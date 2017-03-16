@@ -1,0 +1,28 @@
+html {
+	box-sizing: border-box;
+}
+
+#bucket {
+	display: table;
+	background: red;
+	border: 1px solid pink;
+	width: 100%;
+	padding: 5px;
+}
+
+.queue-item {
+	display: table-row;
+	background: blue;
+	border: 1px solid purple;
+	width: 100%;
+	padding: 5px;
+}
+
+.queue-item > span {
+	display: table-cell;
+	background: green;
+	border: 1px solid turquoise;
+	width: 100px;
+	height: 20px;
+	padding: 5px;
+}

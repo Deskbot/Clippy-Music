@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Music LAN 2000</title>
+
+		<meta charset="utf-8">
+
+		<link rel="stylesheet" type="text/css" href="css/main.css">
+		<link rel="stylesheet" type="text/css" href="css/clippy.css" media="all">
+
+		<script type="text/javascript" src="js/clippy.min.js" defer></script>
+		<script type="text/javascript" src="js/jquery.min.js" defer></script>
+		<script type="text/javascript" src="js/main.js"defer></script>
+	</head>
+	<body>
+		<main>
+			<h1>Music LAN 2000</h1>
+
+			<section id="upload-section">
+				<h2>Upload</h2>
+				<form id="upload-form" action="api/upload" method="POST">
+					<fieldset>
+						<legend>Music</legend>
+						<input type="file" name="music-file" accept="audio/*, video/*">
+						<input type="url" name="music-url" placeholder="YouTube URL" autofocus>
+					</fieldset>
+
+					<fieldset>
+						<legend>Accompanying Image</legend>
+						<input type="file" name="image-file" accept="image/*">
+						<input type="url" name="image-url" placeholder="Image URL">
+					</fieldset>
+					
+					<input type="submit" value="Upload Content">
+				</form>
+			</section>
+
+			<section id="queue-section">
+				<h2>Queue</h2>
+				<div id="queue"></div>
+			</section>
+
+			<section id="nickname-section">
+				<h2>Nickname</h2>
+				<form id="nickname-form" action="api/nickname" method="POST">
+					<input type="text" name="nickname">
+					<input type="submit">
+				</form>
+			</section>
+		</main>
+
+		<div id="templates">
+			<template id="bucket-template">
+				<div class="bucket"></div>
+			</template>
+
+			<template id="queue-item-template">
+				<div class="queue-item">
+					<span class="title"></span>
+					<span class="identity"></span>
+				</div>
+			</template>
+		</section>
+	</body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "name": "music-server",
+  "version": "1.0.0",
+  "description": "A music/video/image server",
+  "main": "main.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Deskbot/Muic-LAN-2000"
+  },
+  "keywords": [
+    "music",
+    "video",
+    "image",
+    "server",
+    "LAN"
+  ],
+  "author": "Thomas Richards",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.15.2",
+    "jquery": "^3.1.1"
+  }
+}
