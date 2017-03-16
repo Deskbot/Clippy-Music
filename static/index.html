@@ -18,7 +18,7 @@
 
 			<section id="upload-section">
 				<h2>Upload</h2>
-				<form id="upload-form" action="api/upload" method="POST">
+				<form id="upload-form" class="http" action="api/upload" method="POST">
 					<fieldset>
 						<legend>Music</legend>
 						<input type="file" name="music-file" accept="audio/*, video/*">
@@ -42,7 +42,7 @@
 
 			<section id="nickname-section">
 				<h2>Nickname</h2>
-				<form id="nickname-form" action="api/nickname" method="POST">
+				<form id="nickname-form" class="ws" action="api/set-nickname" method="POST">
 					<input type="text" name="nickname">
 					<input type="submit">
 				</form>
