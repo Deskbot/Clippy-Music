@@ -11,7 +11,7 @@ Main Features
 Other Features
 --------------
 
-* The browser doesn't require JavaScript
+* The browser doesn't require JavaScript for file upload
 * The browser doesn't need to load resources from the world wide web
 
 Set Up
