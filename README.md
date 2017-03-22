@@ -13,7 +13,6 @@ Other Features
 * The browser doesn't require JavaScript
 * The browser doesn't need to load resources from the world wide web
 
-
 Set Up
 ------
 
@@ -28,6 +27,5 @@ npm start
 Admin Features
 --------------
 
-* Banning by ip, internal id
-* logging everything played by name and internal id
-* can convert internal id into an ip
+* Banning by ip
+* logging everything played by name of track and ip
