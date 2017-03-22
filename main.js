@@ -13,11 +13,6 @@ export
 	map2
 	new content manager
 	new banlist
-	
-	if a queue is serialised
-		new playqueue from file
-	else
-		new playqueue
 
 on ctrl+D
 	end current song
