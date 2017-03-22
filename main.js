@@ -19,3 +19,5 @@ on ctrl+D
 
 on ctrl+C
 	store current queue
+	kill current song/picture
+	then kill process
