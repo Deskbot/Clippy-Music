@@ -6,6 +6,7 @@ Main Features
 * max time in queue
 * has picture upload
 * attempts to prevent the same thing being uploaded twice in a given time range
+* users can choose and change their nickname
 
 Other Features
 --------------
