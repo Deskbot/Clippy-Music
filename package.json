@@ -19,6 +19,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.15.2",
+    "keypress": "^0.2.1",
     "ws": "^2.2.1"
   }
 }

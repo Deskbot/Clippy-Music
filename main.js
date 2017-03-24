@@ -1,23 +1,34 @@
-require options
+const opt = require('./options.js');
+const kp = require('keypress');
+kp(process.stdin); //gives it keypress events
 
-boot websocket server
-boot http(s) server
-boot player //???
+const userInfo = new Map(); //id -> (ip,nickname,ws)
+const ipUser = new Map(); //ip -> id
+const contentManager = new require('./lib/ContentManager2000.js')();
+const banlist = new require('./lib/Banlist2000.js')();
 
-//websocket._socket.remoteAddress
-map1 = ip -> (unum,nickname)
-map2 = ip -> ws
+//start the servers
+const httpServer = require('./lib/HttpServer2000.js');
+const wsServer = require('./lib/WebSocketServer2000.js');
 
-export
-	map1
-	map2
-	new content manager
-	new banlist
 
-on ctrl+D
-	end current song
+//stdin controls
+process.stdin.on('keypress', (ch, key) => {
+	if (key.name === 'end') 
+		contentManager.killCurrent();
+});
 
-on ctrl+C
-	store current queue
-	kill current song/picture
-	then kill process
+process.on('SIGINT', () => {
+	contentManager.store();
+	contentManager.killCurrent();
+	
+	process.exit(0);
+});
+
+//exports
+module.exports = {
+	userInfo: userInfo,
+	ipUser: ipUser,
+	contentManager: contentManager,
+	banlist: banlist,
+};
