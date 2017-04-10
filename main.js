@@ -31,11 +31,11 @@ module.exports = {
 	sendBanned: (id) => {
 		wsServer.sendBanned(userRecord.getSocket(id));
 	},
-	sendError: (id) => {
-		wsServer.sendBanned(userRecord.getSocket(id));
+	sendError: (id, type, reason) => {
+		wsServer.sendError(userRecord.getSocket(id), type, reason);
 	},
-	sendMessage: (id) => {
-		wsServer.sendMessage(userRecord.getSocket(id));
+	sendMessage: (id, message) => {
+		wsServer.sendMessage(userRecord.getSocket(id), message);
 	},
 };
 
