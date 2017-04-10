@@ -38,3 +38,8 @@ module.exports = {
 		wsServer.sendMessage(userRecord.getSocket(id));
 	},
 };
+
+//get ready to begin
+setTimeout(function() {
+	contentManager.start();
+}, 30000); //give people a little time to queue stuff
