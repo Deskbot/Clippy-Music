@@ -46,4 +46,4 @@ module.exports = {
 //get ready to begin
 setTimeout(function() {
 	contentManager.start();
-}, 30000); //give people a little time to queue stuff
+}, 0); //give people a little time to queue stuff
