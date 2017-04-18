@@ -18,7 +18,11 @@
   "author": "Thomas Richards",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.17.1",
+    "crc-32": "^1.0.1",
     "express": "^4.15.2",
+    "formidable": "^1.1.1",
+    "keypress": "^0.2.1",
     "ws": "^2.2.1"
   }
 }
