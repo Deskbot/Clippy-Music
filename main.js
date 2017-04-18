@@ -2,13 +2,17 @@ const opt = require('./options.js');
 const kp = require('keypress');
 kp(process.stdin); //gives it keypress events
 
-const userRecord = new require('./lib/userRecord.js')();
-const contentManager = new require('./lib/ContentManager2000.js')();
-const banlist = new require('./lib/Banlist2000.js')();
+const UserRecordClass = require('./lib/UserRecord.js');
+const ContentManagerClass = require('./lib/ContentManager.js');
+const BanlistClass = require('./lib/Banlist.js');
+
+const userRecord = new UserRecordClass();
+const contentManager = new ContentManagerClass();
+const banlist = new BanlistClass();
 
 //start the servers
-const httpServer = require('./lib/HttpServer2000.js');
-const wsServer = require('./lib/WebSocketServer2000.js');
+const httpServer = require('./lib/HttpServer.js');
+const wsServer = require('./lib/WebSocketServer.js');
 
 //stdin controls
 process.stdin.on('keypress', (ch, key) => {
