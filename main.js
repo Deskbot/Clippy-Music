@@ -21,6 +21,8 @@ process.stdin.on('keypress', (ch, key) => {
 });
 
 process.on('SIGINT', () => {
+	console.log('closing down The Music O\'Matic 2000');
+
 	contentManager.store();
 	contentManager.killCurrent();
 	
