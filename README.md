@@ -21,8 +21,10 @@ Set Up
 Start up
 --------
 
+You may have to run `sudo service apache2 stop` because the program serves the webpage on port 80, which is otherwise in use by Apache.
+
 ```
-npm start
+sudo npm start
 ```
 
 Admin Features
