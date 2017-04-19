@@ -56,4 +56,5 @@ module.exports = {
 //get ready to begin
 setTimeout(function() {
 	contentManager.start();
+	console.log('Ready to receive!');
 }, 0); //give people a little time to queue stuff
