@@ -1,6 +1,8 @@
-const opt = require('./options.js');
 const kp = require('keypress');
 kp(process.stdin); //gives it keypress events
+const fs = require('fs');
+
+const opt = require('./options.js');
 
 const UserRecordClass = require('./lib/UserRecord.js');
 const ContentManagerClass = require('./lib/ContentManager.js');
@@ -28,6 +30,12 @@ process.on('SIGINT', () => {
 	
 	process.exit(0);
 });
+
+//set up dirs, if they don't already exist
+try { fs.mkdirSync(opt.storageDir, 0770); } catch(e) {}
+try { fs.mkdirSync(opt.storageDir + '/music', 0770); } catch(e) {}
+try { fs.mkdirSync(opt.storageDir + '/pictures', 0770); } catch(e) {}
+try { fs.mkdirSync(opt.storageDir + '/uploadInitialLocation', 0770); } catch(e) {}
 
 //exports
 module.exports = {
