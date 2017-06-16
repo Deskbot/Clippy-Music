@@ -19,7 +19,6 @@ const wsServer = require('./lib/WebSocketServer.js');
 readline.emitKeypressEvents(process.stdin);
 process.stdin.setRawMode(true);
 process.stdin.on('keypress', (ch, key) => {
-	console.log('keypress: ', ch, key);
 	if (key.name === 'end') 
 		contentManager.killCurrent();
 
@@ -37,7 +36,7 @@ process.stdin.on('keypress', (ch, key) => {
 });
 
 process.on('SIGINT', () => {
-	console.log('closing down The Music O\'Matic 2000');
+	console.log('Closing down Clippy.');
 
 	contentManager.store();
 
@@ -54,10 +53,10 @@ process.on('SIGINT', () => {
 });
 
 //set up dirs, if they don't already exist
-try { fs.mkdirSync(opt.storageDir, 0770); } catch(e) {}
-try { fs.mkdirSync(opt.storageDir + '/music', 0770); } catch(e) {}
-try { fs.mkdirSync(opt.storageDir + '/pictures', 0770); } catch(e) {}
-try { fs.mkdirSync(opt.storageDir + '/uploadInitialLocation', 0770); } catch(e) {}
+try { fs.mkdirSync(opt.storageDir, 0o777); } catch(e) {}
+try { fs.mkdirSync(opt.storageDir + '/music', 0o777); } catch(e) {}
+try { fs.mkdirSync(opt.storageDir + '/pictures', 0o777); } catch(e) {}
+try { fs.mkdirSync(opt.storageDir + '/uploadInitialLocation', 0o777); } catch(e) {}
 
 //exports
 module.exports = {
@@ -75,8 +74,4 @@ module.exports = {
 	},
 };
 
-//get ready to begin
-setTimeout(function() {
-	contentManager.start();
-	console.log('Ready to receive!');
-}, 0); //give people a little time to queue stuff
+contentManager.start();
