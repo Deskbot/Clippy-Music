@@ -20,7 +20,7 @@ for (let i = 2; i < process.argv.length; i++) { //skip the 2 initial arguments w
 	arg = process.argv[i];
 	
 	if (arg === '-c' || arg === '--clean') {
-		console.log('Deleting any suspended user record or content manager.');
+		console.log('Deleting any suspended user record, content manager, or log file.');
 		try { fs.unlinkSync(UserRecordClass.suspendedFilePath); } catch(e) {}
 		try { fs.unlinkSync(ContentManagerClass.suspendedFilePath); } catch(e) {}
 		try { fs.unlinkSync(ContentManagerClass.logFilePath); } catch(e) {}
