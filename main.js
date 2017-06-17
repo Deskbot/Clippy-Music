@@ -93,6 +93,8 @@ Promise.resolve().then(() => {
 	//start the servers
 	const environmentData = {
 		adminPassword: pass,
+		contentManager: contentManager,
+		userRecord: userRecord,
 	};
 
 	const httpServerProm = require('./lib/HttpServer.js').start(environmentData);
@@ -108,13 +110,13 @@ Promise.resolve().then(() => {
 		userRecord: userRecord,
 		contentManager: contentManager,
 		sendBanned: (id) => {
-			wsServer.sendBanned(userRecord.getSocket(id));
+			if (userRecord.get(id)) wsServer.sendBanned(userRecord.getSocket(id));
 		},
 		sendError: (id, type, reason) => {
-			wsServer.sendError(userRecord.getSocket(id), type, reason);
+			if (userRecord.get(id)) wsServer.sendError(userRecord.getSocket(id), type, reason);
 		},
 		sendMessage: (id, message) => {
-			wsServer.sendMessage(userRecord.getSocket(id), message);
+			if (userRecord.get(id)) wsServer.sendMessage(userRecord.getSocket(id), message);
 		},
 	};
 
