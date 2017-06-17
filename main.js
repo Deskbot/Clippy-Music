@@ -23,6 +23,7 @@ for (let i = 2; i < process.argv.length; i++) { //skip the 2 initial arguments w
 		console.log('Deleting any suspended user record or content manager.');
 		try { fs.unlinkSync(UserRecordClass.suspendedFilePath); } catch(e) {}
 		try { fs.unlinkSync(ContentManagerClass.suspendedFilePath); } catch(e) {}
+		try { fs.unlinkSync(ContentManagerClass.logFilePath); } catch(e) {}
 
 	} else if (arg === '--no-admin') {
 		adminMode = false;
