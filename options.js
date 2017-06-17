@@ -1,5 +1,4 @@
 module.exports = {
-	password: null,
 	timeout: 547,
 	maxQueuedAtOnce: 4,
 	storageDir: '/tmp/The-Music-o-Matic-2000/',
