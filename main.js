@@ -7,8 +7,10 @@ const UserRecordClass = require('./lib/UserRecord.js');
 const ContentManagerClass = require('./lib/ContentManager.js');
 const BanlistClass = require('./lib/Banlist.js');
 
-const userRecord = new UserRecordClass();
-const contentManager = new ContentManagerClass();
+//produce module instances
+
+const userRecord = new UserRecordClass(UserRecordClass.recover());
+const contentManager = new ContentManagerClass(ContentManagerClass.recover());
 const banlist = new BanlistClass();
 
 //start the servers
@@ -39,6 +41,7 @@ process.on('SIGINT', () => {
 	console.log('Closing down Clippy.');
 
 	contentManager.store();
+	userRecord.store();
 
 	if (contentManager.playingPromise) {
 		console.log('Waiting for content being played to get deleted.');
