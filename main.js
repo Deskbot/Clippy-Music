@@ -9,9 +9,8 @@ const opt = require('./options.js');
 
 const UserRecordClass = require('./lib/UserRecord.js');
 const ContentManagerClass = require('./lib/ContentManager.js');
-const BanlistClass = require('./lib/Banlist.js');
 
-let wsServer, httpServer, userRecord, contentManager, banlist;
+let wsServer, httpServer, userRecord, contentManager;
 
 let adminMode = true;
 
@@ -44,11 +43,10 @@ Promise.resolve().then(() => {
 	//produce module instances
 	userRecord = new UserRecordClass(UserRecordClass.recover());
 	contentManager = new ContentManagerClass(ContentManagerClass.recover());
-	banlist = new BanlistClass();
 
 	//stdin controls
 	readline.emitKeypressEvents(process.stdin);
-	process.stdin.resume();
+	process.stdin.resume(); //needed due to something that prompt does somewhere
 	process.stdin.setRawMode(true);
 	process.stdin.on('keypress', (ch, key) => {
 		if (key.name === 'end') 
@@ -108,7 +106,6 @@ Promise.resolve().then(() => {
 	module.exports = {
 		userRecord: userRecord,
 		contentManager: contentManager,
-		banlist: banlist,
 		sendBanned: (id) => {
 			wsServer.sendBanned(userRecord.getSocket(id));
 		},
