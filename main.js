@@ -7,6 +7,18 @@ const UserRecordClass = require('./lib/UserRecord.js');
 const ContentManagerClass = require('./lib/ContentManager.js');
 const BanlistClass = require('./lib/Banlist.js');
 
+//interpret input
+let arg;
+for (let i = 2; i < process.argv.length; i++) { //skip the 2 initial arguments which are the path to node and the file path
+	arg = process.argv[i];
+	
+	if (arg === '-c' || arg === '--clean') {
+		console.log('Deleting any suspended user record or content manager.');
+		try { fs.unlinkSync(UserRecordClass.suspendedFilePath); } catch(e) {}
+		try { fs.unlinkSync(ContentManagerClass.suspendedFilePath); } catch(e) {}
+	}
+}
+
 //produce module instances
 
 const userRecord = new UserRecordClass(UserRecordClass.recover());
