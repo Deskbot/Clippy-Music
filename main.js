@@ -67,7 +67,7 @@ Promise.resolve().then(() => {
 	});
 
 	process.on('SIGINT', () => {
-		console.log('Closing down Clippy.');
+		console.log('Closing down Clippy-Music.');
 
 		contentManager.store();
 		userRecord.store();

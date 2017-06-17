@@ -1,7 +1,7 @@
 module.exports = {
 	timeout: 547,
 	maxQueuedAtOnce: 4,
-	storageDir: '/tmp/The-Music-o-Matic-2000/',
+	storageDir: '/tmp/Clippy-Music-Tmp/',
 	websocketPort: 8080,
 	imageSizeLimit: 5000000,
 	musicSizeLimit: 20000000,

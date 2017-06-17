@@ -1,12 +1,12 @@
 {
-  "name": "music-server",
+  "name": "clippy-music",
   "version": "1.0.0",
   "description": "A music/video/image server",
   "main": "main.js",
   "scripts": {},
   "repository": {
     "type": "git",
-    "url": "https://github.com/Deskbot/Muic-LAN-2000"
+    "url": "https://github.com/Deskbot/Clippy-Music"
   },
   "keywords": [
     "music",
