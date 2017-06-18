@@ -40,6 +40,10 @@ Promise.resolve().then(() => {
 
 	return null;
 
+}).catch(() => {
+	console.error('Unable to get admin password');
+	process.exit(1);
+
 }).then((pass) => {
 	//produce module instances
 	userRecord = new UserRecordClass(UserRecordClass.recover());
@@ -142,7 +146,7 @@ function getAdminPassword() {
 			required: true,
 		}]
 		, function(err, result) {
-			if (err) throw reject(err);
+			if (err) return reject(err);
 
 			if (result.password1 === result.password2) {
 				//prompt.stop();
