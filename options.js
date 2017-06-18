@@ -14,4 +14,4 @@ module.exports = {
 //storageDir        = the location on disk where uploaded songs are stored, if a relative path is given, the directory will be relative to where the process was ran
 //imageSizeLimit    = largest image that can be downloaded, locally or from the internet
 //musicSizeLimit    = largest image that can be downloaded locally
-//uniquenessCoolOff = how many seconds before it's ok to play the same music or show the same picture again
+//uniquenessCoolOff = how many seconds before it's ok to play the same music or show the same picture again. Can use Infinity for the duration to never expire, or -Infinity to never check for uniqueness
