@@ -26,3 +26,9 @@ html {
 	height: 20px;
 	padding: 5px;
 }
+
+/* special cases */
+
+#party-mode-canvas {
+	pointer-events: none;
+}
