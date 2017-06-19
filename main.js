@@ -1,11 +1,11 @@
 const fs = require('fs');
-const prompt = require('prompt');
-prompt.colors = false;
-prompt.message = '';
-prompt.delimiter = '';
 const readline = require('readline');
 
 const opt = require('./options.js');
+const prompt = require('./lib/promptTR');
+prompt.colors = false;
+prompt.message = '';
+prompt.delimiter = '';
 
 const UserRecordClass = require('./lib/UserRecord.js');
 const ContentManagerClass = require('./lib/ContentManager.js');
@@ -49,26 +49,11 @@ Promise.resolve().then(() => {
 	userRecord = new UserRecordClass(UserRecordClass.recover());
 	contentManager = new ContentManagerClass(ContentManagerClass.recover());
 
-	//stdin controls
-	readline.emitKeypressEvents(process.stdin);
-	process.stdin.resume(); //needed due to something that prompt does somewhere
-	process.stdin.setRawMode(true);
-	process.stdin.on('keypress', (ch, key) => {
-		if (key.name === 'end') 
-			contentManager.killCurrent();
-
-		//I'm having to put these in because the settings that allow me to use 'end' prevent normal interrupts key commands
-		else if (key.name === 'c' && key.ctrl)
-			process.kill(process.pid, 'SIGINT');
-		else if (key.name === 's' && key.ctrl) 
-			process.kill(process.pid, 'SIGSTOP');
-		else if (key.name === 'u' && key.ctrl)
-			process.kill(process.pid, 'SIGKILL');
-		else if (key.name === 'z' && key.ctrl)
-			process.kill(process.pid, 'SIGTSTP');
-		else if (key.name === '\\' && key.ctrl) //single backslash
-			process.kill(process.pid, 'SIGQUIT');
-	});
+	//set up dirs, if they don't already exist
+	try { fs.mkdirSync(opt.storageDir, 0o777); } catch(e) {}
+	try { fs.mkdirSync(opt.storageDir + '/music', 0o777); } catch(e) {}
+	try { fs.mkdirSync(opt.storageDir + '/pictures', 0o777); } catch(e) {}
+	try { fs.mkdirSync(opt.storageDir + '/uploadInitialLocation', 0o777); } catch(e) {}
 
 	process.on('SIGINT', () => {
 		console.log('Closing down Clippy-Music.');
@@ -88,11 +73,27 @@ Promise.resolve().then(() => {
 		contentManager.killCurrent();
 	});
 
-	//set up dirs, if they don't already exist
-	try { fs.mkdirSync(opt.storageDir, 0o777); } catch(e) {}
-	try { fs.mkdirSync(opt.storageDir + '/music', 0o777); } catch(e) {}
-	try { fs.mkdirSync(opt.storageDir + '/pictures', 0o777); } catch(e) {}
-	try { fs.mkdirSync(opt.storageDir + '/uploadInitialLocation', 0o777); } catch(e) {}
+	//stdin controls
+	process.stdin.resume(); //needed due to something that prompt does somewhere
+	
+	readline.emitKeypressEvents(process.stdin);
+	process.stdin.setRawMode(true);
+	process.stdin.on('keypress', (ch, key) => {
+		if (key.name === 'end') 
+			contentManager.killCurrent();
+
+		//I'm having to put these in because the settings that allow me to use 'end' prevent normal interrupts key commands
+		else if (key.name === 'c' && key.ctrl)
+			process.kill(process.pid, 'SIGINT');
+		else if (key.name === 's' && key.ctrl) 
+			process.kill(process.pid, 'SIGSTOP');
+		else if (key.name === 'u' && key.ctrl)
+			process.kill(process.pid, 'SIGKILL');
+		else if (key.name === 'z' && key.ctrl)
+			process.kill(process.pid, 'SIGTSTP');
+		else if (key.name === '\\' && key.ctrl) //single backslash
+			process.kill(process.pid, 'SIGQUIT');
+	});
 
 	//start the servers
 	const environmentData = {
