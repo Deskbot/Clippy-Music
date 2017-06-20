@@ -1,5 +1,5 @@
 module.exports = {
-	timeout: 547,
+	timeout: 644,
 	maxQueuedAtOnce: 4,
 	storageDir: '/tmp/Clippy-Music-Tmp/',
 	websocketPort: 8080,
