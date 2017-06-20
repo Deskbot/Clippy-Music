@@ -2,7 +2,6 @@ module.exports = {
 	timeout: 644,
 	maxQueuedAtOnce: 4,
 	storageDir: '/tmp/Clippy-Music-Tmp/',
-	websocketPort: 8080,
 	imageSizeLimit: 5000000,
 	musicSizeLimit: 20000000,
 	nicknameSizeLimit: 40,
