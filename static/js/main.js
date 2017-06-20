@@ -1,6 +1,8 @@
 clippy.Balloon.prototype.CLOSE_BALLOON_DELAY = 20000;
 
-var clippyAgent = null;
+const main = {
+	clippyAgent: null,
+}
 
 function isYouTubeUrl(url) {
 	return url.includes('youtube.com/watch')
@@ -56,8 +58,12 @@ $(document).ready(function() {
 	.then(function(clippy) {
 		clippy.show();
 		clippy.speak("Hi I'm Clippit, your music server assistant.");
-		clippyAgent = clippy;
+		main.clippyAgent = clippy;
 	})
+	.then(() => {new WebSocketHandler()})
 	.then(Handlers.set)
-	.then(setKonamiCode);
+	.then(setKonamiCode)
+	.catch((err) => {
+		console.error(err);
+	});
 });

@@ -103,8 +103,9 @@ Promise.resolve().then(() => {
 	};
 
 	const httpServerProm = require('./lib/HttpServer.js').start(environmentData);
-	wsServer = require('./lib/WebSocketServer.js').startSync(environmentData);
-
+	wsServer = require('./lib/WebSocketServer.js');
+	wsServer.startSync(environmentData);
+	
 	return httpServerProm;
 
 }).then((hs) => {
