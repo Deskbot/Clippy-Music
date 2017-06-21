@@ -116,13 +116,13 @@ Promise.resolve().then(() => {
 		userRecord: userRecord,
 		contentManager: contentManager,
 		sendBanned: (id) => {
-			if (userRecord.get(id)) wsServer.sendBanned(userRecord.getSocket(id));
+			if (userRecord.get(id)) wsServer.sendBanned(userRecord.getSockets(id));
 		},
 		sendError: (id, type, reason) => {
-			if (userRecord.get(id)) wsServer.sendError(userRecord.getSocket(id), type, reason);
+			if (userRecord.get(id)) wsServer.sendError(userRecord.getSockets(id), type, reason);
 		},
 		sendMessage: (id, message) => {
-			if (userRecord.get(id)) wsServer.sendMessage(userRecord.getSocket(id), message);
+			if (userRecord.get(id)) wsServer.sendMessage(userRecord.getSockets(id), message);
 		},
 	};
 
