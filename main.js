@@ -2,7 +2,7 @@ const fs = require('fs');
 const readline = require('readline');
 
 const opt = require('./options.js');
-const prompt = require('./lib/promptTR');
+const prompt = require('./lib/PromptTR.js');
 prompt.colors = false;
 prompt.message = '';
 prompt.delimiter = '';
