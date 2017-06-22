@@ -1,7 +1,20 @@
 class WebSocketHandler {
 
 	constructor() {
-		this.socket = new WebSocket('ws://' + window.location.hostname + ':3000');
+		this.setUp();
+
+		window.onbeforeunload = function() {
+			this.socket.close();
+		};
+	}
+
+	setUp() {
+		try {
+			this.socket = new WebSocket('ws://' + window.location.hostname + ':3000');
+		} catch(err) {
+			this.reSetUp();
+			return;
+		}
 
 		this.socket.onopen = () => {
 			console.log('WebSocket connection opened');
@@ -19,11 +32,12 @@ class WebSocketHandler {
 
 		this.socket.onclose = () => {
 			console.log('WebSocket closed');
+			this.reSetUp();
 		};
+	}
 
-		window.onbeforeunload = function() {
-			this.socket.close();
-		};
+	reSetUp() {
+		setTimeout(() => this.setUp(), 30000);
 	}
 
 	handleBanned(data) {
