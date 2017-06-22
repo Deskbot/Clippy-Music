@@ -12,8 +12,9 @@ class WebSocketHandler {
 
 			console.log('WebSocket message received', data);
 
-			if (data.type === 'banned') return this.handleBanned(data);http://bl.ocks.org/abernier/3070589
+			if (data.type === 'banned') return this.handleBanned(data);
 			if (data.type === 'queue')  return this.handleQueue(data);
+			else                        return main.clippyAgent.speak(data.message);
 		};
 
 		this.socket.onclose = () => {
