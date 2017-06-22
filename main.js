@@ -103,8 +103,7 @@ Promise.resolve().then(() => {
 	};
 
 	const httpServerProm = require('./lib/HttpServer.js').start(environmentData);
-	wsServer = require('./lib/WebSocketServer.js');
-	wsServer.startSync(environmentData);
+	wsServer = require('./lib/WebSocketServer.js').startSync(environmentData);
 	
 	return httpServerProm;
 
@@ -115,14 +114,19 @@ Promise.resolve().then(() => {
 	module.exports = {
 		userRecord: userRecord,
 		contentManager: contentManager,
+		wsServer: wsServer,
+
+		broadcastMessage: (type, mes) => {
+			wsServer.broadcast(type, mes);
+		},
 		sendBanned: (id) => {
 			if (userRecord.get(id)) wsServer.sendBanned(userRecord.getSockets(id));
 		},
 		sendError: (id, type, reason) => {
 			if (userRecord.get(id)) wsServer.sendError(userRecord.getSockets(id), type, reason);
 		},
-		sendMessage: (id, message) => {
-			if (userRecord.get(id)) wsServer.sendMessage(userRecord.getSockets(id), message);
+		sendMessage: (id, type, message) => {
+			if (userRecord.get(id)) wsServer.sendMessage(userRecord.getSockets(id), type, message);
 		},
 	};
 
