@@ -95,17 +95,17 @@ Promise.resolve().then(() => {
 			process.kill(process.pid, 'SIGQUIT');
 	});
 
-	wsServer = require('./lib/WebSocketServer.js').startSync(environmentData);
-
 	//start the servers
 	const environmentData = {
 		adminPassword: pass,
 		contentManager: contentManager,
 		userRecord: userRecord,
-		wsServer: wsServer,
 	};
 
-	return require('./lib/HttpServer.js').start(environmentData);
+	const httpServerProm = require('./lib/HttpServer.js').start(environmentData);
+	wsServer = require('./lib/WebSocketServer.js').startSync(environmentData);
+	
+	return httpServerProm;
 
 }).then((hs) => {
 	httpServer = hs;
