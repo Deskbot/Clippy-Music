@@ -24,7 +24,6 @@ var handlers = {
 
 			var $this = $(this);
 			var $inputs = $this.find('input:not([type=submit])')
-			$inputs.attr('disabled', true);
 			
 			//validate before submit
 
@@ -76,8 +75,7 @@ var handlers = {
 				main.clippyAgent.play('GetArtsy');
 			
 			}).always(function() {
-				$inputs.clear();
-				$inputs.attr('disabled', false);
+				$inputs.val(null);
 			});
 
 			return false;
