@@ -1,4 +1,8 @@
 var utils = {
+	displayNickname: function(name) {
+		$('.nickname').text('(' + name + ')');
+	},
+
 	inputHasFile: function(dom) {
 		dom = dom instanceof $ ? dom[0] : dom;
 		return dom.files && dom.files.length > 0;

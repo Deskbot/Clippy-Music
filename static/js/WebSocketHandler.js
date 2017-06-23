@@ -25,15 +25,20 @@ var WebSocketHandler = (function() {
 
 			console.log('WebSocket message received', data);
 
-			if (data.type === 'banned') return this.handleBanned(data);
-			if (data.type === 'queue')  return this.handleQueue(data);
-			else                        return main.clippyAgent.speak(data.message);
+			if (data.type === 'nickname') return this.displayNickname(data.message);
+			if (data.type === 'banned')   return this.handleBanned(data);
+			if (data.type === 'queue')    return this.handleQueue(data);
+			else                          return main.clippyAgent.speak(data.message);
 		};
 
 		this.socket.onclose = () => {
 			console.log('WebSocket closed');
 			this.reSetUp();
 		};
+	};
+
+	WebSocketHandler.prototype.displayNickname = function(name) {
+		utils.displayNickname(name);
 	};
 
 	WebSocketHandler.prototype.reSetUp = function() {
