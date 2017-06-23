@@ -51,8 +51,10 @@ function stringWrap(str, width, insert) {
 $(document).ready(function() {
 	loadClippy()
 	.then(function (clippy) {
-		clippy.show();
+		clippy.moveTo(window.innerWidth / 2, window.innerHeight / 2);
+		clippy.play('Greeting');
 		clippy.speak("Hi I'm Clippit, your music server assistant.");
+		clippy.play('Alert');
 		main.clippyAgent = clippy;
 	})
 	.then(function(){

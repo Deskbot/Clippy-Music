@@ -17,7 +17,7 @@ var WebSocketHandler = (function() {
 		}
 
 		this.socket.onopen = () => {
-			console.log('WebSocket connection opened');
+			console.log('WebSocket opened');
 		};
 
 		this.socket.onmessage = (event) => {
@@ -56,7 +56,7 @@ var WebSocketHandler = (function() {
 
 	WebSocketHandler.prototype.handleQueue = function(data) {
 
-	}
+	};
 
 	return WebSocketHandler
 })();
