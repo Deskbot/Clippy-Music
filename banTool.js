@@ -25,7 +25,8 @@ prompt.get([
 ], (err, result) => {
 	if (err) throw err;
 		   
-	const dataArg = curlDataBuilder('adminPassword', result.adminPassword, 'id', result.userId);
+	const dataArg = curlDataBuilder('password', result.adminPassword, 'id', result.userId);
+
 	let url;
 	
 	if (result.addOrRemove.length > 0 && result.addOrRemove[0].toLowerCase() == 'r') {
@@ -33,6 +34,8 @@ prompt.get([
 	} else {
 		url = 'localhost/api/ban/add';
 	}
+	
+	console.log('Executing curl');
 	
 	let proc = cp.spawn('curl', ['--data', dataArg, url])
 	proc.stdout.pipe(process.stdout);

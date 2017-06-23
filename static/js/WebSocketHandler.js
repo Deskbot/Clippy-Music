@@ -1,7 +1,20 @@
 class WebSocketHandler {
 
 	constructor() {
-		this.socket = new WebSocket('ws://' + window.location.hostname + ':3000');
+		this.setUp();
+
+		window.onbeforeunload = function() {
+			this.socket.close();
+		};
+	}
+
+	setUp() {
+		try {
+			this.socket = new WebSocket('ws://' + window.location.hostname + ':3000');
+		} catch(err) {
+			this.reSetUp();
+			return;
+		}
 
 		this.socket.onopen = () => {
 			console.log('WebSocket connection opened');
@@ -12,17 +25,19 @@ class WebSocketHandler {
 
 			console.log('WebSocket message received', data);
 
-			if (data.type === 'banned') return this.handleBanned(data);http://bl.ocks.org/abernier/3070589
+			if (data.type === 'banned') return this.handleBanned(data);
 			if (data.type === 'queue')  return this.handleQueue(data);
+			else                        return main.clippyAgent.speak(data.message);
 		};
 
 		this.socket.onclose = () => {
 			console.log('WebSocket closed');
+			this.reSetUp();
 		};
+	}
 
-		window.onbeforeunload = function() {
-			this.socket.close();
-		};
+	reSetUp() {
+		setTimeout(() => this.setUp(), 30000);
 	}
 
 	handleBanned(data) {

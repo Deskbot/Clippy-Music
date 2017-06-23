@@ -60,7 +60,9 @@ $(document).ready(function() {
 		clippy.speak("Hi I'm Clippit, your music server assistant.");
 		main.clippyAgent = clippy;
 	})
-	.then(() => {new WebSocketHandler()})
+	.then(() => {
+		main.webSocketHandler = new WebSocketHandler();
+	})
 	.then(Handlers.set)
 	.then(setKonamiCode)
 	.catch((err) => {
