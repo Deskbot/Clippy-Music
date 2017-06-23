@@ -55,8 +55,9 @@ var WebSocketHandler = (function() {
 	};
 
 	WebSocketHandler.prototype.handleQueue = function(data) {
-
+		var $current;
+		$('#queue-current-item').html($current);
 	};
 
-	return WebSocketHandler
+	return WebSocketHandler;
 })();

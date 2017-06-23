@@ -150,8 +150,8 @@ function getAdminPassword() {
 			message: 'Verify Admin Password (hidden) (2/2): ',
 			hidden: true,
 			required: true,
-		}]
-		, function(err, result) {
+		
+		}], function(err, result) {
 			if (err) return reject(err);
 
 			if (result.password1 === result.password2) {
