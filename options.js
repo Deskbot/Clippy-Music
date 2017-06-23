@@ -2,8 +2,8 @@ module.exports = {
 	timeout: 644,
 	maxQueuedAtOnce: 4,
 	storageDir: '/tmp/Clippy-Music-Tmp/',
-	imageSizeLimit: 5000000,
-	musicSizeLimit: 20000000,
+	imageSizeLimit: 20000000,
+	musicSizeLimit: 40000000,
 	nicknameSizeLimit: 40,
 	uniquenessCoolOff: 86400,
 };
