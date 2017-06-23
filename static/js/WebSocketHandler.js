@@ -42,6 +42,8 @@ var WebSocketHandler = (function() {
 
 	WebSocketHandler.prototype.handleBanned = function(data) {
 		if (data.banned) {
+			main.clippyAgent.stop();
+			main.clippyAgent.play('GetAttention');
 			main.clippyAgent.speak('You have been banned!');
 			main.clippyAgent.play('EmptyTrash');
 		}
