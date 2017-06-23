@@ -1,6 +1,6 @@
-class WebSocketHandler {
-
-	constructor() {
+var WebSocketHandler = (function() {
+	
+	function WebSocketHandler() {
 		this.setUp();
 
 		window.onbeforeunload = function() {
@@ -8,7 +8,7 @@ class WebSocketHandler {
 		};
 	}
 
-	setUp() {
+	WebSocketHandler.prototype.setUp = function() {
 		try {
 			this.socket = new WebSocket('ws://' + window.location.hostname + ':3000');
 		} catch(err) {
@@ -34,20 +34,22 @@ class WebSocketHandler {
 			console.log('WebSocket closed');
 			this.reSetUp();
 		};
-	}
+	};
 
-	reSetUp() {
+	WebSocketHandler.prototype.reSetUp = function() {
 		setTimeout(() => this.setUp(), 30000);
-	}
+	};
 
-	handleBanned(data) {
+	WebSocketHandler.prototype.handleBanned = function(data) {
 		if (data.banned) {
 			main.clippyAgent.speak('You have been banned!');
 			main.clippyAgent.play('EmptyTrash');
 		}
+	};
+
+	WebSocketHandler.prototype.handleQueue = function(data) {
+
 	}
 
-	handleQueue(data) {
-
-	}
-}
+	return WebSocketHandler
+})();

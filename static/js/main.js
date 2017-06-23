@@ -50,17 +50,17 @@ function stringWrap(str, width, insert) {
 
 $(document).ready(function() {
 	loadClippy()
-	.then(function(clippy) {
+	.then(function (clippy) {
 		clippy.show();
 		clippy.speak("Hi I'm Clippit, your music server assistant.");
 		main.clippyAgent = clippy;
 	})
-	.then(() => {
+	.then(function(){
 		main.webSocketHandler = new WebSocketHandler();
 	})
-	.then(Handlers.set)
+	.then(handlers.set)
 	.then(setKonamiCode)
-	.catch((err) => {
+	.catch(function(err) {
 		console.error(err);
 	});
 });
