@@ -49,6 +49,16 @@ You may have to run `sudo service apache2 stop` because the program serves the w
 * `-c --clean`: deletes all stored data that would otherwise be reloaded between runs
 * `--no-admin`: removes need for admin password, however users can't be banned
 
+
+Update
+------
+
+```
+./update.sh
+```
+
+This should work. Essentially it does a `git pull` and uses `pip` or `youtube-dl` to update `youtube-dl`.
+
 Controls
 --------
 
