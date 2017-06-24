@@ -46,6 +46,17 @@ $uploadForm.submit(function(e) {
 			return false;
 		}
 	}
+
+	//check start / end time
+	var startTime = $this.find('[name=start-time]').val();
+	var endTime = $this.find('[name=end-time]').val();
+	var format = /^[0-9]+(:[0-9]+)?(:[0-9]+)?$/;
+
+	if (startTime !== '' && !format.test(startTime) || endTime !== '' && !format.test(endTime)) {
+		main.clippyAgent.stop();
+		main.clippyAgent.speak('Bad format given for start or end time. It should satisfy the following regular expression: ' + format.toString());
+		return false;
+	}
 	
 	//ajax upload
 
