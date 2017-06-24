@@ -21,7 +21,7 @@ Other Features
 Installation
 ------------
 
-###Dependencies:
+### Dependencies:
 
 All available from the links given. In the case of `eog` and `mpv`, it's likely you can get them from your package manager.
 
@@ -44,7 +44,7 @@ sudo node main.js
 
 You may have to run `sudo service apache2 stop` because the program serves the webpage on port 80, which is otherwise in use by Apache.
 
-###Options
+### Options
 
 * `-c --clean`: deletes all stored data that would otherwise be reloaded between runs
 * `--no-admin`: removes need for admin password, however users can't be banned
@@ -58,7 +58,7 @@ Controls
 User API
 --------
 
-###POST /api/content/upload
+### POST /api/content/upload
 
 Use:
 ```
@@ -77,12 +77,12 @@ For all of the following use:
 curl --data "var1=val1&var2=val2" /api/path
 ```
 
-###POST /api/content/remove
+### POST /api/content/remove
 
 Variables
 * content-id
 
-###POST /api/nickname/set
+### POST /api/nickname/set
 
 Variables
 * nickname
@@ -92,13 +92,13 @@ Admin API
 
 A tool exists for banning and unbanning. Run `node banTool.js`. Otherwise:
 
-###Ban By IP
+### Ban By IP
 
 ```
 curl --data 'id=[UserToBan]&password=[AdminPassword]' localhost/api/ban/add
 ```
 
-###Un-Ban By IP
+### Un-Ban By IP
 ```
 curl --data 'id=[UserToBan]&password=[AdminPassword]' localhost/api/ban/remove
 ```
