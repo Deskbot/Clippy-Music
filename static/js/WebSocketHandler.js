@@ -42,6 +42,7 @@ var WebSocketHandler = (function() {
 		main.clippyAgent.stop();
 
 		if (data.success) {
+			main.clippyAgent.speak('I have queued your content successfully.');
 			main.clippyAgent.play('Congratulate');
 
 		} else {
