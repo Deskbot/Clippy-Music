@@ -60,11 +60,22 @@ User API
 
 ###POST /api/content/upload
 
+Use:
+```
+curl --form "var1=val1;file1=@/my/file/path" /api/path
+```
+
 Variables
-* music-file
+* music-file (file)
 * music-url
-* image-file
+* image-file (file)
 * image-url
+
+For all of the following use:
+
+```
+curl --data "var1=val1&var2=val2" /api/path
+```
 
 ###POST /api/content/remove
 
@@ -91,3 +102,14 @@ curl --data 'id=[UserToBan]&password=[AdminPassword]' localhost/api/ban/add
 ```
 curl --data 'id=[UserToBan]&password=[AdminPassword]' localhost/api/ban/remove
 ```
+
+Contibutions
+------------
+
+Please contribute, preferably with code, issues on GitHub is fine.
+
+License
+-------
+
+* You must use this music server
+* You may not use this software to make money
