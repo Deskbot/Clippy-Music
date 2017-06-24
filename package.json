@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "A music/video/image server",
   "main": "main.js",
-  "scripts": {},
+  "scripts": {
+    "start": "node main.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Deskbot/Clippy-Music"

@@ -1,46 +1,93 @@
 Clippy-Music
 ============
 
-Main Features
---------------
-* max time in queue
-* has picture upload
-* attempts to prevent the same thing being uploaded twice in a given time range
-* users can choose and change their nickname
-* time range of music file to be played
-* allows continuation of server from where it was stopped, if the process is killed
+A music server written in NodeJS. Applicable for LAN parties.
+
+Features
+--------
+
+* A priority queue is used to give a lower priority to users who've played more content recently.
+* Pictures can be displayed over music or video.
+* Uniqueness of music and pictures is enforced within a chosen time range.
+* A time range within the music file can be chosen for playing
+* A nickname can be chosen by each user, which can be changed at any time.
+* The process continues from where it was stopped the last time it was closed down.
 
 Other Features
 --------------
 
-* The browser doesn't require JavaScript for file upload
+* A detailed log file of each item played, containing the IP address, file names, and the time at which the content was played.
 
 Installation
 ------------
 
-Dependencies:
-* mpv `apt-get install mpv`
-* youtube-dl `pip install youtube-dl`
+###Dependencies:
+
+All available from the links given. In the case of `eog` and `mpv`, it's likely you can get them from your package manager.
+
+* [eog](https://github.com/GNOME/eog)
+* [mpv](https://mpv.io/)
+* [youtube-dl](https://rg3.github.io/youtube-dl/) (best downloaded via: `pip install youtube-dl`)
 
 ```
 git clone https://github.com/Deskbot/Clippy-Music
+cd Clippy-Music
 npm install
 ```
 
 Run
 ---
 
-You may have to run `sudo service apache2 stop` because the program serves the webpage on port 80, which is otherwise in use by Apache.
+```
+sudo node main.js
+```
 
-`sudo node main.js`
+You may have to run `sudo service apache2 stop` because the program serves the webpage on port 80, which is otherwise in use by Apache.
 
 ###Options
 
-* `--clean`: deletes all stored data that would otherwise be reloaded between runs
+* `-c --clean`: deletes all stored data that would otherwise be reloaded between runs
 * `--no-admin`: removes need for admin password, however users can't be banned
 
-Admin Features
---------------
+Controls
+--------
 
-* Banning by ip
-* logging everything played by name of track and ip
+* End the current song: hit the **'end'** key in the terminal
+* Close the server: hit **ctrl+c**
+
+User API
+--------
+
+###POST /api/content/upload
+
+Variables
+* music-file
+* music-url
+* image-file
+* image-url
+
+###POST /api/content/remove
+
+Variables
+* content-id
+
+###POST /api/nickname/set
+
+Variables
+* nickname
+
+Admin API
+---------
+
+A tool exists for banning and unbanning. Run `node banTool.js`. Otherwise:
+
+###Ban By IP
+
+```
+curl --data 'id=[UserToBan]&password=[AdminPassword]' localhost/api/ban/add
+```
+
+###Un-Ban By IP
+```
+curl --data 'id=[UserToBan]&password=[AdminPassword]' localhost/api/ban/remove
+```
