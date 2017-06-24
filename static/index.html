@@ -16,6 +16,7 @@
 		<script type="text/javascript" src="js/cookie.js" defer></script>
 		<script type="text/javascript" src="js/handlers.js" defer></script>
 		<script type="text/javascript" src="js/main.js" defer></script>
+		<script type="text/javascript" src="js/templates.js" defer></script>
 		<script type="text/javascript" src="js/utils.js" defer></script>
 		<script type="text/javascript" src="js/WebSocketHandler.js" defer></script>
 	</head>
@@ -50,7 +51,7 @@
 			</section>
 
 			<section id="nickname-section">
-				<h2>Nickname <span class="nickname"></span></h2>
+				<h2>Nickname (<span class="my-nickname"></span>)</h2>
 				<form id="nickname-form" class="ws" action="api/nickname/set" method="POST">
 					<input type="text" name="nickname">
 					<input type="submit">
@@ -59,15 +60,23 @@
 		</main>
 
 		<div id="templates">
-			<template id="bucket-template">
-				<div class="bucket"></div>
+			<template id="current-item-template">
+				<span class="nickname"></span>
+				<span class="title"></span>
+			</template>
+				
+			<template id="bucket-container-template">
+				<div class="bucket-container">
+					<h3 class="nickname"></h3>
+					<ol class="bucket"></ol>
+				</div>
 			</template>
 
-			<template id="queue-item-template">
-				<div class="queue-item">
+			<template id="bucket-item-template">
+				<li>
 					<span class="title"></span>
-					<span class="nickname"></span>
-				</div>
+					<button class="delete hidden" data-id=""></button>
+				</li>
 			</template>
 		</div>
 

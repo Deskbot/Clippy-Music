@@ -55,9 +55,57 @@ var WebSocketHandler = (function() {
 	};
 
 	WebSocketHandler.prototype.handleQueue = function(data) {
-		var $current;
-		$('#queue-current-item').html($current);
+		//current
+
+		var $currentlyPlaying = $('#currently-playing');
+
+		$currentlyPlaying.empty();
+
+		if (data.current) {
+			var newCurrentItemElem = templates.makeCurrentItem();
+			newCurrentItemElem.find('.nickname').html(data.current.nickname);
+			newCurrentItemElem.find('.title').html(data.current.title);	
+			$currentlyPlaying.html(newCurrentItemElem);
+		}
+		
+		//rest of queue
+
+		var $queue = $('#queue');
+		$queue.empty();
+
+		var d;
+		for (d of data.queue) { //d contains a nickname and bucket
+			$queue.append(contentToBucketElem(d));
+		}
 	};
 
 	return WebSocketHandler;
+
+	function contentToBucketElem(c) {
+		var $bucketCont = templates.makeBucketContainer();
+		var $bucketNickname = $bucketCont.find('.nickname');
+		var $bucket = $bucketCont.find('.bucket');
+
+		$bucketNickname.html(c.nickname);
+
+		var isMine = cookie.read('id') === c.userId;
+
+		console.log(cookie.read('id'), c.userId);
+
+		if (isMine) $bucketNickname.addClass('my-nickname');
+		
+		var item, $bucketItem;
+		for (item of c.bucket) {
+			$bucketItem = templates.makeBucketItem();
+			$bucketItem.find('.title').html(item.title);
+
+			if (isMine) {
+				$bucketItem.find('.delete').attr('data-id', item.id).removeClass('hidden');
+			}
+			
+			$bucket.append($bucketItem);
+		}
+
+		return $bucketCont;
+	}
 })();

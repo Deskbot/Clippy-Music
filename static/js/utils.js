@@ -1,6 +1,6 @@
 var utils = {
 	displayNickname: function(name) {
-		$('.nickname').text('(' + name + ')');
+		$('.my-nickname').text(name);
 	},
 
 	inputHasFile: function(dom) {

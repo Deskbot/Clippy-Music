@@ -74,6 +74,7 @@ $uploadForm.submit(function(e) {
 	
 	}).always(function() {
 		$inputs.val(null);
+		$inputs.attr('disabled', false);
 	});
 
 	return false;
