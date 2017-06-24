@@ -26,6 +26,7 @@ prompt.get([
 	if (err) throw err;
 		   
 	const dataArg = curlDataBuilder('password', result.adminPassword, 'id', result.userId);
+
 	let url;
 	
 	if (result.addOrRemove.length > 0 && result.addOrRemove[0].toLowerCase() == 'r') {
@@ -35,6 +36,7 @@ prompt.get([
 	}
 	
 	console.log('Executing curl');
+	
 	let proc = cp.spawn('curl', ['--data', dataArg, url])
 	proc.stdout.pipe(process.stdout);
 	proc.stderr.pipe(process.stderr);
