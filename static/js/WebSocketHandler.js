@@ -61,13 +61,13 @@ var WebSocketHandler = (function() {
 
 		var $currentlyPlaying = $('#currently-playing');
 
-		$currentlyPlaying.empty();
-
 		if (data.current) {
-			var newCurrentItemElem = templates.makeCurrentItem();
-			newCurrentItemElem.find('.nickname').html(data.current.nickname);
-			newCurrentItemElem.find('.title').html(data.current.title);	
-			$currentlyPlaying.html(newCurrentItemElem);
+			$currentlyPlaying.find('.nickname').html(data.current.nickname);
+			$currentlyPlaying.find('.title').html(data.current.title);	
+
+		} else {
+			$currentlyPlaying.find('.nickname').html('');
+			$currentlyPlaying.find('.title').html('');
 		}
 		
 		//rest of queue
