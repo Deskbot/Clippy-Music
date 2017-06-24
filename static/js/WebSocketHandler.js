@@ -44,7 +44,7 @@ var WebSocketHandler = (function() {
 	WebSocketHandler.prototype.reSetUp = function() {
 		setTimeout(function() {
 			this.setUp();
-		}, 30000);
+		}.bind(this), 30000);
 	};
 
 	WebSocketHandler.prototype.handleBanned = function(data) {

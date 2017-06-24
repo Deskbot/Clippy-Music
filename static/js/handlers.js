@@ -77,6 +77,8 @@ $uploadForm.submit(function(e) {
 		$inputs.attr('disabled', false);
 	});
 
+	$inputs.attr('disabled', true);
+
 	return false;
 
 });
