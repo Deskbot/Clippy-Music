@@ -64,8 +64,8 @@ $uploadForm.submit(function(e) {
 
 	}).done(function(data, status, jqxhr) {
 		main.clippyAgent.stop();
-		main.clippyAgent.speak('Your music has been queued for download. Unless there\'s a problem it will appear in the play queue soon.');
-		main.clippyAgent.play('Save');
+		main.clippyAgent.speak('I am downloading your music. It should appear in the queue soon.');
+		//main.clippyAgent.play('Save');
 
 	}).fail(function(jqxhr, textStatus, err) {
 		main.clippyAgent.stop();

@@ -25,6 +25,7 @@ var WebSocketHandler = (function() {
 
 			console.log('WebSocket message received', data);
 
+			if (data.type === 'upload')   return this.handleUploadStatus(data);
 			if (data.type === 'nickname') return this.displayNickname(data.message);
 			if (data.type === 'banned')   return this.handleBanned(data);
 			if (data.type === 'queue')    return this.handleQueue(data);
@@ -35,6 +36,35 @@ var WebSocketHandler = (function() {
 			console.log('WebSocket closed');
 			this.reSetUp();
 		};
+	};
+
+	WebSocketHandler.prototype.handleUploadStatus = function(data) {
+		main.clippyAgent.stop();
+
+		if (data.success) {
+			main.clippyAgent.play('Congratulate');
+
+		} else {
+			main.clippyAgent.play('GetAttention');
+
+			var result = data.message;
+
+			if (result.musicDlProblem) {
+				if (result.musicUniqueProblem) {
+					main.clippyAgent.speak(`I was unable to play the music you requested because it has been played in the past ${utils.secToTimeStr(opt.uniquenessCoolOff)}.`);
+				} else {
+					main.clippyAgent.speak('I was unable to download the music you requested.');
+				}
+			}
+
+			if (result.picDlProblem) {
+				if (result.picUniqueProblem) {
+					main.clippyAgent.speak(`I didn't queue the picture you requested because it has been shown in the past ${utils.secToTimeStr(opt.uniquenessCoolOff)}.`);
+				} else {
+					main.clippyAgent.speak('I was unable to download the picture you requested.');
+				}
+			}
+		}
 	};
 
 	WebSocketHandler.prototype.displayNickname = function(name) {
