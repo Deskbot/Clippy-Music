@@ -113,8 +113,8 @@ curl --data 'id=[UserToBan]&password=[AdminPassword]' localhost/api/ban/add
 curl --data 'id=[UserToBan]&password=[AdminPassword]' localhost/api/ban/remove
 ```
 
-Contibutions
-------------
+Contributions
+-------------
 
 Please contribute, preferably with code, issues on GitHub is fine.
 
