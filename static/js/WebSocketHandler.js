@@ -47,22 +47,22 @@ var WebSocketHandler = (function() {
 		} else {
 			main.clippyAgent.play('GetAttention');
 
-			var result = data.message;
+			var problems = data.message.problems;
 
-			if (result.musicDlProblem) {
-				if (result.musicUniqueProblem) {
-					main.clippyAgent.speak(`I was unable to play the music you requested because it has been played in the past ${utils.secToTimeStr(opt.uniquenessCoolOff)}.`);
-				} else {
-					main.clippyAgent.speak('I was unable to download the music you requested.');
-				}
+			if (problems.musicDlProblem) {
+				main.clippyAgent.speak('I was unable to download the music you requested.');
 			}
 
-			if (result.picDlProblem) {
-				if (result.picUniqueProblem) {
-					main.clippyAgent.speak(`I didn't queue the picture you requested because it has been shown in the past ${utils.secToTimeStr(opt.uniquenessCoolOff)}.`);
-				} else {
-					main.clippyAgent.speak('I was unable to download the picture you requested.');
-				}
+			if (problems.musicUniqueProblem) {
+				main.clippyAgent.speak('I was unable to play the music you requested because it has been played in the past ' + data.message.uniquenessCooloff + '.');
+			}
+
+			if (problems.picDlProblem) {
+				main.clippyAgent.speak('I was unable to download the picture you requested.');
+			}
+			
+			if (problems.picUniqueProblem) {
+				main.clippyAgent.speak('I didn\'t queue the picture you requested because it has been shown in the past ' + data.message.uniquenessCoolOff + '.');
 			}
 		}
 	};
