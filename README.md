@@ -8,7 +8,7 @@ Features
 
 * A priority queue is used to give a lower priority to users who've played more content recently.
 * Pictures can be displayed over music or video.
-* Uniqueness of music and pictures is enforced within a chosen time range.
+* Uniqueness of music and pictures is enforced until after a chosen length of time has passed since it was last played/shown.
 * A time range within the music file can be chosen for playing
 * A nickname can be chosen by each user, which can be changed at any time.
 * The process continues from where it was stopped the last time it was closed down.
