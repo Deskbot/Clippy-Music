@@ -64,7 +64,7 @@ $uploadForm.submit(function(e) {
 	fd.append('ajax', true);
 
 	main.clippyAgent.stop();
-	main.clippyAgent.play('SendMail');
+	main.clippyAgent.play('Save');
 
 	$.ajax({
 		url: '/api/content/upload',
