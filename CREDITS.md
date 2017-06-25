@@ -6,6 +6,7 @@ Credits
 * [youtube-dl](http://rg3.github.io/youtube-dl/)
 * [ClippyJS Fork](https://github.com/jasonsperske/clippy.js)
 * [This Cookie JavaScript](https://www.quirksmode.org/js/cookies.html)
+* [alex030293](https://stackoverflow.com/questions/38485622/delete-folder-containing-files-node-js)'s solution for deleting folder contents
 * George Mandis's [Konami-JS](http://konami-js.googlecode.com/)
 * Hristo's [readable file size string solution](https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable) 
 * The to-me-unknown creator of Party Mode
