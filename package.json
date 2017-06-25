@@ -21,6 +21,7 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.17.1",
+    "co": "^4.6.0",
     "crc-32": "^1.0.1",
     "events": "^1.1.1",
     "express": "^4.15.2",
@@ -30,6 +31,7 @@
     "pkginfo": "^0.4.0",
     "q": "^1.5.0",
     "read": "^1.0.7",
+    "request": "^2.81.0",
     "revalidator": "^0.3.1",
     "utile": "^0.3.0",
     "winston": "^2.3.1",
