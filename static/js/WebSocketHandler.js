@@ -55,7 +55,7 @@ var WebSocketHandler = (function() {
 			}
 
 			if (problems.musicUniqueProblem) {
-				main.clippyAgent.speak('I was unable to play the music you requested because it has been played in the past ' + data.message.uniquenessCooloff + '.');
+				main.clippyAgent.speak('I was unable to play the music you requested because it has been played in the past ' + data.message.uniquenessCoolOff + '.');
 			}
 
 			if (problems.picDlProblem) {
