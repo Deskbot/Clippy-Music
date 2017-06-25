@@ -23,11 +23,11 @@ Installation
 
 ### Dependencies:
 
-All available from the links given. In the case of `eog` and `mpv`, it's likely you can get them from your package manager.
+All available from the links given. It's also likely you can get them from your package manager.
 
 * [eog](https://github.com/GNOME/eog)
 * [mpv](https://mpv.io/)
-* [youtube-dl](https://rg3.github.io/youtube-dl/) (best downloaded via: `pip install youtube-dl`)
+* [youtube-dl](https://rg3.github.io/youtube-dl/)
 
 ```
 git clone https://github.com/Deskbot/Clippy-Music
