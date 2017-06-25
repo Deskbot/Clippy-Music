@@ -133,6 +133,42 @@ $('#nickname-form').submit(function(e) {
 	return false;
 });
 
+$('#queue').on('click', '.bucket-container > .bucket button.delete', function(e) {
+	console.log(this);
+	var $this = $(this);
+
+	$this.attr('disabled', true);
+
+	main.clippyAgent.stop();
+	main.clippyAgent.play('EmptyTrash');
+	
+	var contentName = $this.siblings('.title').text();
+
+	//ajax
+
+	$.ajax({
+		url: '/api/content/remove',
+		type: 'POST',
+		data: {
+			ajax: true,
+			"content-id": $this.attr('data-id'),
+		}
+	}).done(function() {
+		main.clippyAgent.speak(contentName + ' was deleted succesfully.');
+		$this.parentsUntil('.bucket').first().remove();
+
+	}).fail(function(jqXHR, textStatus, err) {
+		if (jqXHR.status === 500) {
+			main.clippyAgent.speak('You didn\'t queue "' + contentName + '", so you can\'t delete it.');
+		} else {
+			main.clippyAgent.speak(jqXHR.responseText);
+		}
+
+		$this.attr('disabled', false);
+		
+	});
+});
+
 window.onbeforeunload = function() {
 	main.clippyAgent.stop();
 	main.clippyAgent.play('GoodBye');
