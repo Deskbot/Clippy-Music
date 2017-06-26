@@ -35,6 +35,11 @@ input {
 	width: 100%;
 }
 
+input, button {
+	color: black;
+	font-family: Arial, Helvetica, Verdana, cursive;
+}
+
 input[disabled=disabled] {
 	background-color: #D6D3CE;
 }
