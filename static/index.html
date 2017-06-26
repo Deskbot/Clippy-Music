@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Clippy Music</title>
+		<title>Clippy-Music</title>
 
 		<meta charset="utf-8">
 
+		<link rel="stylesheet" type="text/css" href="css/reset.css">
 		<link rel="stylesheet" type="text/css" href="css/main.css">
 		<link rel="stylesheet" type="text/css" href="css/clippy.css" media="all">
 
 		<script type="text/javascript" src="js/clippy.min.js" defer></script>
 		<script type="text/javascript" src="js/konami.min.js" defer></script>
 		<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js" defer></script>
+		<script type="text/javascript" src="js/jquery-ui.min.js" defer></script>
 		<script type="text/javascript" src="js/partyMode.min.js" defer></script>
 
 		<script type="text/javascript" src="js/cookie.js" defer></script>
@@ -22,68 +24,110 @@
 	</head>
 	<body>
 		<main>
-			<h1>Clippy-Music</h1>
-
 			<section id="upload-section">
-				<h2>Upload</h2>
-				<form id="upload-form" class="http" action="api/content/upload" method="POST" enctype="multipart/form-data">
-					<fieldset>
-						<legend>Music</legend>
-						<input type="file" name="music-file" accept="audio/*, video/*">
-						<input type="url" name="music-url" placeholder="YouTube URL" autofocus>
-						<input type="text" name="start-time" placeholder="Start Time (in seconds or mm:ss or hh:mm:ss)">
-						<input type="text" name="end-time" placeholder="End Time (in seconds or mm:ss or hh:mm:ss)">
-					</fieldset>
+				<div class="handle">
+					<h2>Upload</h2>
+				</div>
+				<div class="bag">
+					<form id="upload-form" class="http" action="api/content/upload" method="POST" enctype="multipart/form-data">
+						<fieldset>
+							<legend>Music</legend>
 
-					<fieldset>
-						<legend>Accompanying Image</legend>
-						<input type="file" name="image-file" accept="image/*">
-						<input type="url" name="image-url" placeholder="Image URL">
-					</fieldset>
-					
-					<input type="submit" value="Upload Content">
-				</form>
+							<div id="music-file-input-button" class="file-upload">
+								<button class="file">Choose Music File</button>
+								<span class="file-name">No File Chosen</span>
+								<input type="file" id="music-file" name="music-file" accept="audio/*, video/*">
+							</div>
+
+							<label>YouTube URL</label>
+							<input type="url" name="music-url" placeholder="" autofocus>
+							<label>Start Time</label>
+							<input type="text" name="start-time" placeholder="Format is seconds or mm:ss or hh:mm:ss">
+							<label>End Time</label>
+							<input type="text" name="end-time" placeholder="Format is seconds or mm:ss or hh:mm:ss">
+						</fieldset>
+
+						<fieldset>
+							<legend>Accompanying Image</legend>
+
+							<div id="picture-file-input-button" class="file-upload">
+								<button class="file">Choose Image File</button>
+								<span class="file-name">No File Chosen</span>
+								<input type="file" id="music-file" name="music-file" accept="audio/*, video/*">
+								<input type="file" id="image-file" name="image-file" accept="image/*">
+							</div>
+							
+							<label>Image URL</label>
+							<input type="url" name="image-url">
+						</fieldset>
+						
+						<input type="submit" value="Upload Content">
+					</form>
+				</div>
 			</section>
 
 			<section id="queue-section">
-				<h2>Currently Playing</h2>
-				<div id="currently-playing">
-					<span class="nickname"></span>
-					<span class="title"></span>
+				<div class="handle">
+					<h2>Currently Playing</h2>
 				</div>
-				<h2>Queue</h2>
-				<div id="queue"></div>
+				<div class="bag extra-pad">
+					<div id="currently-playing">
+						<p class="title"></p>
+						<p class="nickname"></p>
+					</div>
+				</div>
+			</section>
+
+			<section>
+				<div class="handle">
+					<h2>Queue</h2>
+				</div>
+				<div class="bag">
+					<div id="queue"></div>
+				</div>
 			</section>
 
 			<section id="nickname-section">
-				<h2>Nickname (<span class="my-nickname"></span>)</h2>
-				<form id="nickname-form" class="ws" action="api/nickname/set" method="POST">
-					<input type="text" name="nickname">
-					<input type="submit">
-				</form>
+				<div class="handle">
+					<h2>Nickname (<span class="my-nickname"></span>)</h2>
+				</div>
+				<div class="bag">
+					<form id="nickname-form" class="ws" action="api/nickname/set" method="POST">
+						<label>New Nickname</label>
+						<input type="text" name="nickname">
+						<input type="submit">
+					</form>
+				</div>
+			</section>
+
+			<section id="info-section">
+				<div class="handle">
+					<h2>Info</h2>
+				</div>
+				<div class="bag extra-pad">
+					<p>Your priority in the queue is affected by how much time you've spent playing music recently.</p>
+					<p>The admins can set a length of time in which the same music or picture can not be played twice.</p>
+					<p><a href="https://github.com/Deskbot/Clippy-Music">GitHub</a> (contributions welcome)</p>
+				</div>
 			</section>
 		</main>
 
 		<div id="templates">
 			<template id="bucket-container-template">
 				<div class="bucket-container">
-					<h3 class="nickname"></h3>
-					<ol class="bucket"></ol>
+					<fieldset>
+						<legend class="nickname"></legend>
+						<ol class="bucket"></ol>	
+					</fieldset>
 				</div>
 			</template>
 
 			<template id="bucket-item-template">
 				<li>
 					<span class="title"></span>
-					<button class="delete hidden" data-id=""></button>
+					<button class="delete hidden" data-id="">Delete</button>
 				</li>
 			</template>
 		</div>
-
-		<footer>
-			<p>Your priority in the queue is affected by how much time you've spent playing music recently.</p>
-			<p>The admins can set a length of time in which the same music or picture can not be played twice.</p>
-			<p><a href="https://github.com/Deskbot/Clippy-Music">GitHub</a></p>
-		</footer>
 	</body>
 </html>

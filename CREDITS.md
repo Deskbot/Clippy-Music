@@ -8,5 +8,6 @@ Credits
 * [This Cookie JavaScript](https://www.quirksmode.org/js/cookies.html)
 * [alex030293](https://stackoverflow.com/questions/38485622/delete-folder-containing-files-node-js)'s solution for deleting folder contents
 * George Mandis's [Konami-JS](http://konami-js.googlecode.com/)
-* Hristo's [readable file size string solution](https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable) 
+* Hristo's [readable file size string solution](https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable)
+* Yang Zhao's [CSS formatting of file input button](http://geniuscarrier.com/how-to-style-a-html-file-upload-button-in-pure-css/)
 * The to-me-unknown creator of Party Mode

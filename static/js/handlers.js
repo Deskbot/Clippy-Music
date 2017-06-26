@@ -1,4 +1,13 @@
+var $section = $('section');
 var $uploadForm = $('#upload-form');
+
+$section.draggable({
+	handle: '.handle',
+	start: function() {
+		$(this).css('z-index', main.maxZ++);
+	}
+});
+
 
 $uploadForm.find('[name=music-file]').change(function(e) {
 	var $this = $(this);
@@ -84,6 +93,7 @@ $uploadForm.submit(function(e) {
 		main.clippyAgent.play('GetArtsy');
 	
 	}).always(function() {
+		$uploadForm.find('.file-name').text('No File Chosen');
 		$inputs.val(null);
 		$inputs.attr('disabled', false);
 	});
@@ -167,6 +177,18 @@ $('#queue').on('click', '.bucket-container > .bucket button.delete', function(e)
 		$this.attr('disabled', false);
 		
 	});
+});
+
+$uploadForm.find('#music-file-input-button input[type=file]').change(function() {
+	var $this = $(this);
+	var fileName = 'C:\\My Music\\' + $this.val().replace('C:\\fakepath\\', '');
+	$this.siblings('.file-name').text(fileName ? fileName : 'No File Chosen');
+});
+
+$uploadForm.find('#picture-file-input-button input[type=file]').change(function() {
+	var $this = $(this);
+	var fileName = 'C:\\My Pictures\\' + $this.val().replace('C:\\fakepath\\', '');
+	$this.siblings('.file-name').text(fileName ? fileName : 'No File Chosen');
 });
 
 window.onbeforeunload = function() {

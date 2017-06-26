@@ -2,6 +2,7 @@ clippy.Balloon.prototype.CLOSE_BALLOON_DELAY = 20000;
 
 const main = {
 	clippyAgent: null,
+	maxZ: 100
 }
 
 function loadClippy() {
@@ -51,7 +52,7 @@ function stringWrap(str, width, insert) {
 $(document).ready(function() {
 	loadClippy()
 	.then(function(clippy) {
-		clippy.moveTo(window.innerWidth / 2, window.innerHeight / 2);
+		clippy.moveTo(window.innerWidth * 3 / 4, window.innerHeight * 3 / 4);
 		clippy.play('Greeting');
 		clippy.speak("Hi I'm Clippit, your music server assistant.");
 		clippy.play('Alert');
