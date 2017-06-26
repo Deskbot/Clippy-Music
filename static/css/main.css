@@ -87,6 +87,7 @@ input[type=submit] {
 
 button.file {
 	display: inline-block;
+	margin: 1px;
 }
 
 .file-name {

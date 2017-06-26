@@ -36,34 +36,33 @@
 							<legend>Music</legend>
 
 							<div id="music-file-input-button" class="file-upload">
-								<button class="file">Choose Music File</button>
+								<button class="file" tabindex="1">Choose Music File</button>
 								<span class="file-name">No File Chosen</span>
 								<input type="file" id="music-file" name="music-file" accept="audio/*, video/*">
 							</div>
 
 							<label>YouTube URL</label>
-							<input type="url" name="music-url" placeholder="" autofocus>
+							<input type="url" name="music-url" placeholder="" tabindex="2" autofocus>
 							<label>Start Time</label>
-							<input type="text" name="start-time" placeholder="Format is seconds or mm:ss or hh:mm:ss">
+							<input type="text" name="start-time" placeholder="Format is seconds or mm:ss or hh:mm:ss" tabindex="3">
 							<label>End Time</label>
-							<input type="text" name="end-time" placeholder="Format is seconds or mm:ss or hh:mm:ss">
+							<input type="text" name="end-time" placeholder="Format is seconds or mm:ss or hh:mm:ss" tabindex="4">
 						</fieldset>
 
 						<fieldset>
 							<legend>Accompanying Image</legend>
 
 							<div id="picture-file-input-button" class="file-upload">
-								<button class="file">Choose Image File</button>
+								<button class="file" tabindex="5">Choose Image File</button>
 								<span class="file-name">No File Chosen</span>
-								<input type="file" id="music-file" name="music-file" accept="audio/*, video/*">
 								<input type="file" id="image-file" name="image-file" accept="image/*">
 							</div>
 							
 							<label>Image URL</label>
-							<input type="url" name="image-url">
+							<input type="url" name="image-url" tabindex="7">
 						</fieldset>
 						
-						<input type="submit" value="Upload Content">
+						<input type="submit" value="Upload Content" tabindex="8">
 					</form>
 				</div>
 			</section>
