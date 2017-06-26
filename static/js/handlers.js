@@ -1,13 +1,16 @@
 var $section = $('section');
 var $uploadForm = $('#upload-form');
 
+$('html').mouseup(function() {
+	$('.active').removeClass('active');
+});
+
 $section.draggable({
 	handle: '.handle',
 	start: function() {
 		$(this).css('z-index', main.maxZ++);
 	}
 });
-
 
 $uploadForm.find('[name=music-file]').change(function(e) {
 	var $this = $(this);
@@ -141,6 +144,10 @@ $('#nickname-form').submit(function(e) {
 	});
 
 	return false;
+});
+
+$('input[type=file]').mousedown(function() {
+	$(this).siblings('button.file').addClass('active').focus();
 });
 
 $('#queue').on('click', '.bucket-container > .bucket button.delete', function(e) {
