@@ -100,6 +100,12 @@ Variables
 Admin API
 ---------
 
+### POST /api/content/kill
+
+```
+curl --data 'password=[AdminPassword]' localhost/api/content/kill
+```
+
 A tool exists for banning and unbanning. Run `node banTool.js`. Otherwise:
 
 ### Ban By IP
