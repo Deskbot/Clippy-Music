@@ -51,19 +51,19 @@ var WebSocketHandler = (function() {
 			var problems = data.message.problems;
 
 			if (problems.musicDlProblem) {
-				main.clippyAgent.speak('I was unable to download the music you requested.');
+				main.clippyAgent.speak('I was unable to download ' + (data.message.title ? data.message.title : 'the music you requested') + '.');
 			}
 
 			if (problems.musicUniqueProblem) {
-				main.clippyAgent.speak('I was unable to play the music you requested because it has been played in the past ' + data.message.uniquenessCoolOff + '.');
+				main.clippyAgent.speak('I was unable to play ' + (data.message.title ? data.message.title : 'the music you requested') + ' because it has been played in the past ' + data.message.uniquenessCoolOff + '.');
 			}
 
 			if (problems.picDlProblem) {
-				main.clippyAgent.speak('I was unable to download the picture you requested.');
+				main.clippyAgent.speak('I was unable to download the picture you requested with ' + (data.message.title ? data.message.title : 'the music you requested') + '.');
 			}
 			
 			if (problems.picUniqueProblem) {
-				main.clippyAgent.speak('I didn\'t queue the picture you requested because it has been shown in the past ' + data.message.uniquenessCoolOff + '.');
+				main.clippyAgent.speak('I didn\'t queue the picture you requested ' + (data.message.title ? 'alongside ' + data.message.title : '') + ' because it has been shown in the past ' + data.message.uniquenessCoolOff + '.');
 			}
 		}
 	};
