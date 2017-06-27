@@ -150,7 +150,7 @@ $('input[type=file]').mousedown(function() {
 	$(this).siblings('button.file').addClass('active').focus();
 });
 
-$('#queue').on('click', '.bucket-container > .bucket button.delete', function(e) {
+$('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 	console.log(this);
 	var $this = $(this);
 
@@ -170,9 +170,16 @@ $('#queue').on('click', '.bucket-container > .bucket button.delete', function(e)
 			ajax: true,
 			"content-id": $this.attr('data-id'),
 		}
+
 	}).done(function() {
 		main.clippyAgent.speak(contentName + ' was deleted succesfully.');
-		$this.parentsUntil('.bucket').first().remove();
+
+		var $buttonAncestors = $this.parentsUntil('.bucket');
+		var $bucket = $buttonAncestors.first().parent();
+
+		$buttonAncestors.first().remove();
+
+		if ($bucket.children().length === 0) $bucket.parentsUntil('.bucket-container').parent().remove();
 
 	}).fail(function(jqXHR, textStatus, err) {
 		if (jqXHR.status === 500) {
@@ -182,7 +189,6 @@ $('#queue').on('click', '.bucket-container > .bucket button.delete', function(e)
 		}
 
 		$this.attr('disabled', false);
-		
 	});
 });
 

@@ -206,6 +206,10 @@ legend {
 	padding: 5px;
 }
 
+.hidden {
+	display: none;
+}
+
 /* special cases */
 
 #party-mode-canvas {
