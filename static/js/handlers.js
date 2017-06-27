@@ -12,6 +12,10 @@ $section.draggable({
 	}
 });
 
+$section.click(function() {
+	$(this).css('z-index', main.maxZ++);
+});
+
 $uploadForm.find('[name=music-file]').change(function(e) {
 	var $this = $(this);
 
