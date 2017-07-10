@@ -1,4 +1,5 @@
 module.exports = {
+	httpPort: 8080,
 	timeout: 644,
 	storageDir: '/tmp/Clippy-Music-Tmp/',
 	imageSizeLimit: 10000000,
