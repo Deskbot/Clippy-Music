@@ -72,7 +72,7 @@ User API
 
 Use:
 ```
-curl --form "var1=val1;file1=@/my/file/path" /api/path
+curl --form "var1=val1;file1=@/my/file/path" [url]/api/path
 ```
 
 Variables
@@ -84,7 +84,7 @@ Variables
 For all of the following use:
 
 ```
-curl --data "var1=val1&var2=val2" /api/path
+curl --data "var1=val1&var2=val2" [url]/api/path
 ```
 
 ### POST /api/content/remove
@@ -103,20 +103,20 @@ Admin API
 ### POST /api/content/kill
 
 ```
-curl --data 'password=[AdminPassword]' localhost/api/content/kill
+curl --data 'password=[AdminPassword]' [url]/api/content/kill
 ```
 
 A tool exists for banning and unbanning. Run `node banTool.js`. Otherwise:
 
-### Ban By IP
+### POST /api/ban/add
 
 ```
-curl --data 'id=[UserToBan]&password=[AdminPassword]' localhost/api/ban/add
+curl --data 'id=[UserToBanIp]&password=[AdminPassword]' [url]/api/ban/add
 ```
 
-### Un-Ban By IP
+### POST /api/ban/remove
 ```
-curl --data 'id=[UserToBan]&password=[AdminPassword]' localhost/api/ban/remove
+curl --data 'id=[UserToUnBanIp]&password=[AdminPassword]' [url]/api/ban/remove
 ```
 
 Contributions
