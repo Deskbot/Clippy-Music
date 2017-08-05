@@ -27,23 +27,9 @@ for (let i = 2; i < process.argv.length; i++) { //skip the 2 initial arguments w
 		try { fs.unlinkSync(UserRecordClass.suspendedFilePath); } catch(e) {}
 		try { fs.unlinkSync(ContentManagerClass.suspendedFilePath); } catch(e) {}
 		try { fs.unlinkSync(ContentManagerClass.logFilePath); } catch(e) {}
-		try { deleteFolderRecursive(opt.storageDir + '/uploadInitialLocation') } catch(e) {console.error(e);}
-		try { deleteFolderRecursive(opt.storageDir + '/music') } catch(e) {console.error(e);}
-		try { deleteFolderRecursive(opt.storageDir + '/pictures') } catch(e) {console.error(e);}
-
-		function deleteFolderRecursive(path) {
-			if( fs.existsSync(path) ) {
-				fs.readdirSync(path).forEach(function(file,index){
-					var curPath = path + "/" + file;
-
-					if(fs.lstatSync(curPath).isDirectory()) { // recurse
-						deleteFolderRecursive(curPath);
-					} else { // delete file
-						fs.unlinkSync(curPath);
-					}
-				});
-			}
-		}
+		try { utils.deleteFolderRecursive(opt.storageDir + '/uploadInitialLocation') } catch(e) {console.error(e);}
+		try { utils.deleteFolderRecursive(opt.storageDir + '/music') } catch(e) {console.error(e);}
+		try { utils.deleteFolderRecursive(opt.storageDir + '/pictures') } catch(e) {console.error(e);}
 
 	} else if (arg === '--no-admin') {
 		adminMode = false;
