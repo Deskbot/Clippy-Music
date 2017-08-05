@@ -1,11 +1,14 @@
 const fs = require('fs');
+const prompt = require('prompt');
 const readline = require('readline');
 
 const opt = require('./options.js');
-const prompt = require('./lib/PromptTR.js');
 prompt.colors = false;
 prompt.message = '';
 prompt.delimiter = '';
+const promptOpts = {
+	noHandleSIGINT: true,
+}
 
 const UserRecordClass = require('./lib/UserRecord.js');
 const ContentManagerClass = require('./lib/ContentManager.js');
@@ -155,7 +158,7 @@ Promise.resolve().then(() => {
 
 function getAdminPassword() {
 	return new Promise((resolve, reject) => {
-		prompt.start();
+		prompt.start(promptOpts);
 
 		prompt.get([{
 			name: 'password1',
