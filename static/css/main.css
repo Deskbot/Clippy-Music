@@ -74,6 +74,7 @@ input[type=submit], button {
 	cursor: pointer;
 	font-size: 13px;
 	height: 21px;
+	margin-bottom: 1px;
 	padding: 1px 6px;
 	width: auto;
 }
@@ -132,7 +133,6 @@ section {
 	background-color: #D6D3CE;
 	border: 3px ridge #D6D3CE;
 	margin: 20px auto;
-	padding: 1px;
 	width: 500px;
 }
 
