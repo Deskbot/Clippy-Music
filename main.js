@@ -1,14 +1,10 @@
 const fs = require('fs');
-const prompt = require('prompt');
 const readline = require('readline');
 
+const adminPassword = require('./lib/adminPassword.js');
+const debug = require('./lib/debug.js');
 const opt = require('./options.js');
-prompt.colors = false;
-prompt.message = '';
-prompt.delimiter = '';
-const promptOpts = {
-	noHandleSIGINT: true,
-}
+const utils = require('./lib/utils.js');
 
 const UserRecordClass = require('./lib/UserRecord.js');
 const ContentManagerClass = require('./lib/ContentManager.js');
@@ -24,13 +20,16 @@ for (let i = 2; i < process.argv.length; i++) { //skip the 2 initial arguments w
 	
 	if (arg === '-c' || arg === '--clean') {
 		console.log('Deleting any suspended user record, content manager, or log file.');
-		try { fs.unlinkSync(UserRecordClass.suspendedFilePath); } catch(e) {}
-		try { fs.unlinkSync(ContentManagerClass.suspendedFilePath); } catch(e) {}
-		try { fs.unlinkSync(ContentManagerClass.logFilePath); } catch(e) {}
-		try { utils.deleteFolderRecursive(opt.storageDir + '/uploadInitialLocation') } catch(e) {console.error(e);}
-		try { utils.deleteFolderRecursive(opt.storageDir + '/music') } catch(e) {console.error(e);}
-		try { utils.deleteFolderRecursive(opt.storageDir + '/pictures') } catch(e) {console.error(e);}
 
+		utils.deleteFileIfExistsSync(UserRecordClass.suspendedFilePath);
+		utils.deleteFileIfExistsSync(ContentManagerClass.suspendedFilePath);
+		utils.deleteFileIfExistsSync(ContentManagerClass.logFilePath);
+		try { utils.deleteFolderRecursive(opt.storageDir + '/uploadInitialLocation') } catch(e) {console.error(e);}
+		try { utils.deleteFolderRecursive(opt.storageDir + '/music') }                 catch(e) {console.error(e);}
+		try { utils.deleteFolderRecursive(opt.storageDir + '/pictures') }              catch(e) {console.error(e);}
+
+	} else if (arg === '-d' || arg === '--debug') {
+		debug.on();
 	} else if (arg === '--no-admin') {
 		adminMode = false;
 	}
@@ -41,7 +40,9 @@ for (let i = 2; i < process.argv.length; i++) { //skip the 2 initial arguments w
 Promise.resolve().then(() => {
 	//get admin password if needed
 	if (adminMode) {
-		return getAdminPassword();
+		return adminPassword.choose().then((pass) => {
+			adminPassword.set(pass);
+		});
 	}
 
 	return null;
@@ -56,10 +57,10 @@ Promise.resolve().then(() => {
 	contentManager = new ContentManagerClass(ContentManagerClass.recover());
 
 	//set up dirs, if they don't already exist
-	try { fs.mkdirSync(opt.storageDir, 0o777); } catch(e) {}
-	try { fs.mkdirSync(opt.storageDir + '/music', 0o777); } catch(e) {}
-	try { fs.mkdirSync(opt.storageDir + '/pictures', 0o777); } catch(e) {}
-	try { fs.mkdirSync(opt.storageDir + '/uploadInitialLocation', 0o777); } catch(e) {}
+	utils.mkdirSafelySync(opt.storageDir, 0o777);
+	utils.mkdirSafelySync(opt.storageDir + '/music', 0o777);
+	utils.mkdirSafelySync(opt.storageDir + '/pictures', 0o777);
+	utils.mkdirSafelySync(opt.storageDir + '/uploadInitialLocation', 0o777);
 
 	process.on('SIGINT', () => {
 		console.log('Closing down Clippy-Music.');
@@ -85,25 +86,18 @@ Promise.resolve().then(() => {
 	readline.emitKeypressEvents(process.stdin);
 	process.stdin.setRawMode(true);
 	process.stdin.on('keypress', (ch, key) => {
-		if (key.name === 'end') 
-			contentManager.killCurrent();
+		if (key.name === 'end') contentManager.killCurrent();
 
 		//I'm having to put these in because the settings that allow me to use 'end' prevent normal interrupts key commands
-		else if (key.name === 'c' && key.ctrl)
-			process.kill(process.pid, 'SIGINT');
-		else if (key.name === 's' && key.ctrl) 
-			process.kill(process.pid, 'SIGSTOP');
-		else if (key.name === 'u' && key.ctrl)
-			process.kill(process.pid, 'SIGKILL');
-		else if (key.name === 'z' && key.ctrl)
-			process.kill(process.pid, 'SIGTSTP');
-		else if (key.name === '\\' && key.ctrl) //single backslash
-			process.kill(process.pid, 'SIGQUIT');
+		else if (key.name === 'c' && key.ctrl)  process.kill(process.pid, 'SIGINT');
+		else if (key.name === 's' && key.ctrl)  process.kill(process.pid, 'SIGSTOP');
+		else if (key.name === 'u' && key.ctrl)  process.kill(process.pid, 'SIGKILL');
+		else if (key.name === 'z' && key.ctrl)  process.kill(process.pid, 'SIGTSTP');
+		else if (key.name === '\\' && key.ctrl) process.kill(process.pid, 'SIGQUIT'); //single backslash
 	});
 
 	//start the servers
 	const environmentData = {
-		adminPassword: pass,
 		contentManager: contentManager,
 		userRecord: userRecord,
 	};
@@ -141,35 +135,3 @@ Promise.resolve().then(() => {
 }).catch((err) => {
 	console.error(err);
 });
-
-function getAdminPassword() {
-	return new Promise((resolve, reject) => {
-		prompt.start(promptOpts);
-
-		prompt.get([{
-			name: 'password1',
-			message: 'Set Admin Password (hidden) (1/2): ',
-			hidden: true,
-			required: true,
-		},{
-			name: 'password2',
-			message: 'Verify Admin Password (hidden) (2/2): ',
-			hidden: true,
-			required: true,
-		
-		}], function(err, result) {
-			if (err) return reject(err);
-
-			if (result.password1 === result.password2) {
-				//prompt.stop();
-				resolve(result.password1);
-				
-			} else {
-				console.log('Passwords did not match. Try again.');
-				getAdminPassword().then((pass) => {
-					resolve(pass);
-				});
-			}
-		});
-	});
-}
