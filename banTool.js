@@ -1,5 +1,5 @@
 const cp = require('child_process');
-const prompt = require('./lib/PromptTR.js');
+const prompt = require('prompt');
 prompt.colors = false;
 prompt.message = '';
 prompt.delimiter = '';
