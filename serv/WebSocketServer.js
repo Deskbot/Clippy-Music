@@ -8,7 +8,7 @@ const UserRecServ = require('./UserRecordServer.js');
 class Api {
 
 	constructor() {
-		this.wsh = new WebSocketHandler(onConnect.bind(this), onMessage.bind(this), onClose.bind(this));
+		this.wsh = new WebSocketHandler(onConnect.bind(this), onMessage.bind(this), onClose.bind(this), socToUserId.bind(this));
 
 		ContentServer.on('item', function() {
 			this.broadcastQueue();
@@ -16,9 +16,7 @@ class Api {
 
 		//where clause:
 
-		function onConnect(soc) {
-			const id = WebSocketHandler.socToUserId(soc);
-
+		function onConnect(soc, id) {
 			//send queue
 			this.sendQueue(soc);
 
@@ -33,7 +31,7 @@ class Api {
 			if (UserRecServ.isUser(id)) this.sendNickname(soc, UserRecServ.getNickname(id));
 		}
 
-		function onMessage(soc, data) {
+		function onMessage(soc, id, data, flags) {
 			const dataObj = JSON.parse(data);
 
 			if (dataObj.type === 'delete-content') {
@@ -56,6 +54,10 @@ class Api {
 
 		function onClose(soc, id) {
 			UserRecServ.unsetWS(id, soc);
+		}
+
+		function socToUserId(soc) {
+			return soc._socket.remoteAddress;
 		}
 	}
 
