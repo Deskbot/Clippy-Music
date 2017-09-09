@@ -14,17 +14,15 @@ const promptOpts = {
 	noHandleSIGINT: true,
 }
 
-const vars = {
-	password: null,
-	salt: null,
-};
-
 function makeSalt() {
 	return Math.random().toString(36).substr(2);
 }
 
-module.exports = {
-	choose: function choose() {
+//namespace for internal api methods
+class Api {
+	//methods
+
+	static choose() {
 		return new Promise((resolve, reject) => {
 			prompt.start(promptOpts);
 
@@ -47,18 +45,20 @@ module.exports = {
 					
 				} else {
 					console.log('Passwords did not match. Try again.');
-					return set();
+					resolve(Api.choose());
 				}
 			});
 		});
-	},
+	}
 
-	set: function set(inputPass) {
-		vars.salt = makeSalt() + makeSalt() + makeSalt();
-		vars.password = sha256(inputPass + vars.salt);
-	},
+	static set(inputPass) {
+		this.salt = makeSalt() + makeSalt() + makeSalt();
+		this.password = sha256(inputPass + this.salt);
+	}
 
-	verify: function verify(inputPass) {
-		return sha256(inputPass + vars.salt) === vars.password;
-	},
+	static verify(inputPass) {
+		return sha256(inputPass + this.salt) === this.password;
+	}
 };
+
+module.exports = Api;

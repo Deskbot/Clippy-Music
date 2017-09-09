@@ -1,83 +1,103 @@
 const fs = require('fs');
 const readline = require('readline');
 
-const adminPassword = require('./lib/adminPassword.js');
 const debug = require('./lib/debug.js');
 const opt = require('./options.js');
 const utils = require('./lib/utils.js');
 
-const UserRecordClass = require('./lib/UserRecord.js');
-const ContentManagerClass = require('./lib/ContentManager.js');
+const ContentServer = require('./serv/ContentServer.js');
+const PasswordServer = require('./serv/PasswordServer.js');
+const UserRecordServer = require('./serv/UserRecordServer.js');
 
-let wsServer, httpServer, userRecord, contentManager;
+main();
 
-let adminMode = true;
+//fin
 
-//interpret input
-let arg;
-for (let i = 2; i < process.argv.length; i++) { //skip the 2 initial arguments which are the path to node and the file path
-	arg = process.argv[i];
-	
-	if (arg === '-c' || arg === '--clean') {
-		console.log('Deleting any suspended user record, content manager, or log file.');
+function main() {
+	const settings = interpretInput();
 
-		utils.deleteFileIfExistsSync(UserRecordClass.suspendedFilePath);
-		utils.deleteFileIfExistsSync(ContentManagerClass.suspendedFilePath);
-		utils.deleteFileIfExistsSync(ContentManagerClass.logFilePath);
-		try { utils.deleteFolderRecursive(opt.storageDir + '/uploadInitialLocation') } catch(e) {console.error(e);}
-		try { utils.deleteFolderRecursive(opt.storageDir + '/music') }                 catch(e) {console.error(e);}
-		try { utils.deleteFolderRecursive(opt.storageDir + '/pictures') }              catch(e) {console.error(e);}
-
-	} else if (arg === '-d' || arg === '--debug') {
-		debug.on();
-	} else if (arg === '--no-admin') {
-		adminMode = false;
-	}
+	Promise.resolve()
+	.then(() => {
+		if (settings.adminMode) return setUpAdmin();
+		return null;
+	})
+	.then(() => {
+		setUpDirs();
+		setUpControls();
+		setUpServers();
+	})
+	.catch(handleError);
 }
 
-//setup
+function interpretInput() {
+	const vars = {
+		adminMode: true,
+	};
 
-Promise.resolve().then(() => {
-	//get admin password if needed
-	if (adminMode) {
-		return adminPassword.choose().then((pass) => {
-			adminPassword.set(pass);
-		});
+	let arg;
+	for (let i = 2; i < process.argv.length; i++) { //skip the 2 initial arguments which are the path to node and the file path
+		arg = process.argv[i];
+		
+		if (arg === '-c' || arg === '--clean') {
+			console.log('Deleting any suspended user record, content manager, or log file.');
+
+			UserRecordServer.deleteSuspended();
+			ContentServer.deleteSuspended();
+			try { utils.deleteFolderRecursive(opt.storageDir + '/uploadInitialLocation') } catch(e) {console.error(e);}
+			try { utils.deleteFolderRecursive(opt.storageDir + '/music') }                 catch(e) {console.error(e);}
+			try { utils.deleteFolderRecursive(opt.storageDir + '/pictures') }              catch(e) {console.error(e);}
+
+		} else if (arg === '-d' || arg === '--debug') {
+			debug.on();
+		} else if (arg === '--no-admin') {
+			vars.adminMode = false;
+		}
 	}
 
-	return null;
+	return vars;
+}
 
-}).catch(() => {
-	console.error('Unable to get admin password');
-	process.exit(1);
+//get admin password if needed
+function setUpAdmin() {
+	return PasswordServer.choose()
 
-}).then((pass) => {
-	//produce module instances
-	userRecord = new UserRecordClass(UserRecordClass.recover());
-	contentManager = new ContentManagerClass(ContentManagerClass.recover());
+	.then((pass) => {
+		PasswordServer.set(pass);
+	})
 
-	//set up dirs, if they don't already exist
+	.catch((err) => {
+		console.error('Unable to get admin password');
+		console.error(err);
+		process.exit(1);
+	});
+}
+
+//set up dirs, if they don't already exist
+function setUpDirs() {
 	utils.mkdirSafelySync(opt.storageDir, 0o777);
 	utils.mkdirSafelySync(opt.storageDir + '/music', 0o777);
 	utils.mkdirSafelySync(opt.storageDir + '/pictures', 0o777);
 	utils.mkdirSafelySync(opt.storageDir + '/uploadInitialLocation', 0o777);
+}
 
+function setUpControls() {
+	//when this is about to be killed
 	process.on('SIGINT', () => {
 		console.log('Closing down Clippy-Music.');
 
-		contentManager.store();
-		userRecord.store();
+		ContentServer.store();
+		UserRecordServer.store();
 
-		if (contentManager.playingPromise) {
+		if (ContentServer.playingPromise) {
 			console.log('Waiting for content being played to get deleted.');
-			contentManager.playingPromise.then(() => {
+			ContentServer.playingPromise.then(() => {
 				process.exit(0);
 			})
 		} else {
 			process.exit(0);
 		}
 
-		contentManager.killCurrent();
+		ContentServer.killCurrent();
 	});
 
 	//stdin controls
@@ -86,7 +106,7 @@ Promise.resolve().then(() => {
 	readline.emitKeypressEvents(process.stdin);
 	process.stdin.setRawMode(true);
 	process.stdin.on('keypress', (ch, key) => {
-		if (key.name === 'end') contentManager.killCurrent();
+		if (key.name === 'end') ContentServer.killCurrent();
 
 		//I'm having to put these in because the settings that allow me to use 'end' prevent normal interrupts key commands
 		else if (key.name === 'c' && key.ctrl)  process.kill(process.pid, 'SIGINT');
@@ -95,43 +115,12 @@ Promise.resolve().then(() => {
 		else if (key.name === 'z' && key.ctrl)  process.kill(process.pid, 'SIGTSTP');
 		else if (key.name === '\\' && key.ctrl) process.kill(process.pid, 'SIGQUIT'); //single backslash
 	});
+}
 
-	//start the servers
-	const environmentData = {
-		contentManager: contentManager,
-		userRecord: userRecord,
-	};
+function setUpServers() {
+	require('./serv/');//do them all just in case
+}
 
-	const httpServerProm = require('./lib/HttpServer.js').start(environmentData);
-	wsServer = require('./lib/WebSocketServer.js').startSync(environmentData);
-	
-	return httpServerProm;
-
-}).then((hs) => {
-	httpServer = hs;
-
-	//exports
-	module.exports = {
-		userRecord: userRecord,
-		contentManager: contentManager,
-		wsServer: wsServer,
-
-		broadcastMessage: (type, mes) => {
-			wsServer.broadcast(type, mes);
-		},
-		sendBanned: (id) => {
-			if (userRecord.get(id)) wsServer.sendBanned(userRecord.getSockets(id));
-		},
-		sendError: (id, type, reason) => {
-			if (userRecord.get(id)) wsServer.sendError(userRecord.getSockets(id), type, reason);
-		},
-		sendMessage: (id, type, message) => {
-			if (userRecord.get(id)) wsServer.sendMessage(userRecord.getSockets(id), type, message);
-		},
-	};
-
-	contentManager.start();
-
-}).catch((err) => {
+function handleError(err) {
 	console.error(err);
-});
+}
