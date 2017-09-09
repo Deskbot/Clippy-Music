@@ -2,10 +2,6 @@ var WebSocketHandler = (function() {
 	
 	function WebSocketHandler() {
 		this.setUp();
-
-		window.onbeforeunload = function() {
-			this.socket.close();
-		};
 	}
 
 	WebSocketHandler.prototype.setUp = function() {
