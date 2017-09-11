@@ -1,8 +1,13 @@
+@font-face {
+	font-family: 'TahomaWine';
+	src: url('/media/Tahoma Wine.ttf');
+}
+
 html {
 	background-color: #3A69A1;
 	box-sizing: border-box;
-	font-family: Arial, Helvetica, Verdana, cursive;
-	font-size: 10pt;
+	font-family: TahomaWine, Arial, Helvetica, Verdana, cursive;
+	font-size: 13px;
 	font-smooth: never;
 	-webkit-font-smoothing: none;
 	-webkit-touch-callout: none; /* iOS Safari */
@@ -15,6 +20,7 @@ html {
 
 h2 {
 	color: white;
+	font-family: Arial;
 	font-weight: bold;
 	padding: 2px 0 0 2px;
 }
@@ -25,7 +31,6 @@ p, li {
 
 label {
 	display: block;
-	font-size: 10pt;
 	line-height: normal;
 	width: 100%;
 }
@@ -37,7 +42,7 @@ input {
 
 input, button {
 	color: black;
-	font-family: Arial, Helvetica, Verdana, cursive;
+	font-size: 13px;
 }
 
 input[disabled=disabled] {
@@ -72,7 +77,6 @@ input[type=submit], button {
 	border-bottom: 1px solid #424142;
 	box-shadow: inset -1px -1px #848284;
 	cursor: pointer;
-	font-size: 13px;
 	height: 21px;
 	margin-bottom: 1px;
 	padding: 1px 6px;
@@ -97,7 +101,6 @@ button.file {
 }
 
 .file-name {
-	font-size: 10pt;
 }
 
 .file-upload {
