@@ -92,7 +92,6 @@ $uploadForm.submit(function(e) {
 	}).done(function(data, status, jqxhr) {
 		main.clippyAgent.stop();
 		main.clippyAgent.speak('I am downloading your music. It should appear in the queue soon.');
-		//main.clippyAgent.play('Save');
 
 	}).fail(function(jqxhr, textStatus, err) {
 		main.clippyAgent.stop();
@@ -176,7 +175,7 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 		}
 
 	}).done(function() {
-		main.clippyAgent.speak(contentName + ' was deleted succesfully.');
+		main.clippyAgent.speak(utils.entitle(contentName) + ' was deleted succesfully.');
 
 		var $buttonAncestors = $this.parentsUntil('.bucket');
 		var $bucket = $buttonAncestors.first().parent();
@@ -187,7 +186,7 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 
 	}).fail(function(jqXHR, textStatus, err) {
 		if (jqXHR.status === 500) {
-			main.clippyAgent.speak('You didn\'t queue "' + contentName + '", so you can\'t delete it.');
+			main.clippyAgent.speak('You didn\'t queue "' + utils.entitle(contentName) + '", so you can\'t delete it.');
 		} else {
 			main.clippyAgent.speak(jqXHR.responseText);
 		}

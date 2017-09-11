@@ -3,6 +3,14 @@ var utils = {
 		$('.my-nickname').text(name);
 	},
 
+	entitle: function(title) {
+		return '"' + utils.htmlEntityDecode(title) + '"';
+	},
+
+	htmlEntityDecode: function(str) {
+		return $('<div/>').html(str).text()
+	},
+
 	inputHasFile: function(dom) {
 		dom = dom instanceof $ ? dom[0] : dom;
 		return dom.files && dom.files.length > 0;
