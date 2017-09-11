@@ -95,12 +95,18 @@ input[type=submit] {
 	display: block;
 }
 
+ul.text {
+	margin: 10px 0;
+}
+
+ul.text li {
+	list-style-type: square;
+    margin-left: 25px;
+}
+
 button.file {
 	display: inline-block;
 	margin: 1px;
-}
-
-.file-name {
 }
 
 .file-upload {
