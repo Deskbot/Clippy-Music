@@ -1,6 +1,7 @@
 module.exports = {
+	httpPort: 8080,
+	webSocketPort: 3000,
 	timeout: 644,
-	maxQueuedAtOnce: 4,
 	storageDir: '/tmp/Clippy-Music-Tmp/',
 	imageSizeLimit: 10000000,
 	musicSizeLimit: 20000000,
@@ -9,7 +10,6 @@ module.exports = {
 };
 
 //password          = the admin password, null gives anyone access
-//maxQueuedAtOnce   = the maximum number of tracks queued by each user
 //timeout           = the maximum number of seconds a song can play for
 //storageDir        = the location on disk where uploaded songs are stored, if a relative path is given, the directory will be relative to where the process was ran
 //imageSizeLimit    = largest image that can be downloaded, locally or from the internet in bytes

@@ -1,6 +1,8 @@
 .clippy {
     background-color: white !important;
-    border-radius: 50%;
+    background-color: #D6D3CE;
+    border: 3px ridge #D6D3CE;
+    width: 500px;
 }
 
 .clippy, .clippy-balloon {

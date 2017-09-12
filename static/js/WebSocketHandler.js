@@ -2,10 +2,6 @@ var WebSocketHandler = (function() {
 	
 	function WebSocketHandler() {
 		this.setUp();
-
-		window.onbeforeunload = function() {
-			this.socket.close();
-		};
 	}
 
 	WebSocketHandler.prototype.setUp = function() {
@@ -42,7 +38,7 @@ var WebSocketHandler = (function() {
 		main.clippyAgent.stop();
 
 		if (data.success) {
-			main.clippyAgent.speak('I have queued ' + data.message.title + ' successfully.');
+			main.clippyAgent.speak('I have queued ' + utils.entitle(data.message.title) + ' successfully.');
 			main.clippyAgent.play('Congratulate');
 
 		} else {
@@ -51,19 +47,23 @@ var WebSocketHandler = (function() {
 			var problems = data.message.problems;
 
 			if (problems.musicDlProblem) {
-				main.clippyAgent.speak('I was unable to download ' + (data.message.title ? data.message.title : 'the music you requested') + '.');
+				let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
+				main.clippyAgent.speak('I was unable to download ' + what + '.');
 			}
 
 			if (problems.musicUniqueProblem) {
-				main.clippyAgent.speak('I was unable to play ' + (data.message.title ? data.message.title : 'the music you requested') + ' because it has been played in the past ' + data.message.uniquenessCoolOff + '.');
+				let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
+				main.clippyAgent.speak('I was unable to play ' + what + ' because it has been played in the past ' + data.message.uniquenessCoolOff + '.');
 			}
 
 			if (problems.picDlProblem) {
-				main.clippyAgent.speak('I was unable to download the picture you requested with ' + (data.message.title ? data.message.title : 'the music you requested') + '.');
+				let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
+				main.clippyAgent.speak('I was unable to download the picture you requested with ' + what + '.');
 			}
 			
 			if (problems.picUniqueProblem) {
-				main.clippyAgent.speak('I didn\'t queue the picture you requested ' + (data.message.title ? 'alongside ' + data.message.title : '') + ' because it has been shown in the past ' + data.message.uniquenessCoolOff + '.');
+				let maybeAlongside = data.message.title ? 'alongside ' + utils.entitle(data.message.title) : '';
+				main.clippyAgent.speak('I didn\'t queue the picture you requested ' + maybeAlongside + ' because it has been shown in the past ' + data.message.uniquenessCoolOff + '.');
 			}
 		}
 	};
