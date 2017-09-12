@@ -43,9 +43,9 @@ function interpretInput() {
 
 			UserRecordServer.deleteSuspended();
 			ContentServer.deleteSuspended();
-			try { utils.deleteFolderRecursive(opt.storageDir + '/uploadInitialLocation') } catch(e) {console.error(e);}
-			try { utils.deleteFolderRecursive(opt.storageDir + '/music') }                 catch(e) {console.error(e);}
-			try { utils.deleteFolderRecursive(opt.storageDir + '/pictures') }              catch(e) {console.error(e);}
+			try { utils.deleteFolderRecursive(opt.storageDir + '/httpUploads') } catch(e) { console.error(e); }
+			try { utils.deleteFolderRecursive(opt.storageDir + '/music') }       catch(e) { console.error(e); }
+			try { utils.deleteFolderRecursive(opt.storageDir + '/pictures') }    catch(e) { console.error(e); }
 
 		} else if (arg === '-d' || arg === '--debug') {
 			debug.on();
