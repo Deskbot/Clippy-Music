@@ -171,7 +171,7 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 		type: 'POST',
 		data: {
 			ajax: true,
-			"content-id": $this.attr('data-id'),
+			'content-id': $this.attr('data-id'),
 		}
 
 	}).done(function() {

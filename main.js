@@ -1,6 +1,7 @@
 const fs = require('fs');
 const readline = require('readline');
 
+const consts = require('./lib/consts.js');
 const debug = require('./lib/debug.js');
 const opt = require('./options.js');
 const utils = require('./lib/utils.js');
@@ -43,9 +44,9 @@ function interpretInput() {
 
 			UserRecordServer.deleteSuspended();
 			ContentServer.deleteSuspended();
-			try { utils.deleteFolderRecursive(opt.storageDir + '/httpUploads') } catch(e) { console.error(e); }
-			try { utils.deleteFolderRecursive(opt.storageDir + '/music') }       catch(e) { console.error(e); }
-			try { utils.deleteFolderRecursive(opt.storageDir + '/pictures') }    catch(e) { console.error(e); }
+			try { utils.deleteFolderRecursive(opt.storageDir + consts.initialUploadDirName) } catch(e) { console.error(e); }
+			try { utils.deleteFolderRecursive(opt.storageDir + '/music') }                    catch(e) { console.error(e); }
+			try { utils.deleteFolderRecursive(opt.storageDir + '/pictures') }                 catch(e) { console.error(e); }
 
 		} else if (arg === '-d' || arg === '--debug') {
 			debug.on();

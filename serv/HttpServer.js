@@ -1,7 +1,6 @@
-const bodyParser = require('body-parser')
 const express = require('express');
+const formidable = require('formidable');
 const Html5Entities = require('html-entities').Html5Entities;
-const multer = require('multer');
 const q = require('q');
 
 const ContentServer = require('./ContentServer.js');
@@ -9,8 +8,40 @@ const PasswordServer = require('./PasswordServer.js');
 const UserRecordServer = require('./UserRecordServer.js');
 const WebSocketServer = require('./WebSocketServer.js');
 
-const opt = require('../options.js');
+const consts = require('../lib/consts.js');
+const debug = require('../lib/debug.js');
+const opts = require('../options.js');
 const utils = require('../lib/utils.js');
+
+function getFileForm(req) {
+	return new Promise((resolve, reject) => {
+		const form = new formidable.IncomingForm();
+		form.multiples = true;
+		form.uploadDir = opts.storageDir + consts.initialUploadDirName;
+
+		form.parse(req, (err, fields, files) => {
+			if (err) reject(err);
+			resolve([form, fields, files]);
+		});
+	});
+}
+
+function getFormMiddleware(req, res, next) {
+	const form = new formidable.IncomingForm();
+
+	form.parse(req, (err, fields, files) => {
+		if (err) {
+			console.error('Unknown data submission error: ', err);
+			res.status(500).end(err);
+			
+		} else {
+			req.fields = fields;
+			req.files = files;
+
+			next();
+		}
+	});
+}
 
 function recordUserMiddleware(req, res, next) {
 	if (!UserRecordServer.isUser(req.ip)) UserRecordServer.add(req.ip);
@@ -25,187 +56,36 @@ function recordUserMiddleware(req, res, next) {
 	});
 
 	next();
-};
+}
 
 const app = express();
 
-const upload = multer({
-	dest: opt.storageDir + '/uploadInitialLocation',
-	fileFilter: (req, file, cb) => {
-		const lhs = file.mimetype.split('/')[0];
-
-		if (lhs === 'audio' || lhs === 'video' || lhs === 'image') {
-			cb(null, true);
-		} else {
-			cb(new Error(''), false);
-		}
-	},
-	limit: opt.imageSizeLimit > opt.musicSizeLimit ? opt.imageSizeLimit : opt.musicSizeLimit,
-});
-
 app.use('/', express.static(__dirname + '/../static/'));
-app.use('/api/*', bodyParser.json());       // to support JSON-encoded bodies
-app.use('/api/*', bodyParser.urlencoded({   // to support URL-encoded bodies
-	extended: true
-}));
 
 /* Post variables:
-	* music-file
+	* music-file (file)
 	* music-url
-	* image-file
+	* image-file (file)
 	* image-url
+	* start-time
+	* end-time
  */
-const uploadMiddleware = upload.fields([{ name: 'music-file', maxCount: 1 }, { name: 'image-file', maxCount: 1 }]);
-
-//this is a bit messy but promises don't work quite how I'd like them to.
 app.post('/api/content/upload', recordUserMiddleware, (req, res) => {
-
-	new Promise(function(resolve, reject) {
-		uploadMiddleware(req, res, function(err) {
-			if (err) {
-				reject(new FileUploadError(err));
-			} else {
-				resolve();
-			}
-		});
-	}).then(function() {
-		if (UserRecordServer.isBanned(req.ip)) { //assumes ip is the userid
-			WebSocketServer.sendBanned(UserRecordServer.getSockets(req.ip));
-			
-			throw new BannedError();
-		}
-
-		const uploadInfo = {
-			userId: req.ip,
-			musicIsLocal: null,
-			musicTitle: null,
-			musicPath: null,
-			musicUrl: null,
-			picIsLocal: null,
-			picTitle: null,
-			picPath: null,
-			picUrl: null,
-			hasPic: null,
-			startTime: null,
-			endTime: null,
-		};
-
-		let url;
-
-		if (url = req.body['music-url']) {
-			uploadInfo.musicIsLocal = false;
-			uploadInfo.musicUrl = url;
-		} else {
-			uploadInfo.musicIsLocal = true;
-		}
-
-		if (req.body['image-url'] || req.files['image-file']) {
-
-			uploadInfo.hasPic = true;
-
-			if (url = req.body['image-url']) {
-				uploadInfo.picIsLocal = false;
-				uploadInfo.picUrl = url;
-			} else {
-				uploadInfo.picIsLocal = true;
-			}
-
-		} else {
-			uploadInfo.hasPic = false;
-		}
-
-		let startTime, endTime;
-
-		if (startTime = req.body['start-time']) {
-			uploadInfo.startTime = startTime;
-		}
-
-		if (endTime = req.body['end-time']) {
-			uploadInfo.endTime = endTime;
-		}
-
-		return new Promise(function(resolve, reject) {
-			if (uploadInfo.musicIsLocal) {
-				const musicFile = req.files['music-file'] ? req.files['music-file'][0] : null;
-
-				//music
-				if (musicFile != null) {
-					var old_path = musicFile.path,
-					ext = musicFile.originalname.split('.').pop(),
-					index = old_path.lastIndexOf('/') + 1,
-					file_name = musicFile.originalname;
-
-					uploadInfo.musicTitle = Html5Entities.encode(file_name);
-					uploadInfo.musicPath = old_path;
-				} else {
-					reject('Music or video file was expected but not found. This shouldn\'t happen.');
-					console.error(req.files['music-file']);
-				}
-			}
-
-			if (uploadInfo.picIsLocal) {
-				const imageFile = req.files['image-file'] ? req.files['image-file'][0] : null;
-
-				//picture
-				if (imageFile != null) {
-					old_path = imageFile.path;
-					ext = imageFile.originalname.split('.').pop();
-					index = old_path.lastIndexOf('/') + 1;
-					file_name = imageFile.originalname;
-
-					uploadInfo.picTitle = Html5Entities.encode(file_name);
-					uploadInfo.picPath = old_path;
-				} else {
-					reject('Image file was expected but not found. This shouldn\'t happen.');
-					console.error(req.files['image-file']);
-				}
-			}
-
-			resolve();
-
-		}).then(() => {
-
-			uploadInfo.deferred = q.defer(); //so that later we can get a callback for whether the upload was a success or fail
-
-			uploadInfo.deferred.promise.then(
-			() => {
-				WebSocketServer.sendMessage(UserRecordServer.getSockets(req.ip), 'upload', {
-					title: uploadInfo.musicTitle,
-				});
-
-				WebSocketServer.sendQueue(UserRecordServer.getSockets(req.ip));
-			
-			},
-			(result) => {
-				WebSocketServer.sendError(UserRecordServer.getSockets(req.ip), 'upload', {
-					title: uploadInfo.musicTitle,
-					problems: result,
-					uniquenessCoolOff: utils.secToTimeStr(opt.uniquenessCoolOff),
-				});
-			
-			}).catch((e) => {
-				console.error(e);
-			});
-
-			return ContentServer.add(uploadInfo); 
-
-		//this section regards the result of trying to add the data to the play queue
-		}).then(() => {
-			if (req.body.ajax) res.status(200).end();
-			else               res.redirect('/');
-
-		}).catch((messages) => {
-			console.error(messages);
-
-			//do stuff about fails
-			res.status(400).end(messages);
-		});
-		
-	}).catch((err) => {
+	Promise.resolve()
+	.then(handlePotentialBan)
+	.then(() => getFileForm(req))
+	.then(utils.spread((form, fields, files) => { //nesting in order to get the scoping right
+		return parseForm(form, fields, files)
+		.then(ContentServer.add)
+		.then(() => {
+			if (fields.ajax) res.status(200).end();
+			else            res.redirect('/');
+		})
+	}))
+	.catch((err) => {
 		if (err instanceof FileUploadError) {
-			const musicSizeLimStr = utils.sizeToReadbleStr(opt.musicSizeLimit);
-			const imageSizeLimStr = utils.sizeToReadbleStr(opt.imageSizeLimit);
-			res.status(400).end(`Bad file(s) given for upload. They may be of incorrect type or over the size limit of ${musicSizeLimStr} for music and ${imageSizeLimStr} for images.\n`);	
+			debug.error(err);
+			res.status(400).end(err);
 		}
 		else if (err instanceof BannedError) {
 			res.status(400).end('You can not upload content because you are banned.');
@@ -215,24 +95,159 @@ app.post('/api/content/upload', recordUserMiddleware, (req, res) => {
 			res.status(500).end(err);
 		}
 	});
+
+	//where clause
+	function handlePotentialBan() {
+		return new Promise((resolve, reject) => {
+			if (UserRecordServer.isBanned(req.ip)) { //assumes ip is the userid
+				WebSocketServer.sendBanned(UserRecordServer.getSockets(req.ip));
+				reject(new BannedError());
+			} else {
+				resolve();
+			}
+		});
+	}
+
+	function parseForm(form, fields, files) {
+		return new Promise((resolve, reject) => {
+			const uploadInfo = {
+				userId: req.ip,
+				music: {
+					isUrl: null,
+					title: null,
+					path: null,
+				},
+				pic: {
+					exists: null,
+					isUrl: null,
+					title: null,
+					path: null,
+				},
+				startTime: null,
+				endTime: null,
+			};
+
+			const musicFileArr = files['music-file'];
+			const picFileArr = files['image-file'];
+
+			if (form.type != 'multipart') {
+				throw new FileUploadError('Multipart form type required. Received "' + form.type + '" instead.', musicFileArr, picFileArr);
+			}
+
+			//music & video
+			if (fields['music-url']) {
+				uploadInfo.music.isUrl = true;
+				uploadInfo.music.path = fields['music-url'];
+
+			} else if (musicFileArr.length > 0) {
+				const musicFile = utils.arrFirst(musicFileArr); //a problem was had with a previous form parser where it seems the 1 file wasn't always in index 0
+
+				if (!musicFile) {
+					const err = new FileUploadError('Music file expected but not found.', musicFileArr, picFileArr);
+					console.error(err, musicFileArr);
+					throw err;
+				}
+
+				//no file
+				if (musicFile.size === 0) {
+					throw new FileUploadError('No music file or URL given.', musicFileArr, picFileArr);
+				}
+
+				//file too big
+				if (musicFile.size > opts.musicSizeLimit) {
+					throw new FileUploadError(`Music file given was too big. It exceeded the limit of: "${consts.musicSizeLimStr}".`, musicFileArr, picFileArr);
+				}
+
+				//file wrong type
+				const lhs = musicFile.type.split('/')[0];
+				if (!(lhs === 'audio' || lhs === 'video')) {
+					throw new FileUploadError(`Music file given was of the wrong type. Audio or video was expected; "${musicFile.type}" was received instead.`, musicFileArr, picFileArr);
+				}
+
+				//success
+				uploadInfo.music.isUrl = false;
+				uploadInfo.music.path = musicFile.path;
+				uploadInfo.music.title = Html5Entities.encode(musicFile.name);
+			}
+
+			//pic
+			if (fields['image-url']) {
+				uploadInfo.pic.exists = true;
+				uploadInfo.pic.isUrl = true;
+				uploadInfo.pic.path = fields['image-url'];
+
+			} else if (picFileArr.length > 0) {
+				const picFile = utils.arrFirst(picFileArr); //a problem was had with a previous form parser where it seems the 1 file wasn't always in index 0
+
+				if (!picFile) {
+					const err = new FileUploadError('Image file expected but not found.', musicFileArr, picFileArr);
+					console.error(err, picFileArr);
+					throw err;
+				}
+
+				//no file
+				if (picFile.size === 0) {
+					throw new FileUploadError('No image file or URL given.', musicFileArr, picFileArr);
+				}
+
+				//file too big
+				if (picFile.size > opts.imageSizeLimit) {
+					throw new FileUploadError(`Image file given was too big. It exceeded the limit of: "${consts.imageSizeLimStr}".`, musicFileArr, picFileArr);
+				}
+
+				//file wrong type
+				const lhs = picFile.type.split('/')[0];
+				if (lhs === 'image') {
+					throw new FileUploadError(`Image file given was of the wrong type. Image was expected; "${picFile.type}" was received instead.`, musicFileArr, picFileArr);
+				}
+
+				//success
+				uploadInfo.pic.exists = true;
+				uploadInfo.pic.isUrl = false;
+				uploadInfo.pic.path = picFile.path;
+				uploadInfo.pic.title = Html5Entities.encode(picFile.name);
+
+			} else {
+				uploadInfo.pic.exists = false;
+			}
+
+			let time;
+
+			if (time = fields['start-time']) uploadInfo.startTime = time;
+			if (time = fields['end-time'])   uploadInfo.endTime   = time;
+
+			resolve(uploadInfo);
+		})
+		.catch((err) => {
+			if (err instanceof FileUploadError) {
+				for (let name in err.filesObj) {
+					err.filesObj[name].forEach((file) => { utils.deleteFile(file.path) });
+				}
+			}
+			throw err;
+		});
+	}
 });
 
+app.use(getFormMiddleware);
+
+//POST variable: content-id
 app.post('/api/content/remove', (req, res) => {
-	if (!ContentServer.remove(req.ip, parseInt(req.body['content-id']))) {
+	if (!ContentServer.remove(req.ip, parseInt(req.fields['content-id']))) {
 		res.status(400).end('The queue item you tried to remove was not chosen by you.');
 	} else {
-		if (req.body.ajax) res.status(200).end();
+		if (req.fields.ajax) res.status(200).end();
 		else               res.redirect('/');
 	}
 });
 
-//POST vairable: password, id
+//POST variable: password, id
 app.post('/api/ban/add', (req, res) => {
-	if (AdminPassword.verify(req.body.password)) {
-		if (UserRecordServer.isUser(req.body.id)) {
-			UserRecordServer.addBan(req.body.id);
-			ContentServer.purgeUser(req.body.id);
-			if (req.body.ajax) res.status(200).end('Success\n');
+	if (AdminPassword.verify(req.fields.password)) {
+		if (UserRecordServer.isUser(req.fields.id)) {
+			UserRecordServer.addBan(req.fields.id);
+			ContentServer.purgeUser(req.fields.id);
+			if (req.fields.ajax) res.status(200).end('Success\n');
 			else               res.redirect('/');
 
 		} else {
@@ -246,10 +261,10 @@ app.post('/api/ban/add', (req, res) => {
 
 //POST variable: password, id
 app.post('/api/ban/remove', (req, res) => {
-	if (AdminPassword.verify(req.body.password)) {
-		if (UserRecordServer.isBanned(req.body.id)) {
-			UserRecordServer.removeBan(req.body.id);
-			if (req.body.ajax) res.status(200).end('Success\n');
+	if (AdminPassword.verify(req.fields.password)) {
+		if (UserRecordServer.isBanned(req.fields.id)) {
+			UserRecordServer.removeBan(req.fields.id);
+			if (req.fields.ajax) res.status(200).end('Success\n');
 			else               res.redirect('/');
 
 		} else {
@@ -262,7 +277,7 @@ app.post('/api/ban/remove', (req, res) => {
 
 //POST variable: password
 app.post('/api/content/kill', (req, res) => {
-	if (AdminPassword.verify(req.body.password)) {
+	if (AdminPassword.verify(req.fields.password)) {
 		ContentServer.killCurrent();
 		res.status(200).end('Success\n');
 	} else {
@@ -276,17 +291,24 @@ app.post('/api/nickname/set', recordUserMiddleware, (req, res) => {
 		UserRecordServer.add(req.ip);
 	}
 
-	UserRecordServer.setNickname(req.ip, Html5Entities.encode(req.body.nickname.substr(0, opt.nicknameSizeLimit)));
+	UserRecordServer.setNickname(req.ip, Html5Entities.encode(req.fields.nickname.substr(0, opts.nicknameSizeLimit)));
 
-	if (req.body.ajax) res.status(200).end();
-	else               res.redirect('/');
+	if (req.fields.ajax) res.status(200).end();
+	else                 res.redirect('/');
 });
 
-app.listen(opt.httpPort, (err) => {
+app.listen(opts.httpPort, (err) => {
 	if (err) throw err;
 
 	console.log('Web server started');
 });
 
 class BannedError extends Error {}
-class FileUploadError extends Error {}
+
+class FileUploadError extends Error {
+	constructor(message, ...filesObj) {
+		super(message);
+
+		this.filesObj = filesObj;
+	}
+}
