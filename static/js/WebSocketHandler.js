@@ -99,17 +99,23 @@ var WebSocketHandler = (function() {
 	};
 
 	WebSocketHandler.prototype.handleQueue = function(data) {
+		var myId = cookie.read('id');
+
 		//current
 
 		var $currentlyPlaying = $('#currently-playing');
+		var $currentNickname = $currentlyPlaying.find('.nickname');
+		var isMine = !data.current ? false : myId === data.current.userId;
+
+		if (isMine) $currentNickname.addClass('my-nickname');
 
 		if (data.current) {
-			$currentlyPlaying.find('.nickname').html(data.current.nickname);
 			$currentlyPlaying.find('.title').html(data.current.title);	
+			$currentNickname.html(data.current.nickname);
 
 		} else {
-			$currentlyPlaying.find('.nickname').html('');
 			$currentlyPlaying.find('.title').html('');
+			$currentNickname.html('');
 		}
 		
 		//rest of queue
@@ -117,24 +123,21 @@ var WebSocketHandler = (function() {
 		var $queue = $('#queue');
 		$queue.empty();
 
-		var d;
-		for (d of data.queue) { //d contains a nickname and bucket
-			$queue.append(contentToBucketElem(d));
+		for (var d of data.queue) { //d contains a nickname and bucket
+			$queue.append(contentToBucketElem(d, myId));
 		}
 	};
 
 	return WebSocketHandler;
 
-	function contentToBucketElem(c) {
+	function contentToBucketElem(c, myId) {
 		var $bucketCont = templates.makeBucketContainer();
 		var $bucketNickname = $bucketCont.find('.nickname');
 		var $bucket = $bucketCont.find('.bucket');
 
 		$bucketNickname.html(c.nickname);
 
-		var isMine = cookie.read('id') === c.userId;
-
-		console.log(cookie.read('id'), c.userId);
+		var isMine = myId === c.userId;
 
 		if (isMine) $bucketNickname.addClass('my-nickname');
 		
