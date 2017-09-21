@@ -46,11 +46,11 @@ function interpretInput() {
 		if (arg === '-c' || arg === '--clean') {
 			console.log('Deleting any suspended user record, content manager, or log file.');
 
-			utils.deleteDirRecursive(opt.storageDir);
+			utils.deleteDirRecursiveSync(opt.storageDir);
 
 			//const dirs = consts.dirs;
 			//for (let key in dirs) {
-			//	try { utils.deleteDirRecursive(dirs[key]) } catch(e) { console.error(e); }
+			//	try { utils.deleteDirRecursiveSync(dirs[key]) } catch(e) { console.error(e); }
 			//}
 
 			//const files = consts.files;
