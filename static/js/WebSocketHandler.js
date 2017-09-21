@@ -63,11 +63,13 @@ var WebSocketHandler = (function() {
 			} else if (reason === 'unique') {
 				if (content === 'music') {
 					let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
-					main.clippyAgent.speak('I didn\'t queue ' + what + ' because it has been played in the past ' + data.message.uniqueCoolOffStr + '.');
+					let when = data.message.uniqueCoolOffStr.startsWith('Infinity') ? 'already' : 'in the past ' + data.message.uniqueCoolOffStr;
+					main.clippyAgent.speak('I didn\'t queue ' + what + ' because it has been played ' + when + '.');
 				
 				} else if (content === 'pic') {
 					let what = utils.entitle(data.message.title);
-					main.clippyAgent.speak('I didn\'t queue ' + what + ' because the picture you gave has been shown in the past ' + data.message.uniqueCoolOffStr + '.');
+					let when = data.message.uniqueCoolOffStr.startsWith('Infinity') ? 'already' : 'in the past ' + data.message.uniqueCoolOffStr;
+					main.clippyAgent.speak('I didn\'t queue ' + what + ' because the picture you gave has been shown ' + when + '.');
 				
 				} else {
 					main.clippyAgent.speak('I didn\'t queue what you requested because something wasn\'t unique, and for some reason I don\'t know what it was.');
