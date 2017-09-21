@@ -19,7 +19,7 @@ var WebSocketHandler = (function() {
 		this.socket.onmessage = (event) => {
 			const data = JSON.parse(event.data);
 
-			console.log('WebSocket message received', data);
+			console.log('WebSocket data received', data);
 
 			if (data.type === 'upload')   return this.handleUploadStatus(data);
 			if (data.type === 'nickname') return this.displayNickname(data.message);
@@ -44,26 +44,37 @@ var WebSocketHandler = (function() {
 		} else {
 			main.clippyAgent.play('GetAttention');
 
-			var problems = data.message.problems;
+			const reason = data.message.reason;
+			const content = data.message.content;
 
-			if (problems.musicDlProblem) {
-				let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
-				main.clippyAgent.speak('I was unable to download ' + what + '.');
-			}
+			if (reason === 'dl') {
+				if (content === 'music') {
+					let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
+					main.clippyAgent.speak('I was unable to download ' + what + '.');
+				
+				} else if (content === 'pic') {
+					let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
+					main.clippyAgent.speak('I was unable to download the picture you requested with ' + what + '.');
+				
+				} else {
+					main.clippyAgent.speak('I didn\'t queue what you requested because something wasn\'t downloaded successfully, and for some reason I don\'t know what it was.');
+				}
 
-			if (problems.musicUniqueProblem) {
-				let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
-				main.clippyAgent.speak('I was unable to play ' + what + ' because it has been played in the past ' + data.message.uniquenessCoolOff + '.');
-			}
+			} else if (reason === 'unique') {
+				if (content === 'music') {
+					let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
+					main.clippyAgent.speak('I didn\'t queue ' + what + ' because it has been played in the past ' + data.message.uniqueCoolOffStr + '.');
+				
+				} else if (content === 'pic') {
+					let what = utils.entitle(data.message.title);
+					main.clippyAgent.speak('I didn\'t queue ' + what + ' because the picture you gave has been shown in the past ' + data.message.uniqueCoolOffStr + '.');
+				
+				} else {
+					main.clippyAgent.speak('I didn\'t queue what you requested because something wasn\'t unique, and for some reason I don\'t know what it was.');
+				}
 
-			if (problems.picDlProblem) {
-				let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
-				main.clippyAgent.speak('I was unable to download the picture you requested with ' + what + '.');
-			}
-			
-			if (problems.picUniqueProblem) {
-				let maybeAlongside = data.message.title ? 'alongside ' + utils.entitle(data.message.title) : '';
-				main.clippyAgent.speak('I didn\'t queue the picture you requested ' + maybeAlongside + ' because it has been shown in the past ' + data.message.uniquenessCoolOff + '.');
+			} else if (reason === 'unknown') {
+				main.clippyAgent.speak('An unknown problem occured while trying to queue ' + utils.entitle(data.message.title) + '.');
 			}
 		}
 	};

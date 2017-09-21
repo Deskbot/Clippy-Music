@@ -6,10 +6,6 @@ const debug = require('./lib/debug.js');
 const opt = require('./options.js');
 const utils = require('./lib/utils.js');
 
-const ContentServer = require('./serv/ContentServer.js');
-const PasswordServer = require('./serv/PasswordServer.js');
-const UserRecordServer = require('./serv/UserRecordServer.js');
-
 main();
 
 //fin
@@ -19,15 +15,23 @@ function main() {
 
 	Promise.resolve()
 	.then(() => {
+		validateOptions();
 		if (settings.adminMode) return setUpAdmin();
 		return null;
 	})
 	.then(() => {
 		setUpDirs();
-		setUpControls();
 		setUpServers();
+		setUpControls();
 	})
 	.catch(handleError);
+}
+
+function validateOptions() {
+	if (typeof opt.timeout !== 'number') {
+		console.error('Error: "timeout" setting in options.js is not a number.');
+		process.exit(1);
+	}
 }
 
 function interpretInput() {
@@ -42,11 +46,17 @@ function interpretInput() {
 		if (arg === '-c' || arg === '--clean') {
 			console.log('Deleting any suspended user record, content manager, or log file.');
 
-			UserRecordServer.deleteSuspended();
-			ContentServer.deleteSuspended();
-			try { utils.deleteFolderRecursive(opt.storageDir + consts.initialUploadDirName) } catch(e) { console.error(e); }
-			try { utils.deleteFolderRecursive(opt.storageDir + '/music') }                    catch(e) { console.error(e); }
-			try { utils.deleteFolderRecursive(opt.storageDir + '/pictures') }                 catch(e) { console.error(e); }
+			utils.deleteDirRecursive(opt.storageDir);
+
+			//const dirs = consts.dirs;
+			//for (let key in dirs) {
+			//	try { utils.deleteDirRecursive(dirs[key]) } catch(e) { console.error(e); }
+			//}
+
+			//const files = consts.files;
+			//for (let key in files) {
+			//	utils.deleteFileIfExistsSync(files[key]);
+			//}
 
 		} else if (arg === '-d' || arg === '--debug') {
 			debug.on();
@@ -60,6 +70,8 @@ function interpretInput() {
 
 //get admin password if needed
 function setUpAdmin() {
+	const PasswordServer = require('./serv/PasswordServer.js');
+
 	return PasswordServer.choose()
 
 	.then((pass) => {
@@ -76,12 +88,16 @@ function setUpAdmin() {
 //set up dirs, if they don't already exist
 function setUpDirs() {
 	utils.mkdirSafelySync(opt.storageDir, 0o777);
-	utils.mkdirSafelySync(opt.storageDir + '/music', 0o777);
-	utils.mkdirSafelySync(opt.storageDir + '/pictures', 0o777);
-	utils.mkdirSafelySync(opt.storageDir + '/uploadInitialLocation', 0o777);
+
+	for (let key in consts.dirs) {
+		utils.mkdirSafelySync(consts.dirs[key], 0o777);
+	}
 }
 
 function setUpControls() {
+	const ContentServer = require('./serv/ContentServer.js');
+	const UserRecordServer = require('./serv/UserRecordServer.js');
+
 	//when this is about to be killed
 	process.on('SIGINT', () => {
 		console.log('Closing down Clippy-Music.');
@@ -89,11 +105,11 @@ function setUpControls() {
 		ContentServer.store();
 		UserRecordServer.store();
 
-		if (ContentServer.playingPromise) {
+		if (ContentServer.isPlaying()) {
 			console.log('Waiting for content being played to get deleted.');
-			ContentServer.playingPromise.then(() => {
+			ContentServer.on('end', () => {
 				process.exit(0);
-			})
+			});
 		} else {
 			process.exit(0);
 		}
