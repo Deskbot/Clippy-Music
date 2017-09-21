@@ -167,6 +167,7 @@ ContentServer.on('queue-empty', () => {
 });
 
 ContentServer.on('queue-update', () => {
+	lastQueueWasEmpty = false;
 	api.broadcastQueue();
 });
 
