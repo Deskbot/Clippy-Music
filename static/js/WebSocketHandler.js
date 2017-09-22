@@ -19,7 +19,7 @@ var WebSocketHandler = (function() {
 		this.socket.onmessage = (event) => {
 			const data = JSON.parse(event.data);
 
-			console.log('WebSocket message received', data);
+			console.log('WebSocket data received', data);
 
 			if (data.type === 'upload')   return this.handleUploadStatus(data);
 			if (data.type === 'nickname') return this.displayNickname(data.message);
@@ -44,26 +44,41 @@ var WebSocketHandler = (function() {
 		} else {
 			main.clippyAgent.play('GetAttention');
 
-			var problems = data.message.problems;
+			const reason = data.message.reason;
+			const content = data.message.content;
 
-			if (problems.musicDlProblem) {
-				let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
-				main.clippyAgent.speak('I was unable to download ' + what + '.');
-			}
+			if (reason === 'dl') {
+				if (content === 'music') {
+					let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
+					main.clippyAgent.speak('I was unable to download ' + what + ' due to an upload error.');
+				
+				} else if (content === 'pic') {
+					let whatMus = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
+					let whatPic = data.message.picTitle ? utils.entitle(data.message.picTitle) : 'the picture you requested';
+					main.clippyAgent.speak('I was unable to download ' + whatPic + ' with ' + whatMus + ' due to an upload error.');
+				
+				} else {
+					main.clippyAgent.speak('I didn\'t queue what you requested because something wasn\'t uploaded successfully, and for some reason I don\'t know what it was.');
+				}
 
-			if (problems.musicUniqueProblem) {
-				let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
-				main.clippyAgent.speak('I was unable to play ' + what + ' because it has been played in the past ' + data.message.uniquenessCoolOff + '.');
-			}
+			} else if (reason === 'unique') {
+				if (content === 'music') {
+					let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
+					let when = data.message.uniqueCoolOffStr.startsWith('Infinity') ? 'already' : 'in the past ' + data.message.uniqueCoolOffStr;
+					main.clippyAgent.speak('I didn\'t queue ' + what + ' because it has been played ' + when + '.');
+				
+				} else if (content === 'pic') {
+					let whatMus = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
+					let whatPic = data.message.picTitle ? utils.entitle(data.message.picTitle) : 'the picture you requested';
+					let when = data.message.uniqueCoolOffStr.startsWith('Infinity') ? 'already' : 'in the past ' + data.message.uniqueCoolOffStr;
+					main.clippyAgent.speak('I didn\'t queue ' + whatMus + ' because ' + whatPic + ' has been shown ' + when + '.');
+				
+				} else {
+					main.clippyAgent.speak('I didn\'t queue what you requested because something wasn\'t unique, and for some reason I don\'t know what it was.');
+				}
 
-			if (problems.picDlProblem) {
-				let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
-				main.clippyAgent.speak('I was unable to download the picture you requested with ' + what + '.');
-			}
-			
-			if (problems.picUniqueProblem) {
-				let maybeAlongside = data.message.title ? 'alongside ' + utils.entitle(data.message.title) : '';
-				main.clippyAgent.speak('I didn\'t queue the picture you requested ' + maybeAlongside + ' because it has been shown in the past ' + data.message.uniquenessCoolOff + '.');
+			} else if (reason === 'unknown') {
+				main.clippyAgent.speak('An unknown problem occured while trying to queue ' + utils.entitle(data.message.title) + '.');
 			}
 		}
 	};
@@ -88,17 +103,27 @@ var WebSocketHandler = (function() {
 	};
 
 	WebSocketHandler.prototype.handleQueue = function(data) {
+		var myId = cookie.read('id');
+
 		//current
 
 		var $currentlyPlaying = $('#currently-playing');
+		var $currentNickname = $currentlyPlaying.find('.nickname');
+		var isMine = !data.current ? false : myId === data.current.userId;
+
+		if (isMine) {
+			$currentNickname.addClass('my-nickname');
+		} else {
+			$currentNickname.removeClass('my-nickname');
+		}
 
 		if (data.current) {
-			$currentlyPlaying.find('.nickname').html(data.current.nickname);
 			$currentlyPlaying.find('.title').html(data.current.title);	
+			$currentNickname.html(data.current.nickname);
 
 		} else {
-			$currentlyPlaying.find('.nickname').html('');
 			$currentlyPlaying.find('.title').html('');
+			$currentNickname.html('');
 		}
 		
 		//rest of queue
@@ -106,24 +131,21 @@ var WebSocketHandler = (function() {
 		var $queue = $('#queue');
 		$queue.empty();
 
-		var d;
-		for (d of data.queue) { //d contains a nickname and bucket
-			$queue.append(contentToBucketElem(d));
+		for (var d of data.queue) { //d contains a nickname and bucket
+			$queue.append(contentToBucketElem(d, myId));
 		}
 	};
 
 	return WebSocketHandler;
 
-	function contentToBucketElem(c) {
+	function contentToBucketElem(c, myId) {
 		var $bucketCont = templates.makeBucketContainer();
 		var $bucketNickname = $bucketCont.find('.nickname');
 		var $bucket = $bucketCont.find('.bucket');
 
 		$bucketNickname.html(c.nickname);
 
-		var isMine = cookie.read('id') === c.userId;
-
-		console.log(cookie.read('id'), c.userId);
+		var isMine = myId === c.userId;
 
 		if (isMine) $bucketNickname.addClass('my-nickname');
 		

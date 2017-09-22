@@ -4,15 +4,12 @@ const WebSocketHandler = require('../lib/WebSocketHandler.js');
 const ContentServer = require('./ContentServer.js');
 const UserRecServ = require('./UserRecordServer.js');
 
+const consts = require('../lib/consts.js');
+
 //really a namespace where all functions are hoisted
 class Api {
-
 	constructor() {
 		this.wsh = new WebSocketHandler(onConnect.bind(this), onMessage.bind(this), onClose.bind(this), socToUserId.bind(this));
-
-		ContentServer.on('item', function() {
-			this.broadcastQueue();
-		}.bind(this)); //without the bind, this refers to the event object that emitted
 
 		//where clause:
 
@@ -146,9 +143,51 @@ class Api {
 		this.wsh.sendToMany(socs, message);
 	}
 
+	broadcastEmptyQueue() {
+		this.wsh.broadcast(JSON.stringify({
+			type: 'queue',
+			current: null,
+			queue: [],
+		}));
+	}
+
 	broadcastQueue() {
 		this.wsh.broadcast(JSON.stringify(this.makeQueueMessage()));
 	}
 }
 
-module.exports = new Api();
+const api = new Api();
+
+let lastQueueWasEmpty = false;
+ContentServer.on('queue-empty', () => {
+	if (!lastQueueWasEmpty) {
+		api.broadcastEmptyQueue();
+		lastQueueWasEmpty = true;
+	}
+});
+
+ContentServer.on('queue-update', () => {
+	lastQueueWasEmpty = false;
+	api.broadcastQueue();
+});
+
+ContentServer.on('queued', (contentInfo) => {
+	api.sendMessage(UserRecServ.getSockets(contentInfo.userId), 'upload', {
+		title: contentInfo.music.title,
+	});
+
+	api.sendQueue(UserRecServ.getSockets(contentInfo.userId));
+});
+
+ContentServer.on('not-queued', (contentInfo, reason, content, message) => {
+	api.sendError(UserRecServ.getSockets(contentInfo.userId), 'upload', {
+		title: contentInfo.music.title,
+		picTitle: contentInfo.pic.title,
+		content: content,
+		message: message,
+		reason: reason,
+		uniqueCoolOffStr: consts.uniqueCoolOffStr,
+	});
+});
+
+module.exports = api;

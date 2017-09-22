@@ -20,17 +20,17 @@
   "author": "Thomas Richards",
   "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.17.1",
+    "body-parser": "^1.18.0",
     "co": "^4.6.0",
-    "crc-32": "^1.0.1",
+    "crc-32": "^1.1.0",
     "express": "^4.15.2",
+    "formidable": "^1.1.1",
     "html-entities": "^1.2.1",
     "keypress": "^0.2.1",
-    "multer": "^1.3.0",
     "prompt": "git+https://github.com/flatiron/prompt.git",
     "q": "^1.5.0",
     "request": "^2.81.0",
     "sha256": "^0.2.0",
-    "ws": "^2.2.1"
+    "ws": "^2.3.1"
   }
 }

@@ -154,7 +154,6 @@ $('input[type=file]').mousedown(function() {
 });
 
 $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
-	console.log(this);
 	var $this = $(this);
 
 	$this.attr('disabled', true);
@@ -171,7 +170,7 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 		type: 'POST',
 		data: {
 			ajax: true,
-			"content-id": $this.attr('data-id'),
+			'content-id': $this.attr('data-id'),
 		}
 
 	}).done(function() {
@@ -186,7 +185,7 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 
 	}).fail(function(jqXHR, textStatus, err) {
 		if (jqXHR.status === 500) {
-			main.clippyAgent.speak('You didn\'t queue "' + utils.entitle(contentName) + '", so you can\'t delete it.');
+			main.clippyAgent.speak('You didn\'t queue ' + utils.entitle(contentName) + ', so you can\'t delete it.');
 		} else {
 			main.clippyAgent.speak(jqXHR.responseText);
 		}
