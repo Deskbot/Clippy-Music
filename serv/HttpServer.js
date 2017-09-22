@@ -210,6 +210,7 @@ function parseForm(form, fields, files) {
 		if (fields['music-url']) {
 			uploadInfo.music.isUrl = true;
 			uploadInfo.music.path = fields['music-url'];
+			if (musicFile) utils.deleteFile(musicFile.path);
 
 		} else {
 			if (!musicFile) {
@@ -220,6 +221,7 @@ function parseForm(form, fields, files) {
 
 			//no file
 			if (musicFile.size === 0) {
+				utils.deleteFile(musicFile.path); //empty file will still persist otherwise, due to the way multipart form uploads work / are handled
 				throw new FileUploadError('No music file or URL given.', musicFile, picFile);
 			}
 
@@ -246,24 +248,30 @@ function parseForm(form, fields, files) {
 			uploadInfo.pic.isUrl = true;
 			uploadInfo.pic.path = fields['image-url'];
 
-		} else if (picFile.size !== 0) { //file exists
-			//file too big
-			if (picFile.size > opt.imageSizeLimit) {
-				throw new FileUploadError(`Image file given was too big. It exceeded the limit of: "${consts.imageSizeLimStr}".`, musicFile, picFile);
+			if (picFile) utils.deleteFile(picFile.path);
+
+		} else if (picFile) {
+			if (picFile.size !== 0) { //file exists
+				//file too big
+				if (picFile.size > opt.imageSizeLimit) {
+					throw new FileUploadError(`Image file given was too big. It exceeded the limit of: "${consts.imageSizeLimStr}".`, musicFile, picFile);
+				}
+
+				//file wrong type
+				const lhs = picFile.type.split('/')[0];
+				if (lhs !== 'image') {
+					throw new FileUploadError(`Image file given was of the wrong type. Image was expected; "${picFile.type}" was received instead.`, musicFile, picFile);
+				}
+
+				//success
+				uploadInfo.pic.exists = true;
+				uploadInfo.pic.isUrl = false;
+				uploadInfo.pic.path = picFile.path;
+				uploadInfo.pic.title = Html5Entities.encode(picFile.name);
+			
+			} else { //empty picture given, as is typical with multipart forms where no picture is chosen
+				utils.deleteFile(picFile.path);
 			}
-
-			//file wrong type
-			const lhs = picFile.type.split('/')[0];
-			if (lhs !== 'image') {
-				throw new FileUploadError(`Image file given was of the wrong type. Image was expected; "${picFile.type}" was received instead.`, musicFile, picFile);
-			}
-
-			//success
-			uploadInfo.pic.exists = true;
-			uploadInfo.pic.isUrl = false;
-			uploadInfo.pic.path = picFile.path;
-			uploadInfo.pic.title = Html5Entities.encode(picFile.name);
-
 		} else { //no file or url
 			uploadInfo.pic.exists = false;
 		}
