@@ -13,6 +13,8 @@ const debug = require('../lib/debug.js');
 const opt = require('../options.js');
 const utils = require('../lib/utils.js');
 
+const YTError = require('../lib/err/YTError.js');
+
 function getFileForm(req) {
 	return new Promise((resolve, reject) => {
 		const form = new formidable.IncomingForm();
@@ -76,12 +78,12 @@ app.post('/api/content/upload', recordUserMiddleware, (req, res) => {
 		return parseForm(form, fields, files)
 		.then((uplData) => {
 			uplData.userId = req.ip;
-			ContentServer.add(uplData); //ContentServer.add would lose "this" keyword if passed as a function instead of within a lambda
+			return ContentServer.add(uplData); //ContentServer.add would lose "this" keyword if passed as a function instead of within a lambda
 		})
 		.then(() => {
 			if (fields.ajax) res.status(200).end();
 			else             res.redirect('/');
-		})
+		});
 	}))
 	.catch((err) => {
 		if (err instanceof FileUploadError) {
@@ -89,6 +91,9 @@ app.post('/api/content/upload', recordUserMiddleware, (req, res) => {
 		}
 		else if (err instanceof BannedError) {
 			res.status(400).end('You can not upload content because you are banned.');
+		}
+		else if (err instanceof YTError) {
+			res.status(400).end(err.message);
 		}
 		else {
 			console.error('Unknown upload error: ', err);
@@ -105,7 +110,7 @@ app.post('/api/content/remove', (req, res) => {
 		res.status(400).end('The queue item you tried to remove was not chosen by you.');
 	} else {
 		if (req.fields.ajax) res.status(200).end();
-		else               res.redirect('/');
+		else                 res.redirect('/');
 	}
 });
 
@@ -124,7 +129,7 @@ app.post('/api/ban/add', (req, res) => {
 			UserRecordServer.addBan(req.fields.id);
 			ContentServer.purgeUser(req.fields.id);
 			if (req.fields.ajax) res.status(200).end('Success\n');
-			else               res.redirect('/');
+			else                 res.redirect('/');
 
 		} else {
 			res.status(400).end('That user doesn\'t exist.\n');
@@ -141,7 +146,7 @@ app.post('/api/ban/remove', (req, res) => {
 		if (UserRecordServer.isBanned(req.fields.id)) {
 			UserRecordServer.removeBan(req.fields.id);
 			if (req.fields.ajax) res.status(200).end('Success\n');
-			else               res.redirect('/');
+			else                 res.redirect('/');
 
 		} else {
 			res.status(400).end('That user is not banned.\n');
