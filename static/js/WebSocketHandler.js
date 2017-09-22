@@ -111,7 +111,11 @@ var WebSocketHandler = (function() {
 		var $currentNickname = $currentlyPlaying.find('.nickname');
 		var isMine = !data.current ? false : myId === data.current.userId;
 
-		if (isMine) $currentNickname.addClass('my-nickname');
+		if (isMine) {
+			$currentNickname.addClass('my-nickname');
+		} else {
+			$currentNickname.removeClass('my-nickname');
+		}
 
 		if (data.current) {
 			$currentlyPlaying.find('.title').html(data.current.title);	
