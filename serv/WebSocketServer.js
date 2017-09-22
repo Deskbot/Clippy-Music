@@ -182,6 +182,7 @@ ContentServer.on('queued', (contentInfo) => {
 ContentServer.on('not-queued', (contentInfo, reason, content, message) => {
 	api.sendError(UserRecServ.getSockets(contentInfo.userId), 'upload', {
 		title: contentInfo.music.title,
+		picTitle: contentInfo.pic.title,
 		content: content,
 		message: message,
 		reason: reason,

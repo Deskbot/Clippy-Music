@@ -50,14 +50,15 @@ var WebSocketHandler = (function() {
 			if (reason === 'dl') {
 				if (content === 'music') {
 					let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
-					main.clippyAgent.speak('I was unable to download ' + what + '.');
+					main.clippyAgent.speak('I was unable to download ' + what + ' due to an upload error.');
 				
 				} else if (content === 'pic') {
-					let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
-					main.clippyAgent.speak('I was unable to download the picture you requested with ' + what + '.');
+					let whatMus = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
+					let whatPic = data.message.picTitle ? utils.entitle(data.message.picTitle) : 'the picture you requested';
+					main.clippyAgent.speak('I was unable to download ' + whatPic + ' with ' + whatMus + ' due to an upload error.');
 				
 				} else {
-					main.clippyAgent.speak('I didn\'t queue what you requested because something wasn\'t downloaded successfully, and for some reason I don\'t know what it was.');
+					main.clippyAgent.speak('I didn\'t queue what you requested because something wasn\'t uploaded successfully, and for some reason I don\'t know what it was.');
 				}
 
 			} else if (reason === 'unique') {
@@ -67,9 +68,10 @@ var WebSocketHandler = (function() {
 					main.clippyAgent.speak('I didn\'t queue ' + what + ' because it has been played ' + when + '.');
 				
 				} else if (content === 'pic') {
-					let what = utils.entitle(data.message.title);
+					let whatMus = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
+					let whatPic = data.message.picTitle ? utils.entitle(data.message.picTitle) : 'the picture you requested';
 					let when = data.message.uniqueCoolOffStr.startsWith('Infinity') ? 'already' : 'in the past ' + data.message.uniqueCoolOffStr;
-					main.clippyAgent.speak('I didn\'t queue ' + what + ' because the picture you gave has been shown ' + when + '.');
+					main.clippyAgent.speak('I didn\'t queue ' + whatMus + ' because ' + whatPic + ' has been shown ' + when + '.');
 				
 				} else {
 					main.clippyAgent.speak('I didn\'t queue what you requested because something wasn\'t unique, and for some reason I don\'t know what it was.');
