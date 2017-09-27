@@ -27,113 +27,125 @@
 	<body>
 		<main>
 			<section id="upload-section">
-				<div class="handle">
-					<h2>Upload</h2>
-					<button class="x-button"></button>
-				</div>
-				<div class="bag">
-					<form id="upload-form" class="http" action="api/content/upload" method="POST" enctype="multipart/form-data">
-						<fieldset>
-							<legend>Music</legend>
+				<div class="section-borders">
+					<div class="handle">
+						<h2>Upload</h2>
+						<button class="x-button"></button>
+					</div>
+					<div class="bag">
+						<form id="upload-form" class="http" action="api/content/upload" method="POST" enctype="multipart/form-data">
+							<fieldset>
+								<legend>Music</legend>
 
-							<div id="music-file-input-button" class="file-upload">
-								<button class="file" tabindex="1">Choose Music File</button>
-								<span class="file-name">No File Chosen</span>
-								<input type="file" id="music-file" name="music-file" accept="audio/*, video/*">
-							</div>
+								<div id="music-file-input-button" class="file-upload">
+									<button class="file" tabindex="1">Choose Music File</button>
+									<span class="file-name">No File Chosen</span>
+									<input type="file" id="music-file" name="music-file" accept="audio/*, video/*">
+								</div>
 
-							<label>YouTube URL</label>
-							<input type="url" name="music-url" placeholder="" tabindex="2" autofocus>
-							<label>Start Time</label>
-							<input type="text" name="start-time" placeholder="Format is seconds or mm:ss or hh:mm:ss" tabindex="3">
-							<label>End Time</label>
-							<input type="text" name="end-time" placeholder="Format is seconds or mm:ss or hh:mm:ss" tabindex="4">
-						</fieldset>
+								<label>YouTube URL</label>
+								<input type="url" name="music-url" placeholder="" tabindex="2" autofocus>
+								<label>Start Time</label>
+								<input type="text" name="start-time" placeholder="Format is seconds or mm:ss or hh:mm:ss" tabindex="3">
+								<label>End Time</label>
+								<input type="text" name="end-time" placeholder="Format is seconds or mm:ss or hh:mm:ss" tabindex="4">
+							</fieldset>
 
-						<fieldset>
-							<legend>Accompanying Image</legend>
+							<fieldset>
+								<legend>Accompanying Image</legend>
 
-							<div id="picture-file-input-button" class="file-upload">
-								<button class="file" tabindex="5">Choose Image File</button>
-								<span class="file-name">No File Chosen</span>
-								<input type="file" id="image-file" name="image-file" accept="image/*">
-							</div>
+								<div id="picture-file-input-button" class="file-upload">
+									<button class="file" tabindex="5">Choose Image File</button>
+									<span class="file-name">No File Chosen</span>
+									<input type="file" id="image-file" name="image-file" accept="image/*">
+								</div>
+								
+								<label>Image URL</label>
+								<input type="url" name="image-url" tabindex="7">
+							</fieldset>
 							
-							<label>Image URL</label>
-							<input type="url" name="image-url" tabindex="7">
-						</fieldset>
-						
-						<input type="submit" value="Upload Content" tabindex="8">
-					</form>
+							<input type="submit" value="Upload Content" tabindex="8">
+						</form>
+					</div>
 				</div>
 			</section>
 
 			<noscript>
 				<section id="no-script">
-					<div class="handle">
-						<h2>No JavaScript</h2>
-						<button class="x-button"></button>
-					</div>
-					<div class="bag extra-pad">
-						<p>You do not have JavaScript active on this page. I respect your right to decide what code your computer executes, however you should note that some functionality will be disabled.</p>
-						<ul class="text">
-							<li>The "Upload" application works, however "No File Chosen" will still be displayed after a file has been selected. Hover over that area to see the name of the file.</li>
-							<li>If there is some problem with the upload, you will not be notified.</li>
-							<li>The "Currently Playing" and "Queue" applications will not work.</li>
-							<li>You can not move the application windows around.</li>
-							<li>You will not be able to interact with Clippit, the music server assistant.</li>
-						</ul>
-						<p>You may be inclined to use the <a href="https://github.com/Deskbot/Clippy-Music/blob/master/README.md#user-api">API</a>.</p>
+					<div class="section-borders">
+						<div class="handle">
+							<h2>No JavaScript</h2>
+							<button class="x-button"></button>
+						</div>
+						<div class="bag extra-pad">
+							<p>You do not have JavaScript active on this page. I respect your right to decide what code your computer executes, however you should note that some functionality will be disabled.</p>
+							<ul class="text">
+								<li>The "Upload" application works, however "No File Chosen" will still be displayed after a file has been selected. Hover over that area to see the name of the file.</li>
+								<li>If there is some problem with the upload, you will not be notified.</li>
+								<li>The "Currently Playing" and "Queue" applications will not work.</li>
+								<li>You can not move the application windows around.</li>
+								<li>You will not be able to interact with Clippit, the music server assistant.</li>
+							</ul>
+							<p>You may be inclined to use the <a href="https://github.com/Deskbot/Clippy-Music/blob/master/README.md#user-api">API</a>.</p>
+						</div>
 					</div>
 				</section>
 			</noscript>
 
 			<section id="queue-section">
-				<div class="handle">
-					<h2>Currently Playing</h2>
-					<button class="x-button"></button>
-				</div>
-				<div class="bag extra-pad">
-					<div id="currently-playing">
-						<p class="title"></p>
-						<p class="nickname"></p>
+				<div class="section-borders">
+					<div class="handle">
+						<h2>Currently Playing</h2>
+						<button class="x-button"></button>
+					</div>
+					<div class="bag extra-pad">
+						<div id="currently-playing">
+							<p class="title"></p>
+							<p class="nickname"></p>
+						</div>
 					</div>
 				</div>
 			</section>
 
 			<section>
-				<div class="handle">
-					<h2>Queue</h2>
-					<button class="x-button"></button>
-				</div>
-				<div class="bag">
-					<div id="queue"></div>
+				<div class="section-borders">
+					<div class="handle">
+						<h2>Queue</h2>
+						<button class="x-button"></button>
+					</div>
+					<div class="bag">
+						<div id="queue"></div>
+					</div>
 				</div>
 			</section>
 
 			<section id="nickname-section">
-				<div class="handle">
-					<h2>Nickname (<span class="my-nickname"></span>)</h2>
-					<button class="x-button"></button>
-				</div>
-				<div class="bag">
-					<form id="nickname-form" class="ws" action="api/nickname/set" method="POST">
-						<label>New Nickname</label>
-						<input type="text" name="nickname">
-						<input type="submit">
-					</form>
+				<div class="section-borders">
+					<div class="handle">
+						<h2>Nickname (<span class="my-nickname"></span>)</h2>
+						<button class="x-button"></button>
+					</div>
+					<div class="bag">
+						<form id="nickname-form" class="ws" action="api/nickname/set" method="POST">
+							<label>New Nickname</label>
+							<input type="text" name="nickname">
+							<input type="submit">
+						</form>
+					</div>
 				</div>
 			</section>
 
 			<section id="info-section">
-				<div class="handle">
-					<h2>Info</h2>
-					<button class="x-button"></button> 
-				</div>
-				<div class="bag extra-pad">
-					<p>Your priority in the queue is affected by how much time you've spent playing music recently.</p>
-					<p>The admins can set a length of time in which the same music or picture can not be played twice.</p>
-					<p><a href="https://github.com/Deskbot/Clippy-Music">GitHub</a> (contributions welcome)</p>
+				<div class="section-borders">
+					<div class="handle">
+						<h2>Info</h2>
+						<button class="x-button"></button> 
+					</div>
+					<div class="bag extra-pad">
+						<p>Your priority in the queue is affected by how much time you've spent playing music recently.</p>
+						<p>The admins can set a length of time in which the same music or picture can not be played twice.</p>
+						<p><a href="https://github.com/Deskbot/Clippy-Music">GitHub</a> (contributions welcome)</p>
+					</div>
 				</div>
 			</section>
 		</main>

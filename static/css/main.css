@@ -7,7 +7,7 @@ html {
 	background-color: #3A69A1;
 	box-sizing: border-box;
 	font-family: TahomaWine, Arial, Helvetica, Verdana, cursive;
-	font-size: 13px;
+	font-size: 12px;
 	font-smooth: never;
 	-webkit-font-smoothing: none;
 	-webkit-touch-callout: none; /* iOS Safari */
@@ -23,7 +23,7 @@ h2 {
 	display: inline-block;
 	font-family: Arial;
 	font-weight: bold;
-	padding: 2px 0 0 2px;
+	padding: 3px 0 0 3px;
 }
 
 p, li {
@@ -43,7 +43,8 @@ input {
 
 input, button {
 	color: black;
-	font-size: 13px;
+	font-family: TahomaWine;
+	font-size: 12px;
 }
 
 input[disabled=disabled] {
@@ -64,10 +65,10 @@ input[type=text], input[type=url] {
 	height: 21px;
 	margin: 1px 0 2px 0;
 	padding: 1px 6px;
-	width: calc(100% - 12px);
+	width: calc(100% - 14px);
 }
 
-form button:focus, form input[type=text]:focus, form input[type=url]:focus, form input[type=submit]:focus {
+form button:focus, form input[type=submit]:focus, form input[type=file] button {
 	outline: 1px solid black;
 }
 
@@ -80,8 +81,7 @@ input[type=submit], button {
 	box-shadow: inset -1px -1px #848284;
 	cursor: pointer;
 	height: 21px;
-	margin-bottom: 1px;
-	padding: 1px 6px;
+	padding: 0 6px 1px 6px;
 	width: auto;
 }
 
@@ -108,32 +108,34 @@ ul.text li {
 
 button.file {
 	display: inline-block;
-	margin: 1px;
+}
+
+.file-name {
+	vertical-align: baseline;
 }
 
 .file-upload {
+	height: 21px;
 	margin: 5px auto 5px 0;
 	overflow: hidden;
+	padding: 1px;
 	position: relative;
 }
 
 .file-upload input[type=file] {
-	position: absolute;
-	top: 0;
-	right: 0;
-	margin: 0;
-	padding: 0;
 	cursor: pointer;
+	height: 100%;
+	margin: 0;
 	opacity: 0;
 	filter: alpha(opacity=0);
+	padding: 0;
+	position: absolute;
+	right: 0;
+	top: 0;
 }
 
 input[type=submit] {
-	margin: 10px 0 auto auto;
-}
-
-label.file {
-	display: inline-block;
+	margin: 8px 0 auto auto;
 }
 
 main {
@@ -142,9 +144,20 @@ main {
 
 section {
 	background-color: #D6D3CE;
-	border: 3px ridge #D6D3CE;
+	border-top:    1px solid #D6D3CE;
+	border-bottom: 1px solid #424142;
+	border-left:   1px solid #D6D3CE;
+	border-right:  1px solid #424142;
 	margin: 0 auto 20px auto;
 	width: 500px;
+}
+
+section div.section-borders {
+	border-top:    1px solid #FFFFFF;
+	border-bottom: 1px solid #848284;
+	border-left:   1px solid #FFFFFF;
+	border-right:  1px solid #848284;
+	padding: 1px;
 }
 
 fieldset {

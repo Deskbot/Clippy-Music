@@ -1,3 +1,4 @@
+var $fileInput = $('input[type=file]');
 var $section = $('section');
 var $uploadForm = $('#upload-form');
 
@@ -153,8 +154,12 @@ $('#nickname-form').submit(function(e) {
 	return false;
 });
 
-$('input[type=file]').mousedown(function() {
+$fileInput.mousedown(function() {
 	$(this).siblings('button.file').addClass('active').focus();
+});
+
+$fileInput.focus(function() {
+	$(this).siblings('button.file').focus();
 });
 
 $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
