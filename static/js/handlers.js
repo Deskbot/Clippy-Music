@@ -16,6 +16,10 @@ $section.click(function() {
 	$(this).css('z-index', main.maxZ++);
 });
 
+$section.find('.handle > .x-button').click(function(e) {
+	$(this).parentsUntil('main').remove();
+});
+
 $uploadForm.find('[name=music-file]').change(function(e) {
 	var $this = $(this);
 
