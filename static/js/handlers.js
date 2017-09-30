@@ -22,8 +22,6 @@ $section.find('.handle > .x-button').click(function(e) {
 });
 
 $uploadForm.find('[name=music-file]').change(function(e) {
-	var $this = $(this);
-
 	var $musicUrl = $uploadForm.find('[name=music-url]');
 
 	if (utils.inputHasFile(this)) $musicUrl.attr('disabled', true);
@@ -31,11 +29,26 @@ $uploadForm.find('[name=music-file]').change(function(e) {
 });
 
 $uploadForm.find('[name=image-file]').change(function(e) {
-	var $this = $(this);
 	var $musicUrl = $uploadForm.find('[name=image-url]');
 
 	if (utils.inputHasFile(this)) $musicUrl.attr('disabled', true);
 	else                          $musicUrl.attr('disabled', false);
+});
+
+$uploadForm.find('#music-file-input-button input[type=file]').change(function() {
+	var $this = $(this);
+
+	var title = $this.val().replace('C:\\fakepath\\', '');
+	var fileName = title === '' ? 'No File Chosen' : 'C:\\My Music\\' + title;
+	$this.siblings('.file-name').text(fileName ? fileName : 'No File Chosen');
+});
+
+$uploadForm.find('#picture-file-input-button input[type=file]').change(function() {
+	var $this = $(this);
+
+	var title = $this.val().replace('C:\\fakepath\\', '');
+	var fileName = title === '' ? 'No File Chosen' : 'C:\\My Pictures\\' + title;
+	$this.siblings('.file-name').text(fileName ? fileName : 'No File Chosen');
 });
 
 $uploadForm.submit(function(e) {
@@ -201,18 +214,6 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 
 		$this.attr('disabled', false);
 	});
-});
-
-$uploadForm.find('#music-file-input-button input[type=file]').change(function() {
-	var $this = $(this);
-	var fileName = 'C:\\My Music\\' + $this.val().replace('C:\\fakepath\\', '');
-	$this.siblings('.file-name').text(fileName ? fileName : 'No File Chosen');
-});
-
-$uploadForm.find('#picture-file-input-button input[type=file]').change(function() {
-	var $this = $(this);
-	var fileName = 'C:\\My Pictures\\' + $this.val().replace('C:\\fakepath\\', '');
-	$this.siblings('.file-name').text(fileName ? fileName : 'No File Chosen');
 });
 
 window.onbeforeunload = function() {
