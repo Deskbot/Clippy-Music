@@ -6,6 +6,7 @@
 html {
 	background-color: #3A69A1;
 	box-sizing: border-box;
+	cursor: default;
 	font-family: TahomaWine, Arial, Helvetica, Verdana, cursive;
 	font-size: 12px;
 	font-smooth: never;
@@ -211,7 +212,6 @@ fieldset {
 
 legend {
 	background-color: #D6D3CE;
-	cursor: default;
 	padding: 0 2px;
 }
 
