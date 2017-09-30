@@ -40,12 +40,20 @@ body::-webkit-scrollbar-button:single-button {
 	width: 16px;
 }
 
-body::-webkit-scrollbar-button:decrement {
+body::-webkit-scrollbar-button:vertical:decrement {
 	background-image: url("/media/Scrollbar Arrow Up.png");
 }
 
-body::-webkit-scrollbar-button:increment {
+body::-webkit-scrollbar-button:vertical:increment {
 	background-image: url("/media/Scrollbar Arrow Down.png");
+}
+
+body::-webkit-scrollbar-button:horizontal:decrement {
+	background-image: url("/media/Scrollbar Arrow Left.png");
+}
+
+body::-webkit-scrollbar-button:horizontal:increment {
+	background-image: url("/media/Scrollbar Arrow Right.png");
 }
 
 body::-webkit-scrollbar-thumb {
