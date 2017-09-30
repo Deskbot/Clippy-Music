@@ -82,8 +82,7 @@ function submitForm($form) {
 }
 
 $(document).ready(function() {
-	positionSections();
-
+	
 	loadClippy()
 	.then(function(clippy) {
 		clippy.moveTo(window.innerWidth * 3 / 4, window.innerHeight * 3 / 4);
@@ -95,6 +94,7 @@ $(document).ready(function() {
 	.then(function() {
 		main.webSocketHandler = new WebSocketHandler();
 		setKonamiCode();
+		setTimeout(function() {positionSections()}, 100);
 	})
 	.catch(function(err) {
 		console.error(err);
