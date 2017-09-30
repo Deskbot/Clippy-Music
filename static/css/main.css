@@ -211,6 +211,7 @@ fieldset {
 
 legend {
 	background-color: #D6D3CE;
+	cursor: default;
 	padding: 0 2px;
 }
 
