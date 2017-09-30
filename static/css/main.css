@@ -18,6 +18,44 @@ html {
 			  user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
 }
 
+body {
+	margin: 1px;
+}
+
+body::-webkit-scrollbar {
+    background-image: url("/media/Scrollbar Background.png");
+}
+
+body::-webkit-scrollbar-button:single-button {
+	background-color: #D6D3CE;
+	border-top:    1px solid #D6D3CE;
+	border-bottom: 1px solid #424142;
+	border-left:   1px solid #D6D3CE;
+	border-right:  1px solid #424142;
+	box-shadow: inset 1px 1px white;
+	margin: 0 auto 20px auto;
+	height: 16px;
+	position: fixed;
+	width: 16px;
+}
+
+body::-webkit-scrollbar-button:decrement {
+	background-image: url("/media/Scrollbar Arrow Up.png");
+}
+
+body::-webkit-scrollbar-button:increment {
+	background-image: url("/media/Scrollbar Arrow Down.png");
+}
+
+body::-webkit-scrollbar-thumb {
+	background-color: #D6D3CE;
+	border-top:    1px solid #D6D3CE;
+	border-bottom: 1px solid #424142;
+	border-left:   1px solid #D6D3CE;
+	border-right:  1px solid #424142;
+	box-shadow: inset 1px 1px white;
+}
+
 h2 {
 	color: white;
 	display: inline-block;
