@@ -10,6 +10,9 @@ $section.draggable({
 	handle: '.handle',
 	start: function() {
 		$(this).css('z-index', main.maxZ++);
+	},
+	end: function() {
+		positionSections();
 	}
 });
 
@@ -18,6 +21,7 @@ $section.click(function() {
 });
 
 $section.find('.handle > .x-button').click(function(e) {
+	positionSections();
 	$(this).parentsUntil('main').remove();
 });
 

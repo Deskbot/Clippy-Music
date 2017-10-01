@@ -32,19 +32,27 @@ function loadClippy() {
 //this function makes sections 'absolute' as opposed to 'relative' as jquery-ui sets them by default
 //we need to start them off normally so they start off in a natural location when the page loads
 //then we change their position type without moving them on the page
-function positionSections() {
-	var $section = $('section');
+var positionSections = (function() {
+	var alreadyDone = false;
 
-	//setting a section to 'absolute', causes others to move as they are still 'relative', so we must 
-	for (var i = $section.length - 1; i >= 0; i--) {
-		var section = $section[i];
-		var pos = section.getBoundingClientRect();
-		
-		section.style.left = pos.left + 'px'; //keep them fixed where they are when position type changes
-		section.style.top = pos.top + 'px';
-		section.style.position = 'absolute';
+	return function() {
+		if (alreadyDone) return;
+
+		alreadyDone = true;
+
+		var $section = $('section');
+
+		//setting a section to 'absolute', causes others to move as they are still 'relative', so we must 
+		for (var i = $section.length - 1; i >= 0; i--) {
+			var section = $section[i];
+			var pos = section.getBoundingClientRect();
+			
+			section.style.left = pos.left + 'px'; //keep them fixed where they are when position type changes
+			section.style.top = pos.top + 'px';
+			section.style.position = 'absolute';
+		}
 	}
-}
+})();
 
 function setKonamiCode() {
 	var easterEgg = new Konami();
@@ -83,7 +91,6 @@ function submitForm($form) {
 }
 
 $(document).ready(function() {
-	
 	loadClippy()
 	.then(function(clippy) {
 		clippy.moveTo(window.innerWidth * 3 / 4, window.innerHeight * 3 / 4);
@@ -95,7 +102,6 @@ $(document).ready(function() {
 	.then(function() {
 		main.webSocketHandler = new WebSocketHandler();
 		setKonamiCode();
-		setTimeout(function() {positionSections()}, 100);
 	})
 	.catch(function(err) {
 		console.error(err);
