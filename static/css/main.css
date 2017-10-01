@@ -224,6 +224,18 @@ legend {
 	padding: 0 2px;
 }
 
+#currently-playing p {
+	text-align: center;
+}
+
+#currently-playing .wordart {
+	margin: 50px 0;
+}
+
+#currently-playing .title {
+	font-size: 50px;
+}
+
 #nickname-form {
 	padding: 6px 0 0 0;
 }

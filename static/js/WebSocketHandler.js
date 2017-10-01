@@ -117,12 +117,16 @@ var WebSocketHandler = (function() {
 			$currentNickname.removeClass('my-nickname');
 		}
 
+		var $title = $currentlyPlaying.find('.title');
+
 		if (data.current) {
-			$currentlyPlaying.find('.title').html(data.current.title);	
+			$title.html(data.current.title);
+			$title.attr('data-text', data.current.title)
 			$currentNickname.html(data.current.nickname);
 
 		} else {
-			$currentlyPlaying.find('.title').html('');
+			$title.html('');
+			$title.attr('data-text', '');
 			$currentNickname.html('');
 		}
 		
