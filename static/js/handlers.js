@@ -216,6 +216,16 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 	});
 });
 
+var $currentlyPlaying = $('#currently-playing');
+
+$currentlyPlaying.on('dblclick', '.wordart', function() {
+	$(this).removeClass('wordart').addClass('no-wordart');
+});
+
+$currentlyPlaying.on('dblclick', '.no-wordart', function() {
+	$(this).removeClass('no-wordart').addClass('wordart');
+});
+
 window.onbeforeunload = function() {
 	main.clippyAgent.stop();
 	main.clippyAgent.play('GoodBye');

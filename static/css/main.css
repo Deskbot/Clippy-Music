@@ -225,15 +225,13 @@ legend {
 }
 
 #currently-playing p {
+	margin: 6px 0;
 	text-align: center;
 }
 
 #currently-playing .wordart {
-	margin: 50px 0;
-}
-
-#currently-playing .title {
 	font-size: 50px;
+	margin: 50px 0;
 }
 
 #nickname-form {
