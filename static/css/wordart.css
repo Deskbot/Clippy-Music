@@ -6,6 +6,11 @@
 	display: block;
 }
 
+.wordart span:before {
+	left: 0;
+	right: 0;
+}
+
 /* rainbow */
 
 .wordart.rainbow {
@@ -17,7 +22,6 @@
 	font-size: 0.84em;
 }
 .wordart.rainbow span {
-	font-family: Arial, sans-serif;
 	background: #ee00ff;
 	background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2VlMDBmZiIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjE2JSIgc3RvcC1jb2xvcj0iI2ZmMzAzMCIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjMyJSIgc3RvcC1jb2xvcj0iI2ZmOTkwMCIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjQ5JSIgc3RvcC1jb2xvcj0iI2ZmZjQzMCIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjY3JSIgc3RvcC1jb2xvcj0iIzAwZmYwOCIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjgzJSIgc3RvcC1jb2xvcj0iIzMyMjNmZiIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNhYTAwZmYiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);
 	background: -moz-linear-gradient(left, #ee00ff 0%, #ff3030 16%, #ff9900 32%, #fff430 49%, #00ff08 67%, #3223ff 83%, #aa00ff 100%);
@@ -26,20 +30,20 @@
 	background: -o-linear-gradient(left, #ee00ff 0%, #ff3030 16%, #ff9900 32%, #fff430 49%, #00ff08 67%, #3223ff 83%, #aa00ff 100%);
 	background: -ms-linear-gradient(left, #ee00ff 0%, #ff3030 16%, #ff9900 32%, #fff430 49%, #00ff08 67%, #3223ff 83%, #aa00ff 100%);
 	background: linear-gradient(to right, #ee00ff 0%, #ff3030 16%, #ff9900 32%, #fff430 49%, #00ff08 67%, #3223ff 83%, #aa00ff 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ee00ff', endColorstr='#aa00ff', GradientType=1);
 	background-clip: text;
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ee00ff', endColorstr='#aa00ff', GradientType=1);
+	font-family: Arial, sans-serif;
 	font-weight: bold;
 	letter-spacing: -0.01em;
-	margin-left: 0.7em;
 }
 .wordart.rainbow span:before {
 	content: attr(data-text);
 	position: absolute;
 	z-index: -1;
 	top: 0.17em;
-	left: 0.4em;
+	left: -0.6em;
 	-webkit-text-fill-color: rgba(50, 50, 50, 0.3);
 	-webkit-background-clip: border-box;
 	transform: skew(60deg, 0) scale(1, 0.5);
@@ -57,10 +61,10 @@
 	-moz-transform: scale(1, 1.2);
 	-o-transform: scale(1, 1.2);
 	-ms-transform: scale(1, 1.2);
-	font-size: 1.1em;
 }
 .wordart.green-marble span {
 	font-family: Times, 'Times New Roman', serif;
+	font-size: 80px;
 	letter-spacing: -0.01em;
 	text-align: center;
 	position: relative;
@@ -177,8 +181,8 @@
 .wordart.superhero span:before {
 	content: attr(data-text);
 	position: absolute;
-	z-index: -1;
 	text-shadow: 0.01em 0em 0 #802700, 0em 0.01em 0 #c23d00,0.02em 0.01em 0 #802700, 0.01em 0.02em 0 #c23d00,0.03em 0.02em 0 #802700, 0.02em 0.03em 0 #c23d00,0.04em 0.03em 0 #802700, 0.03em 0.04em 0 #c23d00,0.05em 0.04em 0 #802700, 0.04em 0.05em 0 #c23d00,0.06em 0.05em 0 #802700, 0.05em 0.06em 0 #c23d00,0.07em 0.06em 0 #802700, 0.06em 0.07em 0 #c23d00,0.08em 0.07em 0 #802700, 0.07em 0.08em 0 #c23d00;
+	z-index: -1;
 }
 
 /* graydient */
@@ -357,11 +361,11 @@
 .wordart.marble-slab {
 	display: inline-block;
 	font-size: 1.23em;
-	transform: scale(1, 1.2) perspective(1em) rotateY(8deg) rotateZ(-7deg) translateX(6%) translateZ(-0.4em);
-	-webkit-transform: scale(1, 1.2) perspective(1em) rotateY(8deg) rotateZ(-7deg) translateX(6%) translateZ(-0.4em);
-	-moz-transform: scale(1, 1.2) perspective(1em) rotateY(8deg) rotateZ(-7deg) translateX(6%) translateZ(-0.4em);
-	-o-transform: scale(1, 1.2) perspective(1em) rotateY(8deg) rotateZ(-7deg) translateX(6%) translateZ(-0.4em);
-	-ms-transform: scale(1, 1.2) perspective(1em) rotateY(8deg) rotateZ(-7deg) translateX(6%) translateZ(-0.4em);
+	transform: scale(1, 1.2) perspective(3em) rotateY(8deg) rotateZ(-7deg) translateX(6%) translateZ(-0.2em);
+	-webkit-transform: scale(1, 1.2) perspective(3em) rotateY(8deg) rotateZ(-7deg) translateX(6%) translateZ(-0.2em);
+	-moz-transform: scale(1, 1.2) perspective(3em) rotateY(8deg) rotateZ(-7deg) translateX(6%) translateZ(-0.2em);
+	-o-transform: scale(1, 1.2) perspective(3em) rotateY(8deg) rotateZ(-7deg) translateX(6%) translateZ(-0.2em);
+	-ms-transform: scale(1, 1.2) perspective(3em) rotateY(8deg) rotateZ(-7deg) translateX(6%) translateZ(-0.2em);
 }
 .wordart.marble-slab span {
 	font-family: Arial, sans-serif;
@@ -452,7 +456,6 @@
 /* yellow dash */
 
 .wordart.yellow-dash {
-	display: inline-block;
 	font-size: 1.65em;
 	transform-origin: 0 0 0;
 	transform: perspective(1em) rotateY(-6deg) rotateZ(-4deg) scaleY(1.6) translateY(10%) translateZ(-1.1em);
@@ -484,11 +487,11 @@
 .wordart.gray-block {
 	display: inline-block;
 	font-size: 1.42em;
-	transform: perspective(1em) rotateY(5deg) skewY(20deg) scaleY(1.2) translateZ(-0.4em);
-	-webkit-transform: perspective(1em) rotateY(5deg) skewY(20deg) scaleY(1.2) translateZ(-0.4em);
-	-moz-transform: perspective(1em) rotateY(5deg) skewY(20deg) scaleY(1.2) translateZ(-0.4em);
-	-o-transform: perspective(1em) rotateY(5deg) skewY(20deg) scaleY(1.2) translateZ(-0.4em);
-	-ms-transform: perspective(1em) rotateY(5deg) skewY(20deg) scaleY(1.2) translateZ(-0.4em);
+	transform: perspective(1em) rotateY(5deg) skewY(20deg) scaleY(1.2) translateZ(-0.2em);
+	-webkit-transform: perspective(1em) rotateY(5deg) skewY(20deg) scaleY(1.2) translateZ(-0.2em);
+	-moz-transform: perspective(1em) rotateY(5deg) skewY(20deg) scaleY(1.2) translateZ(-0.2em);
+	-o-transform: perspective(1em) rotateY(5deg) skewY(20deg) scaleY(1.2) translateZ(-0.2em);
+	-ms-transform: perspective(1em) rotateY(5deg) skewY(20deg) scaleY(1.2) translateZ(-0.2em);
 }
 .wordart.gray-block span {
 	font-family: Impact;
