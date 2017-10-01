@@ -117,12 +117,19 @@ var WebSocketHandler = (function() {
 			$currentNickname.removeClass('my-nickname');
 		}
 
+		var $title = $currentlyPlaying.find('.title');
+
 		if (data.current) {
-			$currentlyPlaying.find('.title').html(data.current.title);	
+			$title.html(data.current.title);
+			$title.attr('data-text', utils.htmlEntityDecode(data.current.title));
 			$currentNickname.html(data.current.nickname);
 
+			var wordartClass = main.goodWordArt[digestString(data.current.title + data.current.nickname) % main.goodWordArt.length]; //get a random class, but always the same for the same title
+			$currentlyPlaying.find('.wordart').removeClass().addClass('wordart').addClass(wordartClass); //remove all classes because we don't know which word art it currently is, add back 'wordart' then add the type of wordart
+
 		} else {
-			$currentlyPlaying.find('.title').html('');
+			$title.html('');
+			$title.attr('data-text', '');
 			$currentNickname.html('');
 		}
 		
@@ -164,3 +171,11 @@ var WebSocketHandler = (function() {
 		return $bucketCont;
 	}
 })();
+
+function digestString(str) {
+	var tot = 0;
+	for (var i = 0; i < str.length; i++) {
+		tot += str.charCodeAt(i);
+	}
+	return tot;
+}
