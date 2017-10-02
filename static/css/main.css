@@ -20,6 +20,14 @@ html {
 			  user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
 }
 
+html.progress {
+	cursor: progress;
+}
+
+html.progress #upload-section {
+	cursor: wait;
+}
+
 body {
 	margin: 1px;
 }
@@ -79,12 +87,14 @@ p, li {
 }
 
 label {
+	cursor: inherit;
 	display: block;
 	line-height: normal;
 	width: 100%;
 }
 
 input {
+	cursor: inherit;
 	display: block;
 	width: 100%;
 }
@@ -116,6 +126,10 @@ input[type=text], input[type=url] {
 	width: calc(100% - 14px);
 }
 
+form {
+	cursor: inherit;
+}
+
 form button:focus, form input[type=submit]:focus, form input[type=file] button {
 	outline: 1px solid black;
 }
@@ -131,6 +145,10 @@ input[type=submit], button {
 	height: 21px;
 	padding: 0 6px 1px 6px;
 	width: auto;
+}
+
+.progress input[type=submit], button {
+	cursor: inherit;
 }
 
 input[type=submit]:active, button:active, button.active {
@@ -182,6 +200,10 @@ button.file {
 	top: 0;
 }
 
+.progress .file-upload input[type=file] {
+	cursor: inherit;
+}
+
 input[type=submit] {
 	margin: 8px 0 auto auto;
 }
@@ -215,12 +237,14 @@ fieldset {
 	border-right-color: white;
 	border-bottom-color: white;
 	box-shadow: inset 1px 1px white;
+	cursor: inherit;
 	margin: 10px 0;
 	padding: 1px 12px 6px 12px;
 }
 
 legend {
 	background-color: #D6D3CE;
+	cursor: inherit;
 	padding: 0 2px;
 }
 
