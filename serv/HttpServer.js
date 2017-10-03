@@ -85,8 +85,10 @@ app.post('/api/content/upload', recordUserMiddleware, (req, res) => {
 			return ContentServer.add(uplData); //ContentServer.add would lose "this" keyword if passed as a function instead of within a lambda
 		})
 		.then(() => {
-			if (fields.ajax) res.status(200).end();
-			else             res.redirect('/');
+			if (fields.ajax || req.headers['user-agent'].includes('curl'))
+				res.status(200).end('Success\n');
+			else
+				res.redirect('/');
 		});
 	}))
 	.catch((err) => {
@@ -113,7 +115,7 @@ app.post('/api/content/remove', (req, res) => {
 	if (!ContentServer.remove(req.ip, parseInt(req.fields['content-id']))) {
 		res.status(400).end('The queue item you tried to remove was not chosen by you.');
 	} else {
-		if (req.fields.ajax) res.status(200).end();
+		if (noRedirect(req)) res.status(200).end('Success\n');
 		else                 res.redirect('/');
 	}
 });
@@ -121,8 +123,8 @@ app.post('/api/content/remove', (req, res) => {
 //POST variable: nickname
 app.post('/api/nickname/set', recordUserMiddleware, (req, res) => {
 	UserRecordServer.setNickname(req.ip, Html5Entities.encode(req.fields.nickname.substr(0, opt.nicknameSizeLimit)));
-
-	if (req.fields.ajax) res.status(200).end();
+	
+	if (noRedirect(req)) res.status(200).end('Success\n');
 	else                 res.redirect('/');
 });
 
@@ -132,7 +134,7 @@ app.post('/api/ban/add', (req, res) => {
 		if (UserRecordServer.isUser(req.fields.id)) {
 			UserRecordServer.addBan(req.fields.id);
 			ContentServer.purgeUser(req.fields.id);
-			if (req.fields.ajax) res.status(200).end('Success\n');
+			if (noRedirect(req)) res.status(200).end('Success\n');
 			else                 res.redirect('/');
 
 		} else {
@@ -149,7 +151,7 @@ app.post('/api/ban/remove', (req, res) => {
 	if (AdminPassword.verify(req.fields.password)) {
 		if (UserRecordServer.isBanned(req.fields.id)) {
 			UserRecordServer.removeBan(req.fields.id);
-			if (req.fields.ajax) res.status(200).end('Success\n');
+			if (noRedirect(req)) res.status(200).end('Success\n');
 			else                 res.redirect('/');
 
 		} else {
@@ -187,6 +189,10 @@ function handlePotentialBan(userId) {
 			resolve();
 		}
 	});
+}
+
+function noRedirect(req) {
+	return req.fields.ajax || req.headers['user-agent'].includes('curl');
 }
 
 function parseForm(form, fields, files) {
@@ -295,7 +301,9 @@ function parseForm(form, fields, files) {
 	.catch((err) => {
 		if (err instanceof FileUploadError) {
 			console.log("trying to delete these files: ", err.files);
-			err.files.forEach((file) => utils.deleteFile(file.path));
+			err.files.forEach((file) => {
+				if (file) return utils.deleteFile(file.path);
+			});
 		}
 		throw err;
 	});
