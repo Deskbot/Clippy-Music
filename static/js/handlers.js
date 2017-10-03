@@ -60,7 +60,7 @@ $uploadForm.submit(function(e) {
 
 	var $this = $(this);
 	var $inputs = $this.find('input');
-	var $fields = $inputs.find(':not([type=submit])');
+	var $fields = $inputs.filter(':not([type=submit])');
 	
 	//validate before submit
 
