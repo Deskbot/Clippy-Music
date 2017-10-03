@@ -63,6 +63,10 @@ const app = express();
 
 app.use('/', express.static(__dirname + '/../static/'));
 
+app.get('/api/wsport', (req, res) => {
+	res.status(200).end(opt.webSocketPort.toString());
+})
+
 /* Post variables:
 	* music-file (file)
 	* music-url

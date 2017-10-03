@@ -1,12 +1,17 @@
 var WebSocketHandler = (function() {
 	
 	function WebSocketHandler() {
-		this.setUp();
+		$.get({
+			url: '/api/wsport'
+		}).done(function(data) {
+			this.port = data;
+			this.setUp();
+		}.bind(this));
 	}
 
 	WebSocketHandler.prototype.setUp = function() {
 		try {
-			this.socket = new WebSocket('ws://' + window.location.hostname + ':3000');
+			this.socket = new WebSocket('ws://' + window.location.hostname + ':' + this.port);
 		} catch(err) {
 			this.reSetUp();
 			return;
