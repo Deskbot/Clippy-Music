@@ -48,16 +48,6 @@ function interpretInput() {
 
 			utils.deleteDirRecursiveSync(opt.storageDir);
 
-			//const dirs = consts.dirs;
-			//for (let key in dirs) {
-			//	try { utils.deleteDirRecursiveSync(dirs[key]) } catch(e) { console.error(e); }
-			//}
-
-			//const files = consts.files;
-			//for (let key in files) {
-			//	utils.deleteFileIfExistsSync(files[key]);
-			//}
-
 		} else if (arg === '-d' || arg === '--debug') {
 			debug.on();
 		} else if (arg === '--no-admin') {

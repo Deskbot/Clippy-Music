@@ -2,3 +2,4 @@ node_modules/
 npm-debug.log
 static/media/prop/*
 TODO.md
+.sublime*
