@@ -130,7 +130,7 @@ app.post('/api/nickname/set', recordUserMiddleware, (req, res) => {
 
 //POST variable: password, id
 app.post('/api/ban/add', (req, res) => {
-	if (AdminPassword.verify(req.fields.password)) {
+	if (PasswordServer.verify(req.fields.password)) {
 		if (UserRecordServer.isUser(req.fields.id)) {
 			UserRecordServer.addBan(req.fields.id);
 			ContentServer.purgeUser(req.fields.id);
@@ -148,7 +148,7 @@ app.post('/api/ban/add', (req, res) => {
 
 //POST variable: password, id
 app.post('/api/ban/remove', (req, res) => {
-	if (AdminPassword.verify(req.fields.password)) {
+	if (PasswordServer.verify(req.fields.password)) {
 		if (UserRecordServer.isBanned(req.fields.id)) {
 			UserRecordServer.removeBan(req.fields.id);
 			if (noRedirect(req)) res.status(200).end('Success\n');
@@ -164,7 +164,7 @@ app.post('/api/ban/remove', (req, res) => {
 
 //POST variable: password
 app.post('/api/content/kill', (req, res) => {
-	if (AdminPassword.verify(req.fields.password)) {
+	if (PasswordServer.verify(req.fields.password)) {
 		ContentServer.killCurrent();
 		res.status(200).end('Success\n');
 	} else {
