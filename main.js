@@ -11,33 +11,19 @@ main();
 //fin
 
 function main() {
-	const settings = interpretInput();
-
-	Promise.resolve()
-	.then(() => {
+	handleArguments().then(() => {
 		validateOptions();
-		if (settings.adminMode) return setUpAdmin();
-		return null;
-	})
-	.then(() => {
 		setUpDirs();
 		setUpServers();
 		setUpControls();
-	})
-	.catch(handleError);
+		
+	}).catch(handleError);
 }
 
-function validateOptions() {
-	if (typeof opt.timeout !== 'number') {
-		console.error('Error: "timeout" setting in options.js is not a number.');
-		process.exit(1);
-	}
-}
 
-function interpretInput() {
-	const vars = {
-		adminMode: true,
-	};
+function handleArguments() {
+	const promises = [];
+	let admin = true;
 
 	let arg;
 	for (let i = 2; i < process.argv.length; i++) { //skip the 2 initial arguments which are the path to node and the file path
@@ -51,11 +37,13 @@ function interpretInput() {
 		} else if (arg === '-d' || arg === '--debug') {
 			debug.on();
 		} else if (arg === '--no-admin') {
-			vars.adminMode = false;
+			admin = false;
 		}
 	}
 
-	return vars;
+	if (admin) promises.push(setUpAdmin());
+
+	return Promise.all(promises);
 }
 
 //get admin password if needed
@@ -126,6 +114,13 @@ function setUpControls() {
 
 function setUpServers() {
 	require('./serv/');//do them all just in case
+}
+
+function validateOptions() {
+	if (typeof opt.timeout !== 'number') {
+		console.error('Error: "timeout" setting in options.js is not a number.');
+		process.exit(1);
+	}
 }
 
 function handleError(err) {
