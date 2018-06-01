@@ -1,13 +1,13 @@
 module.exports = {
-	httpPort: 8080,
+	httpPort: 80,
 	webSocketPort: 3000,
 	timeout: 644,
 	storageDir: '/tmp/Clippy-Music-Tmp',
 	imageSizeLimit: 100000000,
 	musicSizeLimit: 400000000,
 	nicknameSizeLimit: 40,
-	uniqueCoolOff: Infinity,
-	streamYtOverDur: 1200, //20 minutes
+	uniqueCoolOff: 86400,
+	streamYtOverDur: 1200,
 };
 
 //password          = the admin password, null gives anyone access
