@@ -42,7 +42,7 @@ Run
 sudo node main.js
 ```
 
-You may have to run `sudo service apache2 stop` because the program serves the webpage on port 80, which is otherwise in use by Apache.
+If you intend to expose the web page on port 80 and have a web server installed such as Apache2, you may have to run `sudo service apache2 stop` or expose Clippy Music on a different port and [configure your server](https://wiwifos.blogspot.com/2017/09/apache2-port-rerouting.html) to reroute port 80 to Clippy Music's port.
 
 ### Options
 
