@@ -5,6 +5,7 @@ const ContentServer = require('./ContentServer.js');
 const UserRecServ = require('./UserRecordServer.js');
 
 const consts = require('../lib/consts.js');
+const utils = require('../lib/utils.js');
 
 //really a namespace where all functions are hoisted
 class Api {
@@ -166,10 +167,10 @@ ContentServer.on('queue-empty', () => {
 	}
 });
 
-ContentServer.on('queue-update', () => {
+ContentServer.on('queue-update', utils.throttle(consts.queueUpdateMaxFreq, () => {
 	lastQueueWasEmpty = false;
 	api.broadcastQueue();
-});
+}));
 
 ContentServer.on('queued', (contentInfo) => {
 	api.sendMessage(UserRecServ.getSockets(contentInfo.userId), 'upload', {

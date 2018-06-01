@@ -69,7 +69,7 @@ function parseForm(form, fields, files) {
 				stream: false,
 			},
 			pic: {
-				exists: null,
+				exists: false,
 				isUrl: null,
 				title: null,
 				path: null,

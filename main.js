@@ -17,7 +17,7 @@ function main() {
 		setUpServers();
 		setUpControls();
 		
-	}).catch(handleError);
+	}).catch(utils.reportError);
 }
 
 
@@ -121,8 +121,4 @@ function validateOptions() {
 		console.error('Error: "timeout" setting in options.js is not a number.');
 		process.exit(1);
 	}
-}
-
-function handleError(err) {
-	console.error(err);
 }

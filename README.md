@@ -35,13 +35,6 @@ cd Clippy-Music
 npm install
 ```
 
-Set Up
---------
-
-Clippy Music works out of the box.
-
-To customise the options you first ought to overwrite `options.js` with a copy of `default_options.js` before editing `options.js` because it is a symbolic link by default.
-
 Run
 ---
 
