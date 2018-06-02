@@ -303,6 +303,23 @@ app.post('/api/content/kill', (req, res) => {
 	}
 });
 
+//POST variable: password, id
+app.post('/api/user/penalise', (req, res) => {
+	if (!req.fields.id) {
+		res.status(400).end('User IP address not given.\n');
+		return;
+	}
+
+	if (!PasswordServer.verify(req.fields.password)) {
+		res.status(400).end('Admin password incorrect.\n');
+		return;
+	}
+
+	ContentServer.penalise(req.fields.id);
+	res.status(200).end('Success\n');
+});
+
+
 app.listen(opt.httpPort, (err) => {
 	if (err) throw err;
 
