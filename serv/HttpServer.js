@@ -194,6 +194,8 @@ const app = express();
 
 app.use('/', express.static(__dirname + '/../static/'));
 
+app.use('/admin', express.static(__dirname + '/../static/index.html'));
+
 app.get('/api/wsport', (req, res) => {
 	res.status(200).end(opt.webSocketPort.toString());
 })
