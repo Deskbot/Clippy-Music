@@ -132,7 +132,7 @@ input[type=password], input[type=text], input[type=url] {
 	height: 21px;
 	margin: 1px 0 2px 0;
 	padding: 1px 6px;
-	width: calc(100% - 14px);
+	width: 100%;
 }
 
 form {
@@ -190,7 +190,7 @@ button.file {
 }
 
 .file-upload {
-	height: 21px;
+	height: 23px;
 	margin: 4px auto 4px 0;
 	overflow: hidden;
 	padding: 1px;
@@ -255,6 +255,10 @@ legend {
 	background-color: #D6D3CE;
 	cursor: inherit;
 	padding: 0 2px;
+}
+
+#upload-media-button {
+	margin-top: -2px;
 }
 
 #currently-playing p {
