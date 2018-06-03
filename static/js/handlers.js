@@ -106,7 +106,7 @@ $uploadForm.submit(function(e) {
 	main.clippyAgent.play('Save');
 
 	$.ajax({
-		url: '/api/content/upload',
+		url: '/api/queue/add',
 		type: 'POST',
 		data: fd,
 		contentType: false,
@@ -194,7 +194,7 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 	//ajax
 
 	$.ajax({
-		url: '/api/content/remove',
+		url: '/api/queue/remove',
 		type: 'POST',
 		data: {
 			ajax: true,
