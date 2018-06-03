@@ -3,21 +3,24 @@
 	src: url('/media/Tahoma Wine.ttf');
 }
 
+*, *:before, *:after {
+	box-sizing: inherit;
+}
+
 html {
 	background-color: #3A69A1;
 	background: linear-gradient(0, #3A69A1 0%, #3A69A1 100%);
-	box-sizing: border-box;
 	cursor: default;
 	font-family: TahomaWine, Arial, Helvetica, Verdana, cursive;
 	font-size: 12px;
 	font-smooth: never;
 	-webkit-font-smoothing: none;
 	-webkit-touch-callout: none; /* iOS Safari */
-	  -webkit-user-select: none; /* Safari */
-	   -khtml-user-select: none; /* Konqueror HTML */
-		 -moz-user-select: none; /* Firefox */
-		  -ms-user-select: none; /* Internet Explorer/Edge */
-			  user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+	-webkit-user-select: none; /* Safari */
+	 -khtml-user-select: none; /* Konqueror HTML */
+	   -moz-user-select: none; /* Firefox */
+	    -ms-user-select: none; /* Internet Explorer/Edge */
+	        user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
 }
 
 html.progress {
@@ -29,14 +32,20 @@ html.progress #upload-section {
 }
 
 body {
-	margin: 1px;
+	overflow: hidden;
 }
 
-body::-webkit-scrollbar {
+main {
+	box-sizing: border-box;
+	height: 100vh;
+	overflow-y: scroll;
+}
+
+main::-webkit-scrollbar {
     background-image: url("/media/Scrollbar Background.png");
 }
 
-body::-webkit-scrollbar-button:single-button {
+main::-webkit-scrollbar-button:single-button {
 	background-color: #D6D3CE;
 	border-top:    1px solid #D6D3CE;
 	border-bottom: 1px solid #424142;
@@ -49,23 +58,23 @@ body::-webkit-scrollbar-button:single-button {
 	width: 16px;
 }
 
-body::-webkit-scrollbar-button:vertical:decrement {
+main::-webkit-scrollbar-button:vertical:decrement {
 	background-image: url("/media/Scrollbar Arrow Up.png");
 }
 
-body::-webkit-scrollbar-button:vertical:increment {
+main::-webkit-scrollbar-button:vertical:increment {
 	background-image: url("/media/Scrollbar Arrow Down.png");
 }
 
-body::-webkit-scrollbar-button:horizontal:decrement {
+main::-webkit-scrollbar-button:horizontal:decrement {
 	background-image: url("/media/Scrollbar Arrow Left.png");
 }
 
-body::-webkit-scrollbar-button:horizontal:increment {
+main::-webkit-scrollbar-button:horizontal:increment {
 	background-image: url("/media/Scrollbar Arrow Right.png");
 }
 
-body::-webkit-scrollbar-thumb {
+main::-webkit-scrollbar-thumb {
 	background-color: #D6D3CE;
 	border-top:    1px solid #D6D3CE;
 	border-bottom: 1px solid #424142;
@@ -114,7 +123,7 @@ button:focus, input:focus {
 	outline: none;
 }
 
-input[type=text], input[type=url] {
+input[type=password], input[type=text], input[type=url] {
 	border-top: 1px solid #424142;
 	border-left: 1px solid #424142;
 	border-right: 1px solid white;
@@ -123,14 +132,14 @@ input[type=text], input[type=url] {
 	height: 21px;
 	margin: 1px 0 2px 0;
 	padding: 1px 6px;
-	width: calc(100% - 14px);
+	width: 100%;
 }
 
 form {
 	cursor: inherit;
 }
 
-form button:focus, form input[type=submit]:focus, form input[type=file] button {
+form button:focus, .form button:focus, form input[type=submit]:focus, form input[type=file] button:focus {
 	outline: 1px solid black;
 }
 
@@ -181,8 +190,8 @@ button.file {
 }
 
 .file-upload {
-	height: 21px;
-	margin: 5px auto 5px 0;
+	height: 23px;
+	margin: 4px auto 4px 0;
 	overflow: hidden;
 	padding: 1px;
 	position: relative;
@@ -248,6 +257,10 @@ legend {
 	padding: 0 2px;
 }
 
+#upload-media-button {
+	margin-top: -2px;
+}
+
 #currently-playing p {
 	margin: 6px 0;
 	text-align: center;
@@ -262,8 +275,16 @@ legend {
 	padding: 6px 0 0 0;
 }
 
-#admin-section form {
+#admin-form {
     padding: 6px 0 0 0;
+}
+
+#admin-section fieldset {
+	padding-top: 4px;
+}
+
+button.action {
+	margin: 2px 0;
 }
 
 .bag.extra-pad {

@@ -31,7 +31,7 @@
 				<div class="section-borders">
 					<div class="handle">
 						<h2>Upload</h2>
-						<button class="x-button"></button>
+						<button class="x-button" tabindex="-1"></button>
 					</div>
 					<div class="bag">
 						<form id="upload-form" class="http" action="api/content/upload" method="POST" enctype="multipart/form-data">
@@ -39,33 +39,33 @@
 								<legend>Music</legend>
 
 								<div id="music-file-input-button" class="file-upload">
-									<button class="file" tabindex="1">Choose Music File</button>
+									<button class="file">Choose Music File</button>
 									<span class="file-name">No File Chosen</span>
-									<input type="file" id="music-file" name="music-file" accept="audio/*, video/*">
+									<input type="file" id="music-file" name="music-file" accept="audio/*, video/*" tabindex="-1">
 								</div>
 
 								<label>YouTube URL</label>
-								<input type="url" name="music-url" placeholder="" tabindex="2" autofocus>
+								<input type="url" name="music-url" autofocus>
 								<label>Start Time</label>
-								<input type="text" name="start-time" placeholder="Format is seconds or mm:ss or hh:mm:ss" tabindex="3">
+								<input type="text" name="start-time" placeholder="Format: seconds or mm:ss or hh:mm:ss">
 								<label>End Time</label>
-								<input type="text" name="end-time" placeholder="Format is seconds or mm:ss or hh:mm:ss" tabindex="4">
+								<input type="text" name="end-time" placeholder="Format: seconds or mm:ss or hh:mm:ss">
 							</fieldset>
 
 							<fieldset>
 								<legend>Optional Image Overlay</legend>
 
 								<div id="picture-file-input-button" class="file-upload">
-									<button class="file" tabindex="5">Choose Image File</button>
+									<button class="file">Choose Image File</button>
 									<span class="file-name">No File Chosen</span>
-									<input type="file" id="image-file" name="image-file" accept="image/*">
+									<input type="file" id="image-file" name="image-file" accept="image/*" tabindex="-1">
 								</div>
 								
 								<label>Image URL</label>
-								<input type="url" name="image-url" tabindex="7">
+								<input type="url" name="image-url">
 							</fieldset>
 							
-							<input type="submit" value="Upload Content" tabindex="8">
+							<input id="upload-media-button" type="submit" value="Upload Media">
 						</form>
 					</div>
 				</div>
@@ -76,7 +76,7 @@
 					<div class="section-borders">
 						<div class="handle">
 							<h2>No JavaScript</h2>
-							<button class="x-button"></button>
+							<button class="x-button" tabindex="-1"></button>
 						</div>
 						<div class="bag extra-pad">
 							<p>You do not have JavaScript active on this page. I respect your right to decide what code your computer executes, however you should note that some functionality will be disabled.</p>
@@ -98,7 +98,7 @@
 				<div class="section-borders">
 					<div class="handle">
 						<h2>Currently Playing</h2>
-						<button class="x-button"></button>
+						<button class="x-button" tabindex="-1"></button>
 					</div>
 					<div class="bag extra-pad">
 						<div id="currently-playing">
@@ -115,7 +115,7 @@
 				<div class="section-borders">
 					<div class="handle">
 						<h2>Queue</h2>
-						<button class="x-button"></button>
+						<button class="x-button" tabindex="-1"></button>
 					</div>
 					<div class="bag">
 						<div id="queue"></div>
@@ -127,7 +127,7 @@
 				<div class="section-borders">
 					<div class="handle">
 						<h2>Nickname (<span class="my-nickname"></span>)</h2>
-						<button class="x-button"></button>
+						<button class="x-button" tabindex="-1"></button>
 					</div>
 					<div class="bag">
 						<form id="nickname-form" class="ws" action="api/nickname/set" method="POST">
@@ -143,7 +143,7 @@
 				<div class="section-borders">
 					<div class="handle">
 						<h2>Admin Panel</h2>
-						<button class="x-button"></button>
+						<button class="x-button" tabindex="-1"></button>
 					</div>
 					<div class="bag">
 						<div id="admin-form" class="form">
@@ -189,7 +189,7 @@
 				<div class="section-borders">
 					<div class="handle">
 						<h2>Information</h2>
-						<button class="x-button"></button> 
+						<button class="x-button" tabindex="-1"></button> 
 					</div>
 					<div class="bag extra-pad">
 						<p>Your priority in the queue is affected by how much time you've spent playing music recently.</p>
