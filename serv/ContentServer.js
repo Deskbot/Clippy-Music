@@ -19,6 +19,6 @@ function play() {
 
 cm.on('end', play);
 
-cm.emit('end'); //kick start the cycle of checking for things
+cm.run();
 
 module.exports = cm;
