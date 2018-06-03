@@ -39,6 +39,8 @@ function getFormMiddleware(req, res, next) {
 			req.fields = fields;
 			req.files = files;
 
+			debug.log("fields", fields);
+
 			next();
 		}
 	});
@@ -194,6 +196,8 @@ const app = express();
 
 app.use('/', express.static(__dirname + '/../static/'));
 
+app.use('/admin', express.static(__dirname + '/../static/index.html'));
+
 app.get('/api/wsport', (req, res) => {
 	res.status(200).end(opt.webSocketPort.toString());
 })
@@ -206,7 +210,7 @@ app.get('/api/wsport', (req, res) => {
 	* start-time
 	* end-time
  */
-app.post('/api/content/upload', recordUserMiddleware, (req, res) => {
+app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 	handlePotentialBan(req.ip) //assumes ip address is userId
 	.then(() => getFileForm(req))
 	.then(utils.spread((form, fields, files) => { //nesting in order to get the scoping right
@@ -242,7 +246,7 @@ app.post('/api/content/upload', recordUserMiddleware, (req, res) => {
 app.use(getFormMiddleware);
 
 //POST variable: content-id
-app.post('/api/content/remove', (req, res) => {
+app.post('/api/queue/remove', (req, res) => {
 	if (!ContentServer.remove(req.ip, parseInt(req.fields['content-id']))) {
 		res.status(400).end('The queue item you tried to remove was not chosen by you.');
 	} else {
@@ -259,48 +263,127 @@ app.post('/api/nickname/set', recordUserMiddleware, (req, res) => {
 	else                 res.redirect('/');
 });
 
-//POST variable: password, id
+//POST variable: password, id, nickname
 app.post('/api/ban/add', (req, res) => {
-	if (PasswordServer.verify(req.fields.password)) {
-		if (UserRecordServer.isUser(req.fields.id)) {
+	if (!PasswordServer.verify(req.fields.password)) {
+		res.status(400).end('Admin password incorrect.\n');
+		return;
+	}
+
+	if (req.fields.id) {
+		if (!UserRecordServer.isUser(req.fields.id)) {
+			res.status(400).end('That user doesn\'t exist.\n');
+			return;
+
+		} else {
 			UserRecordServer.addBan(req.fields.id);
 			ContentServer.purgeUser(req.fields.id);
 			if (noRedirect(req)) res.status(200).end('Success\n');
 			else                 res.redirect('/');
+		}
+
+	} else if (req.fields.nickname) {
+		const uids = UserRecordServer.whoHasNickname(req.fields.nickname);
+		
+		if (uids.length === 0) {
+			res.status(400).end('That user doesn\'t exist.\n');
+			return;
 
 		} else {
-			res.status(400).end('That user doesn\'t exist.\n');
+			uids.forEach((id) => {
+				UserRecordServer.addBan(id);
+				ContentServer.purgeUser(id);
+			});
+			
+			if (noRedirect(req)) res.status(200).end('Success\n');
+			else                 res.redirect('/');
 		}
-		
+
 	} else {
-		res.status(400).end('Admin password incorrect.\n');
+		res.status(400).end('User not specified.\n');
 	}
 });
 
 //POST variable: password, id
 app.post('/api/ban/remove', (req, res) => {
-	if (PasswordServer.verify(req.fields.password)) {
-		if (UserRecordServer.isBanned(req.fields.id)) {
+	if (!PasswordServer.verify(req.fields.password)) {
+		res.status(400).end('Admin password incorrect.\n');
+		return;
+	}
+
+	if (req.fields.id) {
+		if (!UserRecordServer.isUser(req.fields.id)) {
+			res.status(400).end('That user doesn\'t exist.\n');
+			return;
+
+		} else {
 			UserRecordServer.removeBan(req.fields.id);
 			if (noRedirect(req)) res.status(200).end('Success\n');
 			else                 res.redirect('/');
+		}
+
+	} else if (req.fields.nickname) {
+		const uids = UserRecordServer.whoHasNickname(req.fields.nickname);
+		if (uids.length === 0) {
+			res.status(400).end('That user doesn\'t exist.\n');
+			return;
 
 		} else {
-			res.status(400).end('That user is not banned.\n');
+			uids.forEach((id) => {
+				UserRecordServer.removeBan(id);
+			});
+			
+			if (noRedirect(req)) res.status(200).end('Success\n');
+			else                 res.redirect('/');
 		}
+
 	} else {
-		res.status(400).end('Admin password incorrect.\n');
+		res.status(400).end('User not specified.\n');
 	}
 });
 
 //POST variable: password
-app.post('/api/content/kill', (req, res) => {
+app.post('/api/skip', (req, res) => {
 	if (PasswordServer.verify(req.fields.password)) {
 		ContentServer.killCurrent();
 		res.status(200).end('Success\n');
 	} else {
 		res.status(400).end('Admin password incorrect.\n');
 	}
+});
+
+//POST variable: password
+app.post('/api/skipAndPenalise', (req, res) => {
+	if (!PasswordServer.verify(req.fields.password)) {
+		res.status(400).end('Admin password incorrect.\n');
+		return;
+	}
+
+	if (ContentServer.currentlyPlaying) {
+		ContentServer.penalise(ContentServer.currentlyPlaying.userId);
+	}
+
+	ContentServer.killCurrent();
+	
+	res.status(200).end('Success\n');
+});
+
+//POST variable: password
+app.post('/api/skipAndBan', (req, res) => {
+	if (!PasswordServer.verify(req.fields.password)) {
+		res.status(400).end('Admin password incorrect.\n');
+		return;
+	}
+
+	if (ContentServer.currentlyPlaying) {
+		const id = ContentServer.currentlyPlaying.userId;
+		UserRecordServer.addBan(id);
+		ContentServer.purgeUser(id);
+	}
+
+	ContentServer.killCurrent();
+
+	res.status(200).end('Success\n');
 });
 
 app.listen(opt.httpPort, (err) => {

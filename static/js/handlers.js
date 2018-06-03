@@ -1,3 +1,4 @@
+var $banUserFields = $('#ban-form').add('#un-ban-form');
 var $fileInput = $('input[type=file]');
 var $section = $('section');
 var $uploadForm = $('#upload-form');
@@ -106,7 +107,7 @@ $uploadForm.submit(function(e) {
 	main.clippyAgent.play('Save');
 
 	$.ajax({
-		url: '/api/content/upload',
+		url: '/api/queue/add',
 		type: 'POST',
 		data: fd,
 		contentType: false,
@@ -194,7 +195,7 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 	//ajax
 
 	$.ajax({
-		url: '/api/content/remove',
+		url: '/api/queue/remove',
 		type: 'POST',
 		data: {
 			ajax: true,
@@ -230,6 +231,143 @@ $currentlyPlaying.on('dblclick', '.wordart', function() {
 
 $currentlyPlaying.on('dblclick', '.no-wordart', function() {
 	$(this).removeClass('no-wordart').addClass('wordart');
+});
+
+$('#skip-button').click(function() {
+	$.ajax({
+		url: '/api/skip',
+		type: 'POST',
+		data: {
+			ajax: true,
+			password: $('#admin-password-input').val()
+		}
+
+	}).done(function() {
+		main.clippyAgent.play('Congratulate');
+
+	}).fail(function(jqXHR, textStatus, err) {
+		main.clippyAgent.speak(jqXHR.responseText);
+	});
+});
+
+$('#skip-penalise-button').click(function() {
+	$.ajax({
+		url: '/api/skipAndPenalise',
+		type: 'POST',
+		data: {
+			ajax: true,
+			password: $('#admin-password-input').val()
+		}
+
+	}).done(function() {
+		main.clippyAgent.play('Congratulate');
+
+	}).fail(function(jqXHR, textStatus, err) {
+		main.clippyAgent.speak(jqXHR.responseText);
+	});
+});
+
+$('#skip-ban-button').click(function() {
+	$.ajax({
+		url: '/api/skipAndBan',
+		type: 'POST',
+		data: {
+			ajax: true,
+			password: $('#admin-password-input').val()
+		}
+
+	}).done(function() {
+		main.clippyAgent.play('Congratulate');
+
+	}).fail(function(jqXHR, textStatus, err) {
+		main.clippyAgent.speak(jqXHR.responseText);
+	});
+});
+
+$('#ban-form').submit(function(e) {
+	e.preventDefault();
+
+	var $this = $(this);
+
+	var id = $this.find('input[name=id]').val();
+	var nickname = $this.find('input[name=nickname]').val();
+
+	$.ajax({
+		url: '/api/ban/add',
+		type: 'POST',
+		data: {
+			ajax: true,
+			id: id,
+			password: $('#admin-password-input').val(),
+			nickname: nickname
+		}
+
+	}).done(function() {
+		$this.find('input').attr('disabled', false);
+		$this.find('input[type=text]').val(null);
+		main.clippyAgent.play('Congratulate');
+
+		var bannedName = id == '' ? nickname : id;
+		main.clippyAgent.speak(bannedName + ' is now banned.');
+
+	}).fail(function(jqXHR, textStatus, err) {
+		main.clippyAgent.speak(jqXHR.responseText);
+	});
+});
+
+$('#un-ban-form').submit(function(e) {
+	e.preventDefault();
+
+	var $this = $(this);
+
+	var id = $this.find('input[name=id]').val();
+	var nickname = $this.find('input[name=nickname]').val();
+
+	$.ajax({
+		url: '/api/ban/remove',
+		type: 'POST',
+		data: {
+			ajax: true,
+			id: id,
+			password: $('#admin-password-input').val(),
+			nickname: nickname
+		}
+
+	}).done(function() {
+		$this.find('input').attr('disabled', false);
+		$this.find('input[type=text]').val(null);
+		main.clippyAgent.play('Congratulate');
+
+		var bannedName = id == '' ? nickname : id;
+		main.clippyAgent.speak(bannedName + ' is no longer banned.');
+
+	}).fail(function(jqXHR, textStatus, err) {
+		main.clippyAgent.speak(jqXHR.responseText);
+	});
+});
+
+$banUserFields.find('[name=id]').keyup(function() {
+	var $this = $(this);
+	var $pairedField = $this.siblings('[name=nickname]');
+	if ($this.val() != '') {
+		$pairedField.attr('disabled', true);
+	} else {
+		$pairedField.attr('disabled', false);
+	}
+});
+
+$banUserFields.find('[name=nickname]').keyup(function() {
+	var $this = $(this);
+	var $pairedField = $this.siblings('[name=id]');
+	if ($this.val() != '') {
+		$pairedField.attr('disabled', true);
+	} else {
+		$pairedField.attr('disabled', false);
+	}
+});
+
+$('button').click(function(e) {
+	e.preventDefault();
 });
 
 window.onbeforeunload = function() {

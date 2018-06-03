@@ -54,6 +54,12 @@ var positionSections = (function() {
 	}
 })();
 
+function maybeShowAdminPanel() {
+	if (window.location.href.includes("admin")) {
+		$('#admin-section').removeClass('hidden');
+	}
+}
+
 function setKonamiCode() {
 	var easterEgg = new Konami();
 	easterEgg.code = partyMode;
@@ -101,6 +107,7 @@ $(document).ready(function() {
 	})
 	.then(function() {
 		main.webSocketHandler = new WebSocketHandler();
+		maybeShowAdminPanel();
 		setKonamiCode();
 	})
 	.catch(function(err) {

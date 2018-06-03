@@ -85,6 +85,7 @@
 								<li>If there is some problem with the upload, you will not be notified.</li>
 								<li>The "Currently Playing" and "Queue" applications will not work.</li>
 								<li>You can not move the application windows around.</li>
+								<li>The admin panel will not work.</li>
 								<li>You will not be able to interact with Clippit, the music server assistant.</li>
 							</ul>
 							<p>You may be inclined to use the <a href="https://github.com/Deskbot/Clippy-Music/blob/master/README.md#user-api">API</a>.</p>
@@ -134,6 +135,52 @@
 							<input type="text" name="nickname">
 							<input type="submit">
 						</form>
+					</div>
+				</div>
+			</section>
+
+			<section id="admin-section" class="hidden">
+				<div class="section-borders">
+					<div class="handle">
+						<h2>Admin Panel</h2>
+						<button class="x-button"></button>
+					</div>
+					<div class="bag">
+						<div id="admin-form" class="form">
+							<label>Admin Password</label>
+							<input id="admin-password-input" type="password" name="password" placeholder="Required for this window to operate.">
+
+							<fieldset>
+								<legend>Controls</legend>
+								<button id="skip-button" class="action">Skip Current Music</button>
+								<br>
+								<button id="skip-penalise-button" class="action">Skip Current Music + Put User to Back of Queue</button>
+								<br>
+								<button id="skip-ban-button" class="action">Skip Current Music + Ban User</button>
+							</fieldset>
+
+							<fieldset id="ban-form">
+								<legend>Ban User</legend>
+								<form>	
+									<label>IP Address</label>
+									<input type="text" name="id">
+									<label>Nickname</label>
+									<input type="text" name="nickname" placeholder="Will ban all with this nickname.">
+									<input type="submit" value="Ban">
+								</form>
+							</fieldset>
+
+							<fieldset id="un-ban-form">
+								<legend>Un-Ban User</legend>
+								<form>
+									<label>IP Address</label>
+									<input type="text" name="id">
+									<label>Nickname</label>
+									<input type="text" name="nickname" placeholder="Will un-ban all with this nickname.">
+									<input type="submit" value="Un-Ban">
+								</form>
+							</fieldset>
+						</div>
 					</div>
 				</div>
 			</section>
