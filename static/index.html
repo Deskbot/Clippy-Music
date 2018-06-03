@@ -142,41 +142,45 @@
 			<section id="admin-section" class="hidden">
 				<div class="section-borders">
 					<div class="handle">
-						<h2>Admin</h2>
+						<h2>Admin Panel</h2>
 						<button class="x-button"></button>
 					</div>
 					<div class="bag">
-						<form>
+						<div id="admin-form" class="form">
 							<label>Admin Password</label>
-							<input type="password" name="password">
+							<input id="admin-password-input" type="password" name="password" placeholder="Required for this window to operate.">
 
 							<fieldset>
 								<legend>Controls</legend>
-								<button>Skip Current Music</button>
+								<button id="skip-button" class="action">Skip Current Music</button>
 								<br>
-								<button>Skip Current Music + Put User to Back of Queue</button>
+								<button id="skip-penalise-button" class="action">Skip Current Music + Put User to Back of Queue</button>
 								<br>
-								<button>Skip Current Music + Ban User</button>
+								<button id="skip-ban-button" class="action">Skip Current Music + Ban User</button>
 							</fieldset>
 
-							<fieldset>
+							<fieldset id="ban-form">
 								<legend>Ban User</legend>
-								<label>IP Address</label>
-								<input type="text" name="id">
-								<label>Nickname</label>
-								<input type="text" name="nickname" placeholder="Will ban all with this nickaname.">
-								<button class="submit">Ban</button>
+								<form>	
+									<label>IP Address</label>
+									<input type="text" name="id">
+									<label>Nickname</label>
+									<input type="text" name="nickname" placeholder="Will ban all with this nickname.">
+									<input type="submit" value="Ban">
+								</form>
 							</fieldset>
 
-							<fieldset>
+							<fieldset id="un-ban-form">
 								<legend>Un-Ban User</legend>
-								<label>IP Address</label>
-								<input type="text" name="id">
-								<label>Nickname</label>
-								<input type="text" name="nickname" placeholder="Will un-ban all with this nickaname.">
-								<button class="submit">Un-Ban</button>
+								<form>
+									<label>IP Address</label>
+									<input type="text" name="id">
+									<label>Nickname</label>
+									<input type="text" name="nickname" placeholder="Will un-ban all with this nickname.">
+									<input type="submit" value="Un-Ban">
+								</form>
 							</fieldset>
-						</form>
+						</div>
 					</div>
 				</div>
 			</section>

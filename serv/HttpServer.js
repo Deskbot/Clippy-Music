@@ -39,6 +39,8 @@ function getFormMiddleware(req, res, next) {
 			req.fields = fields;
 			req.files = files;
 
+			debug.log("fields", fields);
+
 			next();
 		}
 	});
@@ -282,6 +284,7 @@ app.post('/api/ban/add', (req, res) => {
 
 	} else if (req.fields.nickname) {
 		const uids = UserRecordServer.whoHasNickname(req.fields.nickname);
+		
 		if (uids.length === 0) {
 			res.status(400).end('That user doesn\'t exist.\n');
 			return;
