@@ -61,7 +61,7 @@ function noRedirect(req) {
 	return req.fields.ajax || req.headers['user-agent'].includes('curl');
 }
 
-function parseForm(form, fields, files) {
+function parseUploadForm(form, fields, files) {
 	return new Promise((resolve, reject) => {
 		const uploadInfo = {
 			music: {
@@ -200,7 +200,7 @@ app.use('/admin', express.static(__dirname + '/../static/index.html'));
 
 app.get('/api/wsport', (req, res) => {
 	res.status(200).end(opt.webSocketPort.toString());
-})
+});
 
 /* Post variables:
 	* music-file (file)
@@ -214,7 +214,7 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 	handlePotentialBan(req.ip) //assumes ip address is userId
 	.then(() => getFileForm(req))
 	.then(utils.spread((form, fields, files) => { //nesting in order to get the scoping right
-		return parseForm(form, fields, files)
+		return parseUploadForm(form, fields, files)
 		.then((uplData) => {
 			uplData.userId = req.ip;
 			return ContentServer.add(uplData); //ContentServer.add would lose "this" keyword if passed as a function instead of within a lambda
