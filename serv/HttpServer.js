@@ -261,37 +261,81 @@ app.post('/api/nickname/set', recordUserMiddleware, (req, res) => {
 	else                 res.redirect('/');
 });
 
-//POST variable: password, id
+//POST variable: password, id, nickname
 app.post('/api/ban/add', (req, res) => {
-	if (PasswordServer.verify(req.fields.password)) {
-		if (UserRecordServer.isUser(req.fields.id)) {
+	if (!PasswordServer.verify(req.fields.password)) {
+		res.status(400).end('Admin password incorrect.\n');
+		return;
+	}
+
+	if (req.fields.id) {
+		if (!UserRecordServer.isUser(req.fields.id)) {
+			res.status(400).end('That user doesn\'t exist.\n');
+			return;
+
+		} else {
 			UserRecordServer.addBan(req.fields.id);
 			ContentServer.purgeUser(req.fields.id);
 			if (noRedirect(req)) res.status(200).end('Success\n');
 			else                 res.redirect('/');
+		}
+
+	} else if (req.fields.nickname) {
+		const uids = UserRecordServer.whoHasNickname(req.fields.nickname);
+		if (uids.length === 0) {
+			res.status(400).end('That user doesn\'t exist.\n');
+			return;
 
 		} else {
-			res.status(400).end('That user doesn\'t exist.\n');
+			uids.forEach((id) => {
+				UserRecordServer.addBan(id);
+				ContentServer.purgeUser(id);
+			});
+			
+			if (noRedirect(req)) res.status(200).end('Success\n');
+			else                 res.redirect('/');
 		}
-		
+
 	} else {
-		res.status(400).end('Admin password incorrect.\n');
+		res.status(400).end('User not specified.\n');
 	}
 });
 
 //POST variable: password, id
 app.post('/api/ban/remove', (req, res) => {
-	if (PasswordServer.verify(req.fields.password)) {
-		if (UserRecordServer.isBanned(req.fields.id)) {
+	if (!PasswordServer.verify(req.fields.password)) {
+		res.status(400).end('Admin password incorrect.\n');
+		return;
+	}
+
+	if (req.fields.id) {
+		if (!UserRecordServer.isUser(req.fields.id)) {
+			res.status(400).end('That user doesn\'t exist.\n');
+			return;
+
+		} else {
 			UserRecordServer.removeBan(req.fields.id);
 			if (noRedirect(req)) res.status(200).end('Success\n');
 			else                 res.redirect('/');
+		}
+
+	} else if (req.fields.nickname) {
+		const uids = UserRecordServer.whoHasNickname(req.fields.nickname);
+		if (uids.length === 0) {
+			res.status(400).end('That user doesn\'t exist.\n');
+			return;
 
 		} else {
-			res.status(400).end('That user is not banned.\n');
+			uids.forEach((id) => {
+				UserRecordServer.removeBan(id);
+			});
+			
+			if (noRedirect(req)) res.status(200).end('Success\n');
+			else                 res.redirect('/');
 		}
+
 	} else {
-		res.status(400).end('Admin password incorrect.\n');
+		res.status(400).end('User not specified.\n');
 	}
 });
 
