@@ -316,8 +316,9 @@ button.action {
 }
 
 .bag {
-	padding: 0 12px 6px 12px;
 	display: block;
+	overflow: hidden;
+	padding: 0 12px 6px 12px;
 }
 
 .bucket {
