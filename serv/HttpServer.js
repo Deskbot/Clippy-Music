@@ -257,7 +257,7 @@ app.post('/api/queue/remove', (req, res) => {
 
 //POST variable: nickname
 app.post('/api/nickname/set', recordUserMiddleware, (req, res) => {
-	UserRecordServer.setNickname(req.ip, Html5Entities.encode(req.fields.nickname.substr(0, opt.nicknameSizeLimit)));
+	UserRecordServer.setNickname(req.ip, utils.sanitiseNickname(req.fields.nickname));
 	
 	if (noRedirect(req)) res.status(200).end('Success\n');
 	else                 res.redirect('/');
@@ -283,7 +283,7 @@ app.post('/api/ban/add', (req, res) => {
 		}
 
 	} else if (req.fields.nickname) {
-		const uids = UserRecordServer.whoHasNickname(req.fields.nickname);
+		const uids = UserRecordServer.whoHasNickname(utils.sanitiseNickname(req.fields.nickname));
 		
 		if (uids.length === 0) {
 			res.status(400).end('That user doesn\'t exist.\n');
@@ -323,7 +323,7 @@ app.post('/api/ban/remove', (req, res) => {
 		}
 
 	} else if (req.fields.nickname) {
-		const uids = UserRecordServer.whoHasNickname(req.fields.nickname);
+		const uids = UserRecordServer.whoHasNickname(utils.sanitiseNickname(req.fields.nickname));
 		if (uids.length === 0) {
 			res.status(400).end('That user doesn\'t exist.\n');
 			return;
