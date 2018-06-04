@@ -225,7 +225,7 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 
 		if ($bucket.children().length === 0) $bucket.parentsUntil('.bucket-container').parent().remove();
 
-	}).fail(function(jqXHR, textStatus, err) {
+	}).fail(function(jqxhr, textStatus, err) {
 		if (jqxhr.status >= 500 && jqxhr.status < 600) {
 			main.clippyAgent.speak('The server encountered an error trying to queue your media. Check the console and contact the developer.');
 			console.error(jqxhr.responseText);
@@ -264,7 +264,7 @@ $('#skip-button').click(function() {
 	}).done(function() {
 		main.clippyAgent.play('Congratulate');
 
-	}).fail(function(jqXHR, textStatus, err) {
+	}).fail(function(jqxhr, textStatus, err) {
 		main.clippyAgent.stop();
 
 		if (jqxhr.status >= 500 && jqxhr.status < 600) {
@@ -288,7 +288,7 @@ $('#skip-penalise-button').click(function() {
 	}).done(function() {
 		main.clippyAgent.play('Congratulate');
 
-	}).fail(function(jqXHR, textStatus, err) {
+	}).fail(function(jqxhr, textStatus, err) {
 		main.clippyAgent.stop();
 
 		if (jqxhr.status >= 500 && jqxhr.status < 600) {
@@ -312,7 +312,7 @@ $('#skip-ban-button').click(function() {
 	}).done(function() {
 		main.clippyAgent.play('Congratulate');
 
-	}).fail(function(jqXHR, textStatus, err) {
+	}).fail(function(jqxhr, textStatus, err) {
 		main.clippyAgent.stop();
 
 		if (jqxhr.status >= 500 && jqxhr.status < 600) {
@@ -350,7 +350,7 @@ $('#ban-form').submit(function(e) {
 		var bannedName = id == '' ? nickname : id;
 		main.clippyAgent.speak(bannedName + ' is now banned.');
 
-	}).fail(function(jqXHR, textStatus, err) {
+	}).fail(function(jqxhr, textStatus, err) {
 		main.clippyAgent.stop();
 
 		if (jqxhr.status >= 500 && jqxhr.status < 600) {
@@ -388,7 +388,7 @@ $('#un-ban-form').submit(function(e) {
 		var bannedName = id == '' ? nickname : id;
 		main.clippyAgent.speak(bannedName + ' is no longer banned.');
 
-	}).fail(function(jqXHR, textStatus, err) {
+	}).fail(function(jqxhr, textStatus, err) {
 		main.clippyAgent.stop();
 
 		if (jqxhr.status >= 500 && jqxhr.status < 600) {
