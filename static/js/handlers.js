@@ -162,10 +162,9 @@ $('#nickname-form').submit(function(e) {
 		main.clippyAgent.speak('Your nickname has been changed.');
 
 	}).fail(function(jqxhr, textStatus, err) {
-		console.log(jqxhr.responseText);
 		main.clippyAgent.stop();
+		main.clippyAgent.speak(jqxhr.responseText);
 		main.clippyAgent.play('CheckingSomething');
-		main.clippyAgent.speak('There was some kind of error with your nickname request. Check the console for details and tell the dev.');
 	
 	}).always(function() {
 		$nicknameField.val('').attr('disabled', false);

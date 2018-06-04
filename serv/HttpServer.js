@@ -257,7 +257,14 @@ app.post('/api/queue/remove', (req, res) => {
 
 //POST variable: nickname
 app.post('/api/nickname/set', recordUserMiddleware, (req, res) => {
-	UserRecordServer.setNickname(req.ip, utils.sanitiseNickname(req.fields.nickname));
+	const nickname = utils.sanitiseNickname(req.fields.nickname);
+
+	if (nickname.length === 0) {
+		res.status(400).end('Empty nicknames are not allowed.');
+		return;
+	}
+
+	UserRecordServer.setNickname(req.ip, nickname);
 	
 	if (noRedirect(req)) res.status(200).end('Success\n');
 	else                 res.redirect('/');
