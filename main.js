@@ -1,10 +1,23 @@
 const fs = require('fs');
+const prompt = require('prompt');
 const readline = require('readline');
 
 const consts = require('./lib/consts.js');
 const debug = require('./lib/debug.js');
 const opt = require('./options.js');
 const utils = require('./lib/utils.js');
+
+const ContentServer = require('./serv/ContentServer.js');
+const PasswordServer = require('./serv/PasswordServer.js');
+const UserRecordServer = require('./serv/UserRecordServer.js');
+
+//prompt settings
+prompt.colors = false;
+prompt.message = '';
+prompt.delimiter = '';
+const promptOpts = {
+	noHandleSIGINT: true,
+}
 
 main();
 
@@ -20,6 +33,34 @@ function main() {
 	}).catch(utils.reportError);
 }
 
+function chooseAdminPassword() {
+	return new Promise((resolve, reject) => {
+		prompt.start(promptOpts);
+
+		prompt.get([{
+			name: 'password1',
+			message: 'Set Admin Password (hidden) (1/2): ',
+			hidden: true,
+			required: true,
+		},{
+			name: 'password2',
+			message: 'Verify Admin Password (hidden) (2/2): ',
+			hidden: true,
+			required: true,
+		
+		}], function(err, result) {
+			if (err) return reject(err);
+
+			if (result.password1 === result.password2) {
+				resolve(result.password1);
+				
+			} else {
+				console.log('Passwords did not match. Try again.');
+				resolve(Api.choose());
+			}
+		});
+	});
+}
 
 function handleArguments() {
 	const promises = [];
@@ -48,14 +89,10 @@ function handleArguments() {
 
 //get admin password if needed
 function setUpAdmin() {
-	const PasswordServer = require('./serv/PasswordServer.js');
-
-	return PasswordServer.choose()
-
+	return chooseAdminPassword()
 	.then((pass) => {
 		PasswordServer.set(pass);
 	})
-
 	.catch((err) => {
 		console.error('Unable to get admin password');
 		console.error(err);
@@ -73,9 +110,6 @@ function setUpDirs() {
 }
 
 function setUpControls() {
-	const ContentServer = require('./serv/ContentServer.js');
-	const UserRecordServer = require('./serv/UserRecordServer.js');
-
 	//when this is about to be killed
 	process.on('SIGINT', () => {
 		console.log('Closing down Clippy-Music.');
