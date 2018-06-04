@@ -15,6 +15,16 @@ const utils = require('../lib/utils.js');
 
 const YTError = require('../lib/err/YTError.js');
 
+function adminMiddleware(req, res, next) {
+	if (!PasswordServer.isSet()) {
+		res.status(400).end('The admin controls can not be used because no admin password was set.\n');
+	} else if (!PasswordServer.get().verify(req.fields.password)) {
+		res.status(400).end('Admin password incorrect.\n');
+	} else {
+		next();
+	}
+}
+
 function getFileForm(req) {
 	return new Promise((resolve, reject) => {
 		const form = new formidable.IncomingForm();
@@ -270,13 +280,10 @@ app.post('/api/nickname/set', recordUserMiddleware, (req, res) => {
 	else                 res.redirect('/');
 });
 
+app.use(adminMiddleware);
+
 //POST variable: password, id, nickname
 app.post('/api/ban/add', (req, res) => {
-	if (!PasswordServer.verify(req.fields.password)) {
-		res.status(400).end('Admin password incorrect.\n');
-		return;
-	}
-
 	if (req.fields.id) {
 		if (!UserRecordServer.isUser(req.fields.id)) {
 			res.status(400).end('That user doesn\'t exist.\n');
@@ -313,11 +320,6 @@ app.post('/api/ban/add', (req, res) => {
 
 //POST variable: password, id
 app.post('/api/ban/remove', (req, res) => {
-	if (!PasswordServer.verify(req.fields.password)) {
-		res.status(400).end('Admin password incorrect.\n');
-		return;
-	}
-
 	if (req.fields.id) {
 		if (!UserRecordServer.isUser(req.fields.id)) {
 			res.status(400).end('That user doesn\'t exist.\n');
@@ -351,12 +353,8 @@ app.post('/api/ban/remove', (req, res) => {
 
 //POST variable: password
 app.post('/api/skip', (req, res) => {
-	if (PasswordServer.verify(req.fields.password)) {
-		ContentServer.killCurrent();
-		res.status(200).end('Success\n');
-	} else {
-		res.status(400).end('Admin password incorrect.\n');
-	}
+	ContentServer.killCurrent();
+	res.status(200).end('Success\n');
 });
 
 //POST variable: password

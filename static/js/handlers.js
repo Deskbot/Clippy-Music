@@ -1,3 +1,4 @@
+var $adminPasswordInput = $('#admin-password-input');
 var $banUserFields = $('#ban-form').add('#un-ban-form');
 var $fileInput = $('input[type=file]');
 var $section = $('section');
@@ -265,12 +266,22 @@ $currentlyPlaying.on('dblclick', '.no-wordart', function() {
 });
 
 $('#skip-button').click(function() {
+	var adminPassword = $adminPasswordInput.val();
+
+	//no empty password
+	if (!adminPassword) {
+		main.clippyAgent.stop();
+		main.clippyAgent.speak('You need to give the admin password.');
+		main.clippyAgent.play('Searching');
+		return;
+	}
+
 	$.ajax({
 		url: '/api/skip',
 		type: 'POST',
 		data: {
 			ajax: true,
-			password: $('#admin-password-input').val()
+			password: adminPassword
 		}
 
 	}).done(function() {
@@ -288,13 +299,23 @@ $('#skip-button').click(function() {
 	});
 });
 
-$('#skip-penalise-button').click(function() {
+$('#skip-penalise-button').click(function(e) {
+	var adminPassword = $('#admin-password-input').val();
+
+	//no empty password
+	if (adminPassword) {
+		main.clippyAgent.stop();
+		main.clippyAgent.speak('You need to give the admin password.');
+		main.clippyAgent.play('Searching');
+		return;
+	}
+
 	$.ajax({
 		url: '/api/skipAndPenalise',
 		type: 'POST',
 		data: {
 			ajax: true,
-			password: $('#admin-password-input').val()
+			password: adminPassword
 		}
 
 	}).done(function() {
@@ -313,12 +334,22 @@ $('#skip-penalise-button').click(function() {
 });
 
 $('#skip-ban-button').click(function() {
+	var adminPassword = $adminPasswordInput.val();
+
+	//no empty password
+	if (!adminPassword) {
+		main.clippyAgent.stop();
+		main.clippyAgent.speak('You need to give the admin password.');
+		main.clippyAgent.play('Searching');
+		return;
+	}
+
 	$.ajax({
 		url: '/api/skipAndBan',
 		type: 'POST',
 		data: {
 			ajax: true,
-			password: $('#admin-password-input').val()
+			password: adminPassword
 		}
 
 	}).done(function() {
@@ -339,6 +370,16 @@ $('#skip-ban-button').click(function() {
 $('#ban-form').submit(function(e) {
 	e.preventDefault();
 
+	var adminPassword = $adminPasswordInput.val();
+
+	//no empty password
+	if (!adminPassword) {
+		main.clippyAgent.stop();
+		main.clippyAgent.speak('You need to give the admin password.');
+		main.clippyAgent.play('Searching');
+		return;
+	}
+
 	var $this = $(this);
 
 	var id = $this.find('input[name=id]').val();
@@ -350,7 +391,7 @@ $('#ban-form').submit(function(e) {
 		data: {
 			ajax: true,
 			id: id,
-			password: $('#admin-password-input').val(),
+			password: adminPassword,
 			nickname: nickname
 		}
 
@@ -377,6 +418,16 @@ $('#ban-form').submit(function(e) {
 $('#un-ban-form').submit(function(e) {
 	e.preventDefault();
 
+	var adminPassword = $adminPasswordInput.val();
+
+	//no empty password
+	if (!adminPassword) {
+		main.clippyAgent.stop();
+		main.clippyAgent.speak('You need to give the admin password.');
+		main.clippyAgent.play('Searching');
+		return;
+	}
+
 	var $this = $(this);
 
 	var id = $this.find('input[name=id]').val();
@@ -388,7 +439,7 @@ $('#un-ban-form').submit(function(e) {
 		data: {
 			ajax: true,
 			id: id,
-			password: $('#admin-password-input').val(),
+			password: adminPassword,
 			nickname: nickname
 		}
 
