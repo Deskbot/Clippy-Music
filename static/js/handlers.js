@@ -119,7 +119,14 @@ $uploadForm.submit(function(e) {
 
 	}).fail(function(jqxhr, textStatus, err) {
 		main.clippyAgent.stop();
-		main.clippyAgent.speak(jqxhr.responseText);
+
+		if (jqxhr.status >= 500 && jqxhr.status < 600) {
+			main.clippyAgent.speak('The server encountered an error trying to queue your media. Check the console and contact the developer.');
+			console.error(jqxhr.responseText);
+		} else {
+			main.clippyAgent.speak(jqxhr.responseText);
+		}
+
 		main.clippyAgent.play('GetArtsy');
 	
 	}).always(function() {
@@ -163,7 +170,14 @@ $('#nickname-form').submit(function(e) {
 
 	}).fail(function(jqxhr, textStatus, err) {
 		main.clippyAgent.stop();
-		main.clippyAgent.speak(jqxhr.responseText);
+
+		if (jqxhr.status >= 500 && jqxhr.status < 600) {
+			main.clippyAgent.speak('The server encountered an error trying to change your nickname. Check the console and contact the developer.');
+			console.error(jqxhr.responseText);
+		} else {
+			main.clippyAgent.speak(jqxhr.responseText);
+		}
+
 		main.clippyAgent.play('CheckingSomething');
 	
 	}).always(function() {
@@ -212,10 +226,16 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 		if ($bucket.children().length === 0) $bucket.parentsUntil('.bucket-container').parent().remove();
 
 	}).fail(function(jqXHR, textStatus, err) {
-		if (jqXHR.status === 500) {
+		if (jqxhr.status >= 500 && jqxhr.status < 600) {
+			main.clippyAgent.speak('The server encountered an error trying to queue your media. Check the console and contact the developer.');
+			console.error(jqxhr.responseText);
+			return;
+		}
+
+		if (jqxhr.responseText === 'OwnershipError') {
 			main.clippyAgent.speak('You didn\'t queue ' + utils.entitle(contentName) + ', so you can\'t delete it.');
 		} else {
-			main.clippyAgent.speak(jqXHR.responseText);
+			main.clippyAgent.speak(jqxhr.responseText);
 		}
 
 		$this.attr('disabled', false);
@@ -245,7 +265,14 @@ $('#skip-button').click(function() {
 		main.clippyAgent.play('Congratulate');
 
 	}).fail(function(jqXHR, textStatus, err) {
-		main.clippyAgent.speak(jqXHR.responseText);
+		main.clippyAgent.stop();
+
+		if (jqxhr.status >= 500 && jqxhr.status < 600) {
+			main.clippyAgent.speak('The server encountered an error trying to skip the current music. Check the console and contact the developer.');
+			console.error(jqxhr.responseText);
+		} else {
+			main.clippyAgent.speak(jqxhr.responseText);
+		}
 	});
 });
 
@@ -262,7 +289,14 @@ $('#skip-penalise-button').click(function() {
 		main.clippyAgent.play('Congratulate');
 
 	}).fail(function(jqXHR, textStatus, err) {
-		main.clippyAgent.speak(jqXHR.responseText);
+		main.clippyAgent.stop();
+
+		if (jqxhr.status >= 500 && jqxhr.status < 600) {
+			main.clippyAgent.speak('The server encountered an error trying to skip the current music. Check the console and contact the developer.');
+			console.error(jqxhr.responseText);
+		} else {
+			main.clippyAgent.speak(jqxhr.responseText);
+		}
 	});
 });
 
@@ -279,7 +313,14 @@ $('#skip-ban-button').click(function() {
 		main.clippyAgent.play('Congratulate');
 
 	}).fail(function(jqXHR, textStatus, err) {
-		main.clippyAgent.speak(jqXHR.responseText);
+		main.clippyAgent.stop();
+
+		if (jqxhr.status >= 500 && jqxhr.status < 600) {
+			main.clippyAgent.speak('The server encountered an error trying to skip the current music. Check the console and contact the developer.');
+			console.error(jqxhr.responseText);
+		} else {
+			main.clippyAgent.speak(jqxhr.responseText);
+		}
 	});
 });
 
@@ -310,7 +351,14 @@ $('#ban-form').submit(function(e) {
 		main.clippyAgent.speak(bannedName + ' is now banned.');
 
 	}).fail(function(jqXHR, textStatus, err) {
-		main.clippyAgent.speak(jqXHR.responseText);
+		main.clippyAgent.stop();
+
+		if (jqxhr.status >= 500 && jqxhr.status < 600) {
+			main.clippyAgent.speak('The server encountered an error trying to ban ' + bannedName + '. Check the console and contact the developer.');
+			console.error(jqxhr.responseText);
+		} else {
+			main.clippyAgent.speak(jqxhr.responseText);
+		}
 	});
 });
 
@@ -341,7 +389,14 @@ $('#un-ban-form').submit(function(e) {
 		main.clippyAgent.speak(bannedName + ' is no longer banned.');
 
 	}).fail(function(jqXHR, textStatus, err) {
-		main.clippyAgent.speak(jqXHR.responseText);
+		main.clippyAgent.stop();
+
+		if (jqxhr.status >= 500 && jqxhr.status < 600) {
+			main.clippyAgent.speak('The server encountered an error trying to un-ban ' + bannedName + '. Check the console and contact the developer.');
+			console.error(jqxhr.responseText);
+		} else {
+			main.clippyAgent.speak(jqxhr.responseText);
+		}
 	});
 });
 

@@ -248,7 +248,7 @@ app.use(getFormMiddleware);
 //POST variable: content-id
 app.post('/api/queue/remove', (req, res) => {
 	if (!ContentServer.remove(req.ip, parseInt(req.fields['content-id']))) {
-		res.status(400).end('The queue item you tried to remove was not chosen by you.');
+		res.status(400).end('OwnershipError');
 	} else {
 		if (noRedirect(req)) res.status(200).end('Success\n');
 		else                 res.redirect('/');
