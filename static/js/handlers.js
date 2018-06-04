@@ -147,7 +147,18 @@ $('#nickname-form').submit(function(e) {
 
 	var $this = $(this);
 	var $nicknameField = $this.find('[name=nickname]');
+
+	//no empty nicknames
+	if ($nicknameField.val().length === 0) {
+		main.clippyAgent.stop();
+		main.clippyAgent.speak('Your nickname can not be an empty string.');
+		main.clippyAgent.play('CheckingSomething');
+		return;
+	}
+
+	var $submitButton = $this.find('[input=submit]');
 	$nicknameField.attr('disabled', true);
+	$submitButton.attr('disabled', true);
 
 	main.clippyAgent.stop();
 	main.clippyAgent.play('SendMail');
@@ -182,6 +193,7 @@ $('#nickname-form').submit(function(e) {
 	
 	}).always(function() {
 		$nicknameField.val('').attr('disabled', false);
+		$submitButton.attr('disabled', false);
 	});
 
 	return false;
