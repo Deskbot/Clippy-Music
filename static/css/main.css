@@ -118,7 +118,7 @@ input[type=password]:disabled, input[type=text]:disabled, input[type=url]:disabl
 	background-color: #D6D3CE;
 }
 
-form button:disabled, form input[type=submit]:disabled, .form button:disabled, .form input[type=submit]:disabled {
+input[type=file]:disabled + .file-name, form button:disabled, form input[type=submit]:disabled, .form button:disabled, .form input[type=submit]:disabled {
 	color: #808080;
 	text-shadow: 1px 1px 0 white;
 }
