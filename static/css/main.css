@@ -114,8 +114,13 @@ input, button {
 	font-size: 12px;
 }
 
-input[disabled=disabled] {
+input[type=password]:disabled, input[type=text]:disabled, input[type=url]:disabled {
 	background-color: #D6D3CE;
+}
+
+form button:disabled, form input[type=submit]:disabled, .form button:disabled, .form input[type=submit]:disabled {
+	color: #808080;
+	text-shadow: 1px 1px 0 white;
 }
 
 /* make this the default behaviour */
