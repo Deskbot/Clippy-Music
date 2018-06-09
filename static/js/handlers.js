@@ -12,9 +12,6 @@ $section.draggable({
 	handle: '.handle',
 	start: function() {
 		$(this).css('z-index', main.maxZ++);
-	},
-	end: function() {
-		positionSections();
 	}
 });
 
@@ -23,8 +20,16 @@ $section.click(function() {
 });
 
 $section.find('.handle > .x-button').click(function(e) {
-	positionSections();
-	$(this).parentsUntil('main').remove();
+	var $window = $(this).parentsUntil('main').last();
+
+	//offset is caused by both height and margins
+	var distance = $window.height() + removePx($window.css('margin-top')) + removePx($window.css('margin-bottom'));
+
+	console.log($window, distance);
+	
+	shiftDownElemsBelow($window, distance);
+
+	$window.remove();
 });
 
 $uploadForm.find('[name=music-file]').change(function(e) {

@@ -29,34 +29,27 @@ function loadClippy() {
 	});
 }
 
-//this function makes sections 'absolute' as opposed to 'relative' as jquery-ui sets them by default
-//we need to start them off normally so they start off in a natural location when the page loads
-//then we change their position type without moving them on the page
-var positionSections = (function() {
-	var alreadyDone = false;
-
-	return function() {
-		if (alreadyDone) return;
-
-		alreadyDone = true;
-
-		var $section = $('section');
-
-		//setting a section to 'absolute', causes others to move as they are still 'relative', so we must 
-		for (var i = $section.length - 1; i >= 0; i--) {
-			var section = $section[i];
-			var pos = section.getBoundingClientRect();
-			
-			section.style.left = pos.left + 'px'; //keep them fixed where they are when position type changes
-			section.style.top = pos.top + 'px';
-			section.style.position = 'absolute';
-		}
-	}
-})();
-
 function maybeShowAdminPanel() {
 	if (window.location.href.includes("admin")) {
 		$('#admin-section').removeClass('hidden');
+	}
+}
+
+function removePx(str) {
+	str = str.replace('px', '');
+	return parseInt(str);
+}
+
+function shiftDownElemsBelow($elem, distance) {
+	//only shift the later siblings of elem
+	var $laterSections = $elem.nextAll();
+	
+	for (var i = 0; i < $laterSections.length; i++) {
+		var $s = $($laterSections[i]);
+		
+		console.log($s[0], $s.height(), distance, removePx($s.css('height')) + distance + 'px');
+
+		$s.css('top', removePx($s.css('top')) + distance + 'px');
 	}
 }
 
