@@ -66,9 +66,8 @@ function handleArguments() {
 	const promises = [];
 	let admin = true;
 
-	let arg;
 	for (let i = 2; i < process.argv.length; i++) { //skip the 2 initial arguments which are the path to node and the file path
-		arg = process.argv[i];
+		let arg = process.argv[i];
 		
 		if (arg === '-c' || arg === '--clean') {
 			console.log('Deleting any suspended user record, content manager, or log file.');
