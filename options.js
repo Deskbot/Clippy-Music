@@ -5,7 +5,7 @@ module.exports = {
 	storageDir: '/tmp/Clippy-Music-Tmp',
 	imageSizeLimit: 100000000,
 	musicSizeLimit: 400000000,
-	nicknameSizeLimit: 40,
+	nicknameSizeLimit: 33,
 	uniqueCoolOff: 86400,
 	streamYtOverDur: 1200,
 };
