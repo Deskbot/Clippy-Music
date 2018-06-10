@@ -6,8 +6,19 @@ var main = {
 	maxZ: 100
 }
 
-function fullHeight($elem) {
-	return $elem.height() + removePx($elem.css('margin-top')) + removePx($elem.css('margin-bottom'));
+//function is from PrototypeJS
+function offset(element) {
+    var top = 0, left = 0;
+    do {
+        top += element.offsetTop  || 0;
+        left += element.offsetLeft || 0;
+        element = element.offsetParent;
+    } while(element);
+
+    return {
+        top: top,
+        left: left
+    };
 }
 
 function loadClippy() {
@@ -86,6 +97,8 @@ $(document).ready(function() {
 		clippy.speak("Hi I'm Clippit, your music server assistant.");
 		clippy.play('Alert');
 		main.clippyAgent = clippy;
+	})
+	.then(function() {
 		main.webSocketHandler = new WebSocketHandler();
 		maybeShowAdminPanel();
 		setKonamiCode();

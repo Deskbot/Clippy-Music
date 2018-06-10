@@ -125,17 +125,17 @@ var WebSocketHandler = (function() {
 		var $title = $currentlyPlaying.find('.title');
 
 		if (data.current) {
-			$title.text(data.current.title);
+			$title.html(data.current.title);
 			$title.attr('data-text', utils.htmlEntityDecode(data.current.title));
-			$currentNickname.text(data.current.nickname);
+			$currentNickname.html(data.current.nickname);
 
 			var wordartClass = main.goodWordArt[digestString(data.current.title + data.current.nickname) % main.goodWordArt.length]; //get a random class, but always the same for the same title
 			$currentlyPlaying.find('.wordart').removeClass().addClass('wordart').addClass(wordartClass); //remove all classes because we don't know which word art it currently is, add back 'wordart' then add the type of wordart
 
 		} else {
-			$title.text('');
+			$title.html('');
 			$title.attr('data-text', '');
-			$currentNickname.text('');
+			$currentNickname.html('');
 		}
 		
 		//rest of queue
@@ -143,9 +143,8 @@ var WebSocketHandler = (function() {
 		var $queue = $('#queue');
 		$queue.empty();
 
-		for (var i = 0; i < data.queue.length; i++) {
-			var item = data.queue[i]; //item contains a nickname and bucket
-			$queue.append(contentToBucketElem(item, myId));
+		for (var d of data.queue) { //d contains a nickname and bucket
+			$queue.append(contentToBucketElem(d, myId));
 		}
 	};
 
@@ -156,16 +155,16 @@ var WebSocketHandler = (function() {
 		var $bucketNickname = $bucketCont.find('.nickname');
 		var $bucket = $bucketCont.find('.bucket');
 
-		$bucketNickname.text(c.nickname);
+		$bucketNickname.html(c.nickname);
 
 		var isMine = myId === c.userId;
 
 		if (isMine) $bucketNickname.addClass('my-nickname');
 		
-		for (var i = 0; i < c.bucket.length; i++) {
-			var item = c.bucket[i];
-			var $bucketItem = templates.makeBucketItem();
-			$bucketItem.find('.title').text(item.title);
+		var item, $bucketItem;
+		for (item of c.bucket) {
+			$bucketItem = templates.makeBucketItem();
+			$bucketItem.find('.title').html(item.title);
 
 			if (isMine) {
 				$bucketItem.find('.delete').attr('data-id', item.id).removeClass('hidden');
