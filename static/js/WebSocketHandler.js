@@ -143,8 +143,9 @@ var WebSocketHandler = (function() {
 		var $queue = $('#queue');
 		$queue.empty();
 
-		for (var d of data.queue) { //d contains a nickname and bucket
-			$queue.append(contentToBucketElem(d, myId));
+		for (var i = 0; i < data.queue.length; i++) {
+			var item = data.queue[i]; //item contains a nickname and bucket
+			$queue.append(contentToBucketElem(item, myId));
 		}
 	};
 
@@ -161,9 +162,9 @@ var WebSocketHandler = (function() {
 
 		if (isMine) $bucketNickname.addClass('my-nickname');
 		
-		var item, $bucketItem;
-		for (item of c.bucket) {
-			$bucketItem = templates.makeBucketItem();
+		for (var i = 0; i < c.bucket.length; i++) {
+			var item = c.bucket[i];
+			var $bucketItem = templates.makeBucketItem();
 			$bucketItem.find('.title').html(item.title);
 
 			if (isMine) {

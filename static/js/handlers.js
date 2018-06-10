@@ -23,9 +23,7 @@ $section.find('.handle > .x-button').click(function(e) {
 	var $window = $(this).parentsUntil('main').last();
 
 	//offset is caused by both height and margins
-	var distance = $window.height() + removePx($window.css('margin-top')) + removePx($window.css('margin-bottom'));
-
-	console.log($window, distance);
+	var distance = fullHeight($window);
 	
 	shiftDownElemsBelow($window, distance);
 
