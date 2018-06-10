@@ -221,8 +221,6 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 	
 	var contentName = $this.siblings('.title').text();
 
-	//ajax
-
 	$.ajax({
 		url: '/api/queue/remove',
 		type: 'POST',

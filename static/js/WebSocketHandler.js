@@ -36,7 +36,7 @@ var WebSocketHandler = (function() {
 		this.socket.onclose = function() {
 			console.log('WebSocket closed');
 			this.reSetUp();
-		};
+		}.bind(this);
 	};
 
 	WebSocketHandler.prototype.handleUploadStatus = function(data) {
