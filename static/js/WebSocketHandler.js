@@ -17,11 +17,11 @@ var WebSocketHandler = (function() {
 			return;
 		}
 
-		this.socket.onopen = () => {
+		this.socket.onopen = function() {
 			console.log('WebSocket opened');
 		};
 
-		this.socket.onmessage = (event) => {
+		this.socket.onmessage = function(event) {
 			const data = JSON.parse(event.data);
 
 			console.log('WebSocket data received', data);
@@ -31,9 +31,9 @@ var WebSocketHandler = (function() {
 			if (data.type === 'banned')   return this.handleBanned(data);
 			if (data.type === 'queue')    return this.handleQueue(data);
 			else                          return main.clippyAgent.speak(data.message);
-		};
+		}.bind(this);
 
-		this.socket.onclose = () => {
+		this.socket.onclose = function() {
 			console.log('WebSocket closed');
 			this.reSetUp();
 		};
