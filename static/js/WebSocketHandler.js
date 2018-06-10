@@ -36,7 +36,7 @@ var WebSocketHandler = (function() {
 		this.socket.onclose = function() {
 			console.log('WebSocket closed');
 			this.reSetUp();
-		};
+		}.bind(this);
 	};
 
 	WebSocketHandler.prototype.handleUploadStatus = function(data) {
@@ -108,45 +108,49 @@ var WebSocketHandler = (function() {
 	};
 
 	WebSocketHandler.prototype.handleQueue = function(data) {
-		var myId = cookie.read('id');
-
-		//current
-
-		var $currentlyPlaying = $('#currently-playing');
-		var $currentNickname = $currentlyPlaying.find('.nickname');
-		var isMine = !data.current ? false : myId === data.current.userId;
-
-		if (isMine) {
-			$currentNickname.addClass('my-nickname');
-		} else {
-			$currentNickname.removeClass('my-nickname');
-		}
-
-		var $title = $currentlyPlaying.find('.title');
-
-		if (data.current) {
-			$title.text(data.current.title);
-			$title.attr('data-text', utils.htmlEntityDecode(data.current.title));
-			$currentNickname.text(data.current.nickname);
-
-			var wordartClass = main.goodWordArt[digestString(data.current.title + data.current.nickname) % main.goodWordArt.length]; //get a random class, but always the same for the same title
-			$currentlyPlaying.find('.wordart').removeClass().addClass('wordart').addClass(wordartClass); //remove all classes because we don't know which word art it currently is, add back 'wordart' then add the type of wordart
-
-		} else {
-			$title.text('');
-			$title.attr('data-text', '');
-			$currentNickname.text('');
-		}
+		var $queueWindow = $('#queue-section');
 		
-		//rest of queue
+		utils.counterShiftResize($queueWindow, function() {
+			var myId = cookie.read('id');
 
-		var $queue = $('#queue');
-		$queue.empty();
+			//current
 
-		for (var i = 0; i < data.queue.length; i++) {
-			var item = data.queue[i]; //item contains a nickname and bucket
-			$queue.append(contentToBucketElem(item, myId));
-		}
+			var $currentlyPlaying = $('#currently-playing');
+			var $currentNickname = $currentlyPlaying.find('.nickname');
+			var isMine = !data.current ? false : myId === data.current.userId;
+
+			if (isMine) {
+				$currentNickname.addClass('my-nickname');
+			} else {
+				$currentNickname.removeClass('my-nickname');
+			}
+
+			var $title = $currentlyPlaying.find('.title');
+
+			if (data.current) {
+				$title.html(data.current.title);
+				$title.attr('data-text', utils.htmlEntityDecode(data.current.title));
+				$currentNickname.html(data.current.nickname);
+
+				var wordartClass = main.goodWordArt[digestString(data.current.title + data.current.nickname) % main.goodWordArt.length]; //get a random class, but always the same for the same title
+				$currentlyPlaying.find('.wordart').removeClass().addClass('wordart').addClass(wordartClass); //remove all classes because we don't know which word art it currently is, add back 'wordart' then add the type of wordart
+
+			} else {
+				$title.html('');
+				$title.attr('data-text', '');
+				$currentNickname.html('');
+			}
+			
+			//rest of queue
+
+			var $queue = $('#queue');
+			$queue.empty();
+
+			for (var i = 0; i < data.queue.length; i++) {
+				var item = data.queue[i]; //item contains a nickname and bucket
+				$queue.append(contentToBucketElem(item, myId));
+			}
+		});
 	};
 
 	return WebSocketHandler;
@@ -156,7 +160,7 @@ var WebSocketHandler = (function() {
 		var $bucketNickname = $bucketCont.find('.nickname');
 		var $bucket = $bucketCont.find('.bucket');
 
-		$bucketNickname.text(c.nickname);
+		$bucketNickname.html(c.nickname);
 
 		var isMine = myId === c.userId;
 
@@ -165,7 +169,7 @@ var WebSocketHandler = (function() {
 		for (var i = 0; i < c.bucket.length; i++) {
 			var item = c.bucket[i];
 			var $bucketItem = templates.makeBucketItem();
-			$bucketItem.find('.title').text(item.title);
+			$bucketItem.find('.title').html(item.title);
 
 			if (isMine) {
 				$bucketItem.find('.delete').attr('data-id', item.id).removeClass('hidden');

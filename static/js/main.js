@@ -6,10 +6,6 @@ var main = {
 	maxZ: 100
 }
 
-function fullHeight($elem) {
-	return $elem.height() + removePx($elem.css('margin-top')) + removePx($elem.css('margin-bottom'));
-}
-
 function loadClippy() {
 	return new Promise(function(resolve, reject) {
 		clippy.load({ name: 'Clippy', path: 'js/agents/' }, function(agent) {
@@ -21,24 +17,6 @@ function loadClippy() {
 function maybeShowAdminPanel() {
 	if (window.location.href.includes("admin")) {
 		$('#admin-section').removeClass('hidden');
-	}
-}
-
-function removePx(str) {
-	str = str.replace('px', '');
-	return parseInt(str);
-}
-
-function shiftDownElemsBelow($elem, distance) {
-	//only shift the later siblings of elem
-	var $laterSections = $elem.nextAll();
-	
-	for (var i = 0; i < $laterSections.length; i++) {
-		var $s = $($laterSections[i]);
-		
-		console.log($s[0], $s.height(), distance, removePx($s.css('height')) + distance + 'px');
-
-		$s.css('top', removePx($s.css('top')) + distance + 'px');
 	}
 }
 

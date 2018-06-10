@@ -11,7 +11,9 @@ $('html').mouseup(function() {
 $section.draggable({
 	handle: '.handle',
 	start: function() {
-		$(this).css('z-index', main.maxZ++);
+		var $this = $(this);
+		$this.css('z-index', main.maxZ++);
+		$this.attr('data-moved', true);
 	}
 });
 
@@ -221,8 +223,6 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 	
 	var contentName = $this.siblings('.title').text();
 
-	//ajax
-
 	$.ajax({
 		url: '/api/queue/remove',
 		type: 'POST',
@@ -232,14 +232,18 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 		}
 
 	}).done(function() {
-		main.clippyAgent.speak(utils.entitle(contentName) + ' was deleted succesfully.');
+		var $queueSection = $('#queue-section');
 
-		var $buttonAncestors = $this.parentsUntil('.bucket');
-		var $bucket = $buttonAncestors.first().parent();
+		utils.counterShiftResize($queueSection, function() {
+			main.clippyAgent.speak(utils.entitle(contentName) + ' was deleted succesfully.');
 
-		$buttonAncestors.first().remove();
+			var $buttonAncestors = $this.parentsUntil('.bucket');
+			var $bucket = $buttonAncestors.first().parent();
 
-		if ($bucket.children().length === 0) $bucket.parentsUntil('.bucket-container').parent().remove();
+			$buttonAncestors.first().remove();
+
+			if ($bucket.children().length === 0) $bucket.parentsUntil('.bucket-container').parent().remove();
+		});
 
 	}).fail(function(jqxhr, textStatus, err) {
 		if (jqxhr.status >= 500 && jqxhr.status < 600) {
@@ -261,11 +265,15 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 var $currentlyPlaying = $('#currently-playing');
 
 $currentlyPlaying.on('dblclick', '.wordart', function() {
-	$(this).removeClass('wordart').addClass('no-wordart');
+	utils.counterShiftResize($('#current-section'), function() {
+		$(this).removeClass('wordart').addClass('no-wordart');
+	}.bind(this));
 });
 
 $currentlyPlaying.on('dblclick', '.no-wordart', function() {
-	$(this).removeClass('no-wordart').addClass('wordart');
+	utils.counterShiftResize($('#current-section'), function() {
+		$(this).removeClass('no-wordart').addClass('wordart');
+	}.bind(this));
 });
 
 $('#skip-button').click(function() {
