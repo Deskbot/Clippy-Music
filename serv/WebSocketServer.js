@@ -191,4 +191,9 @@ ContentServer.on('not-queued', (contentInfo, reason, content, message) => {
 	});
 });
 
+ContentServer.on('yt-download-change', (userId) => {
+	const queue = JSON.stringify(ContentServer.getDownloadQueue(userId));
+	api.sendMessage(UserRecServ.getSockets(userId), 'download-queue', queue);
+});
+
 module.exports = api;
