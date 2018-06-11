@@ -7,10 +7,6 @@ const debug = require('./lib/debug.js');
 const opt = require('./options.js');
 const utils = require('./lib/utils.js');
 
-const ContentServer = require('./serv/ContentServer.js');
-const PasswordServer = require('./serv/PasswordServer.js');
-const UserRecordServer = require('./serv/UserRecordServer.js');
-
 //prompt settings
 prompt.colors = false;
 prompt.message = '';
@@ -88,6 +84,8 @@ function handleArguments() {
 
 //get admin password if needed
 function setUpAdmin() {
+	const PasswordServer = require('./serv/PasswordServer.js');
+
 	return chooseAdminPassword()
 	.then((pass) => {
 		PasswordServer.set(pass);
@@ -109,6 +107,9 @@ function setUpDirs() {
 }
 
 function setUpControls() {
+	const ContentServer = require('./serv/ContentServer.js');
+	const UserRecordServer = require('./serv/UserRecordServer.js');
+
 	//when this is about to be killed
 	process.on('SIGINT', () => {
 		console.log('Closing down Clippy-Music.');
