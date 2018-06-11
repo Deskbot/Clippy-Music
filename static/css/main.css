@@ -114,15 +114,6 @@ input, button {
 	font-size: 12px;
 }
 
-input[type=password]:disabled, input[type=text]:disabled, input[type=url]:disabled {
-	background-color: #D6D3CE;
-}
-
-input[type=file]:disabled + .file-name, form button:disabled, form input[type=submit]:disabled, .form button:disabled, .form input[type=submit]:disabled {
-	color: #808080;
-	text-shadow: 1px 1px 0 white;
-}
-
 /* make this the default behaviour */
 button:focus, input:focus {
 	outline: none;
@@ -218,8 +209,21 @@ button.file {
 	cursor: inherit;
 }
 
-input[type=submit], button.submit{
+input[type=submit], button.submit {
 	margin: 8px 0 auto auto;
+}
+
+input[type=password]:disabled, input[type=text]:disabled, input[type=url]:disabled {
+	background-color: #D6D3CE;
+}
+
+/* include file name if the corresponding input is disabled
+ * include all buttons except x-buttons
+ */
+input[type=file]:disabled, input[type=file]:disabled + .file-name, button:not(.x-button):disabled, input[type=submit]:not(.x-button):disabled {
+	color: #808080;
+	cursor: default;
+	text-shadow: 1px 1px 0 white;
 }
 
 main {
