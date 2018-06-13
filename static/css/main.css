@@ -135,7 +135,10 @@ form {
 	cursor: inherit;
 }
 
-form button:focus, .form button:focus, form input[type=submit]:focus, form input[type=file] button:focus {
+/* include file name if the corresponding input is focus
+ * include all buttons except x-buttons
+ */
+input[type=file]:focus, input[type=file]:focus + .file-name, button:not(.x-button):focus, input[type=submit]:not(.x-button):focus {
 	outline: 1px solid black;
 }
 
