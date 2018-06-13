@@ -15,9 +15,6 @@ class Api {
 		//where clause:
 
 		function onConnect(soc, id) {
-			//send queue
-			this.sendQueue(soc);
-
 			//save user
 			UserRecServ.add(id);
 			UserRecServ.setWS(id, soc);
@@ -27,6 +24,10 @@ class Api {
 
 			//tell user their nickname
 			if (UserRecServ.isUser(id)) this.sendNickname(soc, UserRecServ.getNickname(id));
+
+			//send queue
+			this.sendQueue(soc);
+			this.sendDlQueue(soc, id);
 		}
 
 		function onMessage(soc, id, data, flags) {
@@ -95,6 +96,11 @@ class Api {
 		});
 
 		this.wsh.sendToMany(socs, message);
+	}
+
+	sendDlQueue(soc, userId) {
+		const queue = ContentServer.getDownloadQueue(userId);
+		api.sendMessage(soc, 'dl-queue', queue);
 	}
 		
 	sendError(socs, type, reason) {
