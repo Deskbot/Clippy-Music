@@ -203,18 +203,30 @@
 
 		<div id="templates">
 			<template id="bucket-container-template">
-				<div class="bucket-container">
-					<fieldset>
-						<legend class="nickname"></legend>
-						<ol class="bucket"></ol>	
-					</fieldset>
-				</div>
+				<fieldset class="bucket-container">
+					<legend class="nickname"></legend>
+					<ol class="bucket"></ol>
+				</fieldset>
 			</template>
 
 			<template id="bucket-item-template">
 				<li>
 					<span class="title"></span>
 					<button class="delete hidden" data-id="">Remove</button>
+				</li>
+			</template>
+
+			<template id="dl-queue-template">
+				<fieldset id="dl-queue-container">
+					<legend>YouTube Downloads In Progress</legend>
+					<ol class="bucket"></ol>
+				</fieldset>
+			</template>
+
+			<template id="dl-item-template">
+				<li>
+					<span class="title"></span>
+					<button class="cancel" data-id="9">Cancel</button>
 				</li>
 			</template>
 		</div>
