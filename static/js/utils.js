@@ -49,6 +49,10 @@ var utils = {
 			|| url.includes('youtu.be');
 	},
 
+	myId: function() {
+		return cookie.read('id');
+	},
+
 	removePx: function(str) {
 		str = str.replace('px', '');
 		return parseInt(str);

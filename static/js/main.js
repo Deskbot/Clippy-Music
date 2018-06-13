@@ -4,7 +4,8 @@ var main = {
 	clippyAgent: null,
 	dlQueue: [],
 	goodWordArt: ['yellow-dash', 'blues', 'rainbow', 'marble-slab', 'gray-block', 'superhero', 'outline', 'up', 'slate', 'mauve', 'graydient', 'red-blue', 'purple', 'green-marble', 'aqua', 'paper-bag', 'sunset', 'chrome'],
-	maxZ: 100
+	maxZ: 100,
+	nickname: ''
 }
 
 function loadClippy() {
