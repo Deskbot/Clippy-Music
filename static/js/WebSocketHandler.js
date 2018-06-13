@@ -29,6 +29,7 @@ var WebSocketHandler = (function() {
 			if (data.type === 'upload')   return this.handleUploadStatus(data);
 			if (data.type === 'nickname') return this.displayNickname(data.message);
 			if (data.type === 'banned')   return this.handleBanned(data);
+			if (data.type === 'dl-queue') return this.handleDlQueue(data.message);
 			if (data.type === 'queue')    return this.handleQueue(data);
 			else                          return main.clippyAgent.speak(data.message);
 		}.bind(this);
