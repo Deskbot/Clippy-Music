@@ -8,6 +8,8 @@ var templates = (function() {
 	
 	var bucketContainerTemplate = toTempl($templates.children('#bucket-container-template'));
 	var bucketItemTemplate = toTempl($templates.children('#bucket-item-template'));
+	var dlQueueTemplate = toTempl($templates.children('#dl-queue-template'));
+	var dlItemTemplate = toTempl($templates.children('#dl-item-template'));
 
 	return {
 		makeBucketContainer: function() {
@@ -15,6 +17,12 @@ var templates = (function() {
 		},
 		makeBucketItem: function() {
 			return bucketItemTemplate.clone();
+		},
+		makeDlQueue: function() {
+			return dlQueueTemplate.clone();
+		},
+		makeDlItem: function() {
+			return dlItemTemplate.clone();
 		}
 	};
 })();

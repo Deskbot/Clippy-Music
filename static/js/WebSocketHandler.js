@@ -152,6 +152,45 @@ var WebSocketHandler = (function() {
 				$queue.append(contentToBucketElem(item, myId));
 			}
 		});
+
+		if (main.dlQueue.length > 0) this.handleDlQueue(main.dlQueue);
+	};
+
+	WebSocketHandler.prototype.handleDlQueue = function(queue) {
+		main.dlQueue = queue;
+
+		var $bucketContainer = $('#my-bucket-container');
+		var myId = utils.myId();
+		
+		//user bucket container doesn't exist
+		if ($bucketContainer.length === 0) {
+			//put bucket container on screen
+			var content = {
+				userId: myId,
+				nickname: main.nickname,
+				bucket: []
+			};
+			$bucketContainer = contentToBucketElem(content, myId);
+			$('#queue').append($bucketContainer);
+		}
+
+		var $dlQueueContainer = $('#dl-queue-container');
+
+		//dlqueue doesn't exist
+		if ($dlQueueContainer.length === 0) {
+			$dlQueueContainer = templates.makeDlQueue();
+			$bucketContainer.append($dlQueueContainer);
+		}
+
+		var $dlQueue = $dlQueueContainer.find('.bucket');
+
+		//replace old list
+		$dlQueue.empty();
+
+		//put items in the dlQueue
+		for (let i = 0; i < queue.length; i++) {
+			$dlQueue.append(contentToDlItemElem(queue[i]));
+		}
 	};
 
 	return WebSocketHandler;
@@ -165,6 +204,7 @@ var WebSocketHandler = (function() {
 
 		var isMine = myId === c.userId;
 
+		if (isMine) $bucketCont.attr('id', 'my-bucket-container');
 		if (isMine) $bucketNickname.addClass('my-nickname');
 		
 		for (var i = 0; i < c.bucket.length; i++) {
@@ -180,6 +220,14 @@ var WebSocketHandler = (function() {
 		}
 
 		return $bucketCont;
+	}
+
+	function contentToDlItemElem(content) {
+		var $dlItem = templates.makeDlItem();
+
+		$dlItem.find('.title').html(content.title);
+
+		return $dlItem;
 	}
 })();
 

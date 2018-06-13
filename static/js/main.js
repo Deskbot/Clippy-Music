@@ -2,6 +2,7 @@ clippy.Balloon.prototype.CLOSE_BALLOON_DELAY = 20000;
 
 var main = {
 	clippyAgent: null,
+	dlQueue: [],
 	goodWordArt: ['yellow-dash', 'blues', 'rainbow', 'marble-slab', 'gray-block', 'superhero', 'outline', 'up', 'slate', 'mauve', 'graydient', 'red-blue', 'purple', 'green-marble', 'aqua', 'paper-bag', 'sunset', 'chrome'],
 	maxZ: 100
 }
