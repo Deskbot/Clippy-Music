@@ -27,10 +27,10 @@ var WebSocketHandler = (function() {
 			console.log('WebSocket data received', data);
 
 			if (data.type === 'upload')   return this.handleUploadStatus(data);
-			if (data.type === 'nickname') return this.displayNickname(data.message);
-			if (data.type === 'banned')   return this.handleBanned(data);
 			if (data.type === 'dl-queue') return this.handleDlQueue(data.message);
+			if (data.type === 'nickname') return this.handleNickname(data.message);
 			if (data.type === 'queue')    return this.handleQueue(data);
+			if (data.type === 'banned')   return this.handleBanned(data);
 			else                          return main.clippyAgent.speak(data.message);
 		}.bind(this);
 
@@ -89,7 +89,8 @@ var WebSocketHandler = (function() {
 		}
 	};
 
-	WebSocketHandler.prototype.displayNickname = function(name) {
+	WebSocketHandler.prototype.handleNickname = function(name) {
+		main.nickname = name;
 		utils.displayNickname(name);
 	};
 
@@ -112,7 +113,7 @@ var WebSocketHandler = (function() {
 		var $queueWindow = $('#queue-section');
 		
 		utils.counterShiftResize($queueWindow, function() {
-			var myId = cookie.read('id');
+			var myId = utils.myId();
 
 			//current
 
