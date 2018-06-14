@@ -158,9 +158,9 @@ var WebSocketHandler = (function() {
 	};
 
 	WebSocketHandler.prototype.handleDlQueue = function(queue) {
-		if (queue.length === 0) return;
-		
 		main.dlQueue = queue;
+
+		if (queue.length === 0) return;
 
 		var $bucketContainer = $('#my-bucket-container');
 		var myId = utils.myId();
