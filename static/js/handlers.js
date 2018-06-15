@@ -240,7 +240,7 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 			var $buttonAncestors = $this.parentsUntil('.bucket');
 			var $bucket = $buttonAncestors.first().parent();
 
-			$buttonAncestors.first().remove();
+			$buttonAncestors.first().remove(); //remove li
 
 			if ($bucket.children().length === 0) $bucket.parentsUntil('.bucket-container').parent().remove();
 		});
@@ -257,6 +257,57 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 		} else {
 			main.clippyAgent.speak(jqxhr.responseText);
 		}
+
+		$this.attr('disabled', false);
+	});
+});
+
+$('#queue').on('click', '#dl-queue-container .bucket button.cancel', function(e) {
+	var $this = $(this);
+
+	$this.attr('disabled', true);
+
+	main.clippyAgent.stop();
+	main.clippyAgent.play('EmptyTrash');
+	
+	var contentName = $this.siblings('.title').text();
+
+	$.ajax({
+		url: '/api/download/cancel',
+		type: 'POST',
+		data: {
+			ajax: true,
+			'dl-index': $this.attr('data-index'),
+		}
+
+	}).done(function() {
+		var $queueSection = $('#queue-section');
+
+		utils.counterShiftResize($queueSection, function() {
+			main.clippyAgent.speak('The download of ' + utils.entitle(contentName) + ' was cancelled.');
+
+			var $buttonAncestors = $this.parentsUntil('.bucket');
+			var $bucket = $buttonAncestors.first().parent();
+
+			$buttonAncestors.first().remove(); //remove li
+
+			var $personalQueue = $bucket.parentsUntil('.bucket-container').parent();
+
+			//remove download queue if empty
+			if ($bucket.children().length === 0) $('#dl-queue-container').remove();
+
+			//if the media queue is now empty, remove it
+			if ($personalQueue.children().length === 0) $personalQueue.remove();
+		});
+
+	}).fail(function(jqxhr, textStatus, err) {
+		if (jqxhr.status >= 500 && jqxhr.status < 600) {
+			main.clippyAgent.speak('The server encountered an error trying to cancel that download. Check the console and contact the developer.');
+			console.error(jqxhr.responseText);
+			return;
+		}
+
+		main.clippyAgent.speak(jqxhr.responseText);
 
 		$this.attr('disabled', false);
 	});
