@@ -13,7 +13,7 @@ const debug = require('../lib/debug.js');
 const opt = require('../options.js');
 const utils = require('../lib/utils.js');
 
-const YTError = require('../lib/err/YTError.js');
+const { YTError } = require('../lib/errors.js');
 
 function adminMiddleware(req, res, next) {
 	if (!PasswordServer.isSet()) {
