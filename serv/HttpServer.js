@@ -260,8 +260,14 @@ app.post('/api/queue/remove', (req, res) => {
 	if (!ContentServer.remove(req.ip, parseInt(req.fields['content-id']))) {
 		res.status(400).end('OwnershipError');
 	} else {
+
+//POST variable: dl-id
+app.post('/api/download/cancel', (req, res) => {
+	if (ContentServer.cancelDownload(req.ip, parseInt(req.fields['dl-id']))) {
 		if (noRedirect(req)) res.status(200).end('Success\n');
 		else                 res.redirect('/');
+	} else {
+		res.status(400).end('The download item specified was not recognised.\n');
 	}
 });
 
