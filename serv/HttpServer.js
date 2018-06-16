@@ -13,7 +13,7 @@ const debug = require('../lib/debug.js');
 const opt = require('../options.js');
 const utils = require('../lib/utils.js');
 
-const YTError = require('../lib/err/YTError.js');
+const { YTError } = require('../lib/errors.js');
 
 function adminMiddleware(req, res, next) {
 	if (!PasswordServer.isSet()) {
@@ -257,11 +257,21 @@ app.use(getFormMiddleware);
 
 //POST variable: content-id
 app.post('/api/queue/remove', (req, res) => {
-	if (!ContentServer.remove(req.ip, parseInt(req.fields['content-id']))) {
-		res.status(400).end('OwnershipError');
-	} else {
+	if (ContentServer.remove(req.ip, parseInt(req.fields['content-id']))) {
 		if (noRedirect(req)) res.status(200).end('Success\n');
 		else                 res.redirect('/');
+	} else {
+		res.status(400).end('OwnershipError');
+	}
+});
+
+//POST variable: dl-index
+app.post('/api/download/cancel', (req, res) => {
+	if (ContentServer.cancelDownload(req.ip, parseInt(req.fields['dl-index']))) {
+		if (noRedirect(req)) res.status(200).end('Success\n');
+		else                 res.redirect('/');
+	} else {
+		res.status(400).end('The download item specified was not recognised.\n');
 	}
 });
 
