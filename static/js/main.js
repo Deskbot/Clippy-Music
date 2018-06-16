@@ -19,6 +19,7 @@ function loadClippy() {
 function maybeShowAdminPanel() {
 	if (window.location.href.includes("admin")) {
 		$('#admin-section').removeClass('hidden');
+		$('#admin-password-input').attr('type', 'password');
 	}
 }
 
