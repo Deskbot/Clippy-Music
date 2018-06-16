@@ -61,6 +61,7 @@ function chooseAdminPassword() {
 function handleArguments() {
 	const promises = [];
 	let admin = true;
+	opt.mute = false;
 
 	for (let i = 2; i < process.argv.length; i++) { //skip the 2 initial arguments which are the path to node and the file path
 		let arg = process.argv[i];
@@ -72,6 +73,8 @@ function handleArguments() {
 
 		} else if (arg === '-d' || arg === '--debug') {
 			debug.on();
+		} else if (arg === '-m' || arg === '--mute') {
+			opt.mute = true;
 		} else if (arg === '--no-admin') {
 			admin = false;
 		}

@@ -47,6 +47,7 @@ If you intend to expose the web page on port 80 and have a web server installed 
 ### Options
 
 * `-c --clean`: deletes all stored data that would otherwise be reloaded between runs
+* `-m --mute`: all media is played muted
 * `--no-admin`: removes need for admin password, however users can't be banned
 
 
