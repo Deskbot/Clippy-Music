@@ -32,21 +32,12 @@ $section.find('.handle > .x-button').click(function(e) {
 	$window.remove();
 });
 
-$uploadForm.find('[name=music-file]').change(function(e) {
+$uploadForm.find('input[name=music-file]').change(function(e) {
 	var $musicUrl = $uploadForm.find('[name=music-url]');
 
 	if (utils.inputHasFile(this)) $musicUrl.attr('disabled', true);
 	else                          $musicUrl.attr('disabled', false);
-});
 
-$uploadForm.find('[name=image-file]').change(function(e) {
-	var $musicUrl = $uploadForm.find('[name=image-url]');
-
-	if (utils.inputHasFile(this)) $musicUrl.attr('disabled', true);
-	else                          $musicUrl.attr('disabled', false);
-});
-
-$uploadForm.find('#music-file-input-button input[type=file]').change(function() {
 	var $this = $(this);
 
 	var title = $this.val().replace('C:\\fakepath\\', '');
@@ -54,7 +45,12 @@ $uploadForm.find('#music-file-input-button input[type=file]').change(function() 
 	$this.siblings('.file-name').text(fileName ? fileName : 'No File Chosen');
 });
 
-$uploadForm.find('#picture-file-input-button input[type=file]').change(function() {
+$uploadForm.find('input[name=image-file]').change(function(e) {
+	var $musicUrl = $uploadForm.find('[name=image-url]');
+
+	if (utils.inputHasFile(this)) $musicUrl.attr('disabled', true);
+	else                          $musicUrl.attr('disabled', false);
+
 	var $this = $(this);
 
 	var title = $this.val().replace('C:\\fakepath\\', '');
@@ -62,10 +58,22 @@ $uploadForm.find('#picture-file-input-button input[type=file]').change(function(
 	$this.siblings('.file-name').text(fileName ? fileName : 'No File Chosen');
 });
 
+$uploadForm.find('input[type=url]').keyup(function(e) {
+	var $this = $(this);
+	var $disabledTargets = $this.siblings('.file-upload').find('input, button');
+console.log($this.val());
+	if ($this.val().length === 0) {
+		$disabledTargets.attr('disabled', false);
+	} else {
+		$disabledTargets.attr('disabled', true);
+	}
+});
+
 $uploadForm.submit(function(e) {
 	e.preventDefault();
 
 	var $this = $(this);
+	var $buttons = $this.find('button');
 	var $inputs = $this.find('input');
 	var $fields = $inputs.filter(':not([type=submit])');
 	
@@ -138,10 +146,12 @@ $uploadForm.submit(function(e) {
 	}).always(function() {
 		$uploadForm.find('.file-name').text('No File Chosen');
 		$fields.val(null);
+		$buttons.attr('disabled', false);
 		$inputs.attr('disabled', false);
 		$('html').removeClass('progress');
 	});
 
+	$buttons.attr('disabled', true);
 	$inputs.attr('disabled', true);
 	$('html').addClass('progress');
 
