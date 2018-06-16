@@ -61,7 +61,7 @@ $uploadForm.find('input[name=image-file]').change(function(e) {
 $uploadForm.find('input[type=url]').keyup(function(e) {
 	var $this = $(this);
 	var $disabledTargets = $this.siblings('.file-upload').find('input, button');
-console.log($this.val());
+
 	if ($this.val().length === 0) {
 		$disabledTargets.attr('disabled', false);
 	} else {
