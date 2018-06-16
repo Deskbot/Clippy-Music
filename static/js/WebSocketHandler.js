@@ -158,6 +158,8 @@ var WebSocketHandler = (function() {
 	};
 
 	WebSocketHandler.prototype.handleDlQueue = function(queue) {
+		if (queue.length === 0) return;
+		
 		main.dlQueue = queue;
 
 		var $bucketContainer = $('#my-bucket-container');
@@ -190,7 +192,7 @@ var WebSocketHandler = (function() {
 
 		//put items in the dlQueue
 		for (let i = 0; i < queue.length; i++) {
-			$dlQueue.append(contentToDlItemElem(queue[i]));
+			$dlQueue.append(contentToDlItemElem(i, queue[i]));
 		}
 	};
 
@@ -223,10 +225,11 @@ var WebSocketHandler = (function() {
 		return $bucketCont;
 	}
 
-	function contentToDlItemElem(content) {
+	function contentToDlItemElem(index, content) {
 		var $dlItem = templates.makeDlItem();
 
 		$dlItem.find('.title').html(content.title);
+		$dlItem.find('.cancel').attr('data-index', content.index);
 
 		return $dlItem;
 	}

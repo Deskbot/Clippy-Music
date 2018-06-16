@@ -292,6 +292,10 @@ legend {
 	padding-top: 4px;
 }
 
+#dl-queue-container {
+	margin: 8px 2px;
+}
+
 button.action {
 	margin: 2px 0;
 }
