@@ -32,21 +32,12 @@ $section.find('.handle > .x-button').click(function(e) {
 	$window.remove();
 });
 
-$uploadForm.find('[name=music-file]').change(function(e) {
+$uploadForm.find('input[name=music-file]').change(function(e) {
 	var $musicUrl = $uploadForm.find('[name=music-url]');
 
 	if (utils.inputHasFile(this)) $musicUrl.attr('disabled', true);
 	else                          $musicUrl.attr('disabled', false);
-});
 
-$uploadForm.find('[name=image-file]').change(function(e) {
-	var $musicUrl = $uploadForm.find('[name=image-url]');
-
-	if (utils.inputHasFile(this)) $musicUrl.attr('disabled', true);
-	else                          $musicUrl.attr('disabled', false);
-});
-
-$uploadForm.find('#music-file-input-button input[type=file]').change(function() {
 	var $this = $(this);
 
 	var title = $this.val().replace('C:\\fakepath\\', '');
@@ -54,7 +45,12 @@ $uploadForm.find('#music-file-input-button input[type=file]').change(function() 
 	$this.siblings('.file-name').text(fileName ? fileName : 'No File Chosen');
 });
 
-$uploadForm.find('#picture-file-input-button input[type=file]').change(function() {
+$uploadForm.find('input[name=image-file]').change(function(e) {
+	var $musicUrl = $uploadForm.find('[name=image-url]');
+
+	if (utils.inputHasFile(this)) $musicUrl.attr('disabled', true);
+	else                          $musicUrl.attr('disabled', false);
+
 	var $this = $(this);
 
 	var title = $this.val().replace('C:\\fakepath\\', '');
