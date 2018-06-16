@@ -66,6 +66,7 @@ $uploadForm.submit(function(e) {
 	e.preventDefault();
 
 	var $this = $(this);
+	var $buttons = $this.find('button');
 	var $inputs = $this.find('input');
 	var $fields = $inputs.filter(':not([type=submit])');
 	
@@ -138,10 +139,12 @@ $uploadForm.submit(function(e) {
 	}).always(function() {
 		$uploadForm.find('.file-name').text('No File Chosen');
 		$fields.val(null);
+		$buttons.attr('disabled', false);
 		$inputs.attr('disabled', false);
 		$('html').removeClass('progress');
 	});
 
+	$buttons.attr('disabled', true);
 	$inputs.attr('disabled', true);
 	$('html').addClass('progress');
 
