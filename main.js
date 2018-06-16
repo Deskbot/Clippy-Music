@@ -52,7 +52,7 @@ function chooseAdminPassword() {
 				
 			} else {
 				console.log('Passwords did not match. Try again.');
-				resolve(Api.choose());
+				resolve(chooseAdminPassword());
 			}
 		});
 	});

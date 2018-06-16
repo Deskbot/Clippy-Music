@@ -148,6 +148,12 @@ $uploadForm.submit(function(e) {
 	return false;
 });
 
+$uploadForm.find('input[type=url]').keypress(function(e) {
+	if (e.keyCode == 13) {
+		$uploadForm.submit();
+	}
+});
+
 $('#nickname-form').submit(function(e) {
 	e.preventDefault();
 
