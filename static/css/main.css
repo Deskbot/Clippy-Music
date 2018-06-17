@@ -397,4 +397,5 @@ button.action {
 
 #party-mode-canvas {
 	pointer-events: none;
+	z-index: 10000;
 }
