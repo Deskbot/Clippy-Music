@@ -488,10 +488,10 @@
 	display: inline-block;
 	font-size: 1.42em;
 	transform: perspective(1em) rotateY(5deg) skewY(20deg) scaleY(1.2) translateZ(-0.2em);
-	-webkit-transform: perspective(1em) rotateY(5deg) skewY(20deg) scaleY(1.2) translateZ(-0.2em);
-	-moz-transform: perspective(1em) rotateY(5deg) skewY(20deg) scaleY(1.2) translateZ(-0.2em);
-	-o-transform: perspective(1em) rotateY(5deg) skewY(20deg) scaleY(1.2) translateZ(-0.2em);
-	-ms-transform: perspective(1em) rotateY(5deg) skewY(20deg) scaleY(1.2) translateZ(-0.2em);
+	-webkit-transform: perspective(1em) rotateY(2deg) skewY(10deg) scaleY(1.2) translateZ(-0.2em);
+	-moz-transform: perspective(1em) rotateY(2deg) skewY(10deg) scaleY(1.2) translateZ(-0.2em);
+	-o-transform: perspective(1em) rotateY(2deg) skewY(10deg) scaleY(1.2) translateZ(-0.2em);
+	-ms-transform: perspective(1em) rotateY(2deg) skewY(10deg) scaleY(1.2) translateZ(-0.2em);
 }
 .wordart.gray-block span {
 	font-family: Impact;

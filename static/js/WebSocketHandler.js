@@ -26,18 +26,29 @@ var WebSocketHandler = (function() {
 
 			console.log('WebSocket data received', data);
 
-			if (data.type === 'upload')   return this.handleUploadStatus(data);
-			if (data.type === 'dl-queue') return this.handleDlQueue(data.message);
-			if (data.type === 'nickname') return this.handleNickname(data.message);
-			if (data.type === 'queue')    return this.handleQueue(data);
-			if (data.type === 'banned')   return this.handleBanned(data);
-			else                          return main.clippyAgent.speak(data.message);
+			if (data.type === 'upload')     return this.handleUploadStatus(data);
+			if (data.type === 'dl-queue')   return this.handleDlQueue(data.message);
+			if (data.type === 'nickname')   return this.handleNickname(data.message);
+			if (data.type === 'queue')      return this.handleQueue(data);
+			if (data.type === 'dl-percent') return this.handleDlPercent(data.message);
+			if (data.type === 'banned')     return this.handleBanned(data);
+			else                            return main.clippyAgent.speak(data.message);
 		}.bind(this);
 
 		this.socket.onclose = function() {
 			console.log('WebSocket closed');
 			this.reSetUp();
 		}.bind(this);
+	};
+
+	WebSocketHandler.prototype.handleDlPercent = function(data) {
+		var $dlQueueContainer = $('#dl-queue-container');
+
+		if ($dlQueueContainer.length === 0) return;
+
+		var $dlBar = $dlQueueContainer.find('.bucket').find('[data-index=' + data.index + ']').siblings('.dl-bar');
+
+		if ($dlBar.length > 0) fillDlBar($dlBar, data.percent);
 	};
 
 	WebSocketHandler.prototype.handleUploadStatus = function(data) {
@@ -192,7 +203,7 @@ var WebSocketHandler = (function() {
 
 		//put items in the dlQueue
 		for (let i = 0; i < queue.length; i++) {
-			$dlQueue.append(contentToDlItemElem(i, queue[i]));
+			$dlQueue.append(contentToDlItemElem(queue[i]));
 		}
 	};
 
@@ -225,20 +236,34 @@ var WebSocketHandler = (function() {
 		return $bucketCont;
 	}
 
-	function contentToDlItemElem(index, content) {
+	function contentToDlItemElem(content) {
 		var $dlItem = templates.makeDlItem();
 
 		$dlItem.find('.title').html(content.title);
 		$dlItem.find('.cancel').attr('data-index', content.index);
+		if (content.percent) fillDlBar($dlItem.find('.dl-bar'), content.percent);
 
 		return $dlItem;
 	}
-})();
 
-function digestString(str) {
-	var tot = 0;
-	for (var i = 0; i < str.length; i++) {
-		tot += str.charCodeAt(i);
+	function digestString(str) {
+		var tot = 0;
+		for (var i = 0; i < str.length; i++) {
+			tot += str.charCodeAt(i);
+		}
+		return tot;
 	}
-	return tot;
-}
+
+	function fillDlBar($bar, percent) {
+		var fullWidth = 412; //based on css; can't evaluate at run time due to width being unknown if $bar is not in DOM
+		var blockWidth = 10; //based on css; they're all the same width
+		var blockPercent = blockWidth / fullWidth;
+		var blocksAlready = $bar.find('.dl-block').length;
+		
+		var targetBlockCount = Math.ceil(percent / blockPercent);
+
+		for (var i = blocksAlready; i < targetBlockCount; i++) {
+			$bar.append(templates.makeDlBlock());
+		}
+	}
+})();

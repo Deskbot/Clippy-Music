@@ -299,6 +299,11 @@ legend {
 	margin: 8px 2px;
 }
 
+/* only the first .dl-bar should be visible */
+#dl-queue-container .bucket li:not(:nth-child(1)) .dl-bar {
+	display: none;
+}
+
 button.action {
 	margin: 2px 0;
 }
@@ -362,6 +367,28 @@ button.action {
 	padding: 5px;
 }
 
+.dl-bar {
+	border-top: 1px solid #424142;
+	border-left: 1px solid #424142;
+	border-right: 1px solid white;
+	border-bottom: 1px solid white;
+	display: block;
+	height: 18px;
+	margin-top: 4px;
+	overflow: hidden;
+	padding: 1px 0;
+	width: 100%;
+}
+
+.dl-block {
+    background-color: #08246B;
+    display: inline-block;
+    height: 100%;
+	margin: 0 1px;
+	vertical-align: top;
+    width: 8px;
+}
+
 .hidden {
 	display: none;
 }
@@ -370,4 +397,5 @@ button.action {
 
 #party-mode-canvas {
 	pointer-events: none;
+	z-index: 10000;
 }
