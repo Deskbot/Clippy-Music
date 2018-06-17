@@ -254,27 +254,17 @@ var WebSocketHandler = (function() {
 	}
 
 	function displayDlBar($li, percent) {
-		percent /= 100;
 		var $bar = $li.find('.dl-bar');
 
-		if (percent > 0) {
-			$bar.removeClass('hidden');
-		}
-
 		var fullWidth = $bar.width();
-		var blockWidth = 10; //based on css, they're all the same width
+		var blockWidth = 10; //based on css; they're all the same width
 		var blockPercent = blockWidth / fullWidth;
-		var targetBlockCount = Math.floor(percent / blockPercent);
 		var blocksAlready = $bar.find('.dl-block').length;
+		
+		var targetBlockCount = Math.ceil(percent / blockPercent);
 
-		if (targetBlockCount > blocksAlready) {
-			for (var i = blocksAlready; i < targetBlockCount; i++) {
-				$bar.append(templates.makeDlBlock());
-			}
-		} else if (blocksAlready > targetBlockCount) {
-			for (var i = targetBlockCount; i < blocksAlready; i++) {
-				$bar.children().last().remove();
-			}
+		for (var i = blocksAlready; i < targetBlockCount; i++) {
+			$bar.append(templates.makeDlBlock());
 		}
 	}
 })();
