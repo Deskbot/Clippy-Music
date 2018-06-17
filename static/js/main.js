@@ -62,7 +62,7 @@ function submitForm($form) {
 $(document).ready(function() {
 	loadClippy()
 	.then(function(clippy) {
-		clippy.moveTo(window.innerWidth * 3 / 4, window.innerHeight * 3 / 4);
+		clippy.moveTo(window.innerWidth * 4 / 5, window.innerHeight * 4 / 5);
 		clippy.play('Greeting');
 		clippy.speak("Hi I'm Clippit, your music server assistant.");
 		clippy.play('Alert');
