@@ -258,7 +258,8 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 
 			$buttonAncestors.first().remove(); //remove li
 
-			if ($bucket.children().length === 0) $bucket.parentsUntil('.bucket-container').parent().remove();
+			//remove bucket container for user if the bucket list contains nothing
+			if ($bucket.children().length === 0) $bucket.parent().remove();
 		});
 
 	}).fail(function(jqxhr, textStatus, err) {
