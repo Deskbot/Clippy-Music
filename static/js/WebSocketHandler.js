@@ -46,9 +46,9 @@ var WebSocketHandler = (function() {
 
 		if ($dlQueueContainer.length === 0) return;
 
-		var $dlItem = $dlQueueContainer.find('.bucket').find('[data-index=' + data.index + ']').parent();
+		var $dlBar = $dlQueueContainer.find('.bucket').find('[data-index=' + data.index + ']').siblings('.dl-bar');
 
-		if ($dlItem.length > 0) displayDlBar($dlItem, data.percent);
+		if ($dlBar.length > 0) fillDlBar($dlBar, data.percent);
 	};
 
 	WebSocketHandler.prototype.handleUploadStatus = function(data) {
@@ -203,7 +203,7 @@ var WebSocketHandler = (function() {
 
 		//put items in the dlQueue
 		for (let i = 0; i < queue.length; i++) {
-			$dlQueue.append(contentToDlItemElem(i, queue[i]));
+			$dlQueue.append(contentToDlItemElem(queue[i]));
 		}
 	};
 
@@ -236,11 +236,12 @@ var WebSocketHandler = (function() {
 		return $bucketCont;
 	}
 
-	function contentToDlItemElem(index, content) {
+	function contentToDlItemElem(content) {
 		var $dlItem = templates.makeDlItem();
 
 		$dlItem.find('.title').html(content.title);
 		$dlItem.find('.cancel').attr('data-index', content.index);
+		if (content.percent) fillDlBar($dlItem.find('.dl-bar'), content.percent);
 
 		return $dlItem;
 	}
@@ -253,10 +254,8 @@ var WebSocketHandler = (function() {
 		return tot;
 	}
 
-	function displayDlBar($li, percent) {
-		var $bar = $li.find('.dl-bar');
-
-		var fullWidth = $bar.width();
+	function fillDlBar($bar, percent) {
+		var fullWidth = 412; //based on css; can't evaluate at run time due to width being unknown if $bar is not in DOM
 		var blockWidth = 10; //based on css; they're all the same width
 		var blockPercent = blockWidth / fullWidth;
 		var blocksAlready = $bar.find('.dl-block').length;
