@@ -261,13 +261,20 @@ var WebSocketHandler = (function() {
 			$bar.removeClass('hidden');
 		}
 
-		var blocksAlready = $bar.find('.dl-block').length;
 		var fullWidth = $bar.width();
 		var blockWidth = 10; //based on css, they're all the same width
 		var blockPercent = blockWidth / fullWidth;
+		var targetBlockCount = Math.floor(percent / blockPercent);
+		var blocksAlready = $bar.find('.dl-block').length;
 
-		for (let i = blocksAlready * blockPercent; i <= percent; i += blockPercent) {
-			$bar.append(templates.makeDlBlock());
+		if (targetBlockCount > blocksAlready) {
+			for (var i = blocksAlready; i < targetBlockCount; i++) {
+				$bar.append(templates.makeDlBlock());
+			}
+		} else if (blocksAlready > targetBlockCount) {
+			for (var i = targetBlockCount; i < blocksAlready; i++) {
+				$bar.children().last().remove();
+			}
 		}
 	}
 })();
