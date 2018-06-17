@@ -26,18 +26,29 @@ var WebSocketHandler = (function() {
 
 			console.log('WebSocket data received', data);
 
-			if (data.type === 'upload')   return this.handleUploadStatus(data);
-			if (data.type === 'dl-queue') return this.handleDlQueue(data.message);
-			if (data.type === 'nickname') return this.handleNickname(data.message);
-			if (data.type === 'queue')    return this.handleQueue(data);
-			if (data.type === 'banned')   return this.handleBanned(data);
-			else                          return main.clippyAgent.speak(data.message);
+			if (data.type === 'upload')     return this.handleUploadStatus(data);
+			if (data.type === 'dl-queue')   return this.handleDlQueue(data.message);
+			if (data.type === 'nickname')   return this.handleNickname(data.message);
+			if (data.type === 'queue')      return this.handleQueue(data);
+			if (data.type === 'dl-percent') return this.handleDlPercent(data.message);
+			if (data.type === 'banned')     return this.handleBanned(data);
+			else                            return main.clippyAgent.speak(data.message);
 		}.bind(this);
 
 		this.socket.onclose = function() {
 			console.log('WebSocket closed');
 			this.reSetUp();
 		}.bind(this);
+	};
+
+	WebSocketHandler.prototype.handleDlPercent = function(data) {
+		var $dlQueueContainer = $('#dl-queue-container');
+
+		if ($dlQueueContainer.length === 0) return;
+
+		var $dlItem = $dlQueueContainer.find('.bucket').find('[data-index=' + data.index + ']').parent();
+
+		if ($dlItem.length > 0) displayDlBar($dlItem, data.percent);
 	};
 
 	WebSocketHandler.prototype.handleUploadStatus = function(data) {
@@ -233,12 +244,30 @@ var WebSocketHandler = (function() {
 
 		return $dlItem;
 	}
-})();
 
-function digestString(str) {
-	var tot = 0;
-	for (var i = 0; i < str.length; i++) {
-		tot += str.charCodeAt(i);
+	function digestString(str) {
+		var tot = 0;
+		for (var i = 0; i < str.length; i++) {
+			tot += str.charCodeAt(i);
+		}
+		return tot;
 	}
-	return tot;
-}
+
+	function displayDlBar($li, percent) {
+		percent /= 100;
+		var $bar = $li.find('.dl-bar');
+
+		if (percent > 0) {
+			$bar.removeClass('hidden');
+		}
+
+		var blocksAlready = $bar.find('.dl-block').length;
+		var fullWidth = $bar.width();
+		var blockWidth = 10; //based on css, they're all the same width
+		var blockPercent = blockWidth / fullWidth;
+
+		for (let i = blocksAlready * blockPercent; i <= percent; i += blockPercent) {
+			$bar.append(templates.makeDlBlock());
+		}
+	}
+})();

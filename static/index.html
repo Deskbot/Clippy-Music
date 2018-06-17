@@ -216,18 +216,23 @@
 				</li>
 			</template>
 
-			<template id="dl-queue-template">
-				<fieldset id="dl-queue-container">
-					<legend>YouTube Downloads In Progress</legend>
-					<ol class="bucket"></ol>
-				</fieldset>
+			<template id="dl-block-template">
+				<div class="dl-block"></div>
 			</template>
 
 			<template id="dl-item-template">
 				<li>
 					<span class="title"></span>
+					<div class="dl-bar hidden"></div>
 					<button class="cancel" data-index="">Cancel</button>
 				</li>
+			</template>
+
+			<template id="dl-queue-template">
+				<fieldset id="dl-queue-container">
+					<legend>YouTube Downloads In Progress</legend>
+					<ol class="bucket"></ol>
+				</fieldset>
 			</template>
 		</div>
 	</body>

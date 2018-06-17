@@ -201,4 +201,11 @@ ContentServer.on('dl-queue-change', (userId) => {
 	api.sendDlQueue(UserRecServ.getSockets(userId), userId);
 });
 
+ContentServer.ytDlManager.on('dl-percent-update', (uid, index, percent) => {
+	api.sendMessage(UserRecServ.getSockets(uid), 'dl-percent', {
+		index,
+		percent
+	});
+});
+
 module.exports = api;
