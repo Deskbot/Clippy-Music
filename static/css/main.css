@@ -299,6 +299,11 @@ legend {
 	margin: 8px 2px;
 }
 
+/* only the first .dl-bar should be visible */
+#dl-queue-container .bucket li:not(:nth-child(1)) .dl-bar {
+	display: none;
+}
+
 button.action {
 	margin: 2px 0;
 }
