@@ -122,8 +122,9 @@ function parseUploadForm(form, fields, files) {
 			}
 
 			//file wrong type
-			const lhs = musicFile.type.split('/')[0];
-			if (!(lhs === 'audio' || lhs === 'video')) {
+			const mimetype = musicFile.type;
+			const lhs = mimetype.split('/')[0];
+			if (!(lhs === 'audio' || lhs === 'video' || mimetype === 'application/octet-stream')) { //audio, video, or default (un-typed) file
 				throw new FileUploadError(`Music file given was of the wrong type. Audio or video was expected; "${musicFile.type}" was received instead.`, musicFile, picFile);
 			}
 
