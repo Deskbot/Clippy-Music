@@ -177,12 +177,13 @@ function parseUploadForm(form, fields, files) {
 	})
 	.catch((err) => {
 		if (err instanceof FileUploadError) {
-			console.log("trying to delete these files: ", err.files);
+			debug.log("deleting these bad uploads: ", err.files);
 			err.files.forEach((file) => {
 				if (file) return utils.deleteFile(file.path);
 			});
+		} else {
+			throw err;
 		}
-		throw err;
 	});
 }
 
