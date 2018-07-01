@@ -65,6 +65,7 @@ Controls
 
 * End the current song: hit the **'end'** key in the terminal
 * Close the server: hit **ctrl+c**
+* Closing an instance of `mpv` instantiated by the server (such as by pressing **q** in the mpv window) will cause the next track to be played.
 
 User API
 --------
