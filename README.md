@@ -35,6 +35,8 @@ cd Clippy-Music
 npm install
 ```
 
+You may wish to edit `options.js` before running the program.
+
 Run
 ---
 
