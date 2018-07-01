@@ -62,6 +62,17 @@ Update
 
 This should work. Essentially it does a `git pull` and uses `pip` or `youtube-dl` to update `youtube-dl`.
 
+Admin
+-----
+
+Admin controls are available in browser by visiting any of:
+
+* /admin
+* #admin
+* ?admin
+
+An admin API is also availabled as detailed below.
+
 Controls
 --------
 
@@ -72,56 +83,32 @@ Controls
 User API
 --------
 
-### POST /api/content/upload
-
-Use:
-```
-curl --form "var1=val1;file1=@/my/file/path" [url]/api/path
-```
-
-Variables
-* music-file (file)
-* music-url
-* image-file (file)
-* image-url
-
-For all of the following use:
+To use the API from the terminal use the following command:
 
 ```
-curl --data "var1=val1&var2=val2" [url]/api/path
+curl --data "field1=value1&field2=value2" [url]/api/path
 ```
 
-### POST /api/content/remove
-
-Variables
-* content-id
-
-### POST /api/nickname/set
-
-Variables
-* nickname
-
-Admin API
----------
-
-### POST /api/content/kill
+Except when submitting to `/api/queue/add`, in which case use the following command whether or not you are uploading a file:
 
 ```
-curl --data 'password=[AdminPassword]' [url]/api/content/kill
+curl --form "field1=@/my/file/path;field2=value2" [url]/api/content/upload
 ```
 
-A tool exists for banning and unbanning. Run `node banTool.js`. Otherwise:
+Please note the difference in term separator: `&` vs `;`.
 
-### POST /api/ban/add
-
-```
-curl --data 'id=[UserToBanIp]&password=[AdminPassword]' [url]/api/ban/add
-```
-
-### POST /api/ban/remove
-```
-curl --data 'id=[UserToUnBanIp]&password=[AdminPassword]' [url]/api/ban/remove
-```
+Method | Path                 | Variables                                                          | Effect |
+-------|----------------------|--------------------------------------------------------------------|--------|
+GET    | /api/wsport          |                                                                    | Gives the web socket port being used for front end communication
+POST   | /api/queue/add       | music-file, music-url, image-file, image-url, start-time, end-time | Add an item to the queue
+POST   | /api/queue/remove    | content-id                                                         | Removes an item from the queue
+POST   | /api/download/cancel | dl-index                                                           | Cancel a download
+POST   | /api/nickname/set    | nickname                                                           | Set your nickname
+POST   | /api/ban/add         | password, id, nickname                                             | Ban a specific player by name or id
+POST   | /api/ban/remove      | password, id                                                       | Un-Ban a specific player by id
+POST   | /api/skip            | password                                                           | Skip the current track
+POST   | /api/skipAndPenalise | password                                                           | Skip the current track and add a send the uploader to the back of the queue
+POST   | /api/skipAndBan      | password                                                           | Skip the current track and ban the uploader
 
 Contributions
 -------------
