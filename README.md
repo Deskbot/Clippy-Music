@@ -129,4 +129,4 @@ License
 -------
 
 * You must use this music server
-* You may not use this software to make money
+* You may not use any of this software to make money
