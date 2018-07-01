@@ -8,6 +8,8 @@ module.exports = {
 	uniqueCoolOff: 86400,
 
 	storageDir: '/tmp/Clippy-Music-Tmp',
+	mpvPath: 'mpv',
+	mpvArgs: ['-vo', 'xv', '-fs', '--af=drc=2:0.25'],
 	youtubeDlPath: 'youtube-dl',
 	
 	imageSizeLimit: 100000000,
