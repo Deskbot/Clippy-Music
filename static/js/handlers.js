@@ -221,6 +221,11 @@ $('#nickname-form').submit(function(e) {
 	return false;
 });
 
+$('button.file').click(function(e) {
+	var $this = $(this);
+	$this.siblings('[type=file]').click();
+});
+
 $fileInput.mousedown(function() {
 	$(this).siblings('button.file').addClass('active').focus();
 });
