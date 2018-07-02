@@ -46,7 +46,7 @@ var WebSocketHandler = (function() {
 
 		if ($dlQueueContainer.length === 0) return;
 
-		var $dlBar = $dlQueueContainer.find('.bucket').find('[data-index=' + data.index + ']').siblings('.dl-bar');
+		var $dlBar = $dlQueueContainer.find('.bucket').find('[data-cid=' + data.cid + ']').siblings('.dl-bar');
 
 		if ($dlBar.length > 0) fillDlBar($dlBar, data.percent);
 	};
@@ -240,7 +240,7 @@ var WebSocketHandler = (function() {
 		var $dlItem = templates.makeDlItem();
 
 		$dlItem.find('.title').html(content.title);
-		$dlItem.find('.cancel').attr('data-index', content.index);
+		$dlItem.find('.cancel').attr('data-cid', content.cid);
 		if (content.percent) fillDlBar($dlItem.find('.dl-bar'), content.percent);
 
 		return $dlItem;
