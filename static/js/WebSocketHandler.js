@@ -164,36 +164,18 @@ var WebSocketHandler = (function() {
 				$queue.append(contentToBucketElem(item, myId));
 			}
 		});
-
-		if (main.dlQueue.length > 0) this.handleDlQueue(main.dlQueue);
 	};
 
 	WebSocketHandler.prototype.handleDlQueue = function(queue) {
 		main.dlQueue = queue;
 
-		if (queue.length === 0) return;
-
-		var $bucketContainer = $('#my-bucket-container');
-		var myId = utils.myId();
-		
-		//user bucket container doesn't exist
-		if ($bucketContainer.length === 0) {
-			//put bucket container on screen
-			var content = {
-				userId: myId,
-				nickname: main.nickname,
-				bucket: []
-			};
-			$bucketContainer = contentToBucketElem(content, myId);
-			$('#queue').append($bucketContainer);
-		}
-
 		var $dlQueueContainer = $('#dl-queue-container');
 
-		//dlqueue doesn't exist
-		if ($dlQueueContainer.length === 0) {
-			$dlQueueContainer = templates.makeDlQueue();
-			$bucketContainer.append($dlQueueContainer);
+		if (queue.length === 0) {
+			$dlQueueContainer.addClass('hidden');
+			return;
+		} else {
+			$dlQueueContainer.removeClass('hidden');
 		}
 
 		var $dlQueue = $dlQueueContainer.find('.bucket');
@@ -255,7 +237,7 @@ var WebSocketHandler = (function() {
 	}
 
 	function fillDlBar($bar, percent) {
-		var fullWidth = 412; //based on css; can't evaluate at run time due to width being unknown if $bar is not in DOM
+		var fullWidth = 444; //based on css; can't evaluate at run time due to width being unknown if $bar is not in DOM
 		var blockWidth = 10; //based on css; they're all the same width
 		var blockPercent = blockWidth / fullWidth;
 		var blocksAlready = $bar.find('.dl-block').length;

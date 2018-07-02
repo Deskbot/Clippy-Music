@@ -67,6 +67,11 @@
 							
 							<input id="upload-media-button" type="submit" value="Upload Media">
 						</form>
+
+						<fieldset id="dl-queue-container" class="hidden">
+							<legend>Progress</legend>
+							<ol class="bucket"></ol>
+						</fieldset>
 					</div>
 				</div>
 			</section>
@@ -226,13 +231,6 @@
 					<button class="cancel" data-cid="">Cancel</button>
 					<div class="dl-bar"></div>
 				</li>
-			</template>
-
-			<template id="dl-queue-template">
-				<fieldset id="dl-queue-container">
-					<legend>YouTube Downloads In Progress</legend>
-					<ol class="bucket"></ol>
-				</fieldset>
 			</template>
 		</div>
 	</body>
