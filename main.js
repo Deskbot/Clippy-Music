@@ -129,7 +129,7 @@ function setUpControls() {
 			process.exit(0);
 		}
 
-		ContentServer.killCurrent();
+		ContentServer.end();
 	});
 
 	//stdin controls
