@@ -25,7 +25,7 @@ function adminMiddleware(req, res, next) {
 	}
 }
 
-function getFileForm(req) {
+function getFileForm(req, doCountFileProgress, onProgress) {
 	return new Promise((resolve, reject) => {
 		const form = new formidable.IncomingForm();
 		form.uploadDir = consts.dirs.httpUpload;
@@ -33,6 +33,12 @@ function getFileForm(req) {
 		form.parse(req, (err, fields, files) => {
 			if (err) reject(err);
 			resolve([form, fields, files]);
+		});
+
+		form.on('fileBegin', (fieldName, file) => {
+			if (doCountFileProgress(fieldName, file)) {
+				form.on('progress', onProgress);
+			}
 		});
 	});
 }
@@ -54,6 +60,28 @@ function getFormMiddleware(req, res, next) {
 			next();
 		}
 	});
+}
+
+function handleFileUpload(req) {
+	let updater;
+
+	return getFileForm(
+		req,
+
+		(fieldName, file) => {
+			const doRecord = fieldName === 'music-file';
+
+			if (doRecord) {
+				updater = ContentServer.uploadDlManager.add(req.ip, file.name);
+			}
+
+			return doRecord;
+		},
+
+		(sofar, total) => {
+			updater(sofar / total);
+		}
+	)
 }
 
 function handlePotentialBan(userId) {
@@ -229,7 +257,7 @@ app.get('/api/wsport', (req, res) => {
  */
 app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 	handlePotentialBan(req.ip) //assumes ip address is userId
-	.then(() => getFileForm(req))
+	.then(() => handleFileUpload(req))
 	.then(utils.spread((form, fields, files) => { //nesting in order to get the scoping right
 		return parseUploadForm(form, fields, files)
 		.then((uplData) => {
