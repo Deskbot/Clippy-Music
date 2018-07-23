@@ -49,7 +49,7 @@ function getFormMiddleware(req, res, next) {
 			req.fields = fields;
 			req.files = files;
 
-			debug.log("fields", fields);
+			debug.log('fields', fields);
 
 			next();
 		}
