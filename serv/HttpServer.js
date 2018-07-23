@@ -28,7 +28,37 @@ function adminMiddleware(req, res, next) {
 function getFileForm(req) {
 	return new Promise((resolve, reject) => {
 		const form = new formidable.IncomingForm();
+		form.maxFileSize = consts.biggestFileSizeLimit;
 		form.uploadDir = consts.dirs.httpUpload;
+
+		let lastFileField;
+		let files = [];
+
+		form.on('fileBegin', (fieldName) => {
+			lastFileField = fieldName;
+		});
+
+		form.on('file', (fieldName, file) => {
+			files.push(file);
+		});
+
+		form.on('error', (err) => {
+			let fileError;
+
+			console.log(lastFileField);
+
+			if (lastFileField == 'music-file') {
+				fileError = makeMusicTooBigError(files);
+			}
+			else if (lastFileField == 'image-file') {
+				fileError = makeImageTooBigError(files);
+			}
+			else {
+				fileError = err;
+			}
+
+			reject(fileError);
+		});
 
 		form.parse(req, (err, fields, files) => {
 			if (err) reject(err);
@@ -65,6 +95,14 @@ function handlePotentialBan(userId) {
 			resolve();
 		}
 	});
+}
+
+function makeImageTooBigError(files) {
+	return new FileUploadError(`Image file given was too big. It exceeded the limit of: "${consts.imageSizeLimStr}".`, files);
+}
+
+function makeMusicTooBigError(files) {
+	return new FileUploadError(`Music file given was too big. It exceeded the limit of: "${consts.musicSizeLimStr}".`, files);
 }
 
 function noRedirect(req) {
@@ -118,7 +156,7 @@ function parseUploadForm(form, fields, files) {
 
 			//file too big
 			if (musicFile.size > opt.musicSizeLimit) {
-				throw new FileUploadError(`Music file given was too big. It exceeded the limit of: "${consts.musicSizeLimStr}".`, musicFile, picFile);
+				throw makeMusicTooBigError([musicFile, picFile]);
 			}
 
 			//file wrong type
@@ -146,7 +184,7 @@ function parseUploadForm(form, fields, files) {
 			if (picFile.size !== 0) { //file exists
 				//file too big
 				if (picFile.size > opt.imageSizeLimit) {
-					throw new FileUploadError(`Image file given was too big. It exceeded the limit of: "${consts.imageSizeLimStr}".`, musicFile, picFile);
+					throw makeImageTooBigError([musicFile, picFile]);
 				}
 
 				//file wrong type
