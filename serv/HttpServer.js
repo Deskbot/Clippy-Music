@@ -28,7 +28,37 @@ function adminMiddleware(req, res, next) {
 function getFileForm(req) {
 	return new Promise((resolve, reject) => {
 		const form = new formidable.IncomingForm();
+		form.maxFileSize = consts.biggestFileSizeLimit;
 		form.uploadDir = consts.dirs.httpUpload;
+
+		let lastFileField;
+		let files = [];
+
+		form.on('fileBegin', (fieldName) => {
+			lastFileField = fieldName;
+		});
+
+		form.on('file', (fieldName, file) => {
+			files.push(file);
+		});
+
+		form.on('error', (err) => {
+			let fileError;
+
+			console.log(lastFileField);
+
+			if (lastFileField == 'music-file') {
+				fileError = makeMusicTooBigError(files);
+			}
+			else if (lastFileField == 'image-file') {
+				fileError = makeImageTooBigError(files);
+			}
+			else {
+				fileError = err;
+			}
+
+			reject(fileError);
+		});
 
 		form.parse(req, (err, fields, files) => {
 			if (err) reject(err);
