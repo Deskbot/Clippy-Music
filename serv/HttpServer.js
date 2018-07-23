@@ -13,7 +13,7 @@ const debug = require('../lib/debug.js');
 const opt = require('../options.js');
 const utils = require('../lib/utils.js');
 
-const { YTError } = require('../lib/errors.js');
+const { BannedError, FileUploadError, YTError } = require('../lib/errors.js');
 
 function adminMiddleware(req, res, next) {
 	if (!PasswordServer.isSet()) {
@@ -413,15 +413,3 @@ app.listen(opt.httpPort, (err) => {
 
 	console.log('Web server started');
 });
-
-//error classes
-
-class BannedError extends Error {}
-
-class FileUploadError extends Error {
-	constructor(message, ...files) {
-		super(message);
-
-		this.files = files;
-	}
-}
