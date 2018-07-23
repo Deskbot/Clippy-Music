@@ -67,6 +67,14 @@ function handlePotentialBan(userId) {
 	});
 }
 
+function makeImageTooBigError(files) {
+	return new FileUploadError(`Image file given was too big. It exceeded the limit of: "${consts.imageSizeLimStr}".`, files);
+}
+
+function makeMusicTooBigError(files) {
+	return new FileUploadError(`Music file given was too big. It exceeded the limit of: "${consts.musicSizeLimStr}".`, files);
+}
+
 function noRedirect(req) {
 	return req.fields.ajax || req.headers['user-agent'].includes('curl');
 }
@@ -118,7 +126,7 @@ function parseUploadForm(form, fields, files) {
 
 			//file too big
 			if (musicFile.size > opt.musicSizeLimit) {
-				throw new FileUploadError(`Music file given was too big. It exceeded the limit of: "${consts.musicSizeLimStr}".`, musicFile, picFile);
+				throw makeMusicTooBigError([musicFile, picFile]);
 			}
 
 			//file wrong type
@@ -146,7 +154,7 @@ function parseUploadForm(form, fields, files) {
 			if (picFile.size !== 0) { //file exists
 				//file too big
 				if (picFile.size > opt.imageSizeLimit) {
-					throw new FileUploadError(`Image file given was too big. It exceeded the limit of: "${consts.imageSizeLimStr}".`, musicFile, picFile);
+					throw makeImageTooBigError([musicFile, picFile]);
 				}
 
 				//file wrong type
