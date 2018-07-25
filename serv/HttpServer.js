@@ -95,7 +95,7 @@ function getFormMiddleware(req, res, next) {
 function handleFileUpload(req) {
 	let deleter, updater;
 
-	return getFileForm(
+	const prom = getFileForm(
 		req,
 
 		(fieldName, file) => {
@@ -113,7 +113,16 @@ function handleFileUpload(req) {
 		(sofar, total) => {
 			updater(sofar / total);
 		}
-	)
+
+	);
+
+	//handle deletion when an error occurs
+	prom.catch(() => {
+		deleter();
+	});
+
+	//pass along results and errors unaffected by internal error handling
+	return prom;
 }
 
 function handlePotentialBan(userId) {
