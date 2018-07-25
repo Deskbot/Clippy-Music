@@ -63,7 +63,7 @@ function getFormMiddleware(req, res, next) {
 }
 
 function handleFileUpload(req) {
-	let updater;
+	let deleter, updater;
 
 	return getFileForm(
 		req,
@@ -72,7 +72,9 @@ function handleFileUpload(req) {
 			const doRecord = fieldName === 'music-file';
 
 			if (doRecord) {
-				updater = ContentServer.uploadDlManager.add(req.ip, file.name);
+				const funcs = ContentServer.uploadDlManager.add(req.ip, file.name);
+				deleter = funcs.deleter;
+				updater = funcs.updater;
 			}
 
 			return doRecord;
