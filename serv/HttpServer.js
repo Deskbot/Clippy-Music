@@ -212,16 +212,6 @@ function parseUploadForm(form, fields, files) {
 		if (time = fields['end-time'])   uploadInfo.endTime   = time;
 
 		resolve(uploadInfo);
-	})
-	.catch((err) => {
-		if (err instanceof FileUploadError) {
-			debug.log("deleting these bad uploads: ", err.files);
-			err.files.forEach((file) => {
-				if (file) return utils.deleteFile(file.path);
-			});
-		} else {
-			throw err;
-		}
 	});
 }
 
@@ -283,6 +273,12 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 	}))
 	.catch((err) => {
 		if (err instanceof FileUploadError) {
+			debug.log("deleting these bad uploads: ", err.files);
+			
+			err.files.forEach((file) => {
+				if (file) return utils.deleteFile(file.path);
+			});
+
 			res.status(400).end(err.message);
 		}
 		else if (err instanceof BannedError) {
