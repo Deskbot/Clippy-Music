@@ -4,6 +4,7 @@ const Html5Entities = require('html-entities').Html5Entities;
 const q = require('q');
 
 const ContentServer = require('./ContentServer.js');
+const ProgressQueue = require('./ProgressQueue.js');
 const PasswordServer = require('./PasswordServer.js');
 const UserRecordServer = require('./UserRecordServer.js');
 const WebSocketServer = require('./WebSocketServer.js');
@@ -102,7 +103,7 @@ function handleFileUpload(req) {
 			const doRecord = fieldName === 'music-file';
 
 			if (doRecord) {
-				const funcs = ContentServer.uploadDlManager.add(req.ip, file.name);
+				const funcs = ProgressQueue.add(req.ip, file.name);
 				deleter = funcs.deleter;
 				updater = funcs.updater;
 			}
