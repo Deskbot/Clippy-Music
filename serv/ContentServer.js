@@ -2,11 +2,11 @@ const q = require('q');
 
 const ContentManager = require('../lib/ContentManager.js');
 
-const IdFactoryServer = require('./IdFactoryServer.js');
-
 const utils = require('../lib/utils.js');
 
-const cm = new ContentManager(ContentManager.recover(), IdFactoryServer);
+const idFactory = require('./IdFactoryServer.js');
+
+const cm = new ContentManager(ContentManager.recover(), idFactory);
 
 //set up
 function play() {
