@@ -4,7 +4,7 @@ const ContentManager = require('../lib/ContentManager.js');
 
 const utils = require('../lib/utils.js');
 
-const cm = new ContentManager(ContentManager.recover());
+const cm = new ContentManager(ContentManager.restore());
 
 //set up
 function play() {
