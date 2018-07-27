@@ -111,6 +111,7 @@ function setUpDirs() {
 
 function setUpControls() {
 	const ContentServer = require('./serv/ContentServer.js');
+	const IdFactoryServer = require('./serv/IdFactoryServer.js');
 	const UserRecordServer = require('./serv/UserRecordServer.js');
 
 	//when this is about to be killed
@@ -118,6 +119,7 @@ function setUpControls() {
 		console.log('Closing down Clippy-Music.');
 
 		ContentServer.store();
+		IdFactoryServer.store();
 		UserRecordServer.store();
 
 		if (ContentServer.isPlaying()) {
