@@ -2,6 +2,7 @@ const debug = require('../lib/debug.js');
 const WebSocketHandler = require('../lib/WebSocketHandler.js');
 
 const ContentServer = require('./ContentServer.js');
+const ProgressQueueServer = require('./ProgressQueueServer.js');
 const UserRecServ = require('./UserRecordServer.js');
 
 const consts = require('../lib/consts.js');
@@ -197,15 +198,8 @@ ContentServer.on('not-queued', (contentInfo, reason, content, message) => {
 	});
 });
 
-ContentServer.on('dl-queue-change', (userId) => {
+ProgressQueueServer.on('progress-update', (userId) => {
 	api.sendDlQueue(UserRecServ.getSockets(userId), userId);
-});
-
-ContentServer.ytDlManager.on('dl-percent-update', (uid, cid, percent) => {
-	api.sendMessage(UserRecServ.getSockets(uid), 'dl-percent', {
-		cid,
-		percent
-	});
 });
 
 module.exports = api;
