@@ -102,7 +102,7 @@ function handleFileUpload(req, contentId) {
 
 		if (doRecord) {
 			ProgressQueueServer.add(req.ip, contentId, file.name);
-			const updater = ProgressQueueServer.createUpdater(req.id, contentId);
+			const updater = ProgressQueueServer.createUpdater(req.ip, contentId);
 
 			return (sofar, total) => {
 				updater(sofar / total);
@@ -301,7 +301,7 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 	.then(utils.spread((form, fields, files) => { //nesting in order to get the scoping right
 		return parseUploadForm(form, fields, files)
 		.then((uplData) => {
-			uplData.contentId = contentId;
+			uplData.id = contentId;
 			uplData.userId = req.ip;
 			return ContentServer.add(uplData); //ContentServer.add would lose "this" keyword if passed as a function instead of within a lambda
 		})
