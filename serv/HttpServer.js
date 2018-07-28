@@ -4,6 +4,7 @@ const Html5Entities = require('html-entities').Html5Entities;
 const q = require('q');
 
 const ContentServer = require('./ContentServer.js');
+const IdFactoryServer = require('./IdFactoryServer.js');
 const ProgressQueueServer = require('./ProgressQueueServer.js');
 const PasswordServer = require('./PasswordServer.js');
 const UserRecordServer = require('./UserRecordServer.js');
@@ -26,7 +27,7 @@ function adminMiddleware(req, res, next) {
 	}
 }
 
-function getFileForm(req, doCountFileProgress, onProgress) {
+function getFileForm(req, generateProgressHandler) {
 	return new Promise((resolve, reject) => {
 		const form = new formidable.IncomingForm();
 		form.maxFileSize = consts.biggestFileSizeLimit;
@@ -67,7 +68,9 @@ function getFileForm(req, doCountFileProgress, onProgress) {
 		});
 
 		form.on('fileBegin', (fieldName, file) => {
-			if (doCountFileProgress(fieldName, file)) {
+			const onProgress = generateProgressHandler(fieldName, file);
+
+			if (onProgress) {
 				form.on('progress', onProgress);
 			}
 		});
@@ -93,33 +96,28 @@ function getFormMiddleware(req, res, next) {
 	});
 }
 
-function handleFileUpload(req) {
-	let deleter, updater;
+function handleFileUpload(req, contentId) {
+	const generateProgressHandler = (fieldName, file) => {
+		const doRecord = fieldName === 'music-file';
 
-	const prom = getFileForm(
-		req,
+		if (doRecord) {
+			ProgressQueueServer.add(req.ip, contentId, file.name);
+			const updater = ProgressQueueServer.createUpdater(req.id, contentId);
 
-		(fieldName, file) => {
-			const doRecord = fieldName === 'music-file';
+			return (sofar, total) => {
+				updater(sofar / total);
+			};
 
-			if (doRecord) {
-				const funcs = ProgressQueueServer.add(req.ip, file.name);
-				deleter = funcs.deleter;
-				updater = funcs.updater;
-			}
-
-			return doRecord;
-		},
-
-		(sofar, total) => {
-			updater(sofar / total);
+		} else {
+			return false;
 		}
+	}
 
-	);
+	const prom = getFileForm(req, generateProgressHandler);
 
 	//handle deletion when an error occurs
 	prom.catch(() => {
-		deleter();
+		ProgressQueueServer.delete(req.ip, contentId);
 	});
 
 	//pass along results and errors unaffected by internal error handling
@@ -296,11 +294,14 @@ app.get('/api/wsport', (req, res) => {
 	* end-time
  */
 app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
+	const contentId = IdFactoryServer.new();
+
 	handlePotentialBan(req.ip) //assumes ip address is userId
-	.then(() => handleFileUpload(req))
+	.then(() => handleFileUpload(req, contentId))
 	.then(utils.spread((form, fields, files) => { //nesting in order to get the scoping right
 		return parseUploadForm(form, fields, files)
 		.then((uplData) => {
+			uplData.contentId = contentId;
 			uplData.userId = req.ip;
 			return ContentServer.add(uplData); //ContentServer.add would lose "this" keyword if passed as a function instead of within a lambda
 		})
