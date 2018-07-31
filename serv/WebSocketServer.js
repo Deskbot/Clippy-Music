@@ -100,7 +100,7 @@ class Api {
 	}
 
 	sendDlQueue(soc, userId) {
-		const queue = ContentServer.getDownloadQueue(userId);
+		const queue = ProgressQueueServer.getQueue(userId);
 		api.sendMessage(soc, 'dl-queue', queue);
 	}
 		
