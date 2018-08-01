@@ -197,7 +197,7 @@ ContentServer.on('not-queued', (contentInfo, reason, contentType) => {
 	});
 });
 
-ProgressQueueServer.on('progress-update', (userId) => {
+ProgressQueueServer.on('dl-progress', (userId) => {
 	api.sendDlQueue(UserRecServ.getSockets(userId), userId);
 });
 

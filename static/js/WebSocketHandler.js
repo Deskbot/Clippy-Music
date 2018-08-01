@@ -26,13 +26,13 @@ var WebSocketHandler = (function() {
 
 			console.log('WebSocket data received', data);
 
-			if (data.type === 'upload')     return this.handleUploadStatus(data);
-			if (data.type === 'dl-queue')   return this.handleDlQueue(data.message);
-			if (data.type === 'nickname')   return this.handleNickname(data.message);
-			if (data.type === 'queue')      return this.handleQueue(data);
-			if (data.type === 'dl-percent') return this.handleDlPercent(data.message);
-			if (data.type === 'banned')     return this.handleBanned(data);
-			else                            return main.clippyAgent.speak(data.message);
+			if (data.type === 'upload')      return this.handleUploadStatus(data);
+			if (data.type === 'dl-queue')    return this.handleDlQueue(data.message);
+			if (data.type === 'nickname')    return this.handleNickname(data.message);
+			if (data.type === 'queue')       return this.handleQueue(data);
+			if (data.type === 'dl-progress') return this.handleDlProgress(data.message);
+			if (data.type === 'banned')      return this.handleBanned(data);
+			else                             return main.clippyAgent.speak(data.message);
 		}.bind(this);
 
 		this.socket.onclose = function() {
@@ -166,8 +166,8 @@ var WebSocketHandler = (function() {
 		});
 	};
 
-	WebSocketHandler.prototype.handleDlQueue = function(queue) {
-		main.dlQueue = queue;
+	WebSocketHandler.prototype.handleDlProgress = function(queue) {
+		storeDlProgress(queue);
 
 		var $dlQueueContainer = $('#dl-queue-container');
 
