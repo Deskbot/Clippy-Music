@@ -62,14 +62,14 @@ var WebSocketHandler = (function() {
 			main.clippyAgent.play('GetAttention');
 
 			const reason = data.message.reason;
-			const content = data.message.content;
+			const contentType = data.message.contentType;
 
 			if (reason === 'dl') {
-				if (content === 'music') {
+				if (contentType === 'music') {
 					let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
 					main.clippyAgent.speak('I was unable to download ' + what + ' due to an upload error.');
 				
-				} else if (content === 'pic') {
+				} else if (contentType === 'pic') {
 					let whatMus = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
 					let whatPic = data.message.picTitle ? utils.entitle(data.message.picTitle) : 'the picture you requested';
 					main.clippyAgent.speak('I was unable to download ' + whatPic + ' with ' + whatMus + ' due to an upload error.');
@@ -79,12 +79,12 @@ var WebSocketHandler = (function() {
 				}
 
 			} else if (reason === 'unique') {
-				if (content === 'music') {
+				if (contentType === 'music') {
 					let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
 					let when = data.message.uniqueCoolOffStr.startsWith('Infinity') ? 'already' : 'in the past ' + data.message.uniqueCoolOffStr;
 					main.clippyAgent.speak('I didn\'t queue ' + what + ' because it has been played ' + when + '.');
 				
-				} else if (content === 'pic') {
+				} else if (contentType === 'pic') {
 					let whatMus = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
 					let whatPic = data.message.picTitle ? utils.entitle(data.message.picTitle) : 'the picture you requested';
 					let when = data.message.uniqueCoolOffStr.startsWith('Infinity') ? 'already' : 'in the past ' + data.message.uniqueCoolOffStr;
