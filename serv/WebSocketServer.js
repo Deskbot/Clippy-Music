@@ -187,12 +187,11 @@ ContentServer.on('queued', (contentInfo) => {
 	api.sendQueue(UserRecServ.getSockets(contentInfo.userId));
 });
 
-ContentServer.on('not-queued', (contentInfo, reason, contentType, message) => {
+ContentServer.on('not-queued', (contentInfo, reason, contentType) => {
 	api.sendError(UserRecServ.getSockets(contentInfo.userId), 'upload', {
 		title: contentInfo.music.title,
 		picTitle: contentInfo.pic.title,
 		contentType: contentType,
-		message: message,
 		reason: reason,
 		uniqueCoolOffStr: consts.uniqueCoolOffStr,
 	});
