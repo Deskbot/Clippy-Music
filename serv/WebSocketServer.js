@@ -101,7 +101,7 @@ class Api {
 
 	sendDlQueue(soc, userId) {
 		const queue = ProgressQueueServer.getQueue(userId);
-		if (queue) api.sendMessage(soc, 'dl-progress', queue);
+		api.sendMessage(soc, 'dl-queue', queue);
 	}
 		
 	sendError(socs, type, reason) {
@@ -197,7 +197,7 @@ ContentServer.on('not-queued', (contentInfo, reason, contentType) => {
 	});
 });
 
-ProgressQueueServer.on('progress-update', (userId) => {
+ProgressQueueServer.on('dl-progress', (userId) => {
 	api.sendDlQueue(UserRecServ.getSockets(userId), userId);
 });
 
