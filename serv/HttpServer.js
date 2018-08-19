@@ -320,18 +320,23 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 				if (file) return utils.deleteFile(file.path);
 			});
 
-			res.status(400).end(err.message);
+			res.status(400);
 		}
 		else if (err instanceof BannedError) {
-			res.status(400).end('You can not upload content because you are banned.');
+			res.status(400);
 		}
 		else if (err instanceof YTError) {
-			res.status(400).end(err.message);
+			res.status(400);
 		}
 		else {
 			console.error('Unknown upload error: ', err);
-			res.status(500).end(err.message);
+			res.status(500);
 		}
+
+		res.end(JSON.stringify({
+			contentId,
+			message: err.message,
+		}));
 	});
 });
 
