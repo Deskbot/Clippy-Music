@@ -181,6 +181,7 @@ ContentServer.on('queue-update', utils.throttle(consts.queueUpdateMaxFreq, () =>
 
 ContentServer.on('queued', (contentInfo) => {
 	api.sendMessage(UserRecServ.getSockets(contentInfo.userId), 'upload', {
+		contentId: contentInfo.id,
 		title: contentInfo.music.title,
 	});
 
@@ -189,6 +190,7 @@ ContentServer.on('queued', (contentInfo) => {
 
 ContentServer.on('not-queued', (contentInfo, reason, contentType) => {
 	api.sendError(UserRecServ.getSockets(contentInfo.userId), 'upload', {
+		contentId: contentInfo.id,
 		title: contentInfo.music.title,
 		picTitle: contentInfo.pic.title,
 		contentType: contentType,
