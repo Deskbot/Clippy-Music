@@ -209,11 +209,8 @@ ProgressQueueServer.on('error', (userId, content) => {
 	api.sendMessage(UserRecServ.getSockets(contentInfo.userId), 'dl-error', content.contentId);
 });
 
-ProgressQueueServer.on('percent', (userId, content) => {
-	api.sendMessage(UserRecServ.getSockets(contentInfo.userId), 'dl-percent', {
-		contentId: content.contentId,
-		percent: content.percent,
-	});
+ProgressQueueServer.on('list', (userId, list) => {
+	api.sendMessage(UserRecServ.getSockets(contentInfo.userId), 'dl-list', list);
 });
 
 module.exports = api;
