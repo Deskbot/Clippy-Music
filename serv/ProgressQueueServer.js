@@ -5,4 +5,4 @@ const idFactory = require('../serv/IdFactoryServer.js');
 const progressQueue = new ProgressQueue(idFactory);
 progressQueue.startTransmitting();
 
-module.exports = progressQueue
+module.exports = progressQueue;
