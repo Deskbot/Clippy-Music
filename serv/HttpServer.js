@@ -117,7 +117,7 @@ function handleFileUpload(req, contentId) {
 
 	//handle deletion when an error occurs
 	prom.catch(() => {
-		ProgressQueueServer.delete(req.ip, contentId);
+		ProgressQueueServer.setError(req.ip, contentId);
 	});
 
 	//pass along results and errors unaffected by internal error handling
