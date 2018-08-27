@@ -28,11 +28,13 @@ var WebSocketHandler = (function() {
 
 			var responseMap = {
 				"upload":     function() { return this.handleUploadStatus(data); }
-				"dl-queue":   function() { return this.handleDlQueue(data.message); }
+				"dl-list":    function() { return this.handleDlQueue(data.message); }
 				"nickname":   function() { return this.handleNickname(data.message); }
 				"queue":      function() { return this.handleQueue(data); }
 				"dl-percent": function() { return this.handleDlPercent(data.message); }
 				"banned":     function() { return this.handleBanned(data); }
+				"dl-delete":  function() { return this.handleDlDelete(data.message); }
+				"dl-error":   function() { return this.handleDlError(data.message); }
 			};
 
 			if (data.type in responseMap) {
@@ -47,6 +49,14 @@ var WebSocketHandler = (function() {
 			console.log('WebSocket closed');
 			this.reSetUp();
 		}.bind(this);
+	};
+
+	WebSocketHandler.prototype.handleDlDelete = function(data) {
+
+	};
+
+	WebSocketHandler.prototype.handleDlError = function(data) {
+
 	};
 
 	WebSocketHandler.prototype.handleDlPercent = function(data) {

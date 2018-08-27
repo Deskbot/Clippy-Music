@@ -198,7 +198,7 @@ ContentServer.on('not-queued', (contentInfo, reason, contentType) => {
 });
 
 ProgressQueueServer.on('add', (userId, content) => {
-	api.sendMessage(UserRecServ.getSockets(userId), 'dl-percent', content);
+	api.sendMessage(UserRecServ.getSockets(userId), 'dl-add', content);
 });
 
 ProgressQueueServer.on('delete', (userId, contentId) => {
@@ -210,7 +210,7 @@ ProgressQueueServer.on('error', (userId, contentId) => {
 });
 
 ProgressQueueServer.on('list', (userId, list) => {
-	api.sendMessage(UserRecServ.getSockets(userId), 'dl-queue', list);
+	api.sendMessage(UserRecServ.getSockets(userId), 'dl-list', list);
 });
 
 module.exports = api;
