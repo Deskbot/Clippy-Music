@@ -26,13 +26,21 @@ var WebSocketHandler = (function() {
 
 			console.log('WebSocket data received', data);
 
-			if (data.type === 'upload')     return this.handleUploadStatus(data);
-			if (data.type === 'dl-queue')   return this.handleDlQueue(data.message);
-			if (data.type === 'nickname')   return this.handleNickname(data.message);
-			if (data.type === 'queue')      return this.handleQueue(data);
-			if (data.type === 'dl-percent') return this.handleDlPercent(data.message);
-			if (data.type === 'banned')     return this.handleBanned(data);
-			else                            return main.clippyAgent.speak(data.message);
+			var responseMap = {
+				"upload":     function() { return this.handleUploadStatus(data); }
+				"dl-queue":   function() { return this.handleDlQueue(data.message); }
+				"nickname":   function() { return this.handleNickname(data.message); }
+				"queue":      function() { return this.handleQueue(data); }
+				"dl-percent": function() { return this.handleDlPercent(data.message); }
+				"banned":     function() { return this.handleBanned(data); }
+			};
+
+			if (data.type in responseMap) {
+				responseMap[data.type]();
+			} else {
+				return main.clippyAgent.speak(data.message);
+			}
+
 		}.bind(this);
 
 		this.socket.onclose = function() {
