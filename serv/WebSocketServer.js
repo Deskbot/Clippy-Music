@@ -201,8 +201,8 @@ ProgressQueueServer.on('add', (userId, content) => {
 	api.sendMessage(UserRecServ.getSockets(userId), 'dl-percent', content);
 });
 
-ProgressQueueServer.on('delete', (userId, content) => {
-	api.sendMessage(UserRecServ.getSockets(userId), 'dl-delete', content.contentId);
+ProgressQueueServer.on('delete', (userId, contentId) => {
+	api.sendMessage(UserRecServ.getSockets(userId), 'dl-delete', contentId);
 });
 
 ProgressQueueServer.on('error', (userId, contentId) => {

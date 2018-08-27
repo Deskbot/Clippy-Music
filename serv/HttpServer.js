@@ -116,7 +116,9 @@ function handleFileUpload(req, contentId) {
 	const prom = getFileForm(req, generateProgressHandler);
 
 	//handle deletion when an error occurs
-	prom.catch(() => {
+	prom.then(() => {
+		ProgressQueueServer.delete(req.ip, contentId);
+	}, () => {
 		ProgressQueueServer.setError(req.ip, contentId);
 	});
 
