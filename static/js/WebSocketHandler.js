@@ -28,10 +28,10 @@ var WebSocketHandler = (function() {
 
 			var responseMap = {
 				"banned":     function() { return this.handleBanned(data); }
+				"dl-add":     function() { return this.handleDlAdd(data.message); }
 				"dl-delete":  function() { return this.handleDlDelete(data.message); }
 				"dl-error":   function() { return this.handleDlError(data.message); }
 				"dl-list":    function() { return this.handleDlQueue(data.message); }
-				"dl-percent": function() { return this.handleDlPercent(data.message); }
 				"nickname":   function() { return this.handleNickname(data.message); }
 				"queue":      function() { return this.handleQueue(data); }
 				"upload":     function() { return this.handleUploadStatus(data); }
@@ -51,22 +51,16 @@ var WebSocketHandler = (function() {
 		}.bind(this);
 	};
 
+	WebSocketHandler.prototype.handleDlAdd = function(data) {
+		
+	};
+
 	WebSocketHandler.prototype.handleDlDelete = function(data) {
 
 	};
 
 	WebSocketHandler.prototype.handleDlError = function(data) {
 
-	};
-
-	WebSocketHandler.prototype.handleDlPercent = function(data) {
-		var $dlQueueContainer = $('#dl-queue-container');
-
-		if ($dlQueueContainer.length === 0) return;
-
-		var $dlBar = $dlQueueContainer.find('.bucket').find('[data-cid=' + data.cid + ']').siblings('.dl-bar');
-
-		if ($dlBar.length > 0) fillDlBar($dlBar, data.percent);
 	};
 
 	WebSocketHandler.prototype.handleUploadStatus = function(data) {
