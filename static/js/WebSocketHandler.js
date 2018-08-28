@@ -7,6 +7,8 @@ var WebSocketHandler = (function() {
 			this.port = data;
 			this.setUp();
 		}.bind(this));
+
+		this.dlMap = new OrderedMap();
 	}
 
 	WebSocketHandler.prototype.setUp = function() {
