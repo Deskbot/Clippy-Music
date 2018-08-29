@@ -284,7 +284,7 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 	});
 });
 
-$('#queue').on('click', '#dl-queue-container .bucket button.cancel', function(e) {
+$('#queue').on('click', '#dl-list-container .bucket button.cancel', function(e) {
 	var $this = $(this);
 
 	$this.attr('disabled', true);
@@ -316,7 +316,7 @@ $('#queue').on('click', '#dl-queue-container .bucket button.cancel', function(e)
 			var $personalQueue = $bucket.parentsUntil('.bucket-container').parent();
 
 			//remove download queue if empty
-			if ($bucket.children().length === 0) $('#dl-queue-container').remove();
+			if ($bucket.children().length === 0) $('#dl-list-container').remove();
 
 			//if the media queue is now empty, remove it
 			if ($personalQueue.children().length === 0) $personalQueue.remove();
