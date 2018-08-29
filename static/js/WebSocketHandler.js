@@ -33,7 +33,7 @@ var WebSocketHandler = (function() {
 				"dl-add":     function() { return this.handleDlAdd(data.message); }
 				"dl-delete":  function() { return this.handleDlDelete(data.message); }
 				"dl-error":   function() { return this.handleDlError(data.message); }
-				"dl-list":    function() { return this.handleDlQueue(data.message); }
+				"dl-list":    function() { return this.handleDlList(data.message); }
 				"nickname":   function() { return this.handleNickname(data.message); }
 				"queue":      function() { return this.handleQueue(data); }
 				"upload":     function() { return this.handleUploadStatus(data); }
@@ -54,15 +54,34 @@ var WebSocketHandler = (function() {
 	};
 
 	WebSocketHandler.prototype.handleDlAdd = function(data) {
-		
+		this.dlMap.insert(data.contentId, data);
+
+		// insert new item into the DOM
 	};
 
-	WebSocketHandler.prototype.handleDlDelete = function(data) {
+	WebSocketHandler.prototype.handleDlDelete = function(contentId) {
+		this.dlMap.remove(contentId);
 
+		// remove the item from the DOM
 	};
 
-	WebSocketHandler.prototype.handleDlError = function(data) {
+	WebSocketHandler.prototype.handleDlError = function(contentId) {
+		var dlItem = this.dlMap.get(contentId);
+		dlItem.error = true;
 
+		// display existing item as an error
+	};
+
+	WebSocketHandler.prototype.handleDlList = function(list) {
+		// update internal list storage
+
+		mergeNewListWithInternal(list);
+
+		// render full list afresh
+
+		var presentList = this.dlMap.getValues();
+
+		renderDlList(presentList);
 	};
 
 	WebSocketHandler.prototype.handleUploadStatus = function(data) {
@@ -180,29 +199,6 @@ var WebSocketHandler = (function() {
 		});
 	};
 
-	WebSocketHandler.prototype.handleDlQueue = function(queue) {
-		main.dlQueue = queue;
-
-		var $dlQueueContainer = $('#dl-queue-container');
-
-		if (queue.length === 0) {
-			$dlQueueContainer.addClass('hidden');
-			return;
-		} else {
-			$dlQueueContainer.removeClass('hidden');
-		}
-
-		var $dlQueue = $dlQueueContainer.find('.bucket');
-
-		//replace old list
-		$dlQueue.empty();
-
-		//put items in the dlQueue
-		for (let i = 0; i < queue.length; i++) {
-			$dlQueue.append(contentToDlItemElem(queue[i]));
-		}
-	};
-
 	return WebSocketHandler;
 
 	function contentToBucketElem(c, myId) {
@@ -260,6 +256,41 @@ var WebSocketHandler = (function() {
 
 		for (var i = blocksAlready; i < targetBlockCount; i++) {
 			$bar.append(templates.makeDlBlock());
+		}
+	}
+
+	function mergeNewListWithInternal(list) {
+		for (var i = 0; i < list.length; i++) {
+			var item = list[i];
+			var cid = item.contentId;
+
+			if (this.dlMap.has(cid)) {
+				var itemBefore = this.dlMap.get(cid);
+				itemBefore.percent = item.percent;
+			} else {
+				this.dlMap.insert(cid, item);
+			}
+		}
+	}
+
+	function renderDlList(list) {
+		var $dlQueueContainer = $('#dl-list-container');
+
+		if (list.length === 0) {
+			$dlQueueContainer.addClass('hidden');
+			return;
+		} else {
+			$dlQueueContainer.removeClass('hidden');
+		}
+
+		var $dlQueue = $dlQueueContainer.find('.bucket');
+
+		//replace old list from DOM
+		$dlQueue.empty();
+
+		//put items in the dlQueue
+		for (let i = 0; i < list.length; i++) {
+			$dlQueue.append(contentToDlItemElem(list[i]));
 		}
 	}
 })();
