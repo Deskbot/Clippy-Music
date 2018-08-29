@@ -210,8 +210,10 @@ var WebSocketHandler = (function() {
 
 		var isMine = myId === c.userId;
 
-		if (isMine) $bucketCont.attr('id', 'my-bucket-container');
-		if (isMine) $bucketNickname.addClass('my-nickname');
+		if (isMine) {
+			$bucketCont.attr('id', 'my-bucket-container');
+			$bucketNickname.addClass('my-nickname');
+		}
 		
 		for (var i = 0; i < c.bucket.length; i++) {
 			var item = c.bucket[i];
