@@ -81,7 +81,7 @@ var WebSocketHandler = (function() {
 
 		var presentList = this.dlMap.getValues();
 
-		renderDlList(presentList);
+		DlList.renderDlList(presentList);
 	};
 
 	WebSocketHandler.prototype.handleUploadStatus = function(data) {
@@ -194,51 +194,12 @@ var WebSocketHandler = (function() {
 
 			for (var i = 0; i < data.queue.length; i++) {
 				var item = data.queue[i]; //item contains a nickname and bucket
-				$queue.append(contentToBucketElem(item, myId));
+				$queue.append(Queue.contentToBucketElem(item, myId));
 			}
 		});
 	};
 
 	return WebSocketHandler;
-
-	function contentToBucketElem(c, myId) {
-		var $bucketCont = templates.makeBucketContainer();
-		var $bucketNickname = $bucketCont.find('.nickname');
-		var $bucket = $bucketCont.find('.bucket');
-
-		$bucketNickname.html(c.nickname);
-
-		var isMine = myId === c.userId;
-
-		if (isMine) {
-			$bucketCont.attr('id', 'my-bucket-container');
-			$bucketNickname.addClass('my-nickname');
-		}
-		
-		for (var i = 0; i < c.bucket.length; i++) {
-			var item = c.bucket[i];
-			var $bucketItem = templates.makeBucketItem();
-			$bucketItem.find('.title').html(item.title);
-
-			if (isMine) {
-				$bucketItem.find('.delete').attr('data-id', item.id).removeClass('hidden');
-			}
-			
-			$bucket.append($bucketItem);
-		}
-
-		return $bucketCont;
-	}
-
-	function contentToDlItemElem(content) {
-		var $dlItem = templates.makeDlItem();
-
-		$dlItem.find('.title').html(content.title);
-		$dlItem.find('.cancel').attr('data-cid', content.cid);
-		if (content.percent) fillDlBar($dlItem.find('.dl-bar'), content.percent);
-
-		return $dlItem;
-	}
 
 	function digestString(str) {
 		var tot = 0;
@@ -246,19 +207,6 @@ var WebSocketHandler = (function() {
 			tot += str.charCodeAt(i);
 		}
 		return tot;
-	}
-
-	function fillDlBar($bar, percent) {
-		var fullWidth = 444; //based on css; can't evaluate at run time due to width being unknown if $bar is not in DOM
-		var blockWidth = 10; //based on css; they're all the same width
-		var blockPercent = blockWidth / fullWidth;
-		var blocksAlready = $bar.find('.dl-block').length;
-		
-		var targetBlockCount = Math.ceil(percent / blockPercent);
-
-		for (var i = blocksAlready; i < targetBlockCount; i++) {
-			$bar.append(templates.makeDlBlock());
-		}
 	}
 
 	function mergeNewListWithInternal(list) {
@@ -272,27 +220,6 @@ var WebSocketHandler = (function() {
 			} else {
 				this.dlMap.insert(cid, item);
 			}
-		}
-	}
-
-	function renderDlList(list) {
-		var $dlQueueContainer = $('#dl-list-container');
-
-		if (list.length === 0) {
-			$dlQueueContainer.addClass('hidden');
-			return;
-		} else {
-			$dlQueueContainer.removeClass('hidden');
-		}
-
-		var $dlQueue = $dlQueueContainer.find('.bucket');
-
-		//replace old list from DOM
-		$dlQueue.empty();
-
-		//put items in the dlQueue
-		for (let i = 0; i < list.length; i++) {
-			$dlQueue.append(contentToDlItemElem(list[i]));
 		}
 	}
 })();
