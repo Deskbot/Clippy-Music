@@ -1,6 +1,10 @@
 var DlList = {
 	$dlQueueContainer: $('#dl-list-container'),
 
+	add: function add(content) {
+		this.$dlQueueContainer.append(contentToDlItemElem(content));
+	},
+
 	contentToDlItemElem: function contentToDlItemElem(content) {
 		var $dlItem = templates.makeDlItem();
 

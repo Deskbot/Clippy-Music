@@ -55,7 +55,7 @@ var WebSocketHandler = (function() {
 	WebSocketHandler.prototype.handleDlAdd = function(data) {
 		this.dlMap.insert(data.contentId, data);
 
-		// insert new item into the DOM
+		DlList.add(data);
 	};
 
 	WebSocketHandler.prototype.handleDlDelete = function(contentId) {
