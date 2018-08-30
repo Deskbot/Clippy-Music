@@ -384,6 +384,10 @@ button.action {
     width: 8px;
 }
 
+.error .dl-block {
+	background-color: ##424142;
+}
+
 .hidden {
 	display: none;
 }

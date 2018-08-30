@@ -1,9 +1,11 @@
 var DlList = {
+	$dlQueueContainer: $('#dl-list-container'),
+
 	contentToDlItemElem: function contentToDlItemElem(content) {
 		var $dlItem = templates.makeDlItem();
 
 		$dlItem.find('.title').html(content.title);
-		$dlItem.find('.cancel').attr('data-cid', content.cid);
+		$dlItem.attr('data-cid', content.cid);
 		if (content.percent) fillDlBar($dlItem.find('.dl-bar'), content.percent);
 		if (content.error) $dlItem.addClass('error');
 
@@ -23,17 +25,19 @@ var DlList = {
 		}
 	},
 
-	renderDlList: function renderDlList(list) {
-		var $dlQueueContainer = $('#dl-list-container');
+	findDlItemElem: function findDlItemElem() {
+		this.$dlQueueContainer.find('[data-cid=' + contentId + ']');
+	},
 
+	renderDlList: function renderDlList(list) {
 		if (list.length === 0) {
-			$dlQueueContainer.addClass('hidden');
+			this.$dlQueueContainer.addClass('hidden');
 			return;
 		} else {
-			$dlQueueContainer.removeClass('hidden');
+			this.$dlQueueContainer.removeClass('hidden');
 		}
 
-		var $dlQueue = $dlQueueContainer.find('.bucket');
+		var $dlQueue = this.$dlQueueContainer.find('.bucket');
 
 		//replace old list from DOM
 		$dlQueue.empty();
@@ -45,6 +49,6 @@ var DlList = {
 	},
 
 	showError: function showError(contentId) {
-
+		findDlItemElem(contentId).addClass('error');
 	}
 }

@@ -69,7 +69,7 @@ var WebSocketHandler = (function() {
 		var dlItem = this.dlMap.get(contentId);
 		dlItem.error = true;
 
-		// display existing item as an error
+		DlList.showError(contentId);
 	};
 
 	WebSocketHandler.prototype.handleDlList = function(list) {
