@@ -178,9 +178,10 @@ var WebSocketHandler = (function() {
 				$title.attr('data-text', utils.htmlEntityDecode(data.current.title));
 				$currentNickname.html(data.current.nickname);
 
-				var wordartClass = main.goodWordArt[digestString(data.current.title + data.current.nickname) % main.goodWordArt.length]; //get a random class, but always the same for the same title
-				$currentlyPlaying.find('.wordart').removeClass().addClass('wordart').addClass(wordartClass); //remove all classes because we don't know which word art it currently is, add back 'wordart' then add the type of wordart
-
+				//get a random class, but always the same for the same title
+				var wordartClass = main.goodWordArt[digestString(data.current.title + data.current.nickname) % main.goodWordArt.length];
+				//remove all classes because we don't know which word art it currently is, add back 'wordart' then add the type of wordart
+				$currentlyPlaying.find('.wordart').removeClass().addClass('wordart').addClass(wordartClass);
 			} else {
 				$title.html('');
 				$title.attr('data-text', '');
