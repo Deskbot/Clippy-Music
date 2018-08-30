@@ -29,22 +29,21 @@ var WebSocketHandler = (function() {
 			console.log('WebSocket data received', data);
 
 			var responseMap = {
-				"banned":     function() { return this.handleBanned(data); }
-				"dl-add":     function() { return this.handleDlAdd(data.message); }
-				"dl-delete":  function() { return this.handleDlDelete(data.message); }
-				"dl-error":   function() { return this.handleDlError(data.message); }
-				"dl-list":    function() { return this.handleDlList(data.message); }
-				"nickname":   function() { return this.handleNickname(data.message); }
-				"queue":      function() { return this.handleQueue(data); }
-				"upload":     function() { return this.handleUploadStatus(data); }
+				"banned":    (function() { return this.handleBanned(data); }.bind(this)),
+				"dl-add":    (function() { return this.handleDlAdd(data.message); }.bind(this)),
+				"dl-delete": (function() { return this.handleDlDelete(data.message); }.bind(this)),
+				"dl-error":  (function() { return this.handleDlError(data.message); }.bind(this)),
+				"dl-list":   (function() { return this.handleDlList(data.message); }.bind(this)),
+				"nickname":  (function() { return this.handleNickname(data.message); }.bind(this)),
+				"queue":     (function() { return this.handleQueue(data); }.bind(this)),
+				"upload":    (function() { return this.handleUploadStatus(data); }.bind(this))
 			};
 
 			if (data.type in responseMap) {
 				responseMap[data.type]();
 			} else {
-				return main.clippyAgent.speak(data.message);
+				main.clippyAgent.speak(data.message);
 			}
-
 		}.bind(this);
 
 		this.socket.onclose = function() {
