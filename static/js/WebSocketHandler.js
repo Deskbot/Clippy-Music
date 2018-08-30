@@ -62,7 +62,7 @@ var WebSocketHandler = (function() {
 	WebSocketHandler.prototype.handleDlDelete = function(contentId) {
 		this.dlMap.remove(contentId);
 
-		// remove the item from the DOM
+		DlList.remove(contentId);
 	};
 
 	WebSocketHandler.prototype.handleDlError = function(contentId) {

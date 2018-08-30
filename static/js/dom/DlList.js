@@ -29,6 +29,10 @@ var DlList = {
 		this.$dlQueueContainer.find('[data-cid=' + contentId + ']');
 	},
 
+	remove: function remove(contentId) {
+		findDlItemElem(contentId).remove();
+	},
+
 	renderDlList: function renderDlList(list) {
 		if (list.length === 0) {
 			this.$dlQueueContainer.addClass('hidden');
