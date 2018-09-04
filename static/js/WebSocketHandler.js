@@ -74,7 +74,7 @@ var WebSocketHandler = (function() {
 	WebSocketHandler.prototype.handleDlList = function(list) {
 		// update internal list storage
 
-		mergeNewListWithInternal(list);
+		this.mergeNewListWithInternal(list);
 
 		// render full list afresh
 
@@ -199,17 +199,7 @@ var WebSocketHandler = (function() {
 		});
 	};
 
-	return WebSocketHandler;
-
-	function digestString(str) {
-		var tot = 0;
-		for (var i = 0; i < str.length; i++) {
-			tot += str.charCodeAt(i);
-		}
-		return tot;
-	}
-
-	function mergeNewListWithInternal(list) {
+	WebSocketHandler.prototype.mergeNewListWithInternal = function(list) {
 		for (var i = 0; i < list.length; i++) {
 			var item = list[i];
 			var cid = item.contentId;
@@ -221,5 +211,15 @@ var WebSocketHandler = (function() {
 				this.dlMap.insert(cid, item);
 			}
 		}
+	};
+
+	return WebSocketHandler;
+
+	function digestString(str) {
+		var tot = 0;
+		for (var i = 0; i < str.length; i++) {
+			tot += str.charCodeAt(i);
+		}
+		return tot;
 	}
 })();
