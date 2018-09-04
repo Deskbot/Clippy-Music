@@ -2,7 +2,7 @@ var DlList = {
 	$dlQueueContainer: $('#dl-list-container'),
 
 	add: function add(content) {
-		this.$dlQueueContainer.append(contentToDlItemElem(content));
+		this.$dlQueueContainer.append(this.contentToDlItemElem(content));
 	},
 
 	contentToDlItemElem: function contentToDlItemElem(content) {
@@ -29,12 +29,12 @@ var DlList = {
 		}
 	},
 
-	findDlItemElem: function findDlItemElem() {
-		this.$dlQueueContainer.find('[data-cid=' + contentId + ']');
+	findDlItemElem: function findDlItemElem(contentId) {
+		return this.$dlQueueContainer.find('[data-cid=' + contentId + ']');
 	},
 
 	remove: function remove(contentId) {
-		findDlItemElem(contentId).remove();
+		this.findDlItemElem(contentId).remove();
 	},
 
 	renderDlList: function renderDlList(list) {
@@ -52,11 +52,11 @@ var DlList = {
 
 		//put items in the dlQueue
 		for (let i = 0; i < list.length; i++) {
-			$dlQueue.append(contentToDlItemElem(list[i]));
+			$dlQueue.append(this.contentToDlItemElem(list[i]));
 		}
 	},
 
 	showError: function showError(contentId) {
-		findDlItemElem(contentId).addClass('error');
+		this.findDlItemElem(contentId).addClass('error');
 	}
 }
