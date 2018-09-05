@@ -1,8 +1,8 @@
 var DlList = {
-	$dlQueueContainer: $('#dl-list-container'),
+	$dlQueueBucket: $('#dl-list-container > .bucket'),
 
 	add: function add(content) {
-		this.$dlQueueContainer.append(this.contentToDlItemElem(content));
+		this.$dlQueueBucket.append(this.contentToDlItemElem(content));
 	},
 
 	contentToDlItemElem: function contentToDlItemElem(content) {
@@ -30,7 +30,7 @@ var DlList = {
 	},
 
 	findDlItemElem: function findDlItemElem(contentId) {
-		return this.$dlQueueContainer.find('[data-cid=' + contentId + ']');
+		return this.$dlQueueBucket.find('[data-cid=' + contentId + ']');
 	},
 
 	remove: function remove(contentId) {
@@ -39,13 +39,13 @@ var DlList = {
 
 	renderDlList: function renderDlList(list) {
 		if (list.length === 0) {
-			this.$dlQueueContainer.addClass('hidden');
+			this.$dlQueueBucket.addClass('hidden');
 			return;
 		} else {
-			this.$dlQueueContainer.removeClass('hidden');
+			this.$dlQueueBucket.removeClass('hidden');
 		}
 
-		var $dlQueue = this.$dlQueueContainer.find('.bucket');
+		var $dlQueue = this.$dlQueueBucket.find('.bucket');
 
 		//replace old list from DOM
 		$dlQueue.empty();
