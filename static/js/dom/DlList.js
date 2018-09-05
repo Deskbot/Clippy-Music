@@ -44,11 +44,10 @@ var DlList = (function() {
 		},
 
 		renderDlList: function renderDlList(list) {
-			if (list.length === 0) {
-				$dlQueueBucket.addClass('hidden');
-				return;
-			} else {
+			if (list.length !== 0) {
 				$dlQueueBucket.removeClass('hidden');
+			} else {
+				$dlQueueBucket.addClass('hidden');
 			}
 
 			var $dlQueue = $dlQueueBucket.find('.bucket');
