@@ -33,5 +33,9 @@ var OrderedMap = (function() {
 		delete this.map[key];
 	};
 
+	OrderedMap.prototype.size = function() {
+		return this.list.length;
+	};
+
 	return OrderedMap;
 })();

@@ -56,12 +56,20 @@ var WebSocketHandler = (function() {
 		this.dlMap.insert(data.contentId, data);
 
 		DlList.add(data);
+
+		if (this.dlMap.size() > 0) {
+			DlList.showContainer();
+		}
 	};
 
 	WebSocketHandler.prototype.handleDlDelete = function(contentId) {
 		this.dlMap.remove(contentId);
 
 		DlList.remove(contentId);
+
+		if (this.dlMap.size() === 0) {
+			DlList.hideContainer();
+		}
 	};
 
 	WebSocketHandler.prototype.handleDlError = function(contentId) {
