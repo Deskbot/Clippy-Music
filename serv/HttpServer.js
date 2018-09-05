@@ -109,9 +109,7 @@ function handleFileUpload(req, contentId) {
 			const updater = ProgressQueueServer.createUpdater(req.ip, contentId);
 
 			//handle deletion when an error occurs
-			promise.then(() => {
-				ProgressQueueServer.finished(req.ip, contentId);
-			}, () => {
+			promise.catch(() => {
 				ProgressQueueServer.finishedWithError(req.ip, contentId);
 			});
 
