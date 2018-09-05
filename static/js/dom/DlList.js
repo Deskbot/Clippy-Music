@@ -11,7 +11,7 @@ var DlList = (function() {
 			var $dlItem = templates.makeDlItem();
 
 			$dlItem.find('.title').html(content.title);
-			$dlItem.attr('data-cid', content.cid);
+			$dlItem.attr('data-cid', content.contentId);
 			if (content.percent) this.fillDlBar($dlItem.find('.dl-bar'), content.percent);
 			if (content.error) $dlItem.addClass('error');
 
@@ -36,7 +36,7 @@ var DlList = (function() {
 		},
 
 		hideContainer: function showContainer() {
-			$dlListContainer.addClass('hidden')
+			$dlListContainer.addClass('hidden');
 		},
 
 		remove: function remove(contentId) {
@@ -62,7 +62,7 @@ var DlList = (function() {
 		},
 
 		showContainer: function showContainer() {
-			$dlListContainer.removeClass('hidden')
+			$dlListContainer.removeClass('hidden');
 		},
 
 		showError: function showError(contentId) {
