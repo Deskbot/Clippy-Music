@@ -10,7 +10,7 @@ var DlList = {
 
 		$dlItem.find('.title').html(content.title);
 		$dlItem.attr('data-cid', content.cid);
-		if (content.percent) fillDlBar($dlItem.find('.dl-bar'), content.percent);
+		if (content.percent) this.fillDlBar($dlItem.find('.dl-bar'), content.percent);
 		if (content.error) $dlItem.addClass('error');
 
 		return $dlItem;
