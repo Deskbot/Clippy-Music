@@ -2,6 +2,11 @@ var DlList = (function() {
 	var $dlListContainer = $('#dl-list-container');
 	var $dlQueueBucket = $dlListContainer.children('.bucket');
 
+	var fullWidth = 444; //based on css; can't evaluate at run time due to width being unknown if $bar is not in DOM
+	var blockWidth = 10; //based on css; they're all the same width
+	var blockPercent = blockWidth / fullWidth;
+	var maxBlocks = Math.ceil(fullWidth / blockWidth);
+
 	var DlList = {
 		add: function add(content) {
 			$dlQueueBucket.append(this.contentToDlItemElem(content));
@@ -19,11 +24,7 @@ var DlList = (function() {
 		},
 
 		fillDlBar: function fillDlBar($bar, percent) {
-			var fullWidth = 444; //based on css; can't evaluate at run time due to width being unknown if $bar is not in DOM
-			var blockWidth = 10; //based on css; they're all the same width
-			var blockPercent = blockWidth / fullWidth;
 			var blocksAlready = $bar.find('.dl-block').length;
-			
 			var targetBlockCount = Math.ceil(percent / blockPercent);
 
 			for (var i = blocksAlready; i < targetBlockCount; i++) {
@@ -64,7 +65,18 @@ var DlList = (function() {
 		},
 
 		showError: function showError(contentId) {
-			this.findDlItemElem(contentId).addClass('error');
+			var $li =  this.findDlItemElem(contentId);
+			$li.addClass('error');
+			var $bar = $li.find('.dl-bar');
+			var $blocks = $bar.find('.dl-block');
+
+			if ($blocks == 0) {
+				// don't let an error show an empty bar
+				// main indicator of the error is the block colour
+				$bar.append(templates.makeDlBlock());
+			} else if ($blocks == maxBlocks) {
+				$bar.first().remove(); // don't let an error show a full bar
+			}
 		}
 	};
 
