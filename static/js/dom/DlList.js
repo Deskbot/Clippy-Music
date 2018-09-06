@@ -50,14 +50,12 @@ var DlList = (function() {
 				$dlQueueBucket.addClass('hidden');
 			}
 
-			var $dlQueue = $dlQueueBucket.find('.bucket');
-
 			//replace old list from DOM
-			$dlQueue.empty();
+			$dlQueueBucket.empty();
 
 			//put items in the dlQueue
 			for (let i = 0; i < list.length; i++) {
-				$dlQueue.append(this.contentToDlItemElem(list[i]));
+				$dlQueueBucket.append(this.contentToDlItemElem(list[i]));
 			}
 		},
 
