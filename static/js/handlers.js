@@ -234,6 +234,21 @@ $fileInput.focus(function() {
 	$(this).siblings('button.file').focus();
 });
 
+var $dlListContainer = $('#dl-list-container');
+$dlListContainer.on('click', 'button.dismiss', function(e) {
+	var $this = $(this);
+	var $li = $this.parent();
+
+	var contentId = $li.attr('data-cid');
+	main.dlMap.remove(contentId);
+	
+	if (main.dlMap.size() == 0) {
+		$dlListContainer.addClass('hidden');
+	}
+
+	$li.remove();
+});
+
 $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 	var $this = $(this);
 

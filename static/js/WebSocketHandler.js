@@ -7,8 +7,6 @@ var WebSocketHandler = (function() {
 			this.port = data;
 			this.setUp();
 		}.bind(this));
-
-		this.dlMap = new OrderedMap();
 	}
 
 	WebSocketHandler.prototype.setUp = function() {
@@ -53,27 +51,27 @@ var WebSocketHandler = (function() {
 	};
 
 	WebSocketHandler.prototype.handleDlAdd = function(data) {
-		this.dlMap.insert(data.contentId, data);
+		main.dlMap.insert(data.contentId, data);
 
 		DlList.add(data);
 
-		if (this.dlMap.size() > 0) {
+		if (main.dlMap.size() > 0) {
 			DlList.showContainer();
 		}
 	};
 
 	WebSocketHandler.prototype.handleDlDelete = function(contentId) {
-		this.dlMap.remove(contentId);
+		main.dlMap.remove(contentId);
 
 		DlList.remove(contentId);
 
-		if (this.dlMap.size() === 0) {
+		if (main.dlMap.size() === 0) {
 			DlList.hideContainer();
 		}
 	};
 
 	WebSocketHandler.prototype.handleDlError = function(contentId) {
-		var dlItem = this.dlMap.get(contentId);
+		var dlItem = main.dlMap.get(contentId);
 		dlItem.error = true;
 
 		DlList.showError(contentId);
@@ -86,7 +84,7 @@ var WebSocketHandler = (function() {
 
 		// render full list afresh
 
-		var presentList = this.dlMap.getValues();
+		var presentList = main.dlMap.getValues();
 
 		DlList.renderDlList(presentList);
 	};
@@ -212,11 +210,11 @@ var WebSocketHandler = (function() {
 			var item = list[i];
 			var cid = item.contentId;
 
-			if (this.dlMap.has(cid)) {
-				var itemBefore = this.dlMap.get(cid);
+			if (main.dlMap.has(cid)) {
+				var itemBefore = main.dlMap.get(cid);
 				itemBefore.percent = item.percent;
 			} else {
-				this.dlMap.insert(cid, item);
+				main.dlMap.insert(cid, item);
 			}
 		}
 	};

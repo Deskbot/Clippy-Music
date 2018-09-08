@@ -36,7 +36,7 @@ var DlList = (function() {
 			return $dlQueueBucket.find('[data-cid=' + contentId + ']');
 		},
 
-		hideContainer: function showContainer() {
+		hideContainer: function hideContainer() {
 			$dlListContainer.addClass('hidden');
 		},
 
@@ -66,16 +66,20 @@ var DlList = (function() {
 
 		showError: function showError(contentId) {
 			var $li =  this.findDlItemElem(contentId);
+
+			$li.children('.dismiss').removeClass('hidden');
+
+			// change block colour; it's the main error indicator
 			$li.addClass('error');
+
+			// don't let an error show an empty bar or a full bar
 			var $bar = $li.find('.dl-bar');
 			var $blocks = $bar.find('.dl-block');
 
-			if ($blocks == 0) {
-				// don't let an error show an empty bar
-				// main indicator of the error is the block colour
+			if ($blocks.length == 0) {
 				$bar.append(templates.makeDlBlock());
 			} else if ($blocks == maxBlocks) {
-				$bar.first().remove(); // don't let an error show a full bar
+				$bar.first().remove();
 			}
 		}
 	};
