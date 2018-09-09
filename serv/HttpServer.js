@@ -319,6 +319,8 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 	.catch((err) => {
 		if (err instanceof FileUploadError) {
 			debug.log("deleting these bad uploads: ", err.files);
+
+			ProgressQueueServer.finishedWithError(req.ip, contentId, err);
 			
 			err.files.forEach((file) => {
 				if (file) return utils.deleteFile(file.path);
