@@ -2,6 +2,7 @@ const debug = require('../lib/debug.js');
 const WebSocketHandler = require('../lib/WebSocketHandler.js');
 
 const ContentServer = require('./ContentServer.js');
+const ProgressQueueServer = require('./ProgressQueueServer.js');
 const UserRecServ = require('./UserRecordServer.js');
 
 const consts = require('../lib/consts.js');
@@ -99,8 +100,8 @@ class Api {
 	}
 
 	sendDlQueue(soc, userId) {
-		const queue = ContentServer.getDownloadQueue(userId);
-		api.sendMessage(soc, 'dl-queue', queue);
+		const queue = ProgressQueueServer.getQueue(userId);
+		api.sendMessage(soc, 'dl-list', queue);
 	}
 		
 	sendError(socs, type, reason) {
@@ -186,26 +187,30 @@ ContentServer.on('queued', (contentInfo) => {
 	api.sendQueue(UserRecServ.getSockets(contentInfo.userId));
 });
 
-ContentServer.on('not-queued', (contentInfo, reason, content, message) => {
+ContentServer.on('not-queued', (contentInfo, reason, contentType) => {
 	api.sendError(UserRecServ.getSockets(contentInfo.userId), 'upload', {
 		title: contentInfo.music.title,
 		picTitle: contentInfo.pic.title,
-		content: content,
-		message: message,
+		contentType: contentType,
 		reason: reason,
 		uniqueCoolOffStr: consts.uniqueCoolOffStr,
 	});
 });
 
-ContentServer.on('dl-queue-change', (userId) => {
-	api.sendDlQueue(UserRecServ.getSockets(userId), userId);
+ProgressQueueServer.on('add', (userId, content) => {
+	api.sendMessage(UserRecServ.getSockets(userId), 'dl-add', content);
 });
 
-ContentServer.ytDlManager.on('dl-percent-update', (uid, index, percent) => {
-	api.sendMessage(UserRecServ.getSockets(uid), 'dl-percent', {
-		index,
-		percent
-	});
+ProgressQueueServer.on('delete', (userId, contentId) => {
+	api.sendMessage(UserRecServ.getSockets(userId), 'dl-delete', contentId);
+});
+
+ProgressQueueServer.on('error', (userId, contentId) => {
+	api.sendMessage(UserRecServ.getSockets(userId), 'dl-error', contentId);
+});
+
+ProgressQueueServer.on('list', (userId, list) => {
+	api.sendMessage(UserRecServ.getSockets(userId), 'dl-list', list);
 });
 
 module.exports = api;

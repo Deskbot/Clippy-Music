@@ -17,10 +17,13 @@
 		<script type="text/javascript" src="js/partyMode.min.js" defer></script>
 
 		<script type="text/javascript" src="js/cookie.js" defer></script>
+		<script type="text/javascript" src="js/OrderedMap.js" defer></script>
 		<script type="text/javascript" src="js/handlers.js" defer></script>
 		<script type="text/javascript" src="js/main.js" defer></script>
 		<script type="text/javascript" src="js/templates.js" defer></script>
 		<script type="text/javascript" src="js/utils.js" defer></script>
+		<script type="text/javascript" src="js/dom/DlList.js" defer></script>
+		<script type="text/javascript" src="js/dom/Queue.js" defer></script>
 		<script type="text/javascript" src="js/WebSocketHandler.js" defer></script>
 
 		<link rel="shortcut icon" href="media/Clippy.ico">
@@ -67,6 +70,11 @@
 							
 							<input id="upload-media-button" type="submit" value="Upload Media">
 						</form>
+
+						<fieldset id="dl-list-container" class="hidden">
+							<legend>Progress</legend>
+							<ol class="bucket"></ol>
+						</fieldset>
 					</div>
 				</div>
 			</section>
@@ -221,18 +229,11 @@
 			</template>
 
 			<template id="dl-item-template">
-				<li>
+				<li class="dl-item" data-cid="">
 					<span class="title"></span>
-					<button class="cancel" data-index="">Cancel</button>
+					<button class="dismiss hidden">Dismiss</button>
 					<div class="dl-bar"></div>
 				</li>
-			</template>
-
-			<template id="dl-queue-template">
-				<fieldset id="dl-queue-container">
-					<legend>YouTube Downloads In Progress</legend>
-					<ol class="bucket"></ol>
-				</fieldset>
 			</template>
 		</div>
 	</body>

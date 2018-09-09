@@ -4,6 +4,8 @@ const Html5Entities = require('html-entities').Html5Entities;
 const q = require('q');
 
 const ContentServer = require('./ContentServer.js');
+const IdFactoryServer = require('./IdFactoryServer.js');
+const ProgressQueueServer = require('./ProgressQueueServer.js');
 const PasswordServer = require('./PasswordServer.js');
 const UserRecordServer = require('./UserRecordServer.js');
 const WebSocketServer = require('./WebSocketServer.js');
@@ -25,8 +27,10 @@ function adminMiddleware(req, res, next) {
 	}
 }
 
-function getFileForm(req) {
-	return new Promise((resolve, reject) => {
+function getFileForm(req, generateProgressHandler) {
+	const defer = q.defer();
+
+	setImmediate(() => {
 		const form = new formidable.IncomingForm();
 		form.maxFileSize = consts.biggestFileSizeLimit;
 		form.uploadDir = consts.dirs.httpUpload;
@@ -45,7 +49,7 @@ function getFileForm(req) {
 		form.on('error', (err) => {
 			let fileError;
 
-			console.log(lastFileField);
+			console.log(lastFileField); // !!! todo
 
 			if (lastFileField == 'music-file') {
 				fileError = makeMusicTooBigError(files);
@@ -56,15 +60,25 @@ function getFileForm(req) {
 			else {
 				fileError = err;
 			}
-
-			reject(fileError);
+			
+			defer.reject(fileError);
 		});
 
 		form.parse(req, (err, fields, files) => {
 			if (err) reject(err);
-			resolve([form, fields, files]);
+			defer.resolve([form, fields, files]);
+		});
+
+		form.on('fileBegin', (fieldName, file) => {
+			const onProgress = generateProgressHandler(defer.promise, fieldName, file);
+
+			if (onProgress) {
+				form.on('progress', onProgress);
+			}
 		});
 	});
+
+	return defer.promise;
 }
 
 function getFormMiddleware(req, res, next) {
@@ -84,6 +98,34 @@ function getFormMiddleware(req, res, next) {
 			next();
 		}
 	});
+}
+
+function handleFileUpload(req, contentId) {
+	const generateProgressHandler = (promise, fieldName, file) => {
+		const doRecord = fieldName === 'music-file';
+
+		if (doRecord) {
+			ProgressQueueServer.add(req.ip, contentId, file.name);
+			const updater = ProgressQueueServer.createUpdater(req.ip, contentId);
+
+			//handle deletion when an error occurs
+			promise.catch(() => {
+				ProgressQueueServer.finishedWithError(req.ip, contentId);
+			});
+
+			return (sofar, total) => {
+				updater(sofar / total);
+			};
+
+		} else {
+			return false;
+		}
+	}
+
+	const prom = getFileForm(req, generateProgressHandler);
+
+	//pass along results and errors unaffected by internal error handling
+	return prom;
 }
 
 function handlePotentialBan(userId) {
@@ -212,16 +254,6 @@ function parseUploadForm(form, fields, files) {
 		if (time = fields['end-time'])   uploadInfo.endTime   = time;
 
 		resolve(uploadInfo);
-	})
-	.catch((err) => {
-		if (err instanceof FileUploadError) {
-			debug.log("deleting these bad uploads: ", err.files);
-			err.files.forEach((file) => {
-				if (file) return utils.deleteFile(file.path);
-			});
-		} else {
-			throw err;
-		}
 	});
 }
 
@@ -266,11 +298,14 @@ app.get('/api/wsport', (req, res) => {
 	* end-time
  */
 app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
+	const contentId = IdFactoryServer.new();
+
 	handlePotentialBan(req.ip) //assumes ip address is userId
-	.then(() => getFileForm(req))
+	.then(() => handleFileUpload(req, contentId))
 	.then(utils.spread((form, fields, files) => { //nesting in order to get the scoping right
 		return parseUploadForm(form, fields, files)
 		.then((uplData) => {
+			uplData.id = contentId;
 			uplData.userId = req.ip;
 			return ContentServer.add(uplData); //ContentServer.add would lose "this" keyword if passed as a function instead of within a lambda
 		})
@@ -283,18 +318,29 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 	}))
 	.catch((err) => {
 		if (err instanceof FileUploadError) {
-			res.status(400).end(err.message);
+			debug.log("deleting these bad uploads: ", err.files);
+			
+			err.files.forEach((file) => {
+				if (file) return utils.deleteFile(file.path);
+			});
+
+			res.status(400);
 		}
 		else if (err instanceof BannedError) {
-			res.status(400).end('You can not upload content because you are banned.');
+			res.status(400);
 		}
 		else if (err instanceof YTError) {
-			res.status(400).end(err.message);
+			res.status(400);
 		}
 		else {
 			console.error('Unknown upload error: ', err);
-			res.status(500).end(err.message);
+			res.status(500);
 		}
+
+		res.end(JSON.stringify({
+			contentId,
+			message: err.message,
+		}));
 	});
 });
 

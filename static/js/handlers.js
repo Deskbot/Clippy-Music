@@ -234,6 +234,21 @@ $fileInput.focus(function() {
 	$(this).siblings('button.file').focus();
 });
 
+var $dlListContainer = $('#dl-list-container');
+$dlListContainer.on('click', 'button.dismiss', function(e) {
+	var $this = $(this);
+	var $li = $this.parent();
+
+	var contentId = $li.attr('data-cid');
+	main.dlMap.remove(contentId);
+	
+	if (main.dlMap.size() == 0) {
+		$dlListContainer.addClass('hidden');
+	}
+
+	$li.remove();
+});
+
 $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 	var $this = $(this);
 
@@ -284,7 +299,7 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 	});
 });
 
-$('#queue').on('click', '#dl-queue-container .bucket button.cancel', function(e) {
+$('#queue').on('click', '#dl-list-container .bucket button.cancel', function(e) {
 	var $this = $(this);
 
 	$this.attr('disabled', true);
@@ -316,7 +331,7 @@ $('#queue').on('click', '#dl-queue-container .bucket button.cancel', function(e)
 			var $personalQueue = $bucket.parentsUntil('.bucket-container').parent();
 
 			//remove download queue if empty
-			if ($bucket.children().length === 0) $('#dl-queue-container').remove();
+			if ($bucket.children().length === 0) $('#dl-list-container').remove();
 
 			//if the media queue is now empty, remove it
 			if ($personalQueue.children().length === 0) $personalQueue.remove();

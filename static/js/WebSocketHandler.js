@@ -26,13 +26,22 @@ var WebSocketHandler = (function() {
 
 			console.log('WebSocket data received', data);
 
-			if (data.type === 'upload')     return this.handleUploadStatus(data);
-			if (data.type === 'dl-queue')   return this.handleDlQueue(data.message);
-			if (data.type === 'nickname')   return this.handleNickname(data.message);
-			if (data.type === 'queue')      return this.handleQueue(data);
-			if (data.type === 'dl-percent') return this.handleDlPercent(data.message);
-			if (data.type === 'banned')     return this.handleBanned(data);
-			else                            return main.clippyAgent.speak(data.message);
+			var responseMap = {
+				"banned":    (function() { return this.handleBanned(data); }.bind(this)),
+				"dl-add":    (function() { return this.handleDlAdd(data.message); }.bind(this)),
+				"dl-delete": (function() { return this.handleDlDelete(data.message); }.bind(this)),
+				"dl-error":  (function() { return this.handleDlError(data.message); }.bind(this)),
+				"dl-list":   (function() { return this.handleDlList(data.message); }.bind(this)),
+				"nickname":  (function() { return this.handleNickname(data.message); }.bind(this)),
+				"queue":     (function() { return this.handleQueue(data); }.bind(this)),
+				"upload":    (function() { return this.handleUploadStatus(data); }.bind(this))
+			};
+
+			if (data.type in responseMap) {
+				responseMap[data.type]();
+			} else {
+				main.clippyAgent.speak(data.message);
+			}
 		}.bind(this);
 
 		this.socket.onclose = function() {
@@ -41,14 +50,43 @@ var WebSocketHandler = (function() {
 		}.bind(this);
 	};
 
-	WebSocketHandler.prototype.handleDlPercent = function(data) {
-		var $dlQueueContainer = $('#dl-queue-container');
+	WebSocketHandler.prototype.handleDlAdd = function(data) {
+		main.dlMap.insert(data.contentId, data);
 
-		if ($dlQueueContainer.length === 0) return;
+		DlList.add(data);
 
-		var $dlBar = $dlQueueContainer.find('.bucket').find('[data-index=' + data.index + ']').siblings('.dl-bar');
+		if (main.dlMap.size() > 0) {
+			DlList.showContainer();
+		}
+	};
 
-		if ($dlBar.length > 0) fillDlBar($dlBar, data.percent);
+	WebSocketHandler.prototype.handleDlDelete = function(contentId) {
+		main.dlMap.remove(contentId);
+
+		DlList.remove(contentId);
+
+		if (main.dlMap.size() === 0) {
+			DlList.hideContainer();
+		}
+	};
+
+	WebSocketHandler.prototype.handleDlError = function(contentId) {
+		var dlItem = main.dlMap.get(contentId);
+		dlItem.error = true;
+
+		DlList.showError(contentId);
+	};
+
+	WebSocketHandler.prototype.handleDlList = function(list) {
+		// update internal list storage
+
+		this.mergeNewListWithInternal(list);
+
+		// render full list afresh
+
+		var presentList = main.dlMap.getValues();
+
+		DlList.renderDlList(presentList);
 	};
 
 	WebSocketHandler.prototype.handleUploadStatus = function(data) {
@@ -62,14 +100,14 @@ var WebSocketHandler = (function() {
 			main.clippyAgent.play('GetAttention');
 
 			const reason = data.message.reason;
-			const content = data.message.content;
+			const contentType = data.message.contentType;
 
 			if (reason === 'dl') {
-				if (content === 'music') {
+				if (contentType === 'music') {
 					let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
 					main.clippyAgent.speak('I was unable to download ' + what + ' due to an upload error.');
 				
-				} else if (content === 'pic') {
+				} else if (contentType === 'pic') {
 					let whatMus = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
 					let whatPic = data.message.picTitle ? utils.entitle(data.message.picTitle) : 'the picture you requested';
 					main.clippyAgent.speak('I was unable to download ' + whatPic + ' with ' + whatMus + ' due to an upload error.');
@@ -79,12 +117,12 @@ var WebSocketHandler = (function() {
 				}
 
 			} else if (reason === 'unique') {
-				if (content === 'music') {
+				if (contentType === 'music') {
 					let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
 					let when = data.message.uniqueCoolOffStr.startsWith('Infinity') ? 'already' : 'in the past ' + data.message.uniqueCoolOffStr;
 					main.clippyAgent.speak('I didn\'t queue ' + what + ' because it has been played ' + when + '.');
 				
-				} else if (content === 'pic') {
+				} else if (contentType === 'pic') {
 					let whatMus = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
 					let whatPic = data.message.picTitle ? utils.entitle(data.message.picTitle) : 'the picture you requested';
 					let when = data.message.uniqueCoolOffStr.startsWith('Infinity') ? 'already' : 'in the past ' + data.message.uniqueCoolOffStr;
@@ -145,9 +183,10 @@ var WebSocketHandler = (function() {
 				$title.attr('data-text', utils.htmlEntityDecode(data.current.title));
 				$currentNickname.html(data.current.nickname);
 
-				var wordartClass = main.goodWordArt[digestString(data.current.title + data.current.nickname) % main.goodWordArt.length]; //get a random class, but always the same for the same title
-				$currentlyPlaying.find('.wordart').removeClass().addClass('wordart').addClass(wordartClass); //remove all classes because we don't know which word art it currently is, add back 'wordart' then add the type of wordart
-
+				//get a random class, but always the same for the same title
+				var wordartClass = main.goodWordArt[digestString(data.current.title + data.current.nickname) % main.goodWordArt.length];
+				//remove all classes because we don't know which word art it currently is, add back 'wordart' then add the type of wordart
+				$currentlyPlaying.find('.wordart').removeClass().addClass('wordart').addClass(wordartClass);
 			} else {
 				$title.html('');
 				$title.attr('data-text', '');
@@ -161,90 +200,26 @@ var WebSocketHandler = (function() {
 
 			for (var i = 0; i < data.queue.length; i++) {
 				var item = data.queue[i]; //item contains a nickname and bucket
-				$queue.append(contentToBucketElem(item, myId));
+				$queue.append(Queue.contentToBucketElem(item, myId));
 			}
 		});
-
-		if (main.dlQueue.length > 0) this.handleDlQueue(main.dlQueue);
 	};
 
-	WebSocketHandler.prototype.handleDlQueue = function(queue) {
-		main.dlQueue = queue;
+	WebSocketHandler.prototype.mergeNewListWithInternal = function(list) {
+		for (var i = 0; i < list.length; i++) {
+			var item = list[i];
+			var cid = item.contentId;
 
-		if (queue.length === 0) return;
-
-		var $bucketContainer = $('#my-bucket-container');
-		var myId = utils.myId();
-		
-		//user bucket container doesn't exist
-		if ($bucketContainer.length === 0) {
-			//put bucket container on screen
-			var content = {
-				userId: myId,
-				nickname: main.nickname,
-				bucket: []
-			};
-			$bucketContainer = contentToBucketElem(content, myId);
-			$('#queue').append($bucketContainer);
-		}
-
-		var $dlQueueContainer = $('#dl-queue-container');
-
-		//dlqueue doesn't exist
-		if ($dlQueueContainer.length === 0) {
-			$dlQueueContainer = templates.makeDlQueue();
-			$bucketContainer.append($dlQueueContainer);
-		}
-
-		var $dlQueue = $dlQueueContainer.find('.bucket');
-
-		//replace old list
-		$dlQueue.empty();
-
-		//put items in the dlQueue
-		for (let i = 0; i < queue.length; i++) {
-			$dlQueue.append(contentToDlItemElem(queue[i]));
+			if (main.dlMap.has(cid)) {
+				var itemBefore = main.dlMap.get(cid);
+				itemBefore.percent = item.percent;
+			} else {
+				main.dlMap.insert(cid, item);
+			}
 		}
 	};
 
 	return WebSocketHandler;
-
-	function contentToBucketElem(c, myId) {
-		var $bucketCont = templates.makeBucketContainer();
-		var $bucketNickname = $bucketCont.find('.nickname');
-		var $bucket = $bucketCont.find('.bucket');
-
-		$bucketNickname.html(c.nickname);
-
-		var isMine = myId === c.userId;
-
-		if (isMine) $bucketCont.attr('id', 'my-bucket-container');
-		if (isMine) $bucketNickname.addClass('my-nickname');
-		
-		for (var i = 0; i < c.bucket.length; i++) {
-			var item = c.bucket[i];
-			var $bucketItem = templates.makeBucketItem();
-			$bucketItem.find('.title').html(item.title);
-
-			if (isMine) {
-				$bucketItem.find('.delete').attr('data-id', item.id).removeClass('hidden');
-			}
-			
-			$bucket.append($bucketItem);
-		}
-
-		return $bucketCont;
-	}
-
-	function contentToDlItemElem(content) {
-		var $dlItem = templates.makeDlItem();
-
-		$dlItem.find('.title').html(content.title);
-		$dlItem.find('.cancel').attr('data-index', content.index);
-		if (content.percent) fillDlBar($dlItem.find('.dl-bar'), content.percent);
-
-		return $dlItem;
-	}
 
 	function digestString(str) {
 		var tot = 0;
@@ -252,18 +227,5 @@ var WebSocketHandler = (function() {
 			tot += str.charCodeAt(i);
 		}
 		return tot;
-	}
-
-	function fillDlBar($bar, percent) {
-		var fullWidth = 412; //based on css; can't evaluate at run time due to width being unknown if $bar is not in DOM
-		var blockWidth = 10; //based on css; they're all the same width
-		var blockPercent = blockWidth / fullWidth;
-		var blocksAlready = $bar.find('.dl-block').length;
-		
-		var targetBlockCount = Math.ceil(percent / blockPercent);
-
-		for (var i = blocksAlready; i < targetBlockCount; i++) {
-			$bar.append(templates.makeDlBlock());
-		}
 	}
 })();

@@ -1,10 +1,14 @@
 const q = require('q');
 
 const ContentManager = require('../lib/ContentManager.js');
+const YtDownloader = require('../lib/YtDownloader.js');
 
 const utils = require('../lib/utils.js');
 
-const cm = new ContentManager(ContentManager.restore());
+const IdFactoryServer = require('./IdFactoryServer.js');
+const ProgressQueueServer = require('./ProgressQueueServer.js');
+
+const cm = new ContentManager(ContentManager.recover(), IdFactoryServer, ProgressQueueServer, new YtDownloader(ProgressQueueServer));
 
 //set up
 function play() {
