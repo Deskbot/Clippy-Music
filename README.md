@@ -27,7 +27,7 @@ All available from the links given. It's also likely you can get them from your 
 
 * [eog](https://github.com/GNOME/eog)
 * [mpv](https://mpv.io/)
-* [youtube-dl](https://rg3.github.io/youtube-dl/)
+* [youtube-dl](https://rg3.github.io/youtube-dl/) Especially important that you have the latest version.
 
 ```
 git clone https://github.com/Deskbot/Clippy-Music
@@ -126,4 +126,4 @@ License
 -------
 
 * You must use this music server
-* You may not use any of this software to make money
+* You may not try or succeed in using any of this software to make any person or entity any money
