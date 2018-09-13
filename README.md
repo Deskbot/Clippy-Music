@@ -35,7 +35,14 @@ cd Clippy-Music
 npm install
 ```
 
-You may wish to edit `options.js` before running the program.
+Configuration
+-------------
+
+Certain choices about program behaviour can be found in `options.js`. If `options.js` does not exist, run the program and it will create that file from a copy of `default_options.js`.
+
+The configuration can not be changed at run time.
+
+Program updates may overwrite `default_options.js` but not `options.js`.
 
 Run
 ---

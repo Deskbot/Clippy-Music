@@ -1,4 +1,7 @@
 const fs = require('fs');
+
+setUpOptionsFile();
+
 const prompt = require('prompt');
 const readline = require('readline');
 
@@ -151,8 +154,19 @@ function setUpControls() {
 	});
 }
 
+function setUpOptionsFile() {
+	const liveFilePath = __dirname + '/options.js';
+
+	if (fs.existsSync(liveFilePath)) return;
+
+	console.log('Creating new options.js file from the default.');
+
+	const defaultFilePath = __dirname + '/default_options.js';
+	fs.copyFileSync(defaultFilePath, liveFilePath);
+}
+
 function setUpServers() {
-	require('./serv/');//do them all just in case
+	require('./serv/'); //do them all just in case
 }
 
 function validateOptions() {
