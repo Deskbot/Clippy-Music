@@ -12,8 +12,9 @@ html {
 	background: linear-gradient(0, #3A69A1 0%, #3A69A1 100%);
 	cursor: default;
 	font-family: TahomaWine, Arial, Helvetica, Verdana, cursive;
-	font-size: 12px;
+	font-size: 11px;
 	font-smooth: never;
+	letter-spacing: 0.5px;
 	-webkit-font-smoothing: none;
 	-webkit-touch-callout: none; /* iOS Safari */
 	-webkit-user-select: none; /* Safari */
@@ -88,7 +89,8 @@ h2 {
 	display: inline-block;
 	font-family: Arial;
 	font-weight: bold;
-	padding: 3px 0 0 3px;
+	margin: 1px 0;
+	padding: 3px 0 2px 3px;
 }
 
 p, li {
@@ -111,7 +113,7 @@ input {
 input, button {
 	color: black;
 	font-family: TahomaWine;
-	font-size: 12px;
+	font-size: 11px;
 }
 
 /* make this the default behaviour */
@@ -151,11 +153,11 @@ input[type=submit], button {
 	box-shadow: inset -1px -1px #848284;
 	cursor: pointer;
 	height: 21px;
-	padding: 0 6px 1px 6px;
+	padding: 0 6px 2px 6px;
 	width: auto;
 }
 
-.progress input[type=submit], button {
+button {
 	cursor: inherit;
 }
 
@@ -169,6 +171,8 @@ input[type=submit]:active, button:active, button.active {
 
 input[type=submit], button.submit {
 	display: block;
+	margin: 8px 0 auto auto;
+	min-width: 74px;
 }
 
 ul.text {
@@ -210,10 +214,6 @@ button.file {
 
 .progress .file-upload input[type=file] {
 	cursor: inherit;
-}
-
-input[type=submit], button.submit {
-	margin: 8px 0 auto auto;
 }
 
 input[type=password]:disabled, input[type=text]:disabled, input[type=url]:disabled {
