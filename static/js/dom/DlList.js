@@ -46,9 +46,9 @@ var DlList = (function() {
 
 		renderDlList: function renderDlList(list) {
 			if (list.length !== 0) {
-				$dlQueueBucket.removeClass('hidden');
+				$dlListContainer.removeClass('hidden');
 			} else {
-				$dlQueueBucket.addClass('hidden');
+				$dlListContainer.addClass('hidden');
 			}
 
 			//replace old list from DOM
