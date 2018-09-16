@@ -196,7 +196,6 @@ $('#nickname-form').submit(function(e) {
 		}
 
 	}).done(function(data, status, jqxhr) {
-		utils.displayNickname($nicknameField.val());
 		main.clippyAgent.stop();
 		main.clippyAgent.play('Congratulate');
 		main.clippyAgent.speak('Your nickname has been changed.');
