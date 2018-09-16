@@ -16,7 +16,7 @@ var utils = {
 	},
 
 	displayNickname: function(name) {
-		$('.my-nickname').text(name);
+		$('.my-nickname').html(name); //nicknames are sanitised
 	},
 
 	elemIsMoved: function($elem) {

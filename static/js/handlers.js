@@ -27,7 +27,7 @@ $section.find('.handle > .x-button').click(function(e) {
 	//offset is caused by both height and margins
 	var distance = utils.fullHeight($window);
 	
-	shiftDownElemsBelow($window, distance);
+	utils.shiftDownElemsBelow($window, distance);
 
 	$window.remove();
 });
@@ -196,7 +196,6 @@ $('#nickname-form').submit(function(e) {
 		}
 
 	}).done(function(data, status, jqxhr) {
-		utils.displayNickname($nicknameField.val());
 		main.clippyAgent.stop();
 		main.clippyAgent.play('Congratulate');
 		main.clippyAgent.speak('Your nickname has been changed.');

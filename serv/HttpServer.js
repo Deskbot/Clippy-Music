@@ -378,6 +378,7 @@ app.post('/api/nickname/set', recordUserMiddleware, (req, res) => {
 	}
 
 	UserRecordServer.setNickname(req.ip, nickname);
+	WebSocketServer.sendNicknameToUser(req.ip, nickname);
 	
 	if (noRedirect(req)) res.status(200).end('Success\n');
 	else                 res.redirect('/');

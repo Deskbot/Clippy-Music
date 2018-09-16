@@ -83,6 +83,11 @@ class Api {
 		this.sendMessage(soc, 'nickname', nickname);
 	}
 
+	sendNicknameToUser(userId, nickname) {
+		const socs = UserRecServ.getSockets(userId);
+		for (let soc of socs) this.sendNickname(soc, nickname);
+	}
+
 	sendBanned(socs) {
 		if (!socs) {
 			debug.log('no socs given');

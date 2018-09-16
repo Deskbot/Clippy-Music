@@ -6,9 +6,10 @@
 }
 
 .clippy, .clippy-balloon {
+    cursor: pointer;
+    letter-spacing: normal;
     position: fixed;
     z-index: 1000;
-    cursor: pointer;
 }
 
 .clippy-balloon {
@@ -46,7 +47,6 @@
     left: 0;
     margin-left: 50px;
     background-position: -10px 0;
-
 }
 
 .clippy-bottom-right .clippy-tip {

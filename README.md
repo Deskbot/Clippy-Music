@@ -27,7 +27,7 @@ All available from the links given. It's also likely you can get them from your 
 
 * [eog](https://github.com/GNOME/eog)
 * [mpv](https://mpv.io/)
-* [youtube-dl](https://rg3.github.io/youtube-dl/)
+* [youtube-dl](https://rg3.github.io/youtube-dl/) Especially important that you have the latest version.
 
 ```
 git clone https://github.com/Deskbot/Clippy-Music
@@ -35,7 +35,14 @@ cd Clippy-Music
 npm install
 ```
 
-You may wish to edit `options.js` before running the program.
+Configuration
+-------------
+
+Certain choices about program behaviour can be found in `options.js`. If `options.js` does not exist, run the program and it will create that file from a copy of `default_options.js`.
+
+The configuration can not be changed at run time.
+
+Program updates may overwrite `default_options.js` but not `options.js`.
 
 Run
 ---
@@ -119,4 +126,4 @@ License
 -------
 
 * You must use this music server
-* You may not use any of this software to make money
+* You may not try or succeed in using any of this software to make any person or entity any money
