@@ -30,52 +30,48 @@ function adminMiddleware(req, res, next) {
 function getFileForm(req, generateProgressHandler) {
 	const defer = q.defer();
 
-	setImmediate(() => {
-		const form = new formidable.IncomingForm();
-		form.maxFileSize = consts.biggestFileSizeLimit;
-		form.uploadDir = consts.dirs.httpUpload;
+	const form = new formidable.IncomingForm();
+	form.maxFileSize = consts.biggestFileSizeLimit;
+	form.uploadDir = consts.dirs.httpUpload;
 
-		let lastFileField;
-		let files = [];
+	let lastFileField;
+	let files = [];
 
-		form.on('fileBegin', (fieldName) => {
-			lastFileField = fieldName;
-		});
+	form.on('fileBegin', (fieldName) => {
+		lastFileField = fieldName;
+	});
 
-		form.on('file', (fieldName, file) => {
-			files.push(file);
-		});
+	form.on('file', (fieldName, file) => {
+		files.push(file);
+	});
 
-		form.on('error', (err) => {
-			let fileError;
+	form.on('error', (err) => {
+		let fileError;
 
-			console.log(lastFileField); // !!! todo
+		if (lastFileField == 'music-file') {
+			fileError = makeMusicTooBigError(files);
+		}
+		else if (lastFileField == 'image-file') {
+			fileError = makeImageTooBigError(files);
+		}
+		else {
+			fileError = err;
+		}
+		
+		defer.reject(fileError);
+	});
 
-			if (lastFileField == 'music-file') {
-				fileError = makeMusicTooBigError(files);
-			}
-			else if (lastFileField == 'image-file') {
-				fileError = makeImageTooBigError(files);
-			}
-			else {
-				fileError = err;
-			}
-			
-			defer.reject(fileError);
-		});
+	form.parse(req, (err, fields, files) => {
+		if (err) defer.reject(err);
+		defer.resolve([form, fields, files]);
+	});
 
-		form.parse(req, (err, fields, files) => {
-			if (err) reject(err);
-			defer.resolve([form, fields, files]);
-		});
+	form.on('fileBegin', (fieldName, file) => {
+		const onProgress = generateProgressHandler(defer.promise, fieldName, file);
 
-		form.on('fileBegin', (fieldName, file) => {
-			const onProgress = generateProgressHandler(defer.promise, fieldName, file);
-
-			if (onProgress) {
-				form.on('progress', onProgress);
-			}
-		});
+		if (onProgress) {
+			form.on('progress', onProgress);
+		}
 	});
 
 	return defer.promise;
@@ -109,8 +105,8 @@ function handleFileUpload(req, contentId) {
 			const updater = ProgressQueueServer.createUpdater(req.ip, contentId);
 
 			//handle deletion when an error occurs
-			promise.catch(() => {
-				ProgressQueueServer.finishedWithError(req.ip, contentId);
+			promise.catch((err) => {
+				ProgressQueueServer.finishedWithError(req.ip, contentId, err);
 			});
 
 			return (sofar, total) => {
@@ -140,11 +136,11 @@ function handlePotentialBan(userId) {
 }
 
 function makeImageTooBigError(files) {
-	return new FileUploadError(`Image file given was too big. It exceeded the limit of: "${consts.imageSizeLimStr}".`, files);
+	return new FileUploadError(`The image file you gave was too big. It exceeded the limit of: "${consts.imageSizeLimStr}".`, files);
 }
 
 function makeMusicTooBigError(files) {
-	return new FileUploadError(`Music file given was too big. It exceeded the limit of: "${consts.musicSizeLimStr}".`, files);
+	return new FileUploadError(`The music file you gave was too big. It exceeded the limit of: "${consts.musicSizeLimStr}".`, files);
 }
 
 function noRedirect(req) {
@@ -171,7 +167,7 @@ function parseUploadForm(form, fields, files) {
 		};
 
 		if (form.type != 'multipart') {
-			throw new FileUploadError('Multipart form type required. Received "' + form.type + '" instead.', musicFile, picFile);
+			throw new FileUploadError('Multipart form type required. Received "' + form.type + '" instead.', [musicFile, picFile]);
 		}
 
 		const musicFile = files['music-file'];
@@ -185,15 +181,14 @@ function parseUploadForm(form, fields, files) {
 
 		} else {
 			if (!musicFile) {
-				const err = new FileUploadError('Music file expected but not found.', musicFile, picFile);
-				console.error(err, musicFile);
+				const err = new FileUploadError('The server thinks you gave a music file but could not find it.', [musicFile, picFile]);
 				throw err;
 			}
 
 			//no file
 			if (musicFile.size === 0) {
 				utils.deleteFile(musicFile.path); //empty file will still persist otherwise, due to the way multipart form uploads work / are handled
-				throw new FileUploadError('No music file or URL given.', musicFile, picFile);
+				throw new FileUploadError('No music file or URL given.', [musicFile, picFile]);
 			}
 
 			//file too big
@@ -205,7 +200,7 @@ function parseUploadForm(form, fields, files) {
 			const mimetype = musicFile.type;
 			const lhs = mimetype.split('/')[0];
 			if (!(lhs === 'audio' || lhs === 'video' || mimetype === 'application/octet-stream')) { //audio, video, or default (un-typed) file
-				throw new FileUploadError(`Music file given was of the wrong type. Audio or video was expected; "${musicFile.type}" was received instead.`, musicFile, picFile);
+				throw new FileUploadError(`The music file given was of the wrong type. Audio or video was expected; "${musicFile.type}" was received instead.`, [musicFile, picFile]);
 			}
 
 			//success
@@ -232,7 +227,7 @@ function parseUploadForm(form, fields, files) {
 				//file wrong type
 				const lhs = picFile.type.split('/')[0];
 				if (lhs !== 'image') {
-					throw new FileUploadError(`Image file given was of the wrong type. Image was expected; "${picFile.type}" was received instead.`, musicFile, picFile);
+					throw new FileUploadError(`The image file given was of the wrong type. Image was expected; "${picFile.type}" was received instead.`, [musicFile, picFile]);
 				}
 
 				//success
@@ -322,9 +317,9 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 
 			ProgressQueueServer.finishedWithError(req.ip, contentId, err);
 			
-			err.files.forEach((file) => {
-				if (file) return utils.deleteFile(file.path);
-			});
+			if (err.files) {
+				for (let file of err.files) if (file) return utils.deleteFile(file.path);
+			}
 
 			res.status(400);
 		}
@@ -341,6 +336,7 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 
 		res.end(JSON.stringify({
 			contentId,
+			errorType: err.constructor.name,
 			message: err.message,
 		}));
 	});

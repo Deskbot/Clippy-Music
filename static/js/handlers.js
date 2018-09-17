@@ -129,19 +129,32 @@ $uploadForm.submit(function(e) {
 
 	}).done(function(data, status, jqxhr) {
 		main.clippyAgent.stop();
-		main.clippyAgent.speak('I am downloading your music. It should appear in the queue soon.');
+		main.clippyAgent.speak('I am now downloading your music.');
 
 	}).fail(function(jqxhr, textStatus, err) {
+		var responseData = JSON.parse(jqxhr.responseText);
+
 		main.clippyAgent.stop();
 
 		if (jqxhr.status >= 500 && jqxhr.status < 600) {
 			main.clippyAgent.speak('The server encountered an error trying to queue your media. Check the console and contact the developer.');
+			main.clippyAgent.play('GetArtsy');
 			console.error(jqxhr.responseText);
-		} else {
-			main.clippyAgent.speak(jqxhr.responseText);
-		}
+			
+		} else if (responseData.errorType === 'BannedError') {
+			main.clippyAgent.speak(responseData.message);
+			main.clippyAgent.play('EmptyTrash');
 
-		main.clippyAgent.play('GetArtsy');
+		} else if (responseData.errorType === 'FileUploadError') {
+			var localDlData = main.dlMap.get(responseData.contentId);
+			localDlData.error = true;
+			main.clippyAgent.speak(responseData.message);
+			main.clippyAgent.play('GetArtsy');
+
+		} else {
+			main.clippyAgent.speak(responseData.message ? responseData.message : jqxhr.responseText);
+			main.clippyAgent.play('GetArtsy');
+		}
 	
 	}).always(function() {
 		$uploadForm.find('.file-name').text('No File Chosen');
@@ -499,6 +512,7 @@ $('#ban-form').submit(function(e) {
 		main.clippyAgent.play('Congratulate');
 
 		var bannedName = id == '' ? nickname : id;
+		bannedName = '"' + bannedName + '"';
 		main.clippyAgent.speak(bannedName + ' is now banned.');
 
 	}).fail(function(jqxhr, textStatus, err) {

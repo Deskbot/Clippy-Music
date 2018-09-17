@@ -108,22 +108,6 @@ class Api {
 		const queue = ProgressQueueServer.getQueue(userId);
 		api.sendMessage(soc, 'dl-list', queue);
 	}
-		
-	sendError(socs, type, reason) {
-		if (!socs) {
-			debug.log('no socs given');
-			debug.trace();
-			return;
-		}
-
-		const message = JSON.stringify({
-			type: type,
-			success: false,
-			message: reason,
-		});
-
-		this.wsh.sendToMany(socs, message);
-	}
 
 	broadcastMessage(type, mes) {
 		const message = JSON.stringify({
@@ -184,38 +168,30 @@ ContentServer.on('queue-update', utils.throttle(consts.queueUpdateMaxFreq, () =>
 	api.broadcastQueue();
 }));
 
-ContentServer.on('queued', (contentInfo) => {
-	api.sendMessage(UserRecServ.getSockets(contentInfo.userId), 'upload', {
-		title: contentInfo.music.title,
-	});
-
-	api.sendQueue(UserRecServ.getSockets(contentInfo.userId));
-});
-
-ContentServer.on('not-queued', (contentInfo, reason, contentType) => {
-	api.sendError(UserRecServ.getSockets(contentInfo.userId), 'upload', {
-		title: contentInfo.music.title,
-		picTitle: contentInfo.pic.title,
-		contentType: contentType,
-		reason: reason,
-		uniqueCoolOffStr: consts.uniqueCoolOffStr,
-	});
-});
-
 ProgressQueueServer.on('add', (userId, content) => {
 	api.sendMessage(UserRecServ.getSockets(userId), 'dl-add', content);
 });
 
 ProgressQueueServer.on('delete', (userId, contentId) => {
-	api.sendMessage(UserRecServ.getSockets(userId), 'dl-delete', contentId);
+	const socs = UserRecServ.getSockets(userId);
+	api.sendMessage(socs, 'dl-delete', contentId);
+	api.sendQueue(socs); // also update the user's content queue to match
 });
 
-ProgressQueueServer.on('error', (userId, contentId) => {
-	api.sendMessage(UserRecServ.getSockets(userId), 'dl-error', contentId);
+//extraInfo is an optional argument
+ProgressQueueServer.on('error', (userId, contentId, error, extraInfo) => {
+	const data = {
+		contentId,
+		error,
+		errorType: error.constructor.name,
+		uniqueCoolOffStr: consts.uniqueCoolOffStr,
+	};
+
+	api.sendMessage(UserRecServ.getSockets(userId), 'dl-error', data);
 });
 
 ProgressQueueServer.on('list', (userId, list) => {
-	api.sendMessage(UserRecServ.getSockets(userId), 'dl-list', list);
+	api.sendMessage( UserRecServ.getSockets(userId), 'dl-list', list);
 });
 
 module.exports = api;

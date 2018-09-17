@@ -30,11 +30,10 @@ var WebSocketHandler = (function() {
 				"banned":    (function() { return this.handleBanned(data); }.bind(this)),
 				"dl-add":    (function() { return this.handleDlAdd(data.message); }.bind(this)),
 				"dl-delete": (function() { return this.handleDlDelete(data.message); }.bind(this)),
-				"dl-error":  (function() { return this.handleDlError(data.message); }.bind(this)),
+				"dl-error":  (function() { return this.handleDlError(data); }.bind(this)),
 				"dl-list":   (function() { return this.handleDlList(data.message); }.bind(this)),
 				"nickname":  (function() { return this.handleNickname(data.message); }.bind(this)),
-				"queue":     (function() { return this.handleQueue(data); }.bind(this)),
-				"upload":    (function() { return this.handleUploadStatus(data); }.bind(this))
+				"queue":     (function() { return this.handleQueue(data); }.bind(this))
 			};
 
 			if (data.type in responseMap) {
@@ -50,10 +49,14 @@ var WebSocketHandler = (function() {
 		}.bind(this);
 	};
 
-	WebSocketHandler.prototype.handleDlAdd = function(data) {
-		main.dlMap.insert(data.contentId, data);
+	WebSocketHandler.prototype.handleDlAdd = function(contentData) {
+		main.clippyAgent.stop();
+		main.clippyAgent.speak('I have queued ' + utils.entitle(contentData.title) + ' successfully.');
+		main.clippyAgent.play('Congratulate');
 
-		DlList.add(data);
+		main.dlMap.insert(contentData.contentId, contentData);
+
+		DlList.add(contentData);
 
 		if (main.dlMap.size() > 0) {
 			DlList.showContainer();
@@ -70,16 +73,87 @@ var WebSocketHandler = (function() {
 		}
 	};
 
-	WebSocketHandler.prototype.handleDlError = function(contentId) {
-		var dlItem = main.dlMap.get(contentId);
-		dlItem.error = true;
+	WebSocketHandler.prototype.handleDlError = function(responseData) {
+		var contentData = responseData.message;
+		var contentId = contentData.contentId;
+
+		var localDlData = main.dlMap.get(contentId);
+		localDlData.error = true;
 
 		DlList.showError(contentId);
+
+		main.clippyAgent.play('GetAttention');
+
+		var errorType = contentData.errorType;
+		var contentType = contentData.error.contentType;
+		var title = localDlData.title;
+
+		var isMusic = contentType === 'music';
+		var isPic = contentType === 'picture'
+		var whatMus = title ? utils.entitle(title) : 'the music you requested';
+		var whatPic = contentData.picTitle ? utils.entitle(contentData.picTitle) : 'the picture you requested';
+
+		var clippySays;
+
+		if (errorType === 'CancelError') {	
+			if (contentData.picTitle) { // was it given at all?
+				clippySays = 'I stopped processing ' + whatMus + ' with ' + whatPic + ' because you cancelled it.';
+			} else if (contentType === 'picture') {
+				clippySays = 'I stopped processing ' + whatMus + ' because you cancelled it.';
+			} else {
+				clippySays = 'I stopped processing your upload because you cancelled it.';
+			}
+
+		} else if (errorType === 'DownloadTooLargeError') {
+			var what;
+
+			if (isMusic || isPic) {
+				if (isMusic) {
+					what = whatMus;
+				} else {
+					what = whatPic;
+				}
+				clippySays = 'I stopped processing ' + what + ' because it was too large (exceeded ' + contentData.error.sizeLimit + ').';
+
+			} else {
+				clippySays = 'I stopped processing your upload because it was too large.';
+			}
+
+		} else if (errorType === 'DownloadWrongType') {
+			var what;
+
+			if (isMusic || isPic) {
+				if (isMusic) {
+					what = whatMus;
+				} else {
+					what = whatPic;
+				}
+				clippySays = 'I didn\'t download ' + what + ' because the file was the wrong type (' + contentData.error.expectedType + ' expected, ' + contentData.error.actualTypeDesc + ' found)';
+
+			} else {
+				clippySays = 'I didn\'t download something because a file was of the wrong type.';
+			}
+			
+		} else if (errorType === 'UniqueError') {
+			var when = contentData.error.timeWithin.startsWith('Infinity') ? 'already' : 'in the past ' + contentData.error.timeWithin;
+
+			if (isMusic) {
+				clippySays = 'I didn\'t queue ' + whatMus + ' because it has been played ' + when + '.';
+			} else if (isPic) {
+				clippySays = 'I didn\'t queue ' + whatMus + ' because ' + whatPic + ' has been shown ' + when + '.';
+			} else {
+				clippySays = 'I didn\'t queue what you requested because something wasn\'t unique.';
+			}
+
+		} else {
+			clippySays = 'An unknown problem occured while trying to queue ' + whatMus + '.';
+		}
+
+		main.clippyAgent.speak(clippySays);
 	};
 
 	WebSocketHandler.prototype.handleDlList = function(list) {
 		// update internal list storage
-
 		this.mergeNewListWithInternal(list);
 
 		// render full list afresh
@@ -87,55 +161,6 @@ var WebSocketHandler = (function() {
 		var presentList = main.dlMap.getValues();
 
 		DlList.renderDlList(presentList);
-	};
-
-	WebSocketHandler.prototype.handleUploadStatus = function(data) {
-		main.clippyAgent.stop();
-
-		if (data.success) {
-			main.clippyAgent.speak('I have queued ' + utils.entitle(data.message.title) + ' successfully.');
-			main.clippyAgent.play('Congratulate');
-
-		} else {
-			main.clippyAgent.play('GetAttention');
-
-			const reason = data.message.reason;
-			const contentType = data.message.contentType;
-
-			if (reason === 'dl') {
-				if (contentType === 'music') {
-					let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
-					main.clippyAgent.speak('I was unable to download ' + what + ' due to an upload error.');
-				
-				} else if (contentType === 'pic') {
-					let whatMus = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
-					let whatPic = data.message.picTitle ? utils.entitle(data.message.picTitle) : 'the picture you requested';
-					main.clippyAgent.speak('I was unable to download ' + whatPic + ' with ' + whatMus + ' due to an upload error.');
-				
-				} else {
-					main.clippyAgent.speak('I didn\'t queue what you requested because something wasn\'t uploaded successfully, and for some reason I don\'t know what it was.');
-				}
-
-			} else if (reason === 'unique') {
-				if (contentType === 'music') {
-					let what = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
-					let when = data.message.uniqueCoolOffStr.startsWith('Infinity') ? 'already' : 'in the past ' + data.message.uniqueCoolOffStr;
-					main.clippyAgent.speak('I didn\'t queue ' + what + ' because it has been played ' + when + '.');
-				
-				} else if (contentType === 'pic') {
-					let whatMus = data.message.title ? utils.entitle(data.message.title) : 'the music you requested';
-					let whatPic = data.message.picTitle ? utils.entitle(data.message.picTitle) : 'the picture you requested';
-					let when = data.message.uniqueCoolOffStr.startsWith('Infinity') ? 'already' : 'in the past ' + data.message.uniqueCoolOffStr;
-					main.clippyAgent.speak('I didn\'t queue ' + whatMus + ' because ' + whatPic + ' has been shown ' + when + '.');
-				
-				} else {
-					main.clippyAgent.speak('I didn\'t queue what you requested because something wasn\'t unique, and for some reason I don\'t know what it was.');
-				}
-
-			} else if (reason === 'unknown') {
-				main.clippyAgent.speak('An unknown problem occured while trying to queue ' + utils.entitle(data.message.title) + '.');
-			}
-		}
 	};
 
 	WebSocketHandler.prototype.handleNickname = function(name) {
