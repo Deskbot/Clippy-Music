@@ -48,17 +48,20 @@ Run
 ---
 
 ```
-sudo node main.js
+npm start -- [...args]
+#or
+node main.js [...args]
 ```
 
-If you intend to expose the web page on port 80 and have a web server installed such as Apache2, you may have to run `sudo service apache2 stop` or expose Clippy Music on a different port and [configure your server](https://wiwifos.blogspot.com/2017/09/apache2-port-rerouting.html) to reroute port 80 to Clippy Music's port.
+To use a port below 1024 you will need to run as root.
+
+If you have a web server installed such as Apache2 and intend to expose the web page on port 80, you may have to run `sudo service apache2 stop` or expose Clippy Music on a different port and [configure your server](https://wiwifos.blogspot.com/2017/09/apache2-port-rerouting.html) to reroute port 80 to Clippy Music's port.
 
 ### Options
 
 * `-c --clean`: deletes all stored data that would otherwise be reloaded between runs
 * `-m --mute`: all media is played muted
 * `--no-admin`: removes need for admin password, however users can't be banned
-
 
 Update
 ------
