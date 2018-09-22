@@ -67,9 +67,8 @@ function getFileForm(req, generateProgressHandler) {
 	});
 
 	form.on('fileBegin', (fieldName, file) => {
-		const onProgress = generateProgressHandler(defer.promise, fieldName, file);
-
-		if (onProgress) {
+		if (fieldName === 'music-file'){
+			const onProgress = generateProgressHandler(defer.promise, fieldName, file);
 			form.on('progress', onProgress);
 		}
 	});
@@ -97,31 +96,23 @@ function getFormMiddleware(req, res, next) {
 }
 
 function handleFileUpload(req, contentId) {
-	const generateProgressHandler = (promise, fieldName, file) => {
-		const doRecord = fieldName === 'music-file';
+	const generateProgressHandler = (promise) => {
+		ProgressQueueServer.add(req.ip, contentId, file.name);
 
-		if (doRecord) {
-			ProgressQueueServer.add(req.ip, contentId, file.name);
-			const updater = ProgressQueueServer.createUpdater(req.ip, contentId);
+		const updater = ProgressQueueServer.createUpdater(req.ip, contentId);
 
-			//handle deletion when an error occurs
-			promise.catch((err) => {
-				ProgressQueueServer.finishedWithError(req.ip, contentId, err);
-			});
+		//handle deletion when an error occurs
+		promise.catch((err) => {
+			ProgressQueueServer.finishedWithError(req.ip, contentId, err);
+		});
 
-			return (sofar, total) => {
-				updater(sofar / total);
-			};
-
-		} else {
-			return false;
-		}
+		return (sofar, total) => {
+			updater(sofar / total);
+		};
 	}
 
-	const prom = getFileForm(req, generateProgressHandler);
-
 	//pass along results and errors unaffected by internal error handling
-	return prom;
+	return getFileForm(req, generateProgressHandler);
 }
 
 function handlePotentialBan(userId) {
