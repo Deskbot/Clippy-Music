@@ -191,7 +191,7 @@ function parseUploadForm(form, fields, files) {
 			const mimetype = musicFile.type;
 			const lhs = mimetype.split('/')[0];
 			if (!(lhs === 'audio' || lhs === 'video' || mimetype === 'application/octet-stream')) { //audio, video, or default (un-typed) file
-				throw new FileUploadError(`The music file given was of the wrong type. Audio or video was expected; "${musicFile.type}" was received instead.`, [musicFile, picFile]);
+				throw new FileUploadError(`The audio or video file you gave was of the wrong type; "${musicFile.type}" was received instead.`, [musicFile, picFile]);
 			}
 
 			//success
@@ -218,7 +218,7 @@ function parseUploadForm(form, fields, files) {
 				//file wrong type
 				const lhs = picFile.type.split('/')[0];
 				if (lhs !== 'image') {
-					throw new FileUploadError(`The image file given was of the wrong type. Image was expected; "${picFile.type}" was received instead.`, [musicFile, picFile]);
+					throw new FileUploadError(`The image file you gave was of the wrong type; "${picFile.type}" was received instead.`, [musicFile, picFile]);
 				}
 
 				//success
