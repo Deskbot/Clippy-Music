@@ -67,8 +67,8 @@ function getFileForm(req, generateProgressHandler) {
 	});
 
 	form.on('fileBegin', (fieldName, file) => {
-		if (fieldName === 'music-file'){
-			const onProgress = generateProgressHandler(defer.promise, fieldName, file);
+		if (fieldName === 'music-file') {
+			const onProgress = generateProgressHandler(defer.promise, file);
 			form.on('progress', onProgress);
 		}
 	});
@@ -96,8 +96,8 @@ function getFormMiddleware(req, res, next) {
 }
 
 function handleFileUpload(req, contentId) {
-	const generateProgressHandler = (promise) => {
-		ProgressQueueServer.add(req.ip, contentId, file.name);
+	const generateProgressHandler = (promise, file) => {
+		ProgressQueueServer.setTitle(req.ip, contentId, file.name);
 
 		const updater = ProgressQueueServer.createUpdater(req.ip, contentId);
 
@@ -285,6 +285,7 @@ app.get('/api/wsport', (req, res) => {
  */
 app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 	const contentId = IdFactoryServer.new();
+	ProgressQueueServer.add(req.ip, contentId);
 
 	handlePotentialBan(req.ip) //assumes ip address is userId
 	.then(() => handleFileUpload(req, contentId))
@@ -293,13 +294,18 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 		.then((uplData) => {
 			uplData.id = contentId;
 			uplData.userId = req.ip;
-			return ContentServer.add(uplData); //ContentServer.add would lose "this" keyword if passed as a function instead of within a lambda
+			return ContentServer.add(uplData);
 		})
-		.then(() => {
-			if (fields.ajax || req.headers['user-agent'].includes('curl'))
+		.then((uplData) => {
+			if (uplData.music.isUrl) {
+				ProgressQueueServer.setTitle(req.ip, contentId, uplData.music.title);
+			}
+
+			if (fields.ajax || req.headers['user-agent'].includes('curl')) {
 				res.status(200).end('Success\n');
-			else
+			} else {
 				res.redirect('/');
+			}
 		});
 	}))
 	.catch((err) => {
