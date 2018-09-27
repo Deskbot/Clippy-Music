@@ -18,7 +18,7 @@ var DlList = (function() {
 			$dlItem.find('.title').html(content.title);
 			$dlItem.attr('data-cid', content.contentId);
 			if (content.percent) this.fillDlBar($dlItem.find('.dl-bar'), content.percent);
-			if (content.error) $dlItem.addClass('error');
+			if (content.error) this.showError($dlItem);
 
 			return $dlItem;
 		},
@@ -64,9 +64,7 @@ var DlList = (function() {
 			$dlListContainer.removeClass('hidden');
 		},
 
-		showError: function showError(contentId) {
-			var $li =  this.findDlItemElem(contentId);
-
+		showError: function showError($li) {
 			$li.children('.dismiss').removeClass('hidden');
 
 			// change block colour; it's the main error indicator

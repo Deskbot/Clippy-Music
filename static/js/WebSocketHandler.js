@@ -80,7 +80,7 @@ var WebSocketHandler = (function() {
 		var localDlData = main.dlMap.get(contentId);
 		localDlData.error = true;
 
-		DlList.showError(contentId);
+		DlList.showError(DlList.findDlItemElem(contentId));
 
 		main.clippyAgent.play('GetAttention');
 
