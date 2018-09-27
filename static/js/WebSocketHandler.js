@@ -94,6 +94,7 @@ var WebSocketHandler = (function() {
 		var whatPic = contentData.picTitle ? utils.entitle(contentData.picTitle) : 'the picture you requested';
 
 		var clippySays;
+		var clippyAnimation;
 
 		if (errorType === 'CancelError') {	
 			if (contentData.picTitle) { // was it given at all?
@@ -133,7 +134,11 @@ var WebSocketHandler = (function() {
 			} else {
 				clippySays = 'I didn\'t download something because a file was of the wrong type.';
 			}
-			
+		
+		} else if (errorType === 'FileUploadError') {
+			clippySays = contentData.errorMessage;
+			clippyAnimation = 'GetArtsy';
+		
 		} else if (errorType === 'UniqueError') {
 			var when = contentData.error.timeWithin.startsWith('Infinity') ? 'already' : 'in the past ' + contentData.error.timeWithin;
 
@@ -145,11 +150,17 @@ var WebSocketHandler = (function() {
 				clippySays = 'I didn\'t queue what you requested because something wasn\'t unique.';
 			}
 
+		} else if (errorType === 'YTError') {
+			clippySays = contentData.errorMessage;
+
 		} else {
 			clippySays = 'An unknown problem occured while trying to queue ' + whatMus + '.';
+			clippyAnimation = 'GetArtsy';
 		}
-
+		
+		main.clippyAgent.stop();
 		main.clippyAgent.speak(clippySays);
+		if (clippyAnimation) main.clippyAgent.play(clippyAnimation);
 	};
 
 	WebSocketHandler.prototype.handleDlList = function(list) {
@@ -157,7 +168,6 @@ var WebSocketHandler = (function() {
 		this.mergeNewListWithInternal(list);
 
 		// render full list afresh
-
 		var presentList = main.dlMap.getValues();
 
 		DlList.renderDlList(presentList);

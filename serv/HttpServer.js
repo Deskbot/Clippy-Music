@@ -101,11 +101,6 @@ function handleFileUpload(req, contentId) {
 
 		const updater = ProgressQueueServer.createUpdater(req.ip, contentId);
 
-		//handle deletion when an error occurs
-		promise.catch((err) => {
-			ProgressQueueServer.finishedWithError(req.ip, contentId, err);
-		});
-
 		return (sofar, total) => {
 			updater(sofar / total);
 		};
@@ -285,9 +280,9 @@ app.get('/api/wsport', (req, res) => {
  */
 app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 	const contentId = IdFactoryServer.new();
-	ProgressQueueServer.add(req.ip, contentId);
 
 	handlePotentialBan(req.ip) //assumes ip address is userId
+	.then(() => ProgressQueueServer.add(req.ip, contentId))
 	.then(() => handleFileUpload(req, contentId))
 	.then(utils.spread((form, fields, files) => { //nesting in order to get the scoping right
 		return parseUploadForm(form, fields, files)
@@ -315,24 +310,27 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 	.catch((err) => {
 		if (err instanceof FileUploadError) {
 			debug.log("deleting these bad uploads: ", err.files);
-
-			ProgressQueueServer.finishedWithError(req.ip, contentId, err);
 			
 			if (err.files) {
-				for (let file of err.files) if (file) return utils.deleteFile(file.path);
+				for (let file of err.files) {
+					if (file) return utils.deleteFile(file.path);
+				}
 			}
 
 			res.status(400);
-		}
-		else if (err instanceof BannedError) {
+			ProgressQueueServer.finishedWithError(req.ip, contentId, err);
+
+		} else if (err instanceof BannedError) {
 			res.status(400);
-		}
-		else if (err instanceof YTError) {
+
+		} else if (err instanceof YTError) {
 			res.status(400);
-		}
-		else {
+			ProgressQueueServer.finishedWithError(req.ip, contentId, err);
+
+		} else {
 			console.error('Unknown upload error: ', err);
 			res.status(500);
+			ProgressQueueServer.finishedWithError(req.ip, contentId, err);
 		}
 
 		res.end(JSON.stringify({

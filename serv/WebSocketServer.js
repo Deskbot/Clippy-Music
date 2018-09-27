@@ -183,6 +183,7 @@ ProgressQueueServer.on('error', (userId, contentId, error, extraInfo) => {
 	const data = {
 		contentId,
 		error,
+		errorMessage: error.message,
 		errorType: error.constructor.name,
 		uniqueCoolOffStr: consts.uniqueCoolOffStr,
 	};

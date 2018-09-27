@@ -134,27 +134,19 @@ $uploadForm.submit(function(e) {
 	}).fail(function(jqxhr, textStatus, err) {
 		var responseData = JSON.parse(jqxhr.responseText);
 
-		main.clippyAgent.stop();
-
 		if (jqxhr.status >= 500 && jqxhr.status < 600) {
+			main.clippyAgent.stop();
 			main.clippyAgent.speak('The server encountered an error trying to queue your media. Check the console and contact the developer.');
 			main.clippyAgent.play('GetArtsy');
 			console.error(jqxhr.responseText);
-			
+
 		} else if (responseData.errorType === 'BannedError') {
+			main.clippyAgent.stop();
 			main.clippyAgent.speak(responseData.message);
 			main.clippyAgent.play('EmptyTrash');
-
-		} else if (responseData.errorType === 'FileUploadError') {
-			var localDlData = main.dlMap.get(responseData.contentId);
-			localDlData.error = true;
-			main.clippyAgent.speak(responseData.message);
-			main.clippyAgent.play('GetArtsy');
-
-		} else {
-			main.clippyAgent.speak(responseData.message ? responseData.message : jqxhr.responseText);
-			main.clippyAgent.play('GetArtsy');
 		}
+
+		// specific error messages are given by web socket
 	
 	}).always(function() {
 		$uploadForm.find('.file-name').text('No File Chosen');
