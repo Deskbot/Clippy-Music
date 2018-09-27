@@ -48,10 +48,10 @@ function getFileForm(req, generateProgressHandler) {
 	form.on('error', (err) => {
 		let fileError;
 
-		if (lastFileField == 'music-file') {
+		if (lastFileField === 'music-file') {
 			fileError = makeMusicTooBigError(files);
 		}
-		else if (lastFileField == 'image-file') {
+		else if (lastFileField === 'image-file') {
 			fileError = makeImageTooBigError(files);
 		}
 		else {

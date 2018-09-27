@@ -91,9 +91,7 @@ $uploadForm.submit(function(e) {
 				main.clippyAgent.play('CheckingSomething');
 				return false;
 			}
-		}
-		//no music
-		else {
+		} else { //no music
 			main.clippyAgent.stop();
 			main.clippyAgent.speak('No music chosen for upload.');
 			main.clippyAgent.play('Searching');
@@ -239,6 +237,7 @@ $fileInput.focus(function() {
 });
 
 var $dlListContainer = $('#dl-list-container');
+
 $dlListContainer.on('click', 'button.dismiss', function(e) {
 	var $this = $(this);
 	var $li = $this.parent();
@@ -251,6 +250,13 @@ $dlListContainer.on('click', 'button.dismiss', function(e) {
 	}
 
 	$li.remove();
+});
+
+$dlListContainer.on('click', '.dl-item.error .dl-bar', function(e) {
+	var contentId = $(e).attr('data-cid');
+	var message = main.dlMap.get(contentId).errorMessage;
+
+	if (message) main.clippyAgent.speak(message);
 });
 
 $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
