@@ -253,10 +253,14 @@ $dlListContainer.on('click', 'button.dismiss', function(e) {
 });
 
 $dlListContainer.on('click', '.dl-item.error .dl-bar', function(e) {
-	var contentId = $(e).attr('data-cid');
+	var $dlItem = $(this).parent();
+	var contentId = $dlItem.attr('data-cid');
 	var message = main.dlMap.get(contentId).errorMessage;
 
-	if (message) main.clippyAgent.speak(message);
+	if (message) {
+		main.clippyAgent.stop();
+		main.clippyAgent.speak(message);
+	}
 });
 
 $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {

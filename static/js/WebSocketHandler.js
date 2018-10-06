@@ -160,6 +160,7 @@ var WebSocketHandler = (function() {
 		
 		main.clippyAgent.stop();
 		main.clippyAgent.speak(clippySays);
+		localDlData.errorMessage = clippySays;
 		if (clippyAnimation) main.clippyAgent.play(clippyAnimation);
 	};
 
