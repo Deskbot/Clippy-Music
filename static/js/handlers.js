@@ -126,8 +126,6 @@ $uploadForm.submit(function(e) {
 		processData: false
 
 	}).done(function(data, status, jqxhr) {
-		main.clippyAgent.stop();
-		main.clippyAgent.speak('I am now downloading your music.');
 
 	}).fail(function(jqxhr, textStatus, err) {
 		var responseData = JSON.parse(jqxhr.responseText);
@@ -200,7 +198,6 @@ $('#nickname-form').submit(function(e) {
 
 	}).done(function(data, status, jqxhr) {
 		main.clippyAgent.stop();
-		main.clippyAgent.play('Congratulate');
 		main.clippyAgent.speak('Your nickname has been changed.');
 
 	}).fail(function(jqxhr, textStatus, err) {

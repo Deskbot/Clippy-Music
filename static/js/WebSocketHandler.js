@@ -51,8 +51,7 @@ var WebSocketHandler = (function() {
 
 	WebSocketHandler.prototype.handleDlAdd = function(contentData) {
 		main.clippyAgent.stop();
-		main.clippyAgent.speak('I have queued ' + utils.entitle(contentData.title) + ' successfully.');
-		main.clippyAgent.play('Congratulate');
+		main.clippyAgent.speak('I am now downloading ' + utils.entitle(contentData.title) + '.');
 
 		main.dlMap.insert(contentData.contentId, contentData);
 
@@ -129,10 +128,10 @@ var WebSocketHandler = (function() {
 				} else {
 					what = whatPic;
 				}
-				clippySays = 'I didn\'t download ' + what + ' because the file was the wrong type (' + contentData.error.expectedType + ' expected, ' + contentData.error.actualTypeDesc + ' found)';
+				clippySays = 'I didn\'t download ' + what + ' because the file was the wrong type; "' + contentData.error.actualTypeDesc + '" was received instead.';
 
 			} else {
-				clippySays = 'I didn\'t download something because a file was of the wrong type.';
+				clippySays = 'I didn\'t download one of your files because it was of the wrong type.';
 			}
 		
 		} else if (errorType === 'FileUploadError') {
@@ -141,6 +140,7 @@ var WebSocketHandler = (function() {
 		
 		} else if (errorType === 'UniqueError') {
 			var when = contentData.error.timeWithin.startsWith('Infinity') ? 'already' : 'in the past ' + contentData.error.timeWithin;
+			clippyAnimation = 'Print';
 
 			if (isMusic) {
 				clippySays = 'I didn\'t queue ' + whatMus + ' because it has been played ' + when + '.';
