@@ -120,7 +120,7 @@ var WebSocketHandler = (function() {
 				clippySays = 'I stopped processing your upload because it was too large.';
 			}
 
-		} else if (errorType === 'DownloadWrongType') {
+		} else if (errorType === 'DownloadWrongTypeError') {
 			var what;
 
 			if (isMusic || isPic) {

@@ -15,7 +15,7 @@ const debug = require('../lib/debug.js');
 const opt = require('../options.js');
 const utils = require('../lib/utils.js');
 
-const { BannedError, FileUploadError, YTError } = require('../lib/errors.js');
+const { BannedError, FileUploadError, UniqueError, YTError } = require('../lib/errors.js');
 
 function adminMiddleware(req, res, next) {
 	if (!PasswordServer.isSet()) {
@@ -322,6 +322,10 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 
 		} else if (err instanceof BannedError) {
 			res.status(400);
+
+		} else if (err instanceof UniqueError) {
+			res.status(400);
+			ProgressQueueServer.finishedWithError(req.ip, contentId, err);
 
 		} else if (err instanceof YTError) {
 			res.status(400);
