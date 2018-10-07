@@ -15,7 +15,7 @@ const debug = require('../lib/debug.js');
 const opt = require('../options.js');
 const utils = require('../lib/utils.js');
 
-const { BannedError, FileUploadError, YTError } = require('../lib/errors.js');
+const { BannedError, FileUploadError, UniqueError, YTError } = require('../lib/errors.js');
 
 function adminMiddleware(req, res, next) {
 	if (!PasswordServer.isSet()) {
@@ -48,10 +48,10 @@ function getFileForm(req, generateProgressHandler) {
 	form.on('error', (err) => {
 		let fileError;
 
-		if (lastFileField == 'music-file') {
+		if (lastFileField === 'music-file') {
 			fileError = makeMusicTooBigError(files);
 		}
-		else if (lastFileField == 'image-file') {
+		else if (lastFileField === 'image-file') {
 			fileError = makeImageTooBigError(files);
 		}
 		else {
@@ -67,9 +67,8 @@ function getFileForm(req, generateProgressHandler) {
 	});
 
 	form.on('fileBegin', (fieldName, file) => {
-		const onProgress = generateProgressHandler(defer.promise, fieldName, file);
-
-		if (onProgress) {
+		if (fieldName === 'music-file' && file && file.name) {
+			const onProgress = generateProgressHandler(defer.promise, file);
 			form.on('progress', onProgress);
 		}
 	});
@@ -97,31 +96,18 @@ function getFormMiddleware(req, res, next) {
 }
 
 function handleFileUpload(req, contentId) {
-	const generateProgressHandler = (promise, fieldName, file) => {
-		const doRecord = fieldName === 'music-file';
+	const generateProgressHandler = (promise, file) => {
+		ProgressQueueServer.setTitle(req.ip, contentId, file.name);
 
-		if (doRecord) {
-			ProgressQueueServer.add(req.ip, contentId, file.name);
-			const updater = ProgressQueueServer.createUpdater(req.ip, contentId);
+		const updater = ProgressQueueServer.createUpdater(req.ip, contentId);
 
-			//handle deletion when an error occurs
-			promise.catch((err) => {
-				ProgressQueueServer.finishedWithError(req.ip, contentId, err);
-			});
-
-			return (sofar, total) => {
-				updater(sofar / total);
-			};
-
-		} else {
-			return false;
-		}
+		return (sofar, total) => {
+			updater(sofar / total);
+		};
 	}
 
-	const prom = getFileForm(req, generateProgressHandler);
-
 	//pass along results and errors unaffected by internal error handling
-	return prom;
+	return getFileForm(req, generateProgressHandler);
 }
 
 function handlePotentialBan(userId) {
@@ -200,7 +186,7 @@ function parseUploadForm(form, fields, files) {
 			const mimetype = musicFile.type;
 			const lhs = mimetype.split('/')[0];
 			if (!(lhs === 'audio' || lhs === 'video' || mimetype === 'application/octet-stream')) { //audio, video, or default (un-typed) file
-				throw new FileUploadError(`The music file given was of the wrong type. Audio or video was expected; "${musicFile.type}" was received instead.`, [musicFile, picFile]);
+				throw new FileUploadError(`The audio or video file you gave was of the wrong type; "${musicFile.type}" was received instead.`, [musicFile, picFile]);
 			}
 
 			//success
@@ -227,7 +213,7 @@ function parseUploadForm(form, fields, files) {
 				//file wrong type
 				const lhs = picFile.type.split('/')[0];
 				if (lhs !== 'image') {
-					throw new FileUploadError(`The image file given was of the wrong type. Image was expected; "${picFile.type}" was received instead.`, [musicFile, picFile]);
+					throw new FileUploadError(`The image file you gave was of the wrong type; "${picFile.type}" was received instead.`, [musicFile, picFile]);
 				}
 
 				//success
@@ -296,42 +282,59 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 	const contentId = IdFactoryServer.new();
 
 	handlePotentialBan(req.ip) //assumes ip address is userId
+	.then(() => ProgressQueueServer.add(req.ip, contentId))
 	.then(() => handleFileUpload(req, contentId))
 	.then(utils.spread((form, fields, files) => { //nesting in order to get the scoping right
 		return parseUploadForm(form, fields, files)
 		.then((uplData) => {
+			if (uplData.music.isUrl) {
+				ProgressQueueServer.setTitle(req.ip, contentId, uplData.music.path);
+			}
+
 			uplData.id = contentId;
 			uplData.userId = req.ip;
-			return ContentServer.add(uplData); //ContentServer.add would lose "this" keyword if passed as a function instead of within a lambda
+			return ContentServer.add(uplData);
 		})
-		.then(() => {
-			if (fields.ajax || req.headers['user-agent'].includes('curl'))
+		.then((uplData) => {
+			if (uplData.music.isUrl) {
+				ProgressQueueServer.setTitle(req.ip, contentId, uplData.music.title);
+			}
+
+			if (fields.ajax || req.headers['user-agent'].includes('curl')) {
 				res.status(200).end('Success\n');
-			else
+			} else {
 				res.redirect('/');
+			}
 		});
 	}))
 	.catch((err) => {
 		if (err instanceof FileUploadError) {
 			debug.log("deleting these bad uploads: ", err.files);
-
-			ProgressQueueServer.finishedWithError(req.ip, contentId, err);
 			
 			if (err.files) {
-				for (let file of err.files) if (file) return utils.deleteFile(file.path);
+				for (let file of err.files) {
+					if (file) return utils.deleteFile(file.path);
+				}
 			}
 
 			res.status(400);
-		}
-		else if (err instanceof BannedError) {
+			ProgressQueueServer.finishedWithError(req.ip, contentId, err);
+
+		} else if (err instanceof BannedError) {
 			res.status(400);
-		}
-		else if (err instanceof YTError) {
+
+		} else if (err instanceof UniqueError) {
 			res.status(400);
-		}
-		else {
+			ProgressQueueServer.finishedWithError(req.ip, contentId, err);
+
+		} else if (err instanceof YTError) {
+			res.status(400);
+			ProgressQueueServer.finishedWithError(req.ip, contentId, err);
+
+		} else {
 			console.error('Unknown upload error: ', err);
 			res.status(500);
+			ProgressQueueServer.finishedWithError(req.ip, contentId, err);
 		}
 
 		res.end(JSON.stringify({

@@ -183,8 +183,8 @@ ProgressQueueServer.on('error', (userId, contentId, error, extraInfo) => {
 	const data = {
 		contentId,
 		error,
-		errorType: error.constructor.name,
-		uniqueCoolOffStr: consts.uniqueCoolOffStr,
+		errorMessage: error.message,
+		errorType: error.constructor.name
 	};
 
 	api.sendMessage(UserRecServ.getSockets(userId), 'dl-error', data);

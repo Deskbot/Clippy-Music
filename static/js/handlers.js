@@ -91,9 +91,7 @@ $uploadForm.submit(function(e) {
 				main.clippyAgent.play('CheckingSomething');
 				return false;
 			}
-		}
-		//no music
-		else {
+		} else { //no music
 			main.clippyAgent.stop();
 			main.clippyAgent.speak('No music chosen for upload.');
 			main.clippyAgent.play('Searching');
@@ -128,33 +126,23 @@ $uploadForm.submit(function(e) {
 		processData: false
 
 	}).done(function(data, status, jqxhr) {
-		main.clippyAgent.stop();
-		main.clippyAgent.speak('I am now downloading your music.');
 
 	}).fail(function(jqxhr, textStatus, err) {
 		var responseData = JSON.parse(jqxhr.responseText);
 
-		main.clippyAgent.stop();
-
 		if (jqxhr.status >= 500 && jqxhr.status < 600) {
+			main.clippyAgent.stop();
 			main.clippyAgent.speak('The server encountered an error trying to queue your media. Check the console and contact the developer.');
 			main.clippyAgent.play('GetArtsy');
 			console.error(jqxhr.responseText);
-			
+
 		} else if (responseData.errorType === 'BannedError') {
+			main.clippyAgent.stop();
 			main.clippyAgent.speak(responseData.message);
 			main.clippyAgent.play('EmptyTrash');
-
-		} else if (responseData.errorType === 'FileUploadError') {
-			var localDlData = main.dlMap.get(responseData.contentId);
-			localDlData.error = true;
-			main.clippyAgent.speak(responseData.message);
-			main.clippyAgent.play('GetArtsy');
-
-		} else {
-			main.clippyAgent.speak(responseData.message ? responseData.message : jqxhr.responseText);
-			main.clippyAgent.play('GetArtsy');
 		}
+
+		// specific error messages are given by web socket
 	
 	}).always(function() {
 		$uploadForm.find('.file-name').text('No File Chosen');
@@ -210,7 +198,6 @@ $('#nickname-form').submit(function(e) {
 
 	}).done(function(data, status, jqxhr) {
 		main.clippyAgent.stop();
-		main.clippyAgent.play('Congratulate');
 		main.clippyAgent.speak('Your nickname has been changed.');
 
 	}).fail(function(jqxhr, textStatus, err) {
@@ -247,6 +234,7 @@ $fileInput.focus(function() {
 });
 
 var $dlListContainer = $('#dl-list-container');
+
 $dlListContainer.on('click', 'button.dismiss', function(e) {
 	var $this = $(this);
 	var $li = $this.parent();
@@ -259,6 +247,17 @@ $dlListContainer.on('click', 'button.dismiss', function(e) {
 	}
 
 	$li.remove();
+});
+
+$dlListContainer.on('click', '.dl-item.error .dl-bar', function(e) {
+	var $dlItem = $(this).parent();
+	var contentId = $dlItem.attr('data-cid');
+	var message = main.dlMap.get(contentId).errorMessage;
+
+	if (message) {
+		main.clippyAgent.stop();
+		main.clippyAgent.speak(message);
+	}
 });
 
 $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {

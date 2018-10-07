@@ -51,8 +51,7 @@ var WebSocketHandler = (function() {
 
 	WebSocketHandler.prototype.handleDlAdd = function(contentData) {
 		main.clippyAgent.stop();
-		main.clippyAgent.speak('I have queued ' + utils.entitle(contentData.title) + ' successfully.');
-		main.clippyAgent.play('Congratulate');
+		main.clippyAgent.speak('I am now downloading ' + utils.entitle(contentData.title) + '.');
 
 		main.dlMap.insert(contentData.contentId, contentData);
 
@@ -80,7 +79,7 @@ var WebSocketHandler = (function() {
 		var localDlData = main.dlMap.get(contentId);
 		localDlData.error = true;
 
-		DlList.showError(contentId);
+		DlList.showError(DlList.findDlItemElem(contentId));
 
 		main.clippyAgent.play('GetAttention');
 
@@ -94,6 +93,7 @@ var WebSocketHandler = (function() {
 		var whatPic = contentData.picTitle ? utils.entitle(contentData.picTitle) : 'the picture you requested';
 
 		var clippySays;
+		var clippyAnimation;
 
 		if (errorType === 'CancelError') {	
 			if (contentData.picTitle) { // was it given at all?
@@ -119,7 +119,7 @@ var WebSocketHandler = (function() {
 				clippySays = 'I stopped processing your upload because it was too large.';
 			}
 
-		} else if (errorType === 'DownloadWrongType') {
+		} else if (errorType === 'DownloadWrongTypeError') {
 			var what;
 
 			if (isMusic || isPic) {
@@ -128,14 +128,19 @@ var WebSocketHandler = (function() {
 				} else {
 					what = whatPic;
 				}
-				clippySays = 'I didn\'t download ' + what + ' because the file was the wrong type (' + contentData.error.expectedType + ' expected, ' + contentData.error.actualTypeDesc + ' found)';
+				clippySays = 'I didn\'t download ' + what + ' because the file was the wrong type; "' + contentData.error.actualTypeDesc + '" was received instead.';
 
 			} else {
-				clippySays = 'I didn\'t download something because a file was of the wrong type.';
+				clippySays = 'I didn\'t download one of your files because it was of the wrong type.';
 			}
-			
+		
+		} else if (errorType === 'FileUploadError') {
+			clippySays = contentData.errorMessage;
+			clippyAnimation = 'GetArtsy';
+		
 		} else if (errorType === 'UniqueError') {
 			var when = contentData.error.timeWithin.startsWith('Infinity') ? 'already' : 'in the past ' + contentData.error.timeWithin;
+			clippyAnimation = 'Print';
 
 			if (isMusic) {
 				clippySays = 'I didn\'t queue ' + whatMus + ' because it has been played ' + when + '.';
@@ -145,11 +150,18 @@ var WebSocketHandler = (function() {
 				clippySays = 'I didn\'t queue what you requested because something wasn\'t unique.';
 			}
 
+		} else if (errorType === 'YTError') {
+			clippySays = contentData.errorMessage;
+
 		} else {
 			clippySays = 'An unknown problem occured while trying to queue ' + whatMus + '.';
+			clippyAnimation = 'GetArtsy';
 		}
-
+		
+		main.clippyAgent.stop();
 		main.clippyAgent.speak(clippySays);
+		localDlData.errorMessage = clippySays;
+		if (clippyAnimation) main.clippyAgent.play(clippyAnimation);
 	};
 
 	WebSocketHandler.prototype.handleDlList = function(list) {
@@ -157,7 +169,6 @@ var WebSocketHandler = (function() {
 		this.mergeNewListWithInternal(list);
 
 		// render full list afresh
-
 		var presentList = main.dlMap.getValues();
 
 		DlList.renderDlList(presentList);
@@ -238,6 +249,7 @@ var WebSocketHandler = (function() {
 			if (main.dlMap.has(cid)) {
 				var itemBefore = main.dlMap.get(cid);
 				itemBefore.percent = item.percent;
+				itemBefore.title = item.title;
 			} else {
 				main.dlMap.insert(cid, item);
 			}

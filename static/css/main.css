@@ -388,6 +388,10 @@ button.action {
 	background-color: #848284;
 }
 
+.error .dl-bar {
+	cursor: help;
+}
+
 .hidden {
 	display: none;
 }
