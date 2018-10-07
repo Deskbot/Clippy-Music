@@ -67,7 +67,7 @@ function getFileForm(req, generateProgressHandler) {
 	});
 
 	form.on('fileBegin', (fieldName, file) => {
-		if (fieldName === 'music-file') {
+		if (fieldName === 'music-file' && file && file.name) {
 			const onProgress = generateProgressHandler(defer.promise, file);
 			form.on('progress', onProgress);
 		}
