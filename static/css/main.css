@@ -44,6 +44,7 @@ main {
 
 main::-webkit-scrollbar {
     background-image: url("/media/Scrollbar Background.png");
+    width: 16px;
 }
 
 main::-webkit-scrollbar-button:single-button {
@@ -82,6 +83,7 @@ main::-webkit-scrollbar-thumb {
 	border-left:   1px solid #D6D3CE;
 	border-right:  1px solid #424142;
 	box-shadow: inset 1px 1px white;
+	width: 16px;
 }
 
 h2 {

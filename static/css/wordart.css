@@ -4,6 +4,7 @@
 
 .wordart span {
 	display: block;
+	letter-spacing: normal; /* reset normal as the default */
 }
 
 .wordart span:before {
