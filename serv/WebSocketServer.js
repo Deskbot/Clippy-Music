@@ -168,8 +168,8 @@ ContentServer.on('queue-update', utils.throttle(consts.queueUpdateMaxFreq, () =>
 	api.broadcastQueue();
 }));
 
-ProgressQueueServer.on('add', (userId, content) => {
-	api.sendMessage(UserRecServ.getSockets(userId), 'dl-add', content);
+ProgressQueueServer.on('prepared', (userId, content) => {
+	api.sendMessage(UserRecServ.getSockets(userId), 'dl-prep', content);
 });
 
 ProgressQueueServer.on('delete', (userId, contentId) => {

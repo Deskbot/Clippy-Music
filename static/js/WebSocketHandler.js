@@ -28,10 +28,10 @@ var WebSocketHandler = (function() {
 
 			var responseMap = {
 				"banned":    (function() { return this.handleBanned(data); }.bind(this)),
-				"dl-add":    (function() { return this.handleDlAdd(data.message); }.bind(this)),
 				"dl-delete": (function() { return this.handleDlDelete(data.message); }.bind(this)),
 				"dl-error":  (function() { return this.handleDlError(data); }.bind(this)),
 				"dl-list":   (function() { return this.handleDlList(data.message); }.bind(this)),
+				"dl-prep":   (function() { return this.handleDlPrepared(data.message); }.bind(this)),
 				"nickname":  (function() { return this.handleNickname(data.message); }.bind(this)),
 				"queue":     (function() { return this.handleQueue(data); }.bind(this))
 			};
@@ -47,19 +47,6 @@ var WebSocketHandler = (function() {
 			console.log('WebSocket closed');
 			this.reSetUp();
 		}.bind(this);
-	};
-
-	WebSocketHandler.prototype.handleDlAdd = function(contentData) {
-		main.clippyAgent.stop();
-		main.clippyAgent.speak('I am now downloading ' + utils.entitle(contentData.title) + '.');
-
-		main.dlMap.set(contentData.contentId, contentData);
-
-		DlList.add(contentData);
-
-		if (main.dlMap.size > 0) {
-			DlList.showContainer();
-		}
 	};
 
 	WebSocketHandler.prototype.handleDlDelete = function(contentId) {
@@ -170,6 +157,11 @@ var WebSocketHandler = (function() {
 
 		// render full list afresh
 		DlList.renderDlList(main.dlMap);
+	};
+
+	WebSocketHandler.prototype.handleDlPrepared = function(contentData) {
+		main.clippyAgent.stop();
+		main.clippyAgent.speak('I am now downloading ' + utils.entitle(contentData.title) + '.');
 	};
 
 	WebSocketHandler.prototype.handleNickname = function(name) {

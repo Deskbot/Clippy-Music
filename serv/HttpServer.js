@@ -288,7 +288,7 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 		return parseUploadForm(form, fields, files)
 		.then((uplData) => {
 			if (uplData.music.isUrl) {
-				ProgressQueueServer.setTitle(req.ip, contentId, uplData.music.path);
+				ProgressQueueServer.setTitle(req.ip, contentId, uplData.music.path, true);
 			}
 
 			uplData.id = contentId;
