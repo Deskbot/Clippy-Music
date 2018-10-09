@@ -53,21 +53,21 @@ var WebSocketHandler = (function() {
 		main.clippyAgent.stop();
 		main.clippyAgent.speak('I am now downloading ' + utils.entitle(contentData.title) + '.');
 
-		main.dlMap.insert(contentData.contentId, contentData);
+		main.dlMap.set(contentData.contentId, contentData);
 
 		DlList.add(contentData);
 
-		if (main.dlMap.size() > 0) {
+		if (main.dlMap.size > 0) {
 			DlList.showContainer();
 		}
 	};
 
 	WebSocketHandler.prototype.handleDlDelete = function(contentId) {
-		main.dlMap.remove(contentId);
+		main.dlMap.delete(contentId);
 
 		DlList.remove(contentId);
 
-		if (main.dlMap.size() === 0) {
+		if (main.dlMap.size === 0) {
 			DlList.hideContainer();
 		}
 	};
@@ -169,9 +169,7 @@ var WebSocketHandler = (function() {
 		this.mergeNewListWithInternal(list);
 
 		// render full list afresh
-		var presentList = main.dlMap.getValues();
-
-		DlList.renderDlList(presentList);
+		DlList.renderDlList(main.dlMap);
 	};
 
 	WebSocketHandler.prototype.handleNickname = function(name) {
@@ -251,7 +249,7 @@ var WebSocketHandler = (function() {
 				itemBefore.percent = item.percent;
 				itemBefore.title = item.title;
 			} else {
-				main.dlMap.insert(cid, item);
+				main.dlMap.set(cid, item);
 			}
 		}
 	};
