@@ -26,7 +26,7 @@ function main() {
 	handleArguments().then(() => {
 		validateOptions();
 		setUpDirs();
-		setUpServers();
+		setUpServices();
 		setUpControls();
 
 	}).catch(utils.reportError);
@@ -89,11 +89,11 @@ function handleArguments() {
 
 //get admin password if needed
 function setUpAdmin() {
-	const PasswordServer = require('./serv/PasswordServer.js');
+	const PasswordService = require('./service/PasswordService.js');
 
 	return chooseAdminPassword()
 	.then((pass) => {
-		PasswordServer.set(pass);
+		PasswordService.set(pass);
 	})
 	.catch((err) => {
 		console.error('Unable to get admin password');
@@ -112,28 +112,28 @@ function setUpDirs() {
 }
 
 function setUpControls() {
-	const ContentServer = require('./serv/ContentServer.js');
-	const IdFactoryServer = require('./serv/IdFactoryServer.js');
-	const UserRecordServer = require('./serv/UserRecordServer.js');
+	const ContentService = require('./service/ContentService.js');
+	const IdFactoryService = require('./service/IdFactoryService.js');
+	const UserRecordService = require('./service/UserRecordService.js');
 
 	//when this is about to be killed
 	process.on('SIGINT', () => {
 		console.log('Closing down Clippy-Music.');
 
-		ContentServer.store();
-		IdFactoryServer.store();
-		UserRecordServer.store();
+		ContentService.store();
+		IdFactoryService.store();
+		UserRecordService.store();
 
-		if (ContentServer.isPlaying()) {
+		if (ContentService.isPlaying()) {
 			console.log('Waiting for content being played to get deleted.');
-			ContentServer.on('end', () => {
+			ContentService.on('end', () => {
 				process.exit(0);
 			});
 		} else {
 			process.exit(0);
 		}
 
-		ContentServer.end();
+		ContentService.end();
 	});
 
 	//stdin controls
@@ -142,7 +142,7 @@ function setUpControls() {
 	readline.emitKeypressEvents(process.stdin);
 	process.stdin.setRawMode(true);
 	process.stdin.on('keypress', (ch, key) => {
-		if (key.name === 'end') ContentServer.killCurrent();
+		if (key.name === 'end') ContentService.killCurrent();
 
 		//I'm having to put these in because the settings that allow me to use 'end' prevent normal interrupts key commands
 		else if (key.name === 'c' && key.ctrl)  process.kill(process.pid, 'SIGINT');
@@ -164,8 +164,8 @@ function setUpOptionsFile() {
 	fs.copyFileSync(defaultFilePath, liveFilePath);
 }
 
-function setUpServers() {
-	require('./serv/'); //do them all just in case
+function setUpServices() {
+	require('./service/'); //do them all just in case
 }
 
 function validateOptions() {

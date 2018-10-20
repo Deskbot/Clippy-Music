@@ -3,12 +3,12 @@ const formidable = require('formidable');
 const Html5Entities = require('html-entities').Html5Entities;
 const q = require('q');
 
-const ContentServer = require('./ContentServer.js');
-const IdFactoryServer = require('./IdFactoryServer.js');
-const ProgressQueueServer = require('./ProgressQueueServer.js');
-const PasswordServer = require('./PasswordServer.js');
-const UserRecordServer = require('./UserRecordServer.js');
-const WebSocketServer = require('./WebSocketServer.js');
+const ContentService = require('./ContentService.js');
+const IdFactoryService = require('./IdFactoryService.js');
+const ProgressQueueService = require('./ProgressQueueService.js');
+const PasswordService = require('./PasswordService.js');
+const UserRecordService = require('./UserRecordService.js');
+const WebSocketService = require('./WebSocketService.js');
 
 const consts = require('../lib/consts.js');
 const debug = require('../lib/debug.js');
@@ -18,9 +18,9 @@ const utils = require('../lib/utils.js');
 const { BannedError, FileUploadError, UniqueError, YTError } = require('../lib/errors.js');
 
 function adminMiddleware(req, res, next) {
-	if (!PasswordServer.isSet()) {
+	if (!PasswordService.isSet()) {
 		res.status(400).end('The admin controls can not be used because no admin password was set.\n');
-	} else if (!PasswordServer.get().verify(req.fields.password)) {
+	} else if (!PasswordService.get().verify(req.fields.password)) {
 		res.status(400).end('Admin password incorrect.\n');
 	} else {
 		next();
@@ -97,9 +97,9 @@ function getFormMiddleware(req, res, next) {
 
 function handleFileUpload(req, contentId) {
 	const generateProgressHandler = (promise, file) => {
-		ProgressQueueServer.setTitle(req.ip, contentId, file.name);
+		ProgressQueueService.setTitle(req.ip, contentId, file.name);
 
-		const updater = ProgressQueueServer.createUpdater(req.ip, contentId);
+		const updater = ProgressQueueService.createUpdater(req.ip, contentId);
 
 		return (sofar, total) => {
 			updater(sofar / total);
@@ -112,8 +112,8 @@ function handleFileUpload(req, contentId) {
 
 function handlePotentialBan(userId) {
 	return new Promise((resolve, reject) => {
-		if (UserRecordServer.isBanned(userId)) {
-			WebSocketServer.sendBanned(UserRecordServer.getSockets(userId));
+		if (UserRecordService.isBanned(userId)) {
+			WebSocketService.sendBanned(UserRecordService.getSockets(userId));
 			return reject(new BannedError());
 		}
 
@@ -239,7 +239,7 @@ function parseUploadForm(form, fields, files) {
 }
 
 function recordUserMiddleware(req, res, next) {
-	if (!UserRecordServer.isUser(req.ip)) UserRecordServer.add(req.ip);
+	if (!UserRecordService.isUser(req.ip)) UserRecordService.add(req.ip);
 
 	const expiryDate = new Date();
 	expiryDate.setYear(expiryDate.getYear() + 1901);
@@ -279,25 +279,25 @@ app.get('/api/wsport', (req, res) => {
 	* end-time
  */
 app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
-	const contentId = IdFactoryServer.new();
+	const contentId = IdFactoryService.new();
 
 	handlePotentialBan(req.ip) //assumes ip address is userId
-	.then(() => ProgressQueueServer.add(req.ip, contentId))
+	.then(() => ProgressQueueService.add(req.ip, contentId))
 	.then(() => handleFileUpload(req, contentId))
 	.then(utils.spread((form, fields, files) => { //nesting in order to get the scoping right
 		return parseUploadForm(form, fields, files)
 		.then((uplData) => {
 			if (uplData.music.isUrl) {
-				ProgressQueueServer.setTitle(req.ip, contentId, uplData.music.path, true);
+				ProgressQueueService.setTitle(req.ip, contentId, uplData.music.path, true);
 			}
 
 			uplData.id = contentId;
 			uplData.userId = req.ip;
-			return ContentServer.add(uplData);
+			return ContentService.add(uplData);
 		})
 		.then((uplData) => {
 			if (uplData.music.isUrl) {
-				ProgressQueueServer.setTitle(req.ip, contentId, uplData.music.title);
+				ProgressQueueService.setTitle(req.ip, contentId, uplData.music.title);
 			}
 
 			if (fields.ajax || req.headers['user-agent'].includes('curl')) {
@@ -318,23 +318,23 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 			}
 
 			res.status(400);
-			ProgressQueueServer.finishedWithError(req.ip, contentId, err);
+			ProgressQueueService.finishedWithError(req.ip, contentId, err);
 
 		} else if (err instanceof BannedError) {
 			res.status(400);
 
 		} else if (err instanceof UniqueError) {
 			res.status(400);
-			ProgressQueueServer.finishedWithError(req.ip, contentId, err);
+			ProgressQueueService.finishedWithError(req.ip, contentId, err);
 
 		} else if (err instanceof YTError) {
 			res.status(400);
-			ProgressQueueServer.finishedWithError(req.ip, contentId, err);
+			ProgressQueueService.finishedWithError(req.ip, contentId, err);
 
 		} else {
 			console.error('Unknown upload error: ', err);
 			res.status(500);
-			ProgressQueueServer.finishedWithError(req.ip, contentId, err);
+			ProgressQueueService.finishedWithError(req.ip, contentId, err);
 		}
 
 		res.end(JSON.stringify({
@@ -349,7 +349,7 @@ app.use(getFormMiddleware);
 
 //POST variable: content-id
 app.post('/api/queue/remove', (req, res) => {
-	if (ContentServer.remove(req.ip, parseInt(req.fields['content-id']))) {
+	if (ContentService.remove(req.ip, parseInt(req.fields['content-id']))) {
 		if (noRedirect(req)) res.status(200).end('Success\n');
 		else                 res.redirect('/');
 	} else {
@@ -359,7 +359,7 @@ app.post('/api/queue/remove', (req, res) => {
 
 //POST variable: dl-index
 app.post('/api/download/cancel', (req, res) => {
-	if (ContentServer.cancelDownload(req.ip, parseInt(req.fields['dl-index']))) {
+	if (ContentService.cancelDownload(req.ip, parseInt(req.fields['dl-index']))) {
 		if (noRedirect(req)) res.status(200).end('Success\n');
 		else                 res.redirect('/');
 	} else {
@@ -376,8 +376,8 @@ app.post('/api/nickname/set', recordUserMiddleware, (req, res) => {
 		return;
 	}
 
-	UserRecordServer.setNickname(req.ip, nickname);
-	WebSocketServer.sendNicknameToUser(req.ip, nickname);
+	UserRecordService.setNickname(req.ip, nickname);
+	WebSocketService.sendNicknameToUser(req.ip, nickname);
 
 	if (noRedirect(req)) res.status(200).end('Success\n');
 	else                 res.redirect('/');
@@ -388,19 +388,19 @@ app.use(adminMiddleware);
 //POST variable: password, id, nickname
 app.post('/api/ban/add', (req, res) => {
 	if (req.fields.id) {
-		if (!UserRecordServer.isUser(req.fields.id)) {
+		if (!UserRecordService.isUser(req.fields.id)) {
 			res.status(400).end('That user doesn\'t exist.\n');
 			return;
 
 		} else {
-			UserRecordServer.addBan(req.fields.id);
-			ContentServer.purgeUser(req.fields.id);
+			UserRecordService.addBan(req.fields.id);
+			ContentService.purgeUser(req.fields.id);
 			if (noRedirect(req)) res.status(200).end('Success\n');
 			else                 res.redirect('/');
 		}
 
 	} else if (req.fields.nickname) {
-		const uids = UserRecordServer.whoHasNickname(utils.sanitiseNickname(req.fields.nickname));
+		const uids = UserRecordService.whoHasNickname(utils.sanitiseNickname(req.fields.nickname));
 
 		if (uids.length === 0) {
 			res.status(400).end('That user doesn\'t exist.\n');
@@ -408,8 +408,8 @@ app.post('/api/ban/add', (req, res) => {
 
 		} else {
 			uids.forEach((id) => {
-				UserRecordServer.addBan(id);
-				ContentServer.purgeUser(id);
+				UserRecordService.addBan(id);
+				ContentService.purgeUser(id);
 			});
 
 			if (noRedirect(req)) res.status(200).end('Success\n');
@@ -424,25 +424,25 @@ app.post('/api/ban/add', (req, res) => {
 //POST variable: password, id
 app.post('/api/ban/remove', (req, res) => {
 	if (req.fields.id) {
-		if (!UserRecordServer.isUser(req.fields.id)) {
+		if (!UserRecordService.isUser(req.fields.id)) {
 			res.status(400).end('That user doesn\'t exist.\n');
 			return;
 
 		} else {
-			UserRecordServer.removeBan(req.fields.id);
+			UserRecordService.removeBan(req.fields.id);
 			if (noRedirect(req)) res.status(200).end('Success\n');
 			else                 res.redirect('/');
 		}
 
 	} else if (req.fields.nickname) {
-		const uids = UserRecordServer.whoHasNickname(utils.sanitiseNickname(req.fields.nickname));
+		const uids = UserRecordService.whoHasNickname(utils.sanitiseNickname(req.fields.nickname));
 		if (uids.length === 0) {
 			res.status(400).end('That user doesn\'t exist.\n');
 			return;
 
 		} else {
 			uids.forEach((id) => {
-				UserRecordServer.removeBan(id);
+				UserRecordService.removeBan(id);
 			});
 
 			if (noRedirect(req)) res.status(200).end('Success\n');
@@ -456,40 +456,40 @@ app.post('/api/ban/remove', (req, res) => {
 
 //POST variable: password
 app.post('/api/skip', (req, res) => {
-	ContentServer.killCurrent();
+	ContentService.killCurrent();
 	res.status(200).end('Success\n');
 });
 
 //POST variable: password
 app.post('/api/skipAndPenalise', (req, res) => {
-	if (!PasswordServer.verify(req.fields.password)) {
+	if (!PasswordService.verify(req.fields.password)) {
 		res.status(400).end('Admin password incorrect.\n');
 		return;
 	}
 
-	if (ContentServer.currentlyPlaying) {
-		ContentServer.penalise(ContentServer.currentlyPlaying.userId);
+	if (ContentService.currentlyPlaying) {
+		ContentService.penalise(ContentService.currentlyPlaying.userId);
 	}
 
-	ContentServer.killCurrent();
+	ContentService.killCurrent();
 
 	res.status(200).end('Success\n');
 });
 
 //POST variable: password
 app.post('/api/skipAndBan', (req, res) => {
-	if (!PasswordServer.verify(req.fields.password)) {
+	if (!PasswordService.verify(req.fields.password)) {
 		res.status(400).end('Admin password incorrect.\n');
 		return;
 	}
 
-	if (ContentServer.currentlyPlaying) {
-		const id = ContentServer.currentlyPlaying.userId;
-		UserRecordServer.addBan(id);
-		ContentServer.purgeUser(id);
+	if (ContentService.currentlyPlaying) {
+		const id = ContentService.currentlyPlaying.userId;
+		UserRecordService.addBan(id);
+		ContentService.purgeUser(id);
 	}
 
-	ContentServer.killCurrent();
+	ContentService.killCurrent();
 
 	res.status(200).end('Success\n');
 });

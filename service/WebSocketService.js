@@ -1,9 +1,9 @@
 const debug = require('../lib/debug.js');
 const WebSocketHandler = require('../lib/WebSocketHandler.js');
 
-const ContentServer = require('./ContentServer.js');
-const ProgressQueueServer = require('./ProgressQueueServer.js');
-const UserRecServ = require('./UserRecordServer.js');
+const ContentService = require('./ContentService.js');
+const ProgressQueueService = require('./ProgressQueueService.js');
+const UserRecordService = require('./UserRecordService.js');
 
 const consts = require('../lib/consts.js');
 const utils = require('../lib/utils.js');
@@ -17,14 +17,14 @@ class Api {
 
 		function onConnect(soc, id) {
 			//save user
-			UserRecServ.add(id);
-			UserRecServ.setWS(id, soc);
+			UserRecordService.add(id);
+			UserRecordService.setWS(id, soc);
 
 			//notify if banned
-			if (UserRecServ.isBanned(id)) this.sendBanned(soc);
+			if (UserRecordService.isBanned(id)) this.sendBanned(soc);
 
 			//tell user their nickname
-			if (UserRecServ.isUser(id)) this.sendNickname(soc, UserRecServ.getNickname(id));
+			if (UserRecordService.isUser(id)) this.sendNickname(soc, UserRecordService.getNickname(id));
 
 			//send queue
 			this.sendQueue(soc);
@@ -35,7 +35,7 @@ class Api {
 			const dataObj = JSON.parse(data);
 
 			if (dataObj.type === 'delete-content') {
-				if (!ContentServer.remove(this.wsh.socToUserId(soc), dataObj.contentId)) {
+				if (!ContentService.remove(this.wsh.socToUserId(soc), dataObj.contentId)) {
 					soc.send(JSON.stringify({
 						type: dataObj.type,
 						success: false,
@@ -53,7 +53,7 @@ class Api {
 		}
 
 		function onClose(soc, id) {
-			UserRecServ.unsetWS(id, soc);
+			UserRecordService.unsetWS(id, soc);
 		}
 
 		function socToUserId(soc) {
@@ -84,7 +84,7 @@ class Api {
 	}
 
 	sendNicknameToUser(userId, nickname) {
-		const socs = UserRecServ.getSockets(userId);
+		const socs = UserRecordService.getSockets(userId);
 		for (let soc of socs) this.sendNickname(soc, nickname);
 	}
 
@@ -105,7 +105,7 @@ class Api {
 	}
 
 	sendDlQueue(soc, userId) {
-		const queue = ProgressQueueServer.getQueue(userId);
+		const queue = ProgressQueueService.getQueue(userId);
 		api.sendMessage(soc, 'dl-list', queue);
 	}
 
@@ -123,8 +123,8 @@ class Api {
 	makeQueueMessage() {
 		return {
 			type: 'queue',
-			current: ContentServer.getCurrentlyPlaying(),
-			queue: ContentServer.getBucketsForPublic(),
+			current: ContentService.getCurrentlyPlaying(),
+			queue: ContentService.getBucketsForPublic(),
 		};
 	}
 
@@ -156,30 +156,30 @@ class Api {
 const api = new Api();
 
 let lastQueueWasEmpty = false;
-ContentServer.on('queue-empty', () => {
+ContentService.on('queue-empty', () => {
 	if (!lastQueueWasEmpty) {
 		api.broadcastEmptyQueue();
 		lastQueueWasEmpty = true;
 	}
 });
 
-ContentServer.on('queue-update', utils.throttle(consts.queueUpdateMaxFreq, () => {
+ContentService.on('queue-update', utils.throttle(consts.queueUpdateMaxFreq, () => {
 	lastQueueWasEmpty = false;
 	api.broadcastQueue();
 }));
 
-ProgressQueueServer.on('prepared', (userId, content) => {
-	api.sendMessage(UserRecServ.getSockets(userId), 'dl-prep', content);
+ProgressQueueService.on('prepared', (userId, content) => {
+	api.sendMessage(UserRecordService.getSockets(userId), 'dl-prep', content);
 });
 
-ProgressQueueServer.on('delete', (userId, contentId) => {
-	const socs = UserRecServ.getSockets(userId);
+ProgressQueueService.on('delete', (userId, contentId) => {
+	const socs = UserRecordService.getSockets(userId);
 	api.sendMessage(socs, 'dl-delete', contentId);
 	api.sendQueue(socs); // also update the user's content queue to match
 });
 
 //extraInfo is an optional argument
-ProgressQueueServer.on('error', (userId, contentId, error, extraInfo) => {
+ProgressQueueService.on('error', (userId, contentId, error, extraInfo) => {
 	const data = {
 		contentId,
 		error,
@@ -187,11 +187,11 @@ ProgressQueueServer.on('error', (userId, contentId, error, extraInfo) => {
 		errorType: error.constructor.name
 	};
 
-	api.sendMessage(UserRecServ.getSockets(userId), 'dl-error', data);
+	api.sendMessage(UserRecordService.getSockets(userId), 'dl-error', data);
 });
 
-ProgressQueueServer.on('list', (userId, list) => {
-	api.sendMessage( UserRecServ.getSockets(userId), 'dl-list', list);
+ProgressQueueService.on('list', (userId, list) => {
+	api.sendMessage( UserRecordService.getSockets(userId), 'dl-list', list);
 });
 
 module.exports = api;

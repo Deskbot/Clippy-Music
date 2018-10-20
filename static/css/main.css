@@ -83,7 +83,8 @@ main::-webkit-scrollbar-thumb {
 	border-left:   1px solid #D6D3CE;
 	border-right:  1px solid #424142;
 	box-shadow: inset 1px 1px white;
-	width: 16px;
+	margin: 0 1px;
+	width: 14px;
 }
 
 h2 {
