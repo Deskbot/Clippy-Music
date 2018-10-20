@@ -50,7 +50,7 @@ var WebSocketHandler = (function() {
 	};
 
 	WebSocketHandler.prototype.handleDlDelete = function(contentId) {
-		main.dlMap.delete(contentId);
+		main.dlMap.delete(contentId.toString());
 
 		DlList.remove(contentId);
 
@@ -63,7 +63,7 @@ var WebSocketHandler = (function() {
 		var contentData = responseData.message;
 		var contentId = contentData.contentId;
 
-		var localDlData = main.dlMap.get(contentId);
+		var localDlData = main.dlMap.get(contentId.toString());
 		localDlData.error = true;
 
 		DlList.showError(DlList.findDlItemElem(contentId));
@@ -246,7 +246,7 @@ var WebSocketHandler = (function() {
 	WebSocketHandler.prototype.mergeNewListWithInternal = function(list) {
 		for (var i = 0; i < list.length; i++) {
 			var item = list[i];
-			var cid = item.contentId;
+			var cid = item.contentId.toString();
 
 			if (main.dlMap.has(cid)) {
 				var itemBefore = main.dlMap.get(cid);

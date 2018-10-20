@@ -2,7 +2,7 @@ clippy.Balloon.prototype.CLOSE_BALLOON_DELAY = 20000;
 
 var main = {
 	clippyAgent: null,
-	dlMap: new Map(),
+	dlMap: new Map(), // string to download data
 	goodWordArt: ['yellow-dash', 'blues', 'rainbow', 'marble-slab', 'gray-block', 'superhero', 'outline', 'up', 'slate', 'mauve', 'graydient', 'red-blue', 'purple', 'green-marble', 'aqua', 'paper-bag', 'sunset', 'chrome'],
 	maxZ: 100,
 	nickname: ''
