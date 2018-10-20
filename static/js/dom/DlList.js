@@ -76,8 +76,12 @@ var DlList = (function() {
 
 			if ($blocks.length == 0) {
 				$bar.append(templates.makeDlBlock());
-			} else if ($blocks == maxBlocks) {
-				$bar.first().remove();
+			} else {
+				// 1 block less than full might look full if only a fraction of the final block is displayed
+				// so 2 blocks less than full is the target quantity
+				for (var newBlockCount = $blocks.length; newBlockCount >= maxBlocks - 2; newBlockCount--) {
+					$blocks.first().remove();
+				}
 			}
 		}
 	};
