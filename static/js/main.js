@@ -11,7 +11,7 @@ var main = {
 function loadClippy() {
 	return new Promise(function(resolve, reject) {
 		clippy.load({ name: 'Clippy', path: 'js/agents/' }, function(agent) {
-			resolve(agent);
+			return resolve(agent);
 		});
 	});
 }

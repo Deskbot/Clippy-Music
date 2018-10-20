@@ -114,10 +114,10 @@ function handlePotentialBan(userId) {
 	return new Promise((resolve, reject) => {
 		if (UserRecordServer.isBanned(userId)) {
 			WebSocketServer.sendBanned(UserRecordServer.getSockets(userId));
-			reject(new BannedError());
-		} else {
-			resolve();
+			return reject(new BannedError());
 		}
+
+		resolve();
 	});
 }
 
@@ -234,7 +234,7 @@ function parseUploadForm(form, fields, files) {
 		if (time = fields['start-time']) uploadInfo.startTime = time;
 		if (time = fields['end-time'])   uploadInfo.endTime   = time;
 
-		resolve(uploadInfo);
+		return resolve(uploadInfo);
 	});
 }
 

@@ -51,12 +51,11 @@ function chooseAdminPassword() {
 			if (err) return reject(err);
 
 			if (result.password1 === result.password2) {
-				resolve(result.password1);
-				
-			} else {
-				console.log('Passwords did not match. Try again.');
-				resolve(chooseAdminPassword());
+				return resolve(result.password1);
 			}
+				
+			console.log('Passwords did not match. Try again.');
+			return resolve(chooseAdminPassword());
 		});
 	});
 }
