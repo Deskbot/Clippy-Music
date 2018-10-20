@@ -44,8 +44,8 @@ var DlList = (function() {
 			this.findDlItemElem(contentId).remove();
 		},
 
-		renderDlList: function renderDlList(map) {
-			if (map.size !== 0) {
+		renderDlList: function renderDlList(list) {
+			if (list.length !== 0) {
 				$dlListContainer.removeClass('hidden');
 			} else {
 				$dlListContainer.addClass('hidden');
@@ -55,8 +55,8 @@ var DlList = (function() {
 			$dlQueueBucket.empty();
 
 			//put items in the dlQueue
-			for (let item of map.values()) {
-				$dlQueueBucket.append(this.contentToDlItemElem(item));
+			for (let i = 0; i < list.length; i++) {
+				$dlQueueBucket.append(this.contentToDlItemElem(list[i]));
 			}
 		},
 

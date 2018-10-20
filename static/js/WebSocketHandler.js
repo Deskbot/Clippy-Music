@@ -50,11 +50,11 @@ var WebSocketHandler = (function() {
 	};
 
 	WebSocketHandler.prototype.handleDlDelete = function(contentId) {
-		main.dlMap.delete(contentId);
+		main.dlMap.remove(contentId);
 
 		DlList.remove(contentId);
 
-		if (main.dlMap.size === 0) {
+		if (main.dlMap.size() === 0) {
 			DlList.hideContainer();
 		}
 	};
@@ -156,7 +156,9 @@ var WebSocketHandler = (function() {
 		this.mergeNewListWithInternal(list);
 
 		// render full list afresh
-		DlList.renderDlList(main.dlMap);
+		var presentList = main.dlMap.getValues();
+
+		DlList.renderDlList(presentList);
 	};
 
 	WebSocketHandler.prototype.handleDlPrepared = function(contentData) {
@@ -241,7 +243,7 @@ var WebSocketHandler = (function() {
 				itemBefore.percent = item.percent;
 				itemBefore.title = item.title;
 			} else {
-				main.dlMap.set(cid, item);
+				main.dlMap.insert(cid, item);
 			}
 		}
 	};
