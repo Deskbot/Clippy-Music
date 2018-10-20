@@ -103,7 +103,7 @@ var WebSocketHandler = (function() {
 				} else {
 					what = whatPic;
 				}
-				clippySays = 'I stopped processing ' + what + ' because it was too large (exceeded ' + contentData.error.sizeLimit + ').';
+				clippySays = 'I stopped processing ' + what + ' because it was too large (exceeded the limit of ' + contentData.error.sizeLimit + ').';
 
 			} else {
 				clippySays = 'I stopped processing your upload because it was too large.';
