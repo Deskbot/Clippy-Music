@@ -122,11 +122,11 @@ function handlePotentialBan(userId) {
 }
 
 function makeImageTooBigError(files) {
-	return new FileUploadError(`The image file you gave was too big. It exceeded the limit of: "${consts.imageSizeLimStr}".`, files);
+	return new FileUploadError(`The image file you gave was too large (exceeded the limit of: "${consts.imageSizeLimStr}").`, files);
 }
 
 function makeMusicTooBigError(files) {
-	return new FileUploadError(`The music file you gave was too big. It exceeded the limit of: "${consts.musicSizeLimStr}".`, files);
+	return new FileUploadError(`The music file you gave was too large (exceeded the limit of: "${consts.musicSizeLimStr}").`, files);
 }
 
 function noRedirect(req) {
