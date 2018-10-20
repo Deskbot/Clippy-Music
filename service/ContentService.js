@@ -7,8 +7,9 @@ const utils = require('../lib/utils.js');
 
 const IdFactoryService = require('./IdFactoryService.js');
 const ProgressQueueService = require('./ProgressQueueService.js');
+const UserRecordService = require('./UserRecordService.js');
 
-const cm = new ContentManager(ContentManager.recover(), IdFactoryService, ProgressQueueService, new YtDownloader(ProgressQueueService));
+const cm = new ContentManager(ContentManager.recover(), IdFactoryService, ProgressQueueService, UserRecordService, new YtDownloader(ProgressQueueService));
 
 //set up
 function play() {
