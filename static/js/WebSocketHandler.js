@@ -82,7 +82,10 @@ var WebSocketHandler = (function() {
 		var clippySays;
 		var clippyAnimation;
 
-		if (errorType === 'CancelError') {	
+		if (errorType === 'BadUrlError') {
+			clippySays = 'I could not find anything at the ' + contentType + ' URL given. Is the url correct?';
+
+		} else if (errorType === 'CancelError') {
 			if (contentData.picTitle) { // was it given at all?
 				clippySays = 'I stopped processing ' + whatMus + ' with ' + whatPic + ' because you cancelled it.';
 			} else if (contentType === 'picture') {
@@ -141,10 +144,19 @@ var WebSocketHandler = (function() {
 			clippySays = contentData.errorMessage;
 
 		} else {
-			clippySays = 'An unknown problem occured while trying to queue ' + whatMus + '.';
+			var what;
+			if (isMusic) {
+				what = whatMus;
+			} else if (isPic) {
+				what = whatPic;
+			} else {
+				what = 'your content';
+			}
+
+			clippySays = 'An unknown problem occured while trying to queue ' + what + '.';
 			clippyAnimation = 'GetArtsy';
 		}
-		
+
 		main.clippyAgent.stop();
 		main.clippyAgent.speak(clippySays);
 		localDlData.errorMessage = clippySays;
