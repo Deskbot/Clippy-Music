@@ -5,7 +5,7 @@ var templates = (function() {
 	}
 
 	var $templates = $('#templates');
-	
+
 	var bucketContainerTemplate = toTempl($templates.children('#bucket-container-template'));
 	var bucketItemTemplate = toTempl($templates.children('#bucket-item-template'));
 	var dlBlockTemplate = toTempl($templates.children('#dl-block-template'));

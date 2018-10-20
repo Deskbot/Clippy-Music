@@ -28,7 +28,7 @@ function main() {
 		setUpDirs();
 		setUpServers();
 		setUpControls();
-		
+
 	}).catch(utils.reportError);
 }
 
@@ -46,14 +46,14 @@ function chooseAdminPassword() {
 			message: 'Verify Admin Password (hidden) (2/2): ',
 			hidden: true,
 			required: true,
-		
+
 		}], function(err, result) {
 			if (err) return reject(err);
 
 			if (result.password1 === result.password2) {
 				return resolve(result.password1);
 			}
-				
+
 			console.log('Passwords did not match. Try again.');
 			return resolve(chooseAdminPassword());
 		});
@@ -67,7 +67,7 @@ function handleArguments() {
 
 	for (let i = 2; i < process.argv.length; i++) { //skip the 2 initial arguments which are the path to node and the file path
 		let arg = process.argv[i];
-		
+
 		if (arg === '-c' || arg === '--clean') {
 			console.log('Deleting any suspended user record, content manager, or log file.');
 
@@ -138,7 +138,7 @@ function setUpControls() {
 
 	//stdin controls
 	process.stdin.resume(); //needed due to something that prompt does somewhere
-	
+
 	readline.emitKeypressEvents(process.stdin);
 	process.stdin.setRawMode(true);
 	process.stdin.on('keypress', (ch, key) => {

@@ -24,19 +24,19 @@ prompt.get([
 	}
 ], (err, result) => {
 	if (err) throw err;
-		   
+
 	const dataArg = curlDataBuilder('password', result.adminPassword, 'id', result.userId);
 
 	let url;
-	
+
 	if (result.addOrRemove.length > 0 && result.addOrRemove[0].toLowerCase() == 'r') {
 		url = 'localhost/api/ban/remove';
 	} else {
 		url = 'localhost/api/ban/add';
 	}
-	
+
 	console.log('Executing curl');
-	
+
 	let proc = cp.spawn('curl', ['--data', dataArg, url])
 	proc.stdout.pipe(process.stdout);
 	proc.stderr.pipe(process.stderr);
@@ -44,10 +44,10 @@ prompt.get([
 
 function curlDataBuilder(...arr) {
 	let strs = [];
-	
+
 	for (let i = 0; i < arr.length; i += 2) {
 		strs.push( arr[i] + '=' + arr[i+1] );
 	}
-	
+
 	return strs.join('&');
 }

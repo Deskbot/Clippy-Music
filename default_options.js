@@ -11,11 +11,11 @@ module.exports = {
 	mpvPath: 'mpv',
 	mpvArgs: ['-vo', 'xv', '-fs', '--af=drc=2:0.25'],
 	youtubeDlPath: 'youtube-dl',
-	
+
 	imageSizeLimit: 100000000,
 	musicSizeLimit: 400000000,
 	nicknameSizeLimit: 33,
-	
+
 };
 
 //dlPercentUpdateFreq = how many milliseconds between updating the download percentage for videos on the front end

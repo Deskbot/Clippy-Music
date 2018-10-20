@@ -26,7 +26,7 @@ $section.find('.handle > .x-button').click(function(e) {
 
 	//offset is caused by both height and margins
 	var distance = utils.fullHeight($window);
-	
+
 	utils.shiftDownElemsBelow($window, distance);
 
 	$window.remove();
@@ -76,7 +76,7 @@ $uploadForm.submit(function(e) {
 	var $buttons = $this.find('button');
 	var $inputs = $this.find('input');
 	var $fields = $inputs.filter(':not([type=submit])');
-	
+
 	//validate before submit
 
 	var musicInputElem = $this.find('[name=music-file]')[0];
@@ -84,7 +84,7 @@ $uploadForm.submit(function(e) {
 
 	//no music file
 	if (!utils.inputHasFile(musicInputElem)) {
-		if (musicUrl) { 
+		if (musicUrl) {
 			if (!utils.isYouTubeUrl(musicUrl)) {
 				main.clippyAgent.stop();
 				main.clippyAgent.speak('Music URL given is not a YouTube link.');
@@ -109,7 +109,7 @@ $uploadForm.submit(function(e) {
 		main.clippyAgent.speak('Bad format given for start or end time. It should satisfy the following regular expression: ' + format.toString());
 		return false;
 	}
-	
+
 	//ajax upload
 
 	var fd = new FormData(this);
@@ -143,7 +143,7 @@ $uploadForm.submit(function(e) {
 		}
 
 		// specific error messages are given by web socket
-	
+
 	}).always(function() {
 		$uploadForm.find('.file-name').text('No File Chosen');
 		$fields.val(null);
@@ -211,7 +211,7 @@ $('#nickname-form').submit(function(e) {
 		}
 
 		main.clippyAgent.play('CheckingSomething');
-	
+
 	}).always(function() {
 		$nicknameField.val('').attr('disabled', false);
 		$submitButton.attr('disabled', false);
@@ -241,7 +241,7 @@ $dlListContainer.on('click', 'button.dismiss', function(e) {
 
 	var contentId = $li.attr('data-cid');
 	main.dlMap.remove(contentId);
-	
+
 	if (main.dlMap.size() == 0) {
 		$dlListContainer.addClass('hidden');
 	}
@@ -267,7 +267,7 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 
 	main.clippyAgent.stop();
 	main.clippyAgent.play('EmptyTrash');
-	
+
 	var contentName = $this.siblings('.title').text();
 
 	$.ajax({
@@ -317,7 +317,7 @@ $('#queue').on('click', '#dl-list-container .bucket button.cancel', function(e) 
 
 	main.clippyAgent.stop();
 	main.clippyAgent.play('EmptyTrash');
-	
+
 	var contentName = $this.siblings('.title').text();
 
 	$.ajax({

@@ -61,7 +61,7 @@ var utils = {
 	shiftDownElemsBelow: function($elem, distance, condition) {
 		//only shift the later siblings of elem
 		var $laterSections = $elem.nextAll();
-		
+
 		for (var i = 0; i < $laterSections.length; i++) {
 			var $s = $($laterSections[i]);
 

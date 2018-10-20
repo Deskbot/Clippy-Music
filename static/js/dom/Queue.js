@@ -12,7 +12,7 @@ var Queue = {
 			$bucketCont.attr('id', 'my-bucket-container');
 			$bucketNickname.addClass('my-nickname');
 		}
-		
+
 		for (var i = 0; i < c.bucket.length; i++) {
 			var item = c.bucket[i];
 			var $bucketItem = templates.makeBucketItem();
@@ -21,7 +21,7 @@ var Queue = {
 			if (isMine) {
 				$bucketItem.find('.delete').attr('data-id', item.id).removeClass('hidden');
 			}
-			
+
 			$bucket.append($bucketItem);
 		}
 

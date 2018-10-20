@@ -46,13 +46,13 @@ function stringWrap(str, width, insert) {
 function submitForm($form) {
 	var url = $form.attr('action');
 	var type = typeof $form.attr('method') !== 'undefined' ? $form.attr('method') : 'POST';
-	
+
 	if (url.includes('?')) {
 		url += '&ajax=1';
 	} else {
 		url += '?ajax=1';
 	}
-	
+
 	return $.ajax(url, {
 		type: type,
 		data: $form.serializeArray()

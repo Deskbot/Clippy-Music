@@ -1,5 +1,5 @@
 var WebSocketHandler = (function() {
-	
+
 	function WebSocketHandler() {
 		$.get({
 			url: '/api/wsport'
@@ -123,11 +123,11 @@ var WebSocketHandler = (function() {
 			} else {
 				clippySays = 'I didn\'t download one of your files because it was of the wrong type.';
 			}
-		
+
 		} else if (errorType === 'FileUploadError') {
 			clippySays = contentData.errorMessage;
 			clippyAnimation = 'GetArtsy';
-		
+
 		} else if (errorType === 'UniqueError') {
 			var when = contentData.error.timeWithin.startsWith('Infinity') ? 'already' : 'in the past ' + contentData.error.timeWithin;
 			clippyAnimation = 'Print';
@@ -200,7 +200,7 @@ var WebSocketHandler = (function() {
 
 	WebSocketHandler.prototype.handleQueue = function(data) {
 		var $queueWindow = $('#queue-section');
-		
+
 		utils.counterShiftResize($queueWindow, function() {
 			var myId = utils.myId();
 
@@ -232,7 +232,7 @@ var WebSocketHandler = (function() {
 				$title.attr('data-text', '');
 				$currentNickname.html('');
 			}
-			
+
 			//rest of queue
 
 			var $queue = $('#queue');

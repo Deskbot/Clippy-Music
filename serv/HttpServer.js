@@ -57,7 +57,7 @@ function getFileForm(req, generateProgressHandler) {
 		else {
 			fileError = err;
 		}
-		
+
 		defer.reject(fileError);
 	});
 
@@ -83,7 +83,7 @@ function getFormMiddleware(req, res, next) {
 		if (err) {
 			console.error('Unknown data submission error: ', err);
 			res.status(500).end(err.message);
-			
+
 		} else {
 			req.fields = fields;
 			req.files = files;
@@ -221,7 +221,7 @@ function parseUploadForm(form, fields, files) {
 				uploadInfo.pic.isUrl = false;
 				uploadInfo.pic.path = picFile.path;
 				uploadInfo.pic.title = Html5Entities.encode(picFile.name);
-			
+
 			} else { //empty picture given, as is typical with multipart forms where no picture is chosen
 				utils.deleteFile(picFile.path);
 			}
@@ -310,7 +310,7 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 	.catch((err) => {
 		if (err instanceof FileUploadError) {
 			debug.log("deleting these bad uploads: ", err.files);
-			
+
 			if (err.files) {
 				for (let file of err.files) {
 					if (file) return utils.deleteFile(file.path);
@@ -378,7 +378,7 @@ app.post('/api/nickname/set', recordUserMiddleware, (req, res) => {
 
 	UserRecordServer.setNickname(req.ip, nickname);
 	WebSocketServer.sendNicknameToUser(req.ip, nickname);
-	
+
 	if (noRedirect(req)) res.status(200).end('Success\n');
 	else                 res.redirect('/');
 });
@@ -401,7 +401,7 @@ app.post('/api/ban/add', (req, res) => {
 
 	} else if (req.fields.nickname) {
 		const uids = UserRecordServer.whoHasNickname(utils.sanitiseNickname(req.fields.nickname));
-		
+
 		if (uids.length === 0) {
 			res.status(400).end('That user doesn\'t exist.\n');
 			return;
@@ -411,7 +411,7 @@ app.post('/api/ban/add', (req, res) => {
 				UserRecordServer.addBan(id);
 				ContentServer.purgeUser(id);
 			});
-			
+
 			if (noRedirect(req)) res.status(200).end('Success\n');
 			else                 res.redirect('/');
 		}
@@ -444,7 +444,7 @@ app.post('/api/ban/remove', (req, res) => {
 			uids.forEach((id) => {
 				UserRecordServer.removeBan(id);
 			});
-			
+
 			if (noRedirect(req)) res.status(200).end('Success\n');
 			else                 res.redirect('/');
 		}
@@ -472,7 +472,7 @@ app.post('/api/skipAndPenalise', (req, res) => {
 	}
 
 	ContentServer.killCurrent();
-	
+
 	res.status(200).end('Success\n');
 });
 
