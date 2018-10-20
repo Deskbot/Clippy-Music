@@ -240,9 +240,9 @@ $dlListContainer.on('click', 'button.dismiss', function(e) {
 	var $li = $this.parent();
 
 	var contentId = $li.attr('data-cid');
-	main.dlMap.remove(contentId);
-
-	if (main.dlMap.size() == 0) {
+	main.dlMap.delete(contentId);
+	
+	if (main.dlMap.size == 0) {
 		$dlListContainer.addClass('hidden');
 	}
 
