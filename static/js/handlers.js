@@ -311,7 +311,6 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 });
 
 $('#dl-list-container').on('click', 'button.cancel', function(e) {
-	console.log(e, this);
 	var $this = $(this);
 	var $li = $this.parent();
 

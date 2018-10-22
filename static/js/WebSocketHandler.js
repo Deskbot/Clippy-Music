@@ -68,8 +68,6 @@ var WebSocketHandler = (function() {
 
 		DlList.showError(DlList.findDlItemElem(contentId));
 
-		main.clippyAgent.play('GetAttention');
-
 		var errorType = contentData.errorType;
 		var contentType = contentData.error.contentType;
 		var title = localDlData.title;
@@ -86,13 +84,7 @@ var WebSocketHandler = (function() {
 			clippySays = 'I could not find anything at the ' + contentType + ' URL given. Is the url correct?';
 
 		} else if (errorType === 'CancelError') {
-			if (contentData.picTitle) { // was it given at all?
-				clippySays = 'I stopped processing ' + whatMus + ' with ' + whatPic + ' because you cancelled it.';
-			} else if (contentType === 'picture') {
-				clippySays = 'I stopped processing ' + whatMus + ' because you cancelled it.';
-			} else {
-				clippySays = 'I stopped processing your upload because you cancelled it.';
-			}
+			return; // don't display an error
 
 		} else if (errorType === 'DownloadTooLargeError') {
 			var what;
@@ -157,6 +149,7 @@ var WebSocketHandler = (function() {
 			clippyAnimation = 'GetArtsy';
 		}
 
+		main.clippyAgent.play('GetAttention');
 		main.clippyAgent.stop();
 		main.clippyAgent.speak(clippySays);
 		localDlData.errorMessage = clippySays;
