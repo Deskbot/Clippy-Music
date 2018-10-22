@@ -241,7 +241,7 @@ $dlListContainer.on('click', 'button.dismiss', function(e) {
 
 	var contentId = $li.attr('data-cid');
 	main.dlMap.delete(contentId);
-	
+
 	if (main.dlMap.size == 0) {
 		$dlListContainer.addClass('hidden');
 	}
@@ -310,8 +310,10 @@ $('#queue').on('click', '.bucket-container .bucket button.delete', function(e) {
 	});
 });
 
-$('#queue').on('click', '#dl-list-container .bucket button.cancel', function(e) {
+$('#dl-list-container').on('click', 'button.cancel', function(e) {
+	console.log(e, this);
 	var $this = $(this);
+	var $li = $this.parent();
 
 	$this.attr('disabled', true);
 
@@ -325,7 +327,7 @@ $('#queue').on('click', '#dl-list-container .bucket button.cancel', function(e) 
 		type: 'POST',
 		data: {
 			ajax: true,
-			'dl-index': $this.attr('data-index'),
+			'content-id': $li.attr('data-cid'),
 		}
 
 	}).done(function() {
