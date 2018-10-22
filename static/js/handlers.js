@@ -331,23 +331,12 @@ $('#dl-list-container').on('click', 'button.cancel', function(e) {
 		}
 
 	}).done(function() {
-		var $queueSection = $('#queue-section');
+		var $uploadSection = $('#upload-section');
 
-		utils.counterShiftResize($queueSection, function() {
+		utils.counterShiftResize($uploadSection, function() {
 			main.clippyAgent.speak('The download of ' + utils.entitle(contentName) + ' was cancelled.');
-
-			var $buttonAncestors = $this.parentsUntil('.bucket');
-			var $bucket = $buttonAncestors.first().parent();
-
-			$buttonAncestors.first().remove(); //remove li
-
-			var $personalQueue = $bucket.parentsUntil('.bucket-container').parent();
-
-			//remove download queue if empty
-			if ($bucket.children().length === 0) $('#dl-list-container').remove();
-
-			//if the media queue is now empty, remove it
-			if ($personalQueue.children().length === 0) $personalQueue.remove();
+			$li.remove();
+			console.log($this, $li);
 		});
 
 	}).fail(function(jqxhr, textStatus, err) {
