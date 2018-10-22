@@ -250,6 +250,7 @@ var WebSocketHandler = (function() {
 
 			if (main.dlMap.has(cid)) {
 				var itemBefore = main.dlMap.get(cid);
+				itemBefore.cancelable = item.cancelable;
 				itemBefore.percent = item.percent;
 				itemBefore.title = item.title;
 			} else {

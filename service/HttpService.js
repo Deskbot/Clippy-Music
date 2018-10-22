@@ -357,9 +357,9 @@ app.post('/api/queue/remove', (req, res) => {
 	}
 });
 
-//POST variable: dl-index
+//POST variable: content-id
 app.post('/api/download/cancel', (req, res) => {
-	if (ContentService.cancelDownload(req.ip, parseInt(req.fields['dl-index']))) {
+	if (ProgressQueueService.cancel(req.ip, parseInt(req.fields['content-id']))) {
 		if (noRedirect(req)) res.status(200).end('Success\n');
 		else                 res.redirect('/');
 	} else {
