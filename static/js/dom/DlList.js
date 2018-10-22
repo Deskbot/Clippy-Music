@@ -17,7 +17,7 @@ var DlList = (function() {
 
 			$dlItem.find('.title').html(content.title);
 			$dlItem.attr('data-cid', content.contentId);
-			if (content.cancelable) $dlItem.find('.cancel').removeClass('hidden');
+			if (content.cancellable) $dlItem.find('.cancel').removeClass('hidden');
 			if (content.percent) this.fillDlBar($dlItem.find('.dl-bar'), content.percent);
 			if (content.error) this.showError($dlItem);
 
