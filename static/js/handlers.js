@@ -319,6 +319,7 @@ $('#dl-list-container').on('click', 'button.cancel', function(e) {
 	main.clippyAgent.stop();
 	main.clippyAgent.play('EmptyTrash');
 
+	var contentId = $li.attr('data-cid');
 	var contentName = $this.siblings('.title').text();
 
 	$.ajax({
@@ -326,16 +327,22 @@ $('#dl-list-container').on('click', 'button.cancel', function(e) {
 		type: 'POST',
 		data: {
 			ajax: true,
-			'content-id': $li.attr('data-cid'),
+			'content-id': contentId,
 		}
 
 	}).done(function() {
+		main.clippyAgent.speak('The download of ' + utils.entitle(contentName) + ' was cancelled.');
+
 		var $uploadSection = $('#upload-section');
 
-		utils.counterShiftResize($uploadSection, function() {
-			main.clippyAgent.speak('The download of ' + utils.entitle(contentName) + ' was cancelled.');
+		utils.counterShiftResize($uploadSection, function () {
 			$li.remove();
-			console.log($this, $li);
+
+			main.dlMap.delete(contentId);
+
+			if (main.dlMap.size == 0) {
+				$dlListContainer.addClass('hidden');
+			}
 		});
 
 	}).fail(function(jqxhr, textStatus, err) {
