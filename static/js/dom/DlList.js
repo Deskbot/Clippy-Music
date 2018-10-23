@@ -42,23 +42,14 @@ var DlList = (function() {
 		},
 
 		remove: function remove(contentId) {
-			this.findDlItemElem(contentId).remove();
+			var $targetElem = this.findDlItemElem(contentId)
+			$targetElem.remove();
+
+			this.showHideContainer(main.dlMap);
 		},
 
-		renderDlList: function renderDlList(map) {
-			if (map.size !== 0) {
-				$dlListContainer.removeClass('hidden');
-			} else {
-				$dlListContainer.addClass('hidden');
-			}
-
-			//replace old list from DOM
-			$dlQueueBucket.empty();
-
-			//put items in the dlQueue
-			for (let item of map.values()) {
-				$dlQueueBucket.append(this.contentToDlItemElem(item));
-			}
+		showCancelButton: function showCancellable($elem) {
+			$elem.find('.cancel').removeClass('hidden');
 		},
 
 		showContainer: function showContainer() {
@@ -82,6 +73,44 @@ var DlList = (function() {
 				// so 2 blocks less than full is the target quantity
 				for (var newBlockCount = $blocks.length; newBlockCount >= maxBlocks - 2; newBlockCount--) {
 					$blocks.first().remove();
+				}
+			}
+		},
+
+		showHideContainer: function showHideContainer(map) {
+			if (map.size !== 0) {
+				this.showContainer();
+			} else {
+				this.hideContainer();
+			}
+		},
+
+		updateDlList: function updateDlList(map, oldMap) {
+			this.showHideContainer(map);
+
+			// put items in the dlQueue
+			for (let key of map.keys()) {
+				var item = map.get(key);
+
+				// alter existing dom if item is already on record
+				if (oldMap.has(key)) {
+					var itemOld = oldMap.get(key);
+					var $elem = this.findDlItemElem(item.contentId);
+
+					if (item.percent !== itemOld.percent) {
+						var $bar = $elem.find('.dl-bar');
+						this.fillDlBar($bar, item.percent);
+					}
+
+					if (item.title !== itemOld.title) {
+						$elem.find('.title').html(item.title);
+					}
+
+					if (item.cancellable) {
+						this.showCancelButton($elem);
+					}
+				} else { // create dom fresh if not on record
+					$dlQueueBucket.append(this.contentToDlItemElem(item));
 				}
 			}
 		}

@@ -242,9 +242,7 @@ $dlListContainer.on('click', 'button.dismiss', function(e) {
 	var contentId = $li.attr('data-cid');
 	main.dlMap.delete(contentId);
 
-	if (main.dlMap.size == 0) {
-		$dlListContainer.addClass('hidden');
-	}
+	DlList.showHideContainer(main.dlMap);
 
 	$li.remove();
 });
@@ -252,11 +250,11 @@ $dlListContainer.on('click', 'button.dismiss', function(e) {
 $dlListContainer.on('click', '.dl-item.error .dl-bar', function(e) {
 	var $dlItem = $(this).parent();
 	var contentId = $dlItem.attr('data-cid');
-	var message = main.dlMap.get(contentId).errorMessage;
+	var item = main.dlMap.get(contentId);
 
-	if (message) {
+	if (item && item.errorMessage) {
 		main.clippyAgent.stop();
-		main.clippyAgent.speak(message);
+		main.clippyAgent.speak(item.errorMessage);
 	}
 });
 
@@ -340,9 +338,7 @@ $('#dl-list-container').on('click', 'button.cancel', function(e) {
 
 			main.dlMap.delete(contentId);
 
-			if (main.dlMap.size == 0) {
-				$dlListContainer.addClass('hidden');
-			}
+			DlList.showHideContainer(main.dlMap);
 		});
 
 	}).fail(function(jqxhr, textStatus, err) {

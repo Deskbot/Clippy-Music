@@ -55,7 +55,7 @@ var WebSocketHandler = (function() {
 		DlList.remove(contentId);
 
 		if (main.dlMap.size === 0) {
-			DlList.hideContainer();
+			DlList.hideContainer(main.dlMap);
 		}
 	};
 
@@ -154,11 +154,18 @@ var WebSocketHandler = (function() {
 	};
 
 	WebSocketHandler.prototype.handleDlList = function(list) {
-		// update internal list storage
-		this.mergeNewListWithInternal(list);
+		main.dlMapOld = main.dlMap;
+		main.dlMap = new Map(main.dlMap); // make a copy so that non-dismissed errors are kept
+
+		// replace entries with up to date version
+		for (var i = 0; i < list.length; i++) {
+			var item = list[i];
+			var cid = item.contentId.toString();
+			main.dlMap.set(cid.toString(), item);
+		}
 
 		// render full list afresh
-		DlList.renderDlList(main.dlMap);
+		DlList.updateDlList(main.dlMap, main.dlMapOld);
 	};
 
 	WebSocketHandler.prototype.handleDlPrepared = function(contentData) {
