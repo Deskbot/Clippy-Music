@@ -83,9 +83,6 @@ var WebSocketHandler = (function() {
 		if (errorType === 'BadUrlError') {
 			clippySays = 'I could not find anything at the ' + contentType + ' URL given. Is the url correct?';
 
-		} else if (errorType === 'CancelError') {
-			return; // don't display an error
-
 		} else if (errorType === 'DownloadTooLargeError') {
 			var what;
 
