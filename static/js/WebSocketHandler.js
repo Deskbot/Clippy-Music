@@ -64,6 +64,9 @@ var WebSocketHandler = (function() {
 		var contentId = contentData.contentId;
 
 		var localDlData = main.dlMap.get(contentId.toString());
+
+		if (!localDlData) return; // if we don't have the item that has errored, don't do anything
+
 		localDlData.error = true;
 
 		DlList.showError(DlList.findDlItemElem(contentId));
