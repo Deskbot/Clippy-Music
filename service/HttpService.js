@@ -167,8 +167,7 @@ function parseUploadForm(form, fields, files) {
 
 		} else {
 			if (!musicFile) {
-				const err = new FileUploadError('The server thinks you gave a music file but could not find it.', [musicFile, picFile]);
-				throw err;
+				throw new FileUploadError('The server thinks you gave a music file but could not find it.', [musicFile, picFile]);
 			}
 
 			//no file
@@ -313,8 +312,10 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 
 			if (err.files) {
 				for (let file of err.files) {
-					if (file) return utils.deleteFile(file.path);
+					if (file) utils.deleteFile(file.path);
 				}
+
+				delete err.files; // so they aren't sent to the user
 			}
 
 			res.status(400);
