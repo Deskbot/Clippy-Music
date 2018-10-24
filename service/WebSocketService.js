@@ -106,7 +106,7 @@ class Api {
 
 	sendDlQueue(soc, userId) {
 		const queue = ProgressQueueService.getQueue(userId);
-		api.sendMessage(soc, 'dl-list', queue);
+		if (queue) api.sendMessage(soc, 'dl-list', queue);
 	}
 
 	broadcastMessage(type, mes) {
