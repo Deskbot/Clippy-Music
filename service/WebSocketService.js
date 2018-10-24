@@ -191,7 +191,7 @@ ProgressQueueService.on('error', (userId, contentId, error, extraInfo) => {
 });
 
 ProgressQueueService.on('list', (userId, list) => {
-	api.sendMessage( UserRecordService.getSockets(userId), 'dl-list', list);
+	api.sendMessage(UserRecordService.getSockets(userId), 'dl-list', list);
 });
 
 module.exports = api;
