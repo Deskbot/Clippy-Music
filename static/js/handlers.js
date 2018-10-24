@@ -159,7 +159,7 @@ $uploadForm.submit(function(e) {
 	return false;
 });
 
-$uploadForm.find('input[type=url]').keypress(function(e) {
+$uploadForm.find('input[type=url], input[type=text]').keypress(function(e) {
 	if (e.keyCode == 13) {
 		$uploadForm.submit();
 	}
