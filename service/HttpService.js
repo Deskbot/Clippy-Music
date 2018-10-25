@@ -312,7 +312,7 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 
 			if (err.files) {
 				for (let file of err.files) {
-					if (file) utils.deleteFile(file.path);
+					if (file) utils.deleteFileIfExists(file.path); // might already have been deleted if url upload
 				}
 
 				delete err.files; // so they aren't sent to the user
