@@ -191,7 +191,7 @@ function parseUploadForm(form, fields, files) {
 			//success
 			uploadInfo.music.isUrl = false;
 			uploadInfo.music.path = musicFile.path;
-			uploadInfo.music.title = Html5Entities.encode(musicFile.name);
+			uploadInfo.music.title = utils.sanitiseFilename(musicFile.name);
 		}
 
 		//pic
@@ -219,7 +219,7 @@ function parseUploadForm(form, fields, files) {
 				uploadInfo.pic.exists = true;
 				uploadInfo.pic.isUrl = false;
 				uploadInfo.pic.path = picFile.path;
-				uploadInfo.pic.title = Html5Entities.encode(picFile.name);
+				uploadInfo.pic.title = utils.sanitiseFilename(picFile.name);
 
 			} else { //empty picture given, as is typical with multipart forms where no picture is chosen
 				utils.deleteFile(picFile.path);

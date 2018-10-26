@@ -15,7 +15,7 @@ module.exports = {
 	imageSizeLimit: 100000000,
 	musicSizeLimit: 400000000,
 	nicknameSizeLimit: 33,
-
+	fileNameSizeLimit: 33,
 };
 
 //dlPercentUpdateFreq = how many milliseconds between updating the download percentage for videos on the front end
