@@ -127,6 +127,8 @@ Contributions
 
 Please contribute, preferably with code, issues on GitHub is fine.
 
+Check out the [todo list](./TODO.md) to see what changes would be good to make.
+
 License
 -------
 
