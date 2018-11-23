@@ -52,13 +52,11 @@ var WebSocketHandler = (function() {
 	WebSocketHandler.prototype.handleDlDelete = function(contentId) {
 		main.dlMap.delete(contentId.toString());
 
-		utils.counterShiftResize(function() {
-			DlList.remove(contentId);
+		DlList.remove(contentId);
 
-			if (main.dlMap.size === 0) {
-				DlList.hideContainer(main.dlMap);
-			}
-		});
+		if (main.dlMap.size === 0) {
+			DlList.hideContainer(main.dlMap);
+		}
 	};
 
 	WebSocketHandler.prototype.handleDlError = function(responseData) {
@@ -71,9 +69,7 @@ var WebSocketHandler = (function() {
 
 		localDlData.error = true;
 
-		utils.counterShiftResize(function() {
-			DlList.showError(DlList.findDlItemElem(contentId));
-		});
+		DlList.showError(DlList.findDlItemElem(contentId));
 
 		var errorType = contentData.errorType;
 		var contentType = contentData.error.contentType;
@@ -172,9 +168,7 @@ var WebSocketHandler = (function() {
 		}
 
 		// render full list afresh
-		utils.counterShiftResize(function() {
-			DlList.updateDlList(main.dlMap, main.dlMapOld);
-		});
+		DlList.updateDlList(main.dlMap, main.dlMapOld);
 	};
 
 	WebSocketHandler.prototype.handleDlPrepared = function(contentData) {
