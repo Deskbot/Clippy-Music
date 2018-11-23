@@ -8,6 +8,8 @@ var DlList = (function() {
 	var maxBlocks = Math.ceil(fullWidth / blockWidth);
 
 	var DlList = {
+		$sectionWithin: $('#upload-section'),
+
 		add: function add(content) {
 			$dlQueueBucket.append(this.contentToDlItemElem(content));
 		},

@@ -52,7 +52,7 @@ var WebSocketHandler = (function() {
 	WebSocketHandler.prototype.handleDlDelete = function(contentId) {
 		main.dlMap.delete(contentId.toString());
 
-		utils.counterShiftResize(function() {
+		utils.counterShiftResize(DlList.$sectionWithin, function() {
 			DlList.remove(contentId);
 
 			if (main.dlMap.size === 0) {
@@ -71,7 +71,7 @@ var WebSocketHandler = (function() {
 
 		localDlData.error = true;
 
-		utils.counterShiftResize(function() {
+		utils.counterShiftResize(DlList.$sectionWithin, function() {
 			DlList.showError(DlList.findDlItemElem(contentId));
 		});
 
@@ -172,7 +172,7 @@ var WebSocketHandler = (function() {
 		}
 
 		// render full list afresh
-		utils.counterShiftResize(function() {
+		utils.counterShiftResize(DlList.$sectionWithin, function() {
 			DlList.updateDlList(main.dlMap, main.dlMapOld);
 		});
 	};
@@ -203,9 +203,7 @@ var WebSocketHandler = (function() {
 	};
 
 	WebSocketHandler.prototype.handleQueue = function(data) {
-		var $queueWindow = $('#queue-section');
-
-		utils.counterShiftResize($queueWindow, function() {
+		utils.counterShiftResize(Queue.$sectionWithin, function() {
 			var myId = utils.myId();
 
 			//current

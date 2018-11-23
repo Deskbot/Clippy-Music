@@ -1,4 +1,6 @@
 var Queue = {
+	$sectionWithin: $('#queue-section'),
+
 	contentToBucketElem: function contentToBucketElem(c, myId) {
 		var $bucketCont = templates.makeBucketContainer();
 		var $bucketNickname = $bucketCont.find('.nickname');
