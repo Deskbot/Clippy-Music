@@ -203,9 +203,9 @@ var WebSocketHandler = (function() {
 	};
 
 	WebSocketHandler.prototype.handleQueue = function(data) {
-		utils.counterShiftResize(Queue.$sectionWithin, function() {
-			var myId = utils.myId();
+		var myId = utils.myId();
 
+		utils.counterShiftResize($('#current-section'), function() {
 			//current
 
 			var $currentlyPlaying = $('#currently-playing');
@@ -234,10 +234,12 @@ var WebSocketHandler = (function() {
 				$title.attr('data-text', '');
 				$currentNickname.html('');
 			}
+		});
 
+		var $queue = $('#queue');
+
+		utils.counterShiftResize($('#queue-section'), function () {
 			//rest of queue
-
-			var $queue = $('#queue');
 			$queue.empty();
 
 			for (var i = 0; i < data.queue.length; i++) {
