@@ -3,6 +3,7 @@ var $banUserFields = $('#ban-form').add('#un-ban-form');
 var $fileInput = $('input[type=file]');
 var $section = $('section');
 var $uploadForm = $('#upload-form');
+var $uploadSection = $('#upload-section');
 
 $('html').mouseup(function() {
 	$('.active').removeClass('active');
@@ -242,9 +243,10 @@ $dlListContainer.on('click', 'button.dismiss', function(e) {
 	var contentId = $li.attr('data-cid');
 	main.dlMap.delete(contentId);
 
-	DlList.showHideContainer(main.dlMap);
-
-	$li.remove();
+	utils.counterShiftResize($uploadSection, function() {
+		DlList.showHideContainer(main.dlMap);
+		$li.remove();
+	});
 });
 
 $dlListContainer.on('click', '.dl-item.error .dl-bar', function(e) {
@@ -330,8 +332,6 @@ $('#dl-list-container').on('click', 'button.cancel', function(e) {
 
 	}).done(function() {
 		main.clippyAgent.speak('The download of ' + utils.entitle(contentName) + ' was cancelled.');
-
-		var $uploadSection = $('#upload-section');
 
 		utils.counterShiftResize($uploadSection, function () {
 			$li.remove();
