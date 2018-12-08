@@ -1,8 +1,8 @@
-const QuickValuesMap = require('../../lib/QuickValuesMap.js');
+const QuickValuesMap = require('../../../lib/QuickValuesMap.js');
 
 const assert = require('assert');
 
-const tests = {
+module.exports = {
     clear: () => {
         const m = new QuickValuesMap();
         m.set(1,2);
@@ -110,16 +110,3 @@ const tests = {
         }
     },
 };
-
-for (const testName in tests) {
-    try {
-        console.log('testing:', testName);
-        tests[testName]();
-        console.log('pass:', testName);
-    } catch(e) {
-        console.log('fail:', testName);
-        throw e;
-    }
-}
-
-console.log('All tests pass:', __filename);
