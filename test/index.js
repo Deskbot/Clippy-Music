@@ -85,17 +85,17 @@ function testFiles(files) {
 
         for (const testName in tests) {
             try {
-                stdout.write(`    ${testName} RUNNING ---`);
+                stdout.write(`    RUNNING ${testName}`);
                 tests[testName]();
                 passCount++;
                 clearLastLine();
-                console.log(`    ${testName} PASS ---`);
+                console.log(`    PASS ${testName}`);
             } catch (e) {
                 allPass = false;
                 failCount++;
                 clearLastLine();
-                console.log(`    ${testName} FAIL ---\n`);
-                throw e; // display the error to the user
+                console.log(`    FAIL ${testName}\n`);
+                console.error(e); // display the error to the user
             }
         }
 
