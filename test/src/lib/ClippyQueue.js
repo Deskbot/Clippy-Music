@@ -79,7 +79,7 @@ module.exports = {
             else break;
         }
 
-        assert.strictEqual(badUserItem, lastItem,
+        assert.strictEqual(lastItem, badUserItem,
             "A penalised user is last in the queue.");
     },
 
@@ -173,7 +173,7 @@ module.exports = {
 
 
         for (const item of itemsInPriorityOrder) {
-            assert.strictEqual(item, q.next(),
+            assert.strictEqual(q.next(), item,
                 "An item is retreived in the correct order based on its user's priority.");
         }
     },
