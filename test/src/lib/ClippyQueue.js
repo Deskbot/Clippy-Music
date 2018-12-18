@@ -157,19 +157,85 @@ module.exports = {
         }];
         const posteriorities = [50, 30, 70];
 
-        const itemsInPriorityOrder = utils
-            .zip(items, posteriorities) // merge lists
-            .sort(([item1, pos1], [item2, pos2]) => pos1 - pos2) // sort small to big by posteriority
-            .map(([item, pos]) => item); // create an array of items
+        // put the first wave of uploads into the queue
 
         for (let i = 0; i < items.length; i++) {
             q.add(items[i]);
             q.boostPosteriority(items[i].userId, posteriorities[i]);
         }
 
+        // check they come back in the right order
+
+        const itemsInPriorityOrder = utils
+            .zip(items, posteriorities) // merge lists
+            .sort(([item1, pos1], [item2, pos2]) => pos1 - pos2) // sort small to big by posteriority
+            .map(([item, pos]) => item); // create an array of items
+
+
         for (const item of itemsInPriorityOrder) {
             assert.strictEqual(item, q.next(),
                 "An item is retreived in the correct order based on its user's priority.");
         }
+    },
+
+    user_priority_is_affected_by_previous_items_they_have_played: () => {
+        const q = new ClippyQueue();
+
+        const items1 = [{
+            id: 1,
+            userId: 100,
+            duration: 5000, // used as a property only for test purposes, not by ClippyQueue
+        },
+        {
+            id: 2,
+            userId: 200,
+            duration: 6000,
+        },
+        {
+            id: 3,
+            userId: 300,
+            duration: 4000,
+        }];
+
+        // add all items to the queue
+        for (const item of items1) {
+            q.add(item);
+        }
+
+        // penalise each user by their item's duration
+        for (let i = 0; i < items1.duration; i++) {
+            const nextItem = q.next();
+            q.boostPosteriority(nextItem.duration);
+        }
+
+        const items2 = [{
+            id: 4,
+            userId: 100
+        }, {
+            id: 5,
+            userId: 200
+        }, {
+            id: 6,
+            userId: 300
+        }];
+
+        for (const item of items2) {
+            q.add(item);
+        }
+
+        // regardless of the duration of these items, the users' previous items should affect the item order
+
+        const usersInPriorityOrder = items1
+            .slice()
+            .sort((i1, i2) => i1.duration - i2.duration) // low to high duration
+            .map((i) => i.userId);
+
+        const userRetreivalOrder = [];
+        for (let i = 0; i < items2.length; i++) {
+            userRetreivalOrder.push(q.next().userId);
+        }
+
+        assert.deepStrictEqual(userRetreivalOrder, usersInPriorityOrder,
+            "Users priority is determined by the duration of previous items they have played.");
     },
 };
