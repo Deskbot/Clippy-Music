@@ -203,9 +203,12 @@ module.exports = {
         }
 
         // penalise each user by their item's duration
-        for (let i = 0; i < items1.duration; i++) {
+        while (true) {
             const nextItem = q.next();
-            q.boostPosteriority(nextItem.duration);
+
+            if (nextItem === null) break;
+
+            q.boostPosteriority(nextItem.userId, nextItem.duration);
         }
 
         const items2 = [{
@@ -231,8 +234,12 @@ module.exports = {
             .map((i) => i.userId);
 
         const userRetreivalOrder = [];
-        for (let i = 0; i < items2.length; i++) {
-            userRetreivalOrder.push(q.next().userId);
+        while (true) {
+            const item = q.next();
+
+            if (item === null) break;
+
+            userRetreivalOrder.push(item.userId);
         }
 
         assert.deepStrictEqual(userRetreivalOrder, usersInPriorityOrder,
