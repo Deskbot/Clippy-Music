@@ -377,6 +377,12 @@ app.post('/api/nickname/set', recordUserMiddleware, (req, res) => {
 		return;
 	}
 
+	// check sanitised version because that's what admins will see
+	if (utils.looksLikeIpAddress(nickname)) {
+		res.status(400).end('Your nickname can not look like an IP address.');
+		return;
+	}
+
 	UserRecordService.setNickname(req.ip, nickname);
 	WebSocketService.sendNicknameToUser(req.ip, nickname);
 
