@@ -28,7 +28,9 @@ module.exports = {
         const userIds = [1,2,3,4,5,6,7];
         const userPosteriorities = [70,50,60,10,20,40,30];
 
-        for (let i = 0; i < 4; i++) {
+        assert.strictEqual(userPosteriorities.length, userIds.length);
+
+        for (let i = 0; i < userIds.length; i++) {
             q.add({
                 id: i,
                 userId: userIds[i],
