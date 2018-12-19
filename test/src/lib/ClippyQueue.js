@@ -25,8 +25,8 @@ module.exports = {
 
     can_get_users_by_posteriority: () => {
         const q = new ClippyQueue();
-        const userIds = [1,2,3,4];
-        const userPosteriorities = [80,70,50,60];
+        const userIds = [1,2,3,4,5,6,7];
+        const userPosteriorities = [70,50,60,10,20,40,30];
 
         for (let i = 0; i < 4; i++) {
             q.add({
@@ -48,17 +48,24 @@ module.exports = {
     can_penalise_a_user: () => {
         const q = new ClippyQueue();
         const badUserItem = {
-            id: 3,
             userId: 3
         };
         const items = [{
-            id: 1,
             userId: 1
         }, {
-            id: 2,
             userId: 2
-        }, badUserItem];
-        const posteriorities = [8,6,7];
+        }, {
+            userId: 3
+        }, {
+            userId: 4
+        }, {
+            userId: 5
+        }, {
+            userId: 6
+        },
+            badUserItem
+        ];
+        const posteriorities = [6,7,1,2,5,4,3];
 
         for (let i = 0; i < items.length; i++) {
             q.add(items[i]);
@@ -144,18 +151,21 @@ module.exports = {
     can_retreive_items_in_order_of_user_priority: () => {
         const q = new ClippyQueue();
         const items = [{
-            id: 1,
             userId: 100
-        },
-        {
-            id: 2,
+        }, {
             userId: 200
-        },
-        {
-            id: 3,
+        }, {
             userId: 300
+        }, {
+            userId: 400
+        }, {
+            userId: 500
+        }, {
+            userId: 600
+        }, {
+            userId: 700
         }];
-        const posteriorities = [50, 30, 70];
+        const posteriorities = [50, 30, 70, 20, 10, 80, 40];
 
         // put the first wave of uploads into the queue
 
@@ -182,19 +192,26 @@ module.exports = {
         const q = new ClippyQueue();
 
         const items1 = [{
-            id: 1,
             userId: 100,
             duration: 5000, // used as a property only for test purposes, not by ClippyQueue
-        },
-        {
-            id: 2,
+        }, {
             userId: 200,
             duration: 6000,
-        },
-        {
-            id: 3,
+        }, {
             userId: 300,
             duration: 4000,
+        }, {
+            userId: 400,
+            duration: 3000,
+        }, {
+            userId: 500,
+            duration: 1000,
+        }, {
+            userId: 600,
+            duration: 9000,
+        }, {
+            userId: 700,
+            duration: 2000,
         }];
 
         // add all items to the queue
@@ -212,14 +229,19 @@ module.exports = {
         }
 
         const items2 = [{
-            id: 4,
             userId: 100
         }, {
-            id: 5,
             userId: 200
         }, {
-            id: 6,
             userId: 300
+        }, {
+            userId: 400
+        }, {
+            userId: 500
+        }, {
+            userId: 600
+        }, {
+            userId: 700
         }];
 
         for (const item of items2) {
