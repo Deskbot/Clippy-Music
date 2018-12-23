@@ -163,10 +163,10 @@ ContentService.on('queue-empty', () => {
 	}
 });
 
-ContentService.on('queue-update', utils.throttle(consts.queueUpdateMaxFreq, () => {
+ContentService.on('queue-update', () => {
 	lastQueueWasEmpty = false;
 	api.broadcastQueue();
-}));
+});
 
 ProgressQueueService.on('prepared', (userId, content) => {
 	api.sendMessage(UserRecordService.getSockets(userId), 'dl-prep', content);
@@ -175,7 +175,7 @@ ProgressQueueService.on('prepared', (userId, content) => {
 ProgressQueueService.on('delete', (userId, contentId) => {
 	const socs = UserRecordService.getSockets(userId);
 	api.sendMessage(socs, 'dl-delete', contentId);
-	api.sendQueue(socs); // also update the user's content queue to match
+	// api.sendQueue(socs); // also update the user's content queue to match
 });
 
 //extraInfo is an optional argument
