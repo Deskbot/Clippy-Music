@@ -16,6 +16,7 @@ List
     * Then rename image/pic variables to overlay everywhere
     * These need making consistent anyway
 * Gifv support
+* Allow admins to remove anything before playing it
 * Prevent a user giving a start and end time that makes the duration 0
     * Can be used to put things on uniqueness cooldown without playing them
     * in playQueue move the hash remember function to later and have check for duration played for
@@ -88,7 +89,6 @@ List
 * Build all error messages on the front end
 * Tell the user how long until something is no longer blocked due to the uniqueness constraint
 * Use a consistent method for checking for an empty string
-* Use a separate uniqueness cooldown for videos and pictures
 * Add a unicode play/pause icon to the play/pause button on the admin panel
 * Make quotes consistent around numbers
 * Make it so progress items can be passed around the system rather than re-searched for frequently
