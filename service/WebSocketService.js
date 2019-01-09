@@ -175,7 +175,6 @@ ProgressQueueService.on('prepared', (userId, content) => {
 ProgressQueueService.on('delete', (userId, contentId) => {
 	const socs = UserRecordService.getSockets(userId);
 	api.sendMessage(socs, 'dl-delete', contentId);
-	// api.sendQueue(socs); // also update the user's content queue to match
 });
 
 //extraInfo is an optional argument
