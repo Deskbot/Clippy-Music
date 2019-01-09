@@ -16,10 +16,7 @@ List
     * Then rename image/pic variables to overlay everywhere
     * These need making consistent anyway
 * Gifv support
-* Allow admins to remove anything before playing it
-* Prevent a user giving a start and end time that makes the duration 0
-    * Can be used to put things on uniqueness cooldown without playing them
-    * in playQueue move the hash remember function to later and have check for duration played for
+* Allow admins to remove anything before it gets played
 * Allow downloading of content
     * Must give a legal warning at the user's first attempt, which prompts the user to confirm their intent
     * Only allow downloading of the currently playing content. I hate seeing people waste their time looking ahead. It ruins the fun.
