@@ -125,13 +125,12 @@ var WebSocketHandler = (function() {
 			clippyAnimation = 'GetArtsy';
 
 		} else if (errorType === 'UniqueError') {
-			var when = contentData.error.timeWithin.startsWith('Infinity') ? 'already' : 'in the past ' + contentData.error.timeWithin;
 			clippyAnimation = 'Print';
 
 			if (isMusic) {
-				clippySays = 'I didn\'t queue ' + whatMus + ' because it has been played ' + when + '.';
+				clippySays = 'I didn\'t queue ' + whatMus + ' because it has been played ' + contentData.error.playedWithin + '.';
 			} else if (isPic) {
-				clippySays = 'I didn\'t queue ' + whatMus + ' because ' + whatPic + ' has been shown ' + when + '.';
+				clippySays = 'I didn\'t queue ' + whatMus + ' because ' + whatPic + ' has been shown ' + contentData.error.playedWithin + '.';
 			} else {
 				clippySays = 'I didn\'t queue what you requested because something wasn\'t unique.';
 			}

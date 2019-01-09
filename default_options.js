@@ -2,16 +2,17 @@ module.exports = {
 	httpPort: 8080,
 	webSocketPort: 3000,
 
-	dlPercentUpdateFreq: 2000,
+	imageUniqueCoolOff: 3600,
+	musicUniqueCoolOff: 3600,
 	streamYtOverDur: 1200,
 	timeout: 644,
-	uniqueCoolOff: 86400,
 
 	storageDir: '/tmp/Clippy-Music-Tmp',
 	mpvPath: 'mpv',
 	mpvArgs: ['-vo', 'xv', '-fs', '--af=drc=2:0.25'],
 	youtubeDlPath: 'youtube-dl',
 
+	dlPercentUpdateFreq: 2000,
 	imageSizeLimit: 100000000,
 	musicSizeLimit: 400000000,
 	nicknameSizeLimit: 33,
