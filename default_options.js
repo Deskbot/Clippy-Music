@@ -10,7 +10,7 @@ module.exports = {
 	storageDir: '/tmp/Clippy-Music-Tmp',
 
 	mpvPath: 'mpv',
-	mpvArgs: ['-vo', 'xv', '-fs', '--af=drc=2:0.25'],
+	mpvArgs: ['-fs', '--af=dynaudnorm'],
 	youtubeDlPath: 'youtube-dl',
 
 	dlPercentUpdateFreq: 2000,
