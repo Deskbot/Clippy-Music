@@ -24,6 +24,7 @@ List
 
 ---
 
+* Make internal errors that aren't user errors get put in the terminal
 * Only attach user ids to items belonging to the user the queue is sent to
 * Check picture for duplicate again before playing it
 * Account for possibility of CDN being down
