@@ -126,8 +126,6 @@ $uploadForm.submit(function(e) {
 		contentType: false,
 		processData: false
 
-	}).done(function(data, status, jqxhr) {
-
 	}).fail(function(jqxhr, textStatus, err) {
 		var responseData = JSON.parse(jqxhr.responseText);
 
@@ -144,18 +142,12 @@ $uploadForm.submit(function(e) {
 		}
 
 		// specific error messages are given by web socket
-
-	}).always(function() {
-		$uploadForm.find('.file-name').text('No File Chosen');
-		$fields.val(null);
-		$buttons.attr('disabled', false);
-		$inputs.attr('disabled', false);
-		$('html').removeClass('progress');
 	});
 
-	$buttons.attr('disabled', true);
-	$inputs.attr('disabled', true);
-	$('html').addClass('progress');
+	$uploadForm.find('.file-name').text('No File Chosen');
+	$fields.val(null);
+	$buttons.attr('disabled', false);
+	$inputs.attr('disabled', false);
 
 	return false;
 });
