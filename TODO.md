@@ -21,6 +21,7 @@ List
     * Must give a legal warning at the user's first attempt, which prompts the user to confirm their intent
     * Only allow downloading of the currently playing content. I hate seeing people waste their time looking ahead. It ruins the fun.
 * Put development diagrams in repo
+* Sometimes unmoved windows move by a small amount when a window above is closed
 
 ---
 
