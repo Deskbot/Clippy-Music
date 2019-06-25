@@ -1,6 +1,5 @@
 const express = require('express');
 const formidable = require('formidable');
-const Html5Entities = require('html-entities').Html5Entities;
 const q = require('q');
 
 const ContentService = require('./ContentService.js');

@@ -6,22 +6,31 @@ This list is in a rough order of priority.
 List
 ----
 
+* Barringer's Bucketing system
+    * Maybe with a couple of caveats like not being able to add to the bucket that is currently playing.
+    * Maybe playing the bucket contents in a random order so you don't get people having a bunch of their stuff in a row.
 * Reddit support
     * youtube-dl does it
     * mpv can stream it but it takes ages
 * Vimeo support
     * youtube-dl does it
     * mpv can stream it
+* Basically every other youtube-dl source including bandcamp and archive.org
+* Improve the way clippy reconnects the websocket, maybe do it as soon as the tab regains focus and update the queue data at the same time.
 * Silent looping Video overlay
     * Then rename image/pic variables to overlay everywhere
     * These need making consistent anyway
 * Gifv support
+* update the state of the choose music file button when pasting into youtube url box
 * Allow admins to remove anything before it gets played
 * Allow downloading of content
     * Must give a legal warning at the user's first attempt, which prompts the user to confirm their intent
     * Only allow downloading of the currently playing content. I hate seeing people waste their time looking ahead. It ruins the fun.
+* Allow killing the thing you yourself are playing
 * Put development diagrams in repo
 * Sometimes unmoved windows move by a small amount when a window above is closed
+* Dragging a window when another window resizes, causes the one you're dragging to shift.
+    * maybe consider changing the way the layout is done. how often do people resize the browser window anyway? I don't think i need to be account for all that
 
 ---
 
@@ -31,6 +40,7 @@ List
 * Account for possibility of CDN being down
     * `<script>window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')</script>`
 * Add all npm scripts like unit-test and ban
+* clippy tests have own assertTrue or assertFalse methods
 * Replace utils.valList with Object.values
 * Remove debug file and commands
 * Split up `static/handlers.js`
@@ -54,6 +64,7 @@ List
 * Remove duplicate code in `static/handlers.js`
 * Make play queue DOM update more efficiently
 * Only try to delete empty files once
+* sort out the fact that the user sees "The admin controls can not be used because no admin password was set." for any unfound endpoint
 * Use a map of content id to item instead of a user queue
 * Allow videos to be uploaded by URL that references a file
 * Tests should execute in a random order
@@ -63,6 +74,7 @@ List
 * Remove null from codebase
 * Truncate file names before sending the files to the server
 * Use exponential form for numbers in default_options
+* both cancel and dismiss show when there is a downlod error from youtube
 * Add unit tests
     * Worth doing before refactors
 * Add integration tests
