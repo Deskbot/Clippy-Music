@@ -8,7 +8,7 @@ List
 
 * Barringer's Bucketing system
     * Maybe with a couple of caveats like not being able to add to the bucket that is currently playing.
-    * Maybe playing the bucket contents in a random order so you don't get people having a bunch of their stuff in a row.
+    * New uploads are added to each bucket in a random position so you don't get people having a bunch of their stuff in a row. This doesn't reorder items already in the list.
 * Reddit support
     * youtube-dl does it
     * mpv can stream it but it takes ages
@@ -83,6 +83,7 @@ List
 
 ---
 
+* Default nickname is "Anonymous" or configurable
 * Windows 2000 cursors (http://telcontar.net/Misc/screeniecursors/)
 * Play the Windows 2000 start up sound when visiting the page
 * Drag windows by their outline, which is more authentic
