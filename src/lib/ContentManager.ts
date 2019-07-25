@@ -97,7 +97,7 @@ export class ContentManager extends EventEmitter {
 
 	//object methods
 
-	add(uplData) {
+	add(uplData): Promise<UploadData> {
 		const that = this;
 
 		const p = new Promise(function(resolve, reject) {

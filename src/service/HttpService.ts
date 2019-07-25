@@ -17,6 +17,7 @@ import * as utils from '../lib/utils.js';
 
 import { getFileDuration } from '../lib/music.js';
 import { BannedError, FileUploadError, UniqueError, YTError } from '../lib/errors.js';
+import { UploadData } from '../types/UploadData';
 
 function adminMiddleware(req, res, next) {
 	if (!PasswordService.isSet()) {
@@ -134,9 +135,9 @@ function noRedirect(req) {
 	return req.fields.ajax || req.headers['user-agent'].includes('curl');
 }
 
-function parseUploadForm(form, fields, files) {
+function parseUploadForm(form, fields, files): Promise<UploadData> {
 	return new Promise((resolve, reject) => {
-		const uploadInfo = {
+		const uploadInfo: UploadData = {
 			music: {
 				isUrl: null,
 				title: null,
