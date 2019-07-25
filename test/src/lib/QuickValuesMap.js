@@ -64,8 +64,6 @@ module.exports = {
         }
     },
 
-    // forEach
-
     get: () => {
         const m = new QuickValuesMap();
         m.set(1,2);

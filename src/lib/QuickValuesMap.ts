@@ -4,12 +4,12 @@
  * We know it needs updating when particular methods on Map are called
 */
 
-export class QuickValuesMap extends Map {
+export class QuickValuesMap<K,V> extends Map<K,V> {
     private quickValuesArr;
     private valuesNeedUpdating;
 
-    constructor(...args) {
-        super(...args);
+    constructor(oldMap?) {
+        super(oldMap);
         this.quickValuesArr = [];
         this.valuesNeedUpdating = true;
     }
@@ -19,19 +19,16 @@ export class QuickValuesMap extends Map {
         this.valuesNeedUpdating = true;
     }
 
-    delete(key) {
-        super.delete(key);
+    delete(key): boolean {
+        const isSuccess = super.delete(key);
         this.valuesNeedUpdating = true;
+        return isSuccess;
     }
 
-    forEach(...args) {
-        super.forEach(...args);
-        this.valuesNeedUpdating = true;
-    }
-
-    set(key, val) {
+    set(key, val): this {
         super.set(key,val);
         this.valuesNeedUpdating = true;
+        return this;
     }
 
     valuesQuick() {
