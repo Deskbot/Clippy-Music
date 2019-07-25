@@ -9,6 +9,15 @@ List
 * Barringer's Bucketing system
     * Maybe with a couple of caveats like not being able to add to the bucket that is currently playing.
     * New uploads are added to each bucket in a random position so you don't get people having a bunch of their stuff in a row. This doesn't reorder items already in the list.
+
+    * determine file duration at upload time and put it on the content object
+    * add bucketing type to config
+    * integrate the new bucketing object in every location with an if to decide which queue
+    * send bucket type to front end
+    * render new kind of bucketing on the front
+    * refactor to not use ifs everywhere
+    * when using ClippyQueue see if we can avoid getting the duration before playing with or just don't count the seconds actually played
+
 * Reddit support
     * youtube-dl does it
     * mpv can stream it but it takes ages
