@@ -11,6 +11,7 @@ const WebSocketService = require('./WebSocketService.js');
 
 const consts = require('../lib/consts.js');
 const debug = require('../lib/debug.js');
+const time = require('../lib/time.js');
 const opt = require('../options.js');
 const utils = require('../lib/utils.js');
 
@@ -292,19 +293,20 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 			}
 
 			return getDuration(uplData.music.path)
-				.then((duration) => {
-					uplData.music.duration = Math.floor(duration);
-					return uplData;
-				})
-				.catch((err) => {
-					console.error("Error reading discerning the duration of a music file.", err, uplData.music.path);
-					throw new FileUploadError(
-						`I could not discern the duration of the music file you uploaded (${uplData.music.title}).`,
-						Object.values(files)
-					);
-				});
+			.then((duration) => {
+				uplData.music.duration = time.clipTimeByStartAndEnd(Math.floor(duration), uplData.startTime, uplData.endTime);
+				return uplData;
+			})
+			.catch((err) => {
+				console.error("Error reading discerning the duration of a music file.", err, uplData.music.path);
+				throw new FileUploadError(
+					`I could not discern the duration of the music file you uploaded (${uplData.music.title}).`,
+					Object.values(files)
+				);
+			});
 
-		}).then((uplData) => {
+		})
+		.then((uplData) => {
 			uplData.id = contentId;
 			uplData.userId = req.ip;
 			return ContentService.add(uplData);

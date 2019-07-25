@@ -7,9 +7,6 @@ List
 ----
 
 * Barringer's Bucketing system
-    * Maybe with a couple of caveats like not being able to add to the bucket that is currently playing.
-    * New uploads are added to each bucket in a random position so you don't get people having a bunch of their stuff in a row. This doesn't reorder items already in the list.
-
     * modify duration by the start and end time given
     * add a test for file duration
     * add bucketing type to options
