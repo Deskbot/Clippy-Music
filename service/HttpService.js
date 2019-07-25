@@ -14,6 +14,7 @@ const debug = require('../lib/debug.js');
 const opt = require('../options.js');
 const utils = require('../lib/utils.js');
 
+const { getDuration } = require('../lib/music.js');
 const { BannedError, FileUploadError, UniqueError, YTError } = require('../lib/errors.js');
 
 function adminMiddleware(req, res, next) {
@@ -136,6 +137,7 @@ function parseUploadForm(form, fields, files) {
 	return new Promise((resolve, reject) => {
 		const uploadInfo = {
 			music: {
+				duration: null,
 				isUrl: null,
 				title: null,
 				path: null,
@@ -289,6 +291,20 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 				ProgressQueueService.setTitle(req.ip, contentId, uplData.music.path, true);
 			}
 
+			return getDuration(uplData.music.path)
+				.then((duration) => {
+					uplData.music.duration = Math.floor(duration);
+					return uplData;
+				})
+				.catch((err) => {
+					console.error("Error reading discerning the duration of a music file.", err, uplData.music.path);
+					throw new FileUploadError(
+						`I could not discern the duration of the music file you uploaded (${uplData.music.title}).`,
+						Object.values(files)
+					);
+				});
+
+		}).then((uplData) => {
 			uplData.id = contentId;
 			uplData.userId = req.ip;
 			return ContentService.add(uplData);
@@ -297,6 +313,8 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 			if (uplData.music.isUrl) {
 				ProgressQueueService.setTitle(req.ip, contentId, uplData.music.title);
 			}
+
+			debug.log("successful upload: ", uplData);
 
 			if (fields.ajax || req.headers['user-agent'].includes('curl')) {
 				res.status(200).end('Success\n');

@@ -10,8 +10,8 @@ List
     * Maybe with a couple of caveats like not being able to add to the bucket that is currently playing.
     * New uploads are added to each bucket in a random position so you don't get people having a bunch of their stuff in a row. This doesn't reorder items already in the list.
 
-    * determine file duration at upload time and put it on the content object
-        * add user readable error in case of bad ffprobe
+    * modify duration by the start and end time given
+    * add a test for file duration
     * add bucketing type to options
     * integrate the new bucketing object in every location with an if to decide which queue
     * send bucket type to front end
@@ -46,6 +46,8 @@ List
 
 ---
 
+* Improve FileUploadError to be spoken as Clippy
+* FileUploadError probably only needs to take file paths and not files
 * Make internal errors that aren't user errors get put in the terminal
 * Only attach user ids to items belonging to the user the queue is sent to
 * Check picture for duplicate again before playing it
