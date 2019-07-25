@@ -9,6 +9,7 @@ module.exports = {
 
 	storageDir: '/tmp/Clippy-Music-Tmp',
 
+	ffprobePath: 'ffprobe',
 	mpvPath: 'mpv',
 	mpvArgs: ['-fs', '--af=dynaudnorm'],
 	youtubeDlPath: 'youtube-dl',

@@ -11,13 +11,15 @@ List
     * New uploads are added to each bucket in a random position so you don't get people having a bunch of their stuff in a row. This doesn't reorder items already in the list.
 
     * determine file duration at upload time and put it on the content object
-    * add bucketing type to config
+        * add user readable error in case of bad ffprobe
+    * add bucketing type to options
     * integrate the new bucketing object in every location with an if to decide which queue
     * send bucket type to front end
     * render new kind of bucketing on the front
     * refactor to not use ifs everywhere
     * when using ClippyQueue see if we can avoid getting the duration before playing with or just don't count the seconds actually played
-
+* make options extend default_options, considering that the data won't be in there if default_options is updated, as has just happened with ffprobe path
+* add eog path to options and its arguments
 * Reddit support
     * youtube-dl does it
     * mpv can stream it but it takes ages
@@ -79,8 +81,6 @@ List
 * Allow videos to be uploaded by URL that references a file
 * Tests should execute in a random order
 * Add JSDoc to all functions
-* Do something to account for the fact that default options could update after you've got an options.js file
-    * could use json which makes merging easy, so long as comments can go in the file
 * Remove null from codebase
 * Truncate file names before sending the files to the server
 * Use exponential form for numbers in default_options
