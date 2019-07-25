@@ -288,6 +288,9 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 	.then(utils.spread((form, fields, files) => { //nesting in order to get the scoping right
 		return parseUploadForm(form, fields, files)
 		.then((uplData) => {
+			uplData.id = contentId;
+			uplData.userId = req.ip;
+
 			if (uplData.music.isUrl) {
 				ProgressQueueService.setTitle(req.ip, contentId, uplData.music.path, true);
 
@@ -312,8 +315,6 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 			}
 		})
 		.then((uplData) => {
-			uplData.id = contentId;
-			uplData.userId = req.ip;
 			return ContentService.add(uplData);
 		})
 		.then((uplData) => {
