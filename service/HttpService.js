@@ -290,21 +290,26 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 		.then((uplData) => {
 			if (uplData.music.isUrl) {
 				ProgressQueueService.setTitle(req.ip, contentId, uplData.music.path, true);
-			}
 
-			return getDuration(uplData.music.path)
-			.then((duration) => {
-				uplData.music.duration = time.clipTimeByStartAndEnd(Math.floor(duration), uplData.startTime, uplData.endTime);
+				// todo get duration of music
+
 				return uplData;
-			})
-			.catch((err) => {
-				console.error("Error reading discerning the duration of a music file.", err, uplData.music.path);
-				throw new FileUploadError(
-					`I could not discern the duration of the music file you uploaded (${uplData.music.title}).`,
-					Object.values(files)
-				);
-			});
 
+			} else {
+				// read the music file to determine its duration
+				return getDuration(uplData.music.path)
+					.then((duration) => {
+						uplData.music.duration = time.clipTimeByStartAndEnd(Math.floor(duration), uplData.startTime, uplData.endTime);
+						return uplData;
+					})
+					.catch((err) => {
+						console.error("Error reading discerning the duration of a music file.", err, uplData.music.path);
+						throw new FileUploadError(
+							`I could not discern the duration of the music file you uploaded (${uplData.music.title}).`,
+							Object.values(files)
+						);
+					});
+			}
 		})
 		.then((uplData) => {
 			uplData.id = contentId;
