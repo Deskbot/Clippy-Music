@@ -73,7 +73,7 @@ export function downloadYtInfo(urlOrId) {
             if (code === 0) {
                 let dataArr = rawData.split('\n');
                 return resolve({
-                    title: Html5Entities.encode(dataArr[0]),
+                    title: new Html5Entities().encode(dataArr[0]),
                     duration: utils.ytTimeStrToSec(dataArr[1]),
                 });
             }

@@ -13,6 +13,7 @@ import { ClippyQueue } from './ClippyQueue.js';
 import * as ContentType from './ContentType.js';
 import { downloadYtInfo } from './music.js';
 import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError } from './errors.js';
+import { UploadData } from '../types/UploadData';
 
 export class ContentManager extends EventEmitter {
 	//data stores
@@ -178,7 +179,7 @@ export class ContentManager extends EventEmitter {
 				picName = picName.length <= 1 ? null : picName.split('.').shift();
 
 				const picinfo = {
-					title: Html5Entities.encode(picName),
+					title: new Html5Entities().encode(picName),
 				};
 
 				const stream = request(url).pipe(fs.createWriteStream(destination));
@@ -252,12 +253,12 @@ export class ContentManager extends EventEmitter {
 
 		let picName;
 		if (contentData.pic.exists) {
-			picName = Html5Entities.decode(contentData.pic.title);
+			picName = new Html5Entities().decode(contentData.pic.title);
 		} else {
 			picName = 'no picture';
 		}
 
-		let nonEntityTile = Html5Entities.decode(contentData.music.title);
+		let nonEntityTile = new Html5Entities().decode(contentData.music.title);
 
 		//public log uses publicly facing info
 		console.log(`"${nickname}" played "${nonEntityTile}" with "${picName}" at ${currentTime}.`);
