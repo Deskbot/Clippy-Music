@@ -8,6 +8,7 @@ import * as consts from './consts.js';
 import * as debug from './debug.js';
 import * as utils from './utils.js';
 import * as opt from '../../options.js';
+import * as time from '../lib/time';
 
 import { ClippyQueue } from './ClippyQueue.js';
 import * as ContentType from './ContentType.js';
@@ -98,10 +99,10 @@ export class ContentManager extends EventEmitter {
 
 	//object methods
 
-	add(uplData): Promise<UploadData> {
+	add(uplData: UploadData): Promise<UploadData> {
 		const that = this;
 
-		const p = new Promise(function(resolve, reject) {
+		const p = new Promise<UploadData>(function(resolve, reject) {
 			if (!uplData.music.isUrl) {
 				return resolve(uplData);
 			}
@@ -151,7 +152,7 @@ export class ContentManager extends EventEmitter {
 		if (contentObj.pic.exists) utils.deleteFile(contentObj.pic.path); //empty picture files can be uploaded and will persist
 	}
 
-	downloadPic(url, destination) {
+	downloadPic(url, destination): Promise<{ title: string }> {
 		return new Promise((resolve, reject) => {
 			request.head(url, (err, res, body) => {
 				if (err) {

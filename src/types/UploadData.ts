@@ -6,6 +6,7 @@ export interface UploadData {
         title: string | null,
         path: string | null,
         stream: boolean,
+        ytId?: string,
     },
     pic: {
         exists: boolean,
