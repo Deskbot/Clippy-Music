@@ -22,6 +22,7 @@ List
         * "strictFunctionTypes": true,
         * "strictNullChecks": true,
         * "strictPropertyInitialization": true,
+    * state something about the use of ts in the readme
 * skip-penalise-button doesn't work, it says you need to give the admin password
 * Barringer's Bucketing system
     * add bucketing type to options
