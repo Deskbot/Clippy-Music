@@ -19,6 +19,11 @@ import { getFileDuration } from '../lib/music.js';
 import { BannedError, FileUploadError, UniqueError, YTError } from '../lib/errors.js';
 import { UploadData } from '../types/UploadData';
 
+type RequestWithFormData = express.Request & {
+	fields: formidable.Fields;
+	files: formidable.Files;
+};
+
 function adminMiddleware(req, res, next) {
 	if (!PasswordService.isSet()) {
 		res.status(400).end('The admin controls can not be used because no admin password was set.\n');
@@ -375,8 +380,8 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 app.use(getFormMiddleware);
 
 //POST variable: content-id
-app.post('/api/queue/remove', (req, res) => {
-	if (ContentService.remove(req.ip, parseInt(req.fields['content-id']))) {
+app.post('/api/queue/remove', (req: RequestWithFormData, res) => {
+	if (ContentService.remove(req.ip, parseInt(req.fields['content-id'] as string))) {
 		if (noRedirect(req)) res.status(200).end('Success\n');
 		else                 res.redirect('/');
 	} else {
@@ -385,8 +390,8 @@ app.post('/api/queue/remove', (req, res) => {
 });
 
 //POST variable: content-id
-app.post('/api/download/cancel', (req, res) => {
-	if (ProgressQueueService.cancel(req.ip, parseInt(req.fields['content-id']))) {
+app.post('/api/download/cancel', (req: RequestWithFormData, res) => {
+	if (ProgressQueueService.cancel(req.ip, parseInt(req.fields['content-id'] as string))) {
 		if (noRedirect(req)) res.status(200).end('Success\n');
 		else                 res.redirect('/');
 	} else {
@@ -395,7 +400,7 @@ app.post('/api/download/cancel', (req, res) => {
 });
 
 //POST variable: nickname
-app.post('/api/nickname/set', recordUserMiddleware, (req, res) => {
+app.post('/api/nickname/set', recordUserMiddleware, (req: RequestWithFormData, res) => {
 	const nickname = utils.sanitiseNickname(req.fields.nickname);
 
 	if (nickname.length === 0) {
@@ -419,7 +424,7 @@ app.post('/api/nickname/set', recordUserMiddleware, (req, res) => {
 app.use(adminMiddleware);
 
 //POST variable: password, id, nickname
-app.post('/api/ban/add', (req, res) => {
+app.post('/api/ban/add', (req: RequestWithFormData, res) => {
 	if (req.fields.id) {
 		if (!UserRecordService.isUser(req.fields.id)) {
 			res.status(400).end('That user doesn\'t exist.\n');
@@ -455,7 +460,7 @@ app.post('/api/ban/add', (req, res) => {
 });
 
 //POST variable: password, id
-app.post('/api/ban/remove', (req, res) => {
+app.post('/api/ban/remove', (req: RequestWithFormData, res) => {
 	if (req.fields.id) {
 		if (!UserRecordService.isUser(req.fields.id)) {
 			res.status(400).end('That user doesn\'t exist.\n');
