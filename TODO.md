@@ -7,8 +7,6 @@ List
 ----
 
 * Barringer's Bucketing system
-    * modify duration by the start and end time given
-    * add a test for file duration
     * add bucketing type to options
     * integrate the new bucketing object in every location with an if to decide which queue
     * send bucket type to front end
