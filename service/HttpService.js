@@ -138,7 +138,6 @@ function parseUploadForm(form, fields, files) {
 	return new Promise((resolve, reject) => {
 		const uploadInfo = {
 			music: {
-				duration: null,
 				isUrl: null,
 				title: null,
 				path: null,
@@ -150,6 +149,7 @@ function parseUploadForm(form, fields, files) {
 				title: null,
 				path: null,
 			},
+			duration: null,
 			startTime: null,
 			endTime: null,
 		};
@@ -299,7 +299,7 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 				// read the music file to determine its duration
 				return getDuration(uplData.music.path)
 					.then((duration) => {
-						uplData.music.duration = time.clipTimeByStartAndEnd(Math.floor(duration), uplData.startTime, uplData.endTime);
+						uplData.duration = time.clipTimeByStartAndEnd(Math.floor(duration), uplData.startTime, uplData.endTime);
 						return uplData;
 					})
 					.catch((err) => {
