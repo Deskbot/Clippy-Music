@@ -64,7 +64,7 @@ function resolvePath(path) {
     if (fullyQualifiedPath.includes(__dirname)) return fullyQualifiedPath;
 
     // assume the path is relative to ./test/
-    return __dirname + "/" + path
+    return __dirname + "/" + path;
 }
 
 function testFiles(files) {
@@ -77,6 +77,7 @@ function testFiles(files) {
         try {
             tests = require(file);
         } catch (e) {
+            console.error(e);
             console.log(`--- ${relativeFilePath} SKIPPED ---`);
             continue;
         }

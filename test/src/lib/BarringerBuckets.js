@@ -44,7 +44,7 @@ module.exports = {
         const item2 = {
             userId: 1,
             duration: 900
-        }
+        };
 
         q.add(item1);
         q.add(item2);
