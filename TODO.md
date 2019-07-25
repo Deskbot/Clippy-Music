@@ -26,6 +26,7 @@ List
 * Basically every other youtube-dl source including bandcamp and archive.org
 * Improve the way clippy reconnects the websocket, maybe do it as soon as the tab regains focus and update the queue data at the same time.
 * Is the behaviour of forgetting an item when it is removed from the queue correct?
+* Change the "Progress" label to "Upload Progress"
 * Silent looping Video overlay
     * Then rename image/pic variables to overlay everywhere
     * These need making consistent anyway
