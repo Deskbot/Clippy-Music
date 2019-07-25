@@ -69,8 +69,11 @@ export class ClippyQueue {
 		return this.userBuckets[uid];
 	}
 
+	/**
+	 * Gets a list of userIds in order from the user with the lowest posteriority to the highest.
+	 */
 	getUsersByPosteriority() {
-		return this.userIds.sort((a, b) => this.userPosteriority[a] > this.userPosteriority[b]); // high to low
+		return this.userIds.sort((a, b) => this.userPosteriority[a] - this.userPosteriority[b]);
 	}
 
 	next() {
