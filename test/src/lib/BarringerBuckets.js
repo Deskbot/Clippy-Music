@@ -57,6 +57,37 @@ module.exports = {
             "The added items are in different buckets.");
     },
 
+    random_insert_does_insert: () => {
+        let bucket = [];
+
+        const items = [{
+            userId: 1,
+            contentId: 1,
+            duration: 200,
+        }, {
+            userId: 2,
+            contentId: 2,
+            duration: 200,
+        }, {
+            userId: 3,
+            contentId: 3,
+            duration: 200,
+        }];
+
+        for (const item of items) {
+            BarringerBuckets.randomlyInsert(item, bucket);
+            assert(bucket.includes(item),
+                "The inserted item should be in the bucket."
+            );
+        }
+
+        for (const item of items) {
+            assert(bucket.includes(item),
+                "All previously inserted items should be in the bucket."
+            );
+        }
+    },
+
     remove: () => {
         const q = new BarringerBuckets(1000);
 
