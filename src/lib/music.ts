@@ -4,13 +4,18 @@ import * as debug from './debug.js';
 import * as opt from '../../options.js';
 import * as utils from './utils.js';
 
+interface YtData {
+    title: string,
+    duration: number,
+}
+
 /**
  * Returns a promise that resolves with a string of this format:
  * [FORMAT]
  * duration=numberOfSeconds
  * [/FORMAT]
  */
-function getFFProbeFormatDataContainingDuration(filePath) {
+function getFFProbeFormatDataContainingDuration(filePath): Promise<string> {
     return new Promise((resolve, reject) => {
         // -v error (high logging)
         // -show_entries format=duration (get the duration data)
@@ -55,7 +60,7 @@ export function getFileDuration(filePath) {
     });
 }
 
-export function downloadYtInfo(urlOrId) {
+export function downloadYtInfo(urlOrId): Promise<YtData> {
     return new Promise(function (resolve, reject) {
         let infoProc = cp.spawn(opt.youtubeDlPath, ['--no-playlist', '--get-title', '--get-duration', urlOrId]);
         let rawData = '';
