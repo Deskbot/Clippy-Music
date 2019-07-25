@@ -12,7 +12,7 @@ const WebSocketService = require('./WebSocketService.js');
 const consts = require('../lib/consts.js');
 const debug = require('../lib/debug.js');
 const time = require('../lib/time.js');
-const opt = require('../options.js');
+const opt = require('../../options.js');
 const utils = require('../lib/utils.js');
 
 const { getFileDuration } = require('../lib/music.js');

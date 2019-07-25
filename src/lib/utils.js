@@ -3,7 +3,7 @@ const fs = require('fs');
 const Html5Entities = require('html-entities').Html5Entities;
 const Url = require('url-parse');
 
-const opt = require('../options.js');
+const opt = require('../../options.js');
 
 const utils = {
 

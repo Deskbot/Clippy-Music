@@ -7,7 +7,7 @@ const readline = require('readline');
 
 const consts = require('./lib/consts.js');
 const debug = require('./lib/debug.js');
-const opt = require('./options.js');
+const opt = require('../options.js');
 const utils = require('./lib/utils.js');
 
 //prompt settings
@@ -154,14 +154,14 @@ function setUpControls() {
 }
 
 function setUpOptionsFile() {
-	const liveFilePath = __dirname + '/options.js';
+	const optionsPath = __dirname + '/../options.js';
 
-	if (fs.existsSync(liveFilePath)) return;
+	if (fs.existsSync(optionsPath)) return;
 
 	console.log('Creating new options.js file from the default.');
 
 	const defaultFilePath = __dirname + '/default_options.js';
-	fs.copyFileSync(defaultFilePath, liveFilePath);
+	fs.copyFileSync(defaultFilePath, optionsPath);
 }
 
 function setUpServices() {

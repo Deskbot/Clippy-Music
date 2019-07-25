@@ -2,7 +2,7 @@
 
 const ws = require('ws');
 
-const opt = require('../options.js');
+const opt = require('../../options.js');
 
 class WSH {
 	constructor(onConnect, onMessage, onClose, socToId) {

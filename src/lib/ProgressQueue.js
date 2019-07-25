@@ -5,7 +5,7 @@
 const EventEmitter = require('events');
 
 const consts = require('./consts.js');
-const opt = require('../options.js');
+const opt = require('../../options.js');
 const utils = require('./utils.js');
 
 const QuickValuesMap = require('./QuickValuesMap.js');

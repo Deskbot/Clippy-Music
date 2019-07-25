@@ -1,7 +1,7 @@
 const cp = require('child_process');
 const Html5Entities = require('html-entities').Html5Entities;
 const debug = require('./debug.js');
-const opt = require('../options.js');
+const opt = require('../../options.js');
 const utils = require('./utils.js');
 
 /**

@@ -1,4 +1,4 @@
-const opt = require('../options.js');
+const opt = require('../../options.js');
 
 const utils = require('./utils.js');
 

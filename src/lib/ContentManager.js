@@ -8,7 +8,7 @@ const q = require('q');
 const consts = require('./consts.js');
 const debug = require('./debug.js');
 const utils = require('./utils.js');
-const opt = require('../options.js');
+const opt = require('../../options.js');
 
 const ClippyQueue = require('./ClippyQueue.js');
 const ContentType = require('./ContentType.js');

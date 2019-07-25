@@ -1,7 +1,7 @@
 const cp = require('child_process');
 const q = require('q');
 
-const opt = require('../options.js');
+const opt = require('../../options.js');
 const utils = require('./utils.js');
 
 const { CancelError, UnknownDownloadError } = require('./errors.js');
