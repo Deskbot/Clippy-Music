@@ -294,7 +294,7 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 			if (uplData.music.isUrl) {
 				ProgressQueueService.setTitle(req.ip, contentId, uplData.music.path, true);
 
-				// todo get duration of music
+				// the title and duration are set later by `ContentService.add(uplData)`
 
 				return uplData;
 
