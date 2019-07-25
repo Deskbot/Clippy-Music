@@ -15,7 +15,7 @@ const time = require('../lib/time.js');
 const opt = require('../options.js');
 const utils = require('../lib/utils.js');
 
-const { getDuration } = require('../lib/music.js');
+const { getFileDuration } = require('../lib/music.js');
 const { BannedError, FileUploadError, UniqueError, YTError } = require('../lib/errors.js');
 
 function adminMiddleware(req, res, next) {
@@ -300,7 +300,7 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 
 			} else {
 				// read the music file to determine its duration
-				return getDuration(uplData.music.path)
+				return getFileDuration(uplData.music.path)
 					.then((duration) => {
 						uplData.duration = time.clipTimeByStartAndEnd(Math.floor(duration), uplData.startTime, uplData.endTime);
 						return uplData;
