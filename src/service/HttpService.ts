@@ -494,11 +494,6 @@ app.post('/api/skip', (req, res) => {
 
 //POST variable: password
 app.post('/api/skipAndPenalise', (req, res) => {
-	if (!PasswordService.verify(req.fields.password)) {
-		res.status(400).end('Admin password incorrect.\n');
-		return;
-	}
-
 	if (ContentService.currentlyPlaying) {
 		ContentService.penalise(ContentService.currentlyPlaying.userId);
 	}
@@ -510,11 +505,6 @@ app.post('/api/skipAndPenalise', (req, res) => {
 
 //POST variable: password
 app.post('/api/skipAndBan', (req, res) => {
-	if (!PasswordService.verify(req.fields.password)) {
-		res.status(400).end('Admin password incorrect.\n');
-		return;
-	}
-
 	if (ContentService.currentlyPlaying) {
 		const id = ContentService.currentlyPlaying.userId;
 		UserRecordService.addBan(id);

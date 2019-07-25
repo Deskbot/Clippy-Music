@@ -22,6 +22,7 @@ List
         * "strictFunctionTypes": true,
         * "strictNullChecks": true,
         * "strictPropertyInitialization": true,
+* skip-penalise-button doesn't work, it says you need to give the admin password
 * Barringer's Bucketing system
     * add bucketing type to options
     * integrate the new bucketing object in every location with an if to decide which queue
