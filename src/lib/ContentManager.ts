@@ -1,40 +1,47 @@
-const cp = require('child_process');
-const EventEmitter = require('events');
-const Html5Entities = require('html-entities').Html5Entities;
-const request = require('request');
-const fs = require('fs');
-const q = require('q');
+import * as cp from 'child_process';
+import { EventEmitter } from 'events';
+import { Html5Entities } from 'html-entities';
+import * as request from 'request';
+import * as fs from 'fs';
 
-const consts = require('./consts.js');
-const debug = require('./debug.js');
-const utils = require('./utils.js');
-const opt = require('../../options.js');
+import * as consts from './consts.js';
+import * as debug from './debug.js';
+import * as utils from './utils.js';
+import * as opt from '../../options.js';
 
-const ClippyQueue = require('./ClippyQueue.js');
-const ContentType = require('./ContentType.js');
-const { downloadYtInfo } = require('./music.js');
-const { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError } = require('./errors.js');
+import { ClippyQueue } from './ClippyQueue.js';
+import * as ContentType from './ContentType.js';
+import { downloadYtInfo } from './music.js';
+import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError } from './errors.js';
 
-class ContentManager extends EventEmitter {
+export class ContentManager extends EventEmitter {
+	//data stores
+	private playQueue = null;
+	private musicHashes = {};
+	private picHashes = {};
+	private ytIds = {};
+
+	//injected objects
+	private idFactory;
+	private progressQueue;
+	private userRecord;
+	private ytDownloader;
+
+	//processes
+	private runningMusicProc = null;
+	private runningPicProc = null;
+	public currentlyPlaying = null;
+
+	private stop?: boolean;
+
 	constructor(startState, idFactory, progressQueue, userRecord, ytDownloader) {
 		super();
-
-		//data stores
-		this.playQueue = null;
-		this.musicHashes = {};
-		this.picHashes = {};
-		this.ytIds = {};
 
 		//injected objects
 		this.idFactory = idFactory;
 		this.progressQueue = progressQueue;
 		this.userRecord = userRecord;
 		this.ytDownloader = ytDownloader;
-
-		//processes
-		this.runningMusicProc = null;
-		this.runningPicProc = null;
-		this.currentlyPlaying = null;
 
 		if (startState) {
 			console.log('Using suspended content manager');
@@ -540,5 +547,3 @@ class ContentManager extends EventEmitter {
 		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff * 1000 < new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
 	}
 }
-
-module.exports = ContentManager;

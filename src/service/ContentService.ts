@@ -1,19 +1,19 @@
-const q = require('q');
+import * as q from 'q';
 
-const ContentManager = require('../lib/ContentManager.js');
-const YtDownloader = require('../lib/YtDownloader.js');
+import { ContentManager } from '../lib/ContentManager.js';
+import { YtDownloader } from '../lib/YtDownloader.js';
 
-const utils = require('../lib/utils.js');
+import * as utils from '../lib/utils.js';
 
-const IdFactoryService = require('./IdFactoryService.js');
-const ProgressQueueService = require('./ProgressQueueService.js');
-const UserRecordService = require('./UserRecordService.js');
+import { IdFactoryService } from './IdFactoryService.js';
+import { ProgressQueueService } from './ProgressQueueService.js';
+import { UserRecordService } from './UserRecordService.js';
 
-const cm = new ContentManager(ContentManager.recover(), IdFactoryService, ProgressQueueService, UserRecordService, new YtDownloader(ProgressQueueService));
+export const ContentManagerService = new ContentManager(ContentManager.recover(), IdFactoryService, ProgressQueueService, UserRecordService, new YtDownloader(ProgressQueueService));
 
 //set up
 function play() {
-	const isNext = cm.playNext();
+	const isNext = ContentManagerService.playNext();
 
 	if (!isNext) {
 		q.delay(1000)
@@ -22,8 +22,6 @@ function play() {
 	}
 }
 
-cm.on('end', play);
+ContentManagerService.on('end', play);
 
-cm.run();
-
-module.exports = cm;
+ContentManagerService.run();

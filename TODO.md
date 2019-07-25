@@ -10,6 +10,7 @@ List
     * compiles
     * doesn't compile static
     * runs
+    * check new Html5Entities works
     * tests run
     * prune unnecessary modules
     * add strictness

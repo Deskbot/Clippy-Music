@@ -1,11 +1,13 @@
-const fs = require('fs');
+import * as fs from 'fs';
 
-const consts = require('./consts.js');
-const utils = require('./utils.js');
+import * as consts from './consts.js';
 
 const recordFilePath = consts.files.users;
 
-class UserRecord {
+export class UserRecord {
+	private idToUser;
+	private banlist;
+
 	constructor(startState) {
 		this.idToUser = {}; //ip -> (nickname,socs)
 		this.banlist = [];
@@ -71,7 +73,7 @@ class UserRecord {
 
 	//object methods
 
-	add(id, soc) {
+	add(id, soc?) {
 		if (!this.isUser(id)) {
 			this.idToUser[id] = {
 				nickname: id,
@@ -155,5 +157,3 @@ class UserRecord {
 		return ids;
 	}
 }
-
-module.exports = UserRecord;

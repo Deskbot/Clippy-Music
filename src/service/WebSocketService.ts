@@ -1,15 +1,14 @@
-const debug = require('../lib/debug.js');
-const WebSocketHandler = require('../lib/WebSocketHandler.js');
+import * as debug from '../lib/debug.js';
+import { WebSocketHandler } from '../lib/WebSocketHandler.js';
 
-const ContentService = require('./ContentService.js');
-const ProgressQueueService = require('./ProgressQueueService.js');
-const UserRecordService = require('./UserRecordService.js');
-
-const consts = require('../lib/consts.js');
-const utils = require('../lib/utils.js');
+import { ContentManagerService as ContentService } from './ContentService.js';
+import { ProgressQueueService } from './ProgressQueueService.js';
+import { UserRecordService } from './UserRecordService.js';
 
 //really a namespace where all functions are hoisted
 class Api {
+	private wsh;
+
 	constructor() {
 		this.wsh = new WebSocketHandler(onConnect.bind(this), onMessage.bind(this), onClose.bind(this), socToUserId.bind(this));
 
@@ -106,7 +105,7 @@ class Api {
 
 	sendDlQueue(soc, userId) {
 		const queue = ProgressQueueService.getQueue(userId);
-		if (queue) api.sendMessage(soc, 'dl-list', queue);
+		if (queue) WebSocketService.sendMessage(soc, 'dl-list', queue);
 	}
 
 	broadcastMessage(type, mes) {
@@ -153,28 +152,28 @@ class Api {
 	}
 }
 
-const api = new Api();
+export const WebSocketService = new Api();
 
 let lastQueueWasEmpty = false;
 ContentService.on('queue-empty', () => {
 	if (!lastQueueWasEmpty) {
-		api.broadcastEmptyQueue();
+		WebSocketService.broadcastEmptyQueue();
 		lastQueueWasEmpty = true;
 	}
 });
 
 ContentService.on('queue-update', () => {
 	lastQueueWasEmpty = false;
-	api.broadcastQueue();
+	WebSocketService.broadcastQueue();
 });
 
 ProgressQueueService.on('prepared', (userId, content) => {
-	api.sendMessage(UserRecordService.getSockets(userId), 'dl-prep', content);
+	WebSocketService.sendMessage(UserRecordService.getSockets(userId), 'dl-prep', content);
 });
 
 ProgressQueueService.on('delete', (userId, contentId) => {
 	const socs = UserRecordService.getSockets(userId);
-	api.sendMessage(socs, 'dl-delete', contentId);
+	WebSocketService.sendMessage(socs, 'dl-delete', contentId);
 });
 
 //extraInfo is an optional argument
@@ -186,11 +185,9 @@ ProgressQueueService.on('error', (userId, contentId, error, extraInfo) => {
 		errorType: error.constructor.name
 	};
 
-	api.sendMessage(UserRecordService.getSockets(userId), 'dl-error', data);
+	WebSocketService.sendMessage(UserRecordService.getSockets(userId), 'dl-error', data);
 });
 
 ProgressQueueService.on('list', (userId, list) => {
-	api.sendMessage(UserRecordService.getSockets(userId), 'dl-list', list);
+	WebSocketService.sendMessage(UserRecordService.getSockets(userId), 'dl-list', list);
 });
-
-module.exports = api;

@@ -1,4 +1,2 @@
-module.exports = {
-	music: 'music',
-	pic: 'picture',
-};
+export const music = 'music';
+export const pic = 'picture';

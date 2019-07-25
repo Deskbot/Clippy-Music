@@ -4,7 +4,10 @@
  * We know it needs updating when particular methods on Map are called
 */
 
-module.exports = class QuickValuesMap extends Map {
+export class QuickValuesMap extends Map {
+    private quickValuesArr;
+    private valuesNeedUpdating;
+
     constructor(...args) {
         super(...args);
         this.quickValuesArr = [];

@@ -1,8 +1,10 @@
-const fs = require('fs');
+import * as fs from 'fs';
 
-const consts = require('./consts.js');
+import * as consts from './consts.js';
 
-class IdFactory {
+export class IdFactory {
+	private nextId;
+
 	constructor(startingId) {
 		if (typeof startingId != 'undefined') {
 			console.log('Using suspended ID Factory');
@@ -39,5 +41,3 @@ class IdFactory {
 		fs.writeFileSync(consts.files.idFactory, this.nextId);
 	}
 }
-
-module.exports = IdFactory;

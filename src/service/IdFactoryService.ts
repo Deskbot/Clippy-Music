@@ -1,3 +1,3 @@
-const IdFactory = require('../lib/IdFactory.js');
+import { IdFactory } from '../lib/IdFactory.js';
 
-module.exports = new IdFactory(IdFactory.restore());
+export const IdFactoryService = new IdFactory(IdFactory.restore());

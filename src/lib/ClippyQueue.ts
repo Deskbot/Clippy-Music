@@ -1,12 +1,12 @@
-const utils = require('./utils.js');
+import * as utils from './utils.js';
 
-class ClippyQueue {
-	constructor(queueObj) {
-		this.userPosteriority = {};
-		this.userBuckets = {};
-		this.userIds = [];
-		this.currPosteriority = 0;
+export class ClippyQueue {
+	private userPosteriority = {};
+	private userBuckets = {};
+	private userIds = [];
+	private currPosteriority = 0;
 
+	constructor(queueObj?) {
 		if (queueObj) {
 			this.userPosteriority = queueObj.userPosteriority;
 			this.userBuckets = queueObj.userBuckets;
@@ -138,5 +138,3 @@ class ClippyQueue {
 function durToBucketOffset(dur) { //assumes duration is in seconds
 	return Math.ceil(dur / 60); //gives number of total minutes passed plus 1
 }
-
-module.exports = ClippyQueue;

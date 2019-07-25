@@ -1,9 +1,7 @@
-const PasswordContainer = require('../lib/PasswordContainer.js');
+import { PasswordContainer } from '../lib/PasswordContainer.js';
 
 class Api {
-	constructor() {
-		this.container = null;
-	}
+	private container = null;
 
 	get() {
 		return this.container;
@@ -18,4 +16,4 @@ class Api {
 	}
 };
 
-module.exports = new Api();
+export const PasswordService = new Api();

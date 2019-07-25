@@ -1,14 +1,14 @@
-const fs = require('fs');
+import * as fs from 'fs';
 
 setUpOptionsFile();
 
-const prompt = require('prompt');
-const readline = require('readline');
+import * as prompt from 'prompt';
+import * as readline from 'readline';
 
-const consts = require('./lib/consts.js');
-const debug = require('./lib/debug.js');
-const opt = require('../options.js');
-const utils = require('./lib/utils.js');
+import * as consts from './lib/consts.js';
+import * as debug from './lib/debug.js';
+import * as opt from '../options.js';
+import * as utils from './lib/utils.js';
 
 //prompt settings
 prompt.colors = false;

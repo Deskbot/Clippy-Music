@@ -2,15 +2,20 @@
  * percentages are 0 to 1
  */
 
-const EventEmitter = require('events');
+import { EventEmitter } from 'events';
 
-const consts = require('./consts.js');
-const opt = require('../../options.js');
-const utils = require('./utils.js');
+import * as consts from './consts.js';
+import * as opt from '../../options.js';
+import * as utils from './utils.js';
 
-const QuickValuesMap = require('./QuickValuesMap.js');
+import { QuickValuesMap } from './QuickValuesMap.js';
 
-class ProgressQueue extends EventEmitter {
+export class ProgressQueue extends EventEmitter {
+	private idFactory;
+	private lastQueueLength;
+	private queues;
+	private totalContents;
+	private transmitIntervalId;
 
 	constructor(idFactory) {
 		super();
@@ -22,7 +27,7 @@ class ProgressQueue extends EventEmitter {
 		this.transmitIntervalId = null;
 	}
 
-	add(userId, contentId, title) {
+	add(userId, contentId, title?) {
 		if (!this.queues[userId]) {
 			this.queues[userId] = new QuickValuesMap();
 		}
@@ -165,5 +170,3 @@ class ProgressQueue extends EventEmitter {
 		}
 	}
 }
-
-module.exports = ProgressQueue;

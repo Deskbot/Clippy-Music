@@ -1,14 +1,17 @@
-const cp = require('child_process');
-const q = require('q');
+import * as cp from 'child_process';
+import * as q from 'q';
 
-const opt = require('../../options.js');
-const utils = require('./utils.js');
+import * as opt from '../../options.js';
+import * as utils from './utils.js';
 
-const { CancelError, UnknownDownloadError } = require('./errors.js');
+import { CancelError, UnknownDownloadError } from './errors.js';
 
-const ContentType = require('./ContentType.js');
+import * as ContentType from './ContentType.js';
 
-class YtDownloader {
+export class YtDownloader {
+	private progressQueue;
+	private userQueues;
+
 	constructor(progressQueue) {
 		this.progressQueue = progressQueue;
 		this.userQueues = {};
@@ -139,6 +142,9 @@ class YtDownloader {
 }
 
 class PercentReader {
+	private lastPercent;
+	private phase;
+	private proc;
 
 	constructor(dlProc) {
 		this.lastPercent = 0;
@@ -189,5 +195,3 @@ class PercentReader {
 		return parseFloat(pcStr);
 	}
 }
-
-module.exports = YtDownloader;

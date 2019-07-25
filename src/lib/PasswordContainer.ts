@@ -3,12 +3,14 @@
  * the one password will only ever be in memory,
  * the password will only be generated once.
  */
-const prompt = require('prompt');
-const sha256 = require('sha256');
+import * as sha256 from 'sha256';
 
-class PasswordContainer {
+export class PasswordContainer {
+	private salt;
+	private password;
+
 	constructor(inputPass) {
-		this.salt = this.constructor.newSalt(32);
+		this.salt = PasswordContainer.newSalt(32);
 		this.password = sha256(inputPass + this.salt);
 	}
 
@@ -30,5 +32,3 @@ class PasswordContainer {
 		return str.substr(len);
 	}
 }
-
-module.exports = PasswordContainer;

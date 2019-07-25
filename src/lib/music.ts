@@ -1,8 +1,8 @@
-const cp = require('child_process');
-const Html5Entities = require('html-entities').Html5Entities;
-const debug = require('./debug.js');
-const opt = require('../../options.js');
-const utils = require('./utils.js');
+import * as cp from 'child_process';
+import { Html5Entities } from 'html-entities';
+import * as debug from './debug.js';
+import * as opt from '../../options.js';
+import * as utils from './utils.js';
 
 /**
  * Returns a promise that resolves with a string of this format:
@@ -41,45 +41,44 @@ function getFFProbeFormatDataContainingDuration(filePath) {
     });
 }
 
-module.exports = {
-    getFileDuration(filePath) {
-        return getFFProbeFormatDataContainingDuration(filePath)
-        .then((ffProbeData) => {
-            const durationLine = ffProbeData.split('\n')[1];
-            if (durationLine === undefined) throw new Error('');
 
-            const secondsStr = durationLine.split('=')[1];
-            if (secondsStr === undefined) throw new Error('');
+export function getFileDuration(filePath) {
+    return getFFProbeFormatDataContainingDuration(filePath)
+    .then((ffProbeData) => {
+        const durationLine = ffProbeData.split('\n')[1];
+        if (durationLine === undefined) throw new Error('');
 
-            return parseFloat(secondsStr);
+        const secondsStr = durationLine.split('=')[1];
+        if (secondsStr === undefined) throw new Error('');
+
+        return parseFloat(secondsStr);
+    });
+}
+
+export function downloadYtInfo(urlOrId) {
+    return new Promise(function (resolve, reject) {
+        let infoProc = cp.spawn(opt.youtubeDlPath, ['--no-playlist', '--get-title', '--get-duration', urlOrId]);
+        let rawData = '';
+        let rawError = '';
+
+        infoProc.stdout.on('data', function (chunk) {
+            rawData += chunk;
         });
-    },
-
-    downloadYtInfo(urlOrId) {
-        return new Promise(function (resolve, reject) {
-            let infoProc = cp.spawn(opt.youtubeDlPath, ['--no-playlist', '--get-title', '--get-duration', urlOrId]);
-            let rawData = '';
-            let rawError = '';
-
-            infoProc.stdout.on('data', function (chunk) {
-                rawData += chunk;
-            });
-            infoProc.on('error', function (message) {
-                rawError += message;
-            });
-            infoProc.on('close', function (code, signal) {
-                debug.error('yt-dl info getting error message:', rawError);
-
-                if (code === 0) {
-                    let dataArr = rawData.split('\n');
-                    return resolve({
-                        title: Html5Entities.encode(dataArr[0]),
-                        duration: utils.ytTimeStrToSec(dataArr[1]),
-                    });
-                }
-
-                return reject(rawError);
-            });
+        infoProc.on('error', function (message) {
+            rawError += message;
         });
-    }
-};
+        infoProc.on('close', function (code, signal) {
+            debug.error('yt-dl info getting error message:', rawError);
+
+            if (code === 0) {
+                let dataArr = rawData.split('\n');
+                return resolve({
+                    title: Html5Entities.encode(dataArr[0]),
+                    duration: utils.ytTimeStrToSec(dataArr[1]),
+                });
+            }
+
+            return reject(rawError);
+        });
+    });
+}

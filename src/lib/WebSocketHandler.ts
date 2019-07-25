@@ -1,10 +1,12 @@
 //all purpose handler for incoming web sockets connections and messages
 
-const ws = require('ws');
+import * as ws from 'ws';
 
-const opt = require('../../options.js');
+import * as opt from '../../options.js';
 
-class WSH {
+export class WebSocketHandler {
+	private wss;
+
 	constructor(onConnect, onMessage, onClose, socToId) {
 		this.wss = new ws.Server({ port: opt.webSocketPort });
 
@@ -13,7 +15,7 @@ class WSH {
 
 			//add handler to do something when the client sends a message
 			soc.on('message', (data, flags) => {
-				if (!flag.binary) {
+				if (!flags.binary) {
 					onMessage(soc, id, data, flags);
 				} else {
 					console.error('mysterious binary flag occured');
@@ -45,5 +47,3 @@ class WSH {
 		}
 	}
 }
-
-module.exports = WSH;

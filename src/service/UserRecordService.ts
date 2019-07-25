@@ -1,3 +1,3 @@
-const UserRecordClass = require('../lib/UserRecord.js');
+import { UserRecord } from '../lib/UserRecord.js';
 
-module.exports = new UserRecordClass(UserRecordClass.recover());
+export const UserRecordService = new UserRecord(UserRecord.recover());

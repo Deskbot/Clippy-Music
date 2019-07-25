@@ -1,30 +1,29 @@
-const opt = require('../../options.js');
+import * as opt from '../../options.js';
 
-const utils = require('./utils.js');
+import * as utils from './utils.js';
 
-module.exports = {
-	biggestFileSizeLimit: opt.musicSizeLimit > opt.imageSizeLimit ? opt.musicSizeLimit : opt.imageSizeLimit,
 
-	imageSizeLimStr: utils.sizeToReadbleStr(opt.imageSizeLimit),
-	musicSizeLimStr: utils.sizeToReadbleStr(opt.musicSizeLimit),
-	imagePlayedWithin: opt.imageUniqueCoolOff === Infinity ? 'already' : 'in the past ' + utils.secToTimeStr(opt.imageUniqueCoolOff),
-	musicPlayedWithin: opt.musicUniqueCoolOff === Infinity ? 'already' : 'in the past ' + utils.secToTimeStr(opt.musicUniqueCoolOff),
+export const biggestFileSizeLimit = opt.musicSizeLimit > opt.imageSizeLimit ? opt.musicSizeLimit : opt.imageSizeLimit;
 
-	maxPercentBeforeFinished: 0.99,
-	minPlayTimeToPreventReplay: 5, //seconds
+export const imageSizeLimStr = utils.sizeToReadbleStr(opt.imageSizeLimit);
+export const musicSizeLimStr = utils.sizeToReadbleStr(opt.musicSizeLimit);
+export const imagePlayedWithin = opt.imageUniqueCoolOff === Infinity ? 'already' : 'in the past ' + utils.secToTimeStr(opt.imageUniqueCoolOff);
+export const musicPlayedWithin = opt.musicUniqueCoolOff === Infinity ? 'already' : 'in the past ' + utils.secToTimeStr(opt.musicUniqueCoolOff);
 
-	dirs: {
-		httpUpload: opt.storageDir + '/httpUploads/',
-		music:      opt.storageDir + '/music/',
-		pic:        opt.storageDir + '/pictures/',
-	},
+export const maxPercentBeforeFinished = 0.99;
+export const minPlayTimeToPreventReplay = 5; //seconds
 
-	files: {
-		content:   opt.storageDir + '/suspendedContentManager.json',
-		idFactory: opt.storageDir + '/idFactory.txt',
-		log:       opt.storageDir + '/log.txt',
-		users:     opt.storageDir + '/suspendedUserRecord.json',
-	},
-
-	queueUpdateMaxFreq: 2000
+export const dirs = {
+	httpUpload: opt.storageDir + '/httpUploads/',
+	music:      opt.storageDir + '/music/',
+	pic:        opt.storageDir + '/pictures/',
 };
+
+export const files = {
+	content:   opt.storageDir + '/suspendedContentManager.json',
+	idFactory: opt.storageDir + '/idFactory.txt',
+	log:       opt.storageDir + '/log.txt',
+	users:     opt.storageDir + '/suspendedUserRecord.json',
+};
+
+export const queueUpdateMaxFreq = 2000;

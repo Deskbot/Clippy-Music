@@ -1,7 +1,10 @@
-const utils = require("./utils.js");
+import * as utils from "./utils.js";
 
-class BarringerBuckets {
-    constructor(maxTimePerBucket, queueObj) {
+export class BarringerBuckets {
+    private buckets;
+    private maxTimePerBucket: number;
+
+    constructor(maxTimePerBucket: number, queueObj: {}[]) {
         this.buckets = queueObj ? queueObj : [];
         this.maxTimePerBucket = maxTimePerBucket;
     }
@@ -76,5 +79,3 @@ class BarringerBuckets {
         return totalTimeExisting + time < this.maxTimePerBucket;
     }
 }
-
-module.exports = BarringerBuckets;

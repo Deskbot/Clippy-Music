@@ -1,22 +1,22 @@
-const express = require('express');
-const formidable = require('formidable');
-const q = require('q');
+import * as express from 'express';
+import * as formidable from 'formidable';
+import * as q from 'q';
 
-const ContentService = require('./ContentService.js');
-const IdFactoryService = require('./IdFactoryService.js');
-const ProgressQueueService = require('./ProgressQueueService.js');
-const PasswordService = require('./PasswordService.js');
-const UserRecordService = require('./UserRecordService.js');
-const WebSocketService = require('./WebSocketService.js');
+import { ContentManagerService as ContentService } from './ContentService.js';
+import { IdFactoryService } from './IdFactoryService.js';
+import { ProgressQueueService } from './ProgressQueueService.js';
+import { PasswordService } from './PasswordService.js';
+import { UserRecordService } from './UserRecordService.js';
+import { WebSocketService } from './WebSocketService.js';
 
-const consts = require('../lib/consts.js');
-const debug = require('../lib/debug.js');
-const time = require('../lib/time.js');
-const opt = require('../../options.js');
-const utils = require('../lib/utils.js');
+import * as consts from '../lib/consts.js';
+import * as debug from '../lib/debug.js';
+import * as time from '../lib/time.js';
+import * as opt from '../../options.js';
+import * as utils from '../lib/utils.js';
 
-const { getFileDuration } = require('../lib/music.js');
-const { BannedError, FileUploadError, UniqueError, YTError } = require('../lib/errors.js');
+import { getFileDuration } from '../lib/music.js';
+import { BannedError, FileUploadError, UniqueError, YTError } from '../lib/errors.js';
 
 function adminMiddleware(req, res, next) {
 	if (!PasswordService.isSet()) {
@@ -155,7 +155,7 @@ function parseUploadForm(form, fields, files) {
 		};
 
 		if (form.type != 'multipart') {
-			throw new FileUploadError('Multipart form type required. Received "' + form.type + '" instead.', [musicFile, picFile]);
+			throw new FileUploadError('Multipart form type required. Received "' + form.type + '" instead.', []);
 		}
 
 		const musicFile = files['music-file'];
@@ -243,7 +243,7 @@ function recordUserMiddleware(req, res, next) {
 	if (!UserRecordService.isUser(req.ip)) UserRecordService.add(req.ip);
 
 	const expiryDate = new Date();
-	expiryDate.setYear(expiryDate.getYear() + 1901);
+	expiryDate.setFullYear(expiryDate.getFullYear() + 1);
 
 	//store user id in cookie
 	res.cookie('id', req.ip, {

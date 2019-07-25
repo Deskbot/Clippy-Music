@@ -1,8 +1,6 @@
-const ProgressQueue = require('../lib/ProgressQueue.js');
+import { ProgressQueue } from '../lib/ProgressQueue.js';
 
-const idFactory = require('./IdFactoryService.js');
+import { IdFactoryService } from './IdFactoryService.js';
 
-const progressQueue = new ProgressQueue(idFactory);
-progressQueue.startTransmitting();
-
-module.exports = progressQueue;
+export const ProgressQueueService = new ProgressQueue(IdFactoryService);
+ProgressQueueService.startTransmitting();
