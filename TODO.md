@@ -6,6 +6,21 @@ This list is in a rough order of priority.
 List
 ----
 
+* typescript
+    * compiles
+    * doesn't compile static
+    * runs
+    * tests run
+    * prune unnecessary modules
+    * add strictness
+        * "alwaysStrict": true,
+        * "noImplicitAny": true,
+        * "noImplicitThis": true,
+        * "noImplicitReturns": true,
+        * "strict": true,
+        * "strictFunctionTypes": true,
+        * "strictNullChecks": true,
+        * "strictPropertyInitialization": true,
 * Barringer's Bucketing system
     * add bucketing type to options
     * integrate the new bucketing object in every location with an if to decide which queue
