@@ -1,7 +1,5 @@
 import * as fs from 'fs';
 
-setUpOptionsFile();
-
 import * as prompt from 'prompt';
 import * as readline from 'readline';
 
@@ -151,17 +149,6 @@ function setUpControls() {
 		else if (key.name === 'z' && key.ctrl)  process.kill(process.pid, 'SIGTSTP');
 		else if (key.name === '\\' && key.ctrl) process.kill(process.pid, 'SIGQUIT'); //single backslash
 	});
-}
-
-function setUpOptionsFile() {
-	const optionsPath = __dirname + '/../options.js';
-
-	if (fs.existsSync(optionsPath)) return;
-
-	console.log('Creating new options.js file from the default.');
-
-	const defaultFilePath = __dirname + '/default_options.js';
-	fs.copyFileSync(defaultFilePath, optionsPath);
 }
 
 function setUpServices() {

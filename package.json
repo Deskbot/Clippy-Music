@@ -4,7 +4,7 @@
   "description": "A music/video/image server",
   "main": "main.js",
   "scripts": {
-    "build": "./node_modules/typescript/bin/tsc",
+    "build": "node build.js",
     "start": "node src/main.js",
     "test": "node test/index.js"
   },
