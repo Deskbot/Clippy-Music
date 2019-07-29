@@ -1,10 +1,10 @@
 {
     "compilerOptions": {
         "alwaysStrict": true,
+        "moduleResolution": "node",
         "outDir": "./build",
         "sourceMap": true,
         "sourceRoot": "./src",
-
         "target": "ES2017",
     },
 
