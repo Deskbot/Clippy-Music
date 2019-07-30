@@ -3,7 +3,7 @@ const process = require("process");
 
 const { stdout } = process;
 
-const testFileDir = __dirname + "/src";
+const testFileDir = __dirname + "/build";
 
 main();
 
