@@ -8,6 +8,7 @@ List
 
 * typescript
     * compiles
+    * type-defs -> module-defs
     * doesn't compile static
     * runs
     * check new Html5Entities works

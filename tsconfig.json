@@ -1,7 +1,8 @@
 {
     "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
         "alwaysStrict": true,
-        "moduleResolution": "node",
+        "module": "commonjs",
         "outDir": "./build",
         "sourceMap": true,
         "sourceRoot": "./src",
@@ -9,7 +10,6 @@
     },
 
     "exclude": [
-        "./node_modules",
         "./src/static"
     ]
 }

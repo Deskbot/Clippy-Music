@@ -1,7 +1,7 @@
 import * as cp from 'child_process';
 import { EventEmitter } from 'events';
 import { Html5Entities } from 'html-entities';
-import * as request from 'request';
+import request from 'request';
 import * as fs from 'fs';
 
 import * as consts from './consts.js';

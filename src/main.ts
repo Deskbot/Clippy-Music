@@ -1,6 +1,4 @@
-import * as fs from 'fs';
-
-import * as prompt from 'prompt';
+import prompt = require('prompt');
 import * as readline from 'readline';
 
 import * as consts from './lib/consts.js';
@@ -8,7 +6,7 @@ import * as debug from './lib/debug.js';
 import * as opt from '../options.js';
 import * as utils from './lib/utils.js';
 
-//prompt settings
+// prompt settings
 prompt.colors = false;
 prompt.message = '';
 prompt.delimiter = '';
