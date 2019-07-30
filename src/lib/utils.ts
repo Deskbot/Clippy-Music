@@ -1,7 +1,7 @@
 import * as crc_32 from 'crc-32';
 import * as fs from 'fs';
 import { Html5Entities } from 'html-entities';
-import * as Url from 'url-parse';
+import Url from 'url-parse';
 
 import * as opt from '../../options.js';
 

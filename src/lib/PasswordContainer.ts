@@ -3,7 +3,7 @@
  * the one password will only ever be in memory,
  * the password will only be generated once.
  */
-import * as sha256 from 'sha256';
+import sha256 from 'sha256';
 
 export class PasswordContainer {
 	private salt;

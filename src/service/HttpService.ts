@@ -1,4 +1,4 @@
-import * as express from 'express';
+import express from 'express';
 import * as formidable from 'formidable';
 import * as q from 'q';
 

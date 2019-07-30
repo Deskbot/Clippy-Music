@@ -16,8 +16,6 @@ const promptOpts = {
 
 main();
 
-//fin
-
 function main() {
 	handleArguments().then(() => {
 		validateOptions();
@@ -37,13 +35,13 @@ function chooseAdminPassword() {
 			message: 'Set Admin Password (hidden) (1/2): ',
 			hidden: true,
 			required: true,
-		},{
+		}, {
 			name: 'password2',
 			message: 'Verify Admin Password (hidden) (2/2): ',
 			hidden: true,
 			required: true,
 
-		}], function(err, result) {
+		}], (err, result) => {
 			if (err) return reject(err);
 
 			if (result.password1 === result.password2) {
