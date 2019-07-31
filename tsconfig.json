@@ -5,11 +5,15 @@
         "module": "commonjs",
         "outDir": "./build",
         "sourceMap": true,
-        "sourceRoot": "./src",
+        "sourceRoot": "../src",
         "target": "ES2017",
     },
 
     "exclude": [
         "./src/static"
-    ]
+    ],
+
+    "include": [
+        "./src"
+    ],
 }

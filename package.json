@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "build": "node build.js",
-    "start": "node build/main.js",
+    "start": "node -r source-map-support/register build/main.js",
     "test": "node test/index.js"
   },
   "repository": {
@@ -32,6 +32,7 @@
     "q": "^1.5.1",
     "request": "^2.88.0",
     "sha256": "^0.2.0",
+    "source-map-support": "^0.5.13",
     "typescript": "^3.5.3",
     "url-parse": "^1.4.7",
     "ws": "^5.2.2"
