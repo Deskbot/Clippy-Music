@@ -24,7 +24,7 @@ type RequestWithFormData = express.Request & {
 	files: formidable.Files;
 };
 
-function adminMiddleware(req, res, next) {
+function adminCredentialsRequired(req, res, next) {
 	if (!PasswordService.isSet()) {
 		res.status(400).end('The admin controls can not be used because no admin password was set.\n');
 	} else if (!PasswordService.get().verify(req.fields.password)) {
@@ -421,10 +421,8 @@ app.post('/api/nickname/set', recordUserMiddleware, (req: RequestWithFormData, r
 	else                 res.redirect('/');
 });
 
-app.use(adminMiddleware);
-
 //POST variable: password, id, nickname
-app.post('/api/ban/add', (req: RequestWithFormData, res) => {
+app.post('/api/ban/add', adminCredentialsRequired, (req: RequestWithFormData, res) => {
 	if (req.fields.id) {
 		if (!UserRecordService.isUser(req.fields.id)) {
 			res.status(400).end('That user doesn\'t exist.\n');
@@ -460,7 +458,7 @@ app.post('/api/ban/add', (req: RequestWithFormData, res) => {
 });
 
 //POST variable: password, id
-app.post('/api/ban/remove', (req: RequestWithFormData, res) => {
+app.post('/api/ban/remove', adminCredentialsRequired, (req: RequestWithFormData, res) => {
 	if (req.fields.id) {
 		if (!UserRecordService.isUser(req.fields.id)) {
 			res.status(400).end('That user doesn\'t exist.\n');
@@ -493,13 +491,13 @@ app.post('/api/ban/remove', (req: RequestWithFormData, res) => {
 });
 
 //POST variable: password
-app.post('/api/skip', (req, res) => {
+app.post('/api/skip', adminCredentialsRequired, (req, res) => {
 	ContentService.killCurrent();
 	res.status(200).end('Success\n');
 });
 
 //POST variable: password
-app.post('/api/skipAndPenalise', (req, res) => {
+app.post('/api/skipAndPenalise', adminCredentialsRequired, (req, res) => {
 	if (ContentService.currentlyPlaying) {
 		ContentService.penalise(ContentService.currentlyPlaying.userId);
 	}
@@ -510,7 +508,7 @@ app.post('/api/skipAndPenalise', (req, res) => {
 });
 
 //POST variable: password
-app.post('/api/skipAndBan', (req, res) => {
+app.post('/api/skipAndBan', adminCredentialsRequired, (req, res) => {
 	if (ContentService.currentlyPlaying) {
 		const id = ContentService.currentlyPlaying.userId;
 		UserRecordService.addBan(id);
