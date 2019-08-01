@@ -1,4 +1,4 @@
-import express from 'express';
+import * as express from 'express';
 import * as formidable from 'formidable';
 import * as q from 'q';
 
@@ -522,8 +522,10 @@ app.post('/api/skipAndBan', (req, res) => {
 	res.status(200).end('Success\n');
 });
 
-app.listen(opt.httpPort, (err) => {
-	if (err) throw err;
+export function startHttpService() {
+	app.listen(opt.httpPort, (err) => {
+		if (err) throw err;
 
-	console.log('Web server started');
-});
+		console.log('Web server started');
+	});
+}

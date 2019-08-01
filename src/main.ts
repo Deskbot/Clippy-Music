@@ -6,6 +6,9 @@ import * as debug from './lib/debug.js';
 import * as opt from '../options.js';
 import * as utils from './lib/utils.js';
 
+import { PasswordService } from './service/PasswordService';
+import { startHttpService } from './service/HttpService';
+
 // prompt settings
 prompt.colors = false;
 prompt.message = '';
@@ -42,6 +45,7 @@ function chooseAdminPassword() {
 			required: true,
 
 		}], (err, result) => {
+
 			if (err) return reject(err);
 
 			if (result.password1 === result.password2) {
@@ -83,13 +87,11 @@ function handleArguments() {
 
 //get admin password if needed
 function setUpAdmin() {
-	const PasswordService = require('./service/PasswordService.js');
-
 	return chooseAdminPassword()
-	.then((pass) => {
+	.then(pass => {
 		PasswordService.set(pass);
 	})
-	.catch((err) => {
+	.catch(err => {
 		console.error('Unable to get admin password');
 		console.error(err);
 		process.exit(1);
@@ -106,9 +108,9 @@ function setUpDirs() {
 }
 
 function setUpControls() {
-	const ContentService = require('./service/ContentService.js');
-	const IdFactoryService = require('./service/IdFactoryService.js');
-	const UserRecordService = require('./service/UserRecordService.js');
+	const { ContentService } = require('./service/ContentService.js');
+	const { IdFactoryService } = require('./service/IdFactoryService.js');
+	const { UserRecordService } = require('./service/UserRecordService.js');
 
 	//when this is about to be killed
 	process.on('SIGINT', () => {
@@ -148,7 +150,7 @@ function setUpControls() {
 }
 
 function setUpServices() {
-	require('./service/'); //do them all just in case
+	startHttpService();
 }
 
 function validateOptions() {
