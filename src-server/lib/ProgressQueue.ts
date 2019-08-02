@@ -11,16 +11,14 @@ import * as utils from './utils';
 import { QuickValuesMap } from './QuickValuesMap';
 
 export class ProgressQueue extends EventEmitter {
-	private idFactory;
 	private lastQueueLength;
 	private queues;
 	private totalContents;
 	private transmitIntervalId;
 
-	constructor(idFactory) {
+	constructor() {
 		super();
 
-		this.idFactory = idFactory;
 		this.lastQueueLength = {};
 		this.queues = {}; // userId -> QuickValuesMap<contentId, progress item>
 		this.totalContents = 0;
