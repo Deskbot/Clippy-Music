@@ -4,11 +4,11 @@
 
 import { EventEmitter } from 'events';
 
-import * as consts from './consts.js';
+import * as consts from './consts';
 import * as opt from '../../options.js';
-import * as utils from './utils.js';
+import * as utils from './utils';
 
-import { QuickValuesMap } from './QuickValuesMap.js';
+import { QuickValuesMap } from './QuickValuesMap';
 
 export class ProgressQueue extends EventEmitter {
 	private idFactory;

@@ -1,13 +1,13 @@
 import * as q from 'q';
 
-import { ContentManager } from '../lib/ContentManager.js';
-import { YtDownloader } from '../lib/YtDownloader.js';
+import { ContentManager } from '../lib/ContentManager';
+import { YtDownloader } from '../lib/YtDownloader';
 
-import * as utils from '../lib/utils.js';
+import * as utils from '../lib/utils';
 
-import { IdFactoryService } from './IdFactoryService.js';
-import { ProgressQueueService } from './ProgressQueueService.js';
-import { UserRecordService } from './UserRecordService.js';
+import { IdFactoryService } from './IdFactoryService';
+import { ProgressQueueService } from './ProgressQueueService';
+import { UserRecordService } from './UserRecordService';
 
 export const ContentManagerService = new ContentManager(ContentManager.recover(), IdFactoryService, ProgressQueueService, UserRecordService, new YtDownloader(ProgressQueueService));
 

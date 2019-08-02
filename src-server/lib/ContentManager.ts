@@ -4,16 +4,16 @@ import { Html5Entities } from 'html-entities';
 import request from 'request';
 import * as fs from 'fs';
 
-import * as consts from './consts.js';
-import * as debug from './debug.js';
-import * as utils from './utils.js';
+import * as consts from './consts';
+import * as debug from './debug';
+import * as utils from './utils';
 import * as opt from '../../options.js';
-import * as time from '../lib/time';
+import * as time from './time';
 
-import { ClippyQueue } from './ClippyQueue.js';
-import * as ContentType from './ContentType.js';
-import { downloadYtInfo } from './music.js';
-import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError } from './errors.js';
+import { ClippyQueue } from './ClippyQueue';
+import * as ContentType from './ContentType';
+import { downloadYtInfo } from './music';
+import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError } from './errors';
 import { UploadData } from '../types/UploadData';
 
 export class ContentManager extends EventEmitter {

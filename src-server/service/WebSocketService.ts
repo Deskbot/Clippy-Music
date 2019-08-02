@@ -1,9 +1,9 @@
-import * as debug from '../lib/debug.js';
-import { WebSocketHandler } from '../lib/WebSocketHandler.js';
+import * as debug from '../lib/debug';
+import { WebSocketHandler } from '../lib/WebSocketHandler';
 
-import { ContentManagerService as ContentService } from './ContentService.js';
-import { ProgressQueueService } from './ProgressQueueService.js';
-import { UserRecordService } from './UserRecordService.js';
+import { ContentManagerService as ContentService } from './ContentService';
+import { ProgressQueueService } from './ProgressQueueService';
+import { UserRecordService } from './UserRecordService';
 
 //really a namespace where all functions are hoisted
 class Api {

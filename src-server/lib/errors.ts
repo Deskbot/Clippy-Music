@@ -1,6 +1,6 @@
-import * as consts from './consts.js';
+import * as consts from './consts';
 
-import * as ContentType from './ContentType.js';
+import * as ContentType from './ContentType';
 
 abstract class DeferredContentError extends Error {
 	public readonly contentType;

@@ -2,21 +2,21 @@ import * as express from 'express';
 import * as formidable from 'formidable';
 import * as q from 'q';
 
-import { ContentManagerService as ContentService } from './ContentService.js';
-import { IdFactoryService } from './IdFactoryService.js';
-import { ProgressQueueService } from './ProgressQueueService.js';
-import { PasswordService } from './PasswordService.js';
-import { UserRecordService } from './UserRecordService.js';
-import { WebSocketService } from './WebSocketService.js';
+import { ContentManagerService as ContentService } from './ContentService';
+import { IdFactoryService } from './IdFactoryService';
+import { ProgressQueueService } from './ProgressQueueService';
+import { PasswordService } from './PasswordService';
+import { UserRecordService } from './UserRecordService';
+import { WebSocketService } from './WebSocketService';
 
-import * as consts from '../lib/consts.js';
-import * as debug from '../lib/debug.js';
-import * as time from '../lib/time.js';
+import * as consts from '../lib/consts';
+import * as debug from '../lib/debug';
+import * as time from '../lib/time';
 import * as opt from '../../options.js';
-import * as utils from '../lib/utils.js';
+import * as utils from '../lib/utils';
 
-import { getFileDuration } from '../lib/music.js';
-import { BannedError, FileUploadError, UniqueError, YTError } from '../lib/errors.js';
+import { getFileDuration } from '../lib/music';
+import { BannedError, FileUploadError, UniqueError, YTError } from '../lib/errors';
 import { UploadData } from '../types/UploadData';
 
 type RequestWithFormData = express.Request & {
@@ -264,9 +264,9 @@ function recordUserMiddleware(req, res, next) {
 
 const app = express();
 
-app.use('/', express.static(__dirname + '/../static/'));
+app.use('/', express.static(consts.staticDirPath));
 
-app.use('/admin', express.static(__dirname + '/../static/index.html'));
+app.use('/admin', express.static(consts.staticDirPath + '/index.html'));
 
 app.use('/', (req, res, next) => {
 	res.type('text/plain');

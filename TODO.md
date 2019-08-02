@@ -7,6 +7,7 @@ List
 ----
 
 * typescript
+    * static is never copied into build, need some way of having a constant reference to static and also put it somewhere relatively sensible
     * check new Html5Entities works
     * tests run
     * prune unnecessary modules

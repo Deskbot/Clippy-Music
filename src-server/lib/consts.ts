@@ -1,7 +1,6 @@
-import * as opt from '../../options.js';
-
-import * as utils from './utils.js';
-
+import * as opt from '../../options';
+import * as path from "path";
+import * as utils from './utils';
 
 export const biggestFileSizeLimit = opt.musicSizeLimit > opt.imageSizeLimit ? opt.musicSizeLimit : opt.imageSizeLimit;
 
@@ -27,3 +26,5 @@ export const files = {
 };
 
 export const queueUpdateMaxFreq = 2000;
+
+export const staticDirPath = path.normalize(__dirname + "/../../src-front");

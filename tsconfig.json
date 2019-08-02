@@ -10,10 +10,10 @@
     },
 
     "exclude": [
-        "./src/static"
+        "./src-front"
     ],
 
     "include": [
-        "./src"
+        "./src-server"
     ],
 }

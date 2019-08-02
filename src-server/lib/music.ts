@@ -1,8 +1,8 @@
 import * as cp from 'child_process';
 import { Html5Entities } from 'html-entities';
-import * as debug from './debug.js';
+import * as debug from './debug';
 import * as opt from '../../options.js';
-import * as utils from './utils.js';
+import * as utils from './utils';
 
 interface YtData {
     title: string,

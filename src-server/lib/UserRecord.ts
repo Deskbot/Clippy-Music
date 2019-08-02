@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 
-import * as consts from './consts.js';
+import * as consts from './consts';
 
 const recordFilePath = consts.files.users;
 

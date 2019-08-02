@@ -1,4 +1,4 @@
-import { PasswordContainer } from '../lib/PasswordContainer.js';
+import { PasswordContainer } from '../lib/PasswordContainer';
 
 class Api {
 	private container = null;

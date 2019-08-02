@@ -1,10 +1,10 @@
 import prompt = require('prompt');
 import * as readline from 'readline';
 
-import * as consts from './lib/consts.js';
-import * as debug from './lib/debug.js';
+import * as consts from './lib/consts';
+import * as debug from './lib/debug';
 import * as opt from '../options.js';
-import * as utils from './lib/utils.js';
+import * as utils from './lib/utils';
 
 import { PasswordService } from './service/PasswordService';
 import { startHttpService } from './service/HttpService';
