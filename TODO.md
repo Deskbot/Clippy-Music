@@ -7,7 +7,7 @@ List
 ----
 
 * typescript
-    * check new Html5Entities works
+    * check everything works
     * tests run
     * prune unnecessary modules
     * add strictness

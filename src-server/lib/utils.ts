@@ -1,7 +1,7 @@
 import * as crc_32 from 'crc-32';
 import * as fs from 'fs';
 import { Html5Entities } from 'html-entities';
-import Url from 'url-parse';
+import { URL } from 'url';
 
 import * as opt from '../../options.js';
 
@@ -98,13 +98,13 @@ export function deleteFileIfExistsSync(dir) {
 export function doNothing() {}
 
 export function extractYtVideoId(s) {
-	const urlObj = new Url(s, true);
+	const urlObj = new URL(s);
 
 	if (urlObj.hostname.includes('youtu.be')) { // shortened YouTube url
 		const pathParts = urlObj.pathname.split('/');
 		return arrFirstMatch(pathParts, (part) => part.length !== 0);
 	} else {
-		return urlObj.query.v;
+		return urlObj.searchParams.get("v");
 	}
 }
 

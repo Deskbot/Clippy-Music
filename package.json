@@ -34,7 +34,6 @@
     "sha256": "^0.2.0",
     "source-map-support": "^0.5.13",
     "typescript": "^3.5.3",
-    "url-parse": "^1.4.7",
     "ws": "^5.2.2"
   },
   "devDependencies": {
@@ -47,7 +46,6 @@
     "@types/q": "^1.5.2",
     "@types/request": "^2.48.2",
     "@types/sha256": "^0.2.0",
-    "@types/url-parse": "^1.4.3",
     "@types/ws": "^6.0.1"
   }
 }
