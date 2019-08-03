@@ -3,7 +3,7 @@
  * the one password will only ever be in memory,
  * the password will only be generated once.
  */
-import sha256 = require('sha256');
+import * as crypto from "crypto";
 
 export class PasswordContainer {
 	private salt;
@@ -11,11 +11,11 @@ export class PasswordContainer {
 
 	constructor(inputPass) {
 		this.salt = PasswordContainer.newSalt(32);
-		this.password = sha256(inputPass + this.salt);
+		this.password = hash(inputPass + this.salt);
 	}
 
 	verify(inputPass) {
-		return sha256(inputPass + this.salt) === this.password;
+		return hash(inputPass + this.salt) === this.password;
 	}
 
 	//static
@@ -31,4 +31,11 @@ export class PasswordContainer {
 
 		return str.substr(len);
 	}
+}
+
+function hash(data: string): string {
+	return crypto.createHash('sha256')
+		.update(data)
+		.digest()
+		.toString();
 }
