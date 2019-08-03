@@ -1,11 +1,10 @@
 {
     "compilerOptions": {
-        "allowSyntheticDefaultImports": true,
         "alwaysStrict": true,
         "module": "commonjs",
         "outDir": "./build",
         "sourceMap": true,
-        "sourceRoot": "../src",
+        "sourceRoot": "../src-front",
         "target": "ES2017",
     },
 
