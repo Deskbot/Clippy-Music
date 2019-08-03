@@ -2,6 +2,7 @@
     "compilerOptions": {
         "alwaysStrict": true,
         "module": "commonjs",
+        "noImplicitReturns": true,
         "outDir": "./build",
         "sourceMap": true,
         "sourceRoot": "../src-front",

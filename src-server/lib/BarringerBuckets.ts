@@ -20,6 +20,8 @@ export class BarringerBuckets {
         }
 
         this.buckets.push([item]);
+
+        return false;
     }
 
     getBuckets() {
