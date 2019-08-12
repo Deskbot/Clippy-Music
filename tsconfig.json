@@ -6,6 +6,7 @@
         "outDir": "./build",
         "sourceMap": true,
         "sourceRoot": "../src-front",
+        "strictNullChecks": true,
         "target": "ES2017",
     },
 

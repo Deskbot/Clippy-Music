@@ -58,8 +58,8 @@ function chooseAdminPassword() {
 	});
 }
 
-function handleArguments() {
-	const promises = [];
+function handleArguments(): Promise<void[]> {
+	const promises: Promise<void>[] = [];
 	let admin = true;
 	opt.mute = false;
 
@@ -86,7 +86,7 @@ function handleArguments() {
 }
 
 //get admin password if needed
-function setUpAdmin() {
+function setUpAdmin(): Promise<void> {
 	return chooseAdminPassword()
 	.then(pass => {
 		PasswordService.set(pass);
@@ -136,7 +136,11 @@ function setUpControls() {
 	process.stdin.resume(); //needed due to something that prompt does somewhere
 
 	readline.emitKeypressEvents(process.stdin);
-	process.stdin.setRawMode(true);
+
+	if (process.stdin.setRawMode) {
+		process.stdin.setRawMode(true);
+	}
+
 	process.stdin.on('keypress', (ch, key) => {
 		if (key.name === 'end') ContentService.killCurrent();
 

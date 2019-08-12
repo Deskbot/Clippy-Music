@@ -1,9 +1,9 @@
 import { PasswordContainer } from '../lib/PasswordContainer';
 
 class Api {
-	private container = null;
+	private container: PasswordContainer | null = null;
 
-	get() {
+	get(): PasswordContainer | null {
 		return this.container;
 	}
 
@@ -14,6 +14,6 @@ class Api {
 	set(pw) {
 		this.container = new PasswordContainer(pw);
 	}
-};
+}
 
 export const PasswordService = new Api();

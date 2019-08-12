@@ -1,9 +1,14 @@
 import * as utils from './utils';
+import { ItemData } from '../types/UploadData';
 
 export class ClippyQueue {
-	private userPosteriority = {};
-	private userBuckets = {};
-	private userIds = [];
+	private userPosteriority: {
+		[userId: string]: number
+	} = {};
+	private userBuckets: {
+		[userId: string]: ItemData[]
+	} = {};
+	private userIds: string[] = [];
 	private currPosteriority = 0;
 
 	constructor(queueObj?) {
@@ -15,7 +20,7 @@ export class ClippyQueue {
 		}
 	}
 
-	add(itemData) {
+	add(itemData: ItemData & { userId: string }) {
 		let userBucket = this.userBuckets[itemData.userId];
 
 		if (!userBucket) { //first visit
@@ -77,10 +82,10 @@ export class ClippyQueue {
 	}
 
 	next() {
-		let possibleUsers = [];
-		let targetUser = null;
+		let possibleUsers: string[] = [];
+		let targetUser: string | null = null;
 		let targetPo = Infinity;
-		let userId;
+		let userId: string;
 
 		for (let i = 0; i < this.userIds.length; i++) {
 			userId = this.userIds[i];
@@ -117,7 +122,7 @@ export class ClippyQueue {
 	penalise(uid) {
 		if (uid in this.userPosteriority) {
 			//get max of all posterioritys in userPosteriorty object
-			let biggestPos = Math.max(...utils.valList(this.userPosteriority));
+			let biggestPos = Math.max(...Object.values(this.userPosteriority));
 			this.userPosteriority[uid] = biggestPos + 1;
 		}
 	}

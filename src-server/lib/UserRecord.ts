@@ -146,8 +146,8 @@ export class UserRecord {
 		socs.splice(socs.indexOf(soc), 1);
 	}
 
-	whoHasNickname(nn) {
-		const ids = [];
+	whoHasNickname(nn): string[] {
+		const ids: string[] = [];
 
 		for (let uid in this.idToUser) {
 			let user = this.idToUser[uid];

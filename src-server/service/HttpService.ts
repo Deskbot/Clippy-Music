@@ -27,7 +27,7 @@ type RequestWithFormData = express.Request & {
 function adminCredentialsRequired(req, res, next) {
 	if (!PasswordService.isSet()) {
 		res.status(400).end('The admin controls can not be used because no admin password was set.\n');
-	} else if (!PasswordService.get().verify(req.fields.password)) {
+	} else if (!PasswordService.get()!.verify(req.fields.password)) {
 		res.status(400).end('Admin password incorrect.\n');
 	} else {
 		next();
@@ -42,13 +42,13 @@ function getFileForm(req, generateProgressHandler) {
 	form.uploadDir = consts.dirs.httpUpload;
 
 	let lastFileField;
-	let files = [];
+	let files: formidable.File[] = [];
 
 	form.on('fileBegin', (fieldName) => {
 		lastFileField = fieldName;
 	});
 
-	form.on('file', (fieldName, file) => {
+	form.on('file', (fieldName: string, file: formidable.File) => {
 		files.push(file);
 	});
 
@@ -330,7 +330,7 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 
 			debug.log("successful upload: ", uplData);
 
-			if (fields.ajax || req.headers['user-agent'].includes('curl')) {
+			if (fields.ajax || (req.headers['user-agent'] && req.headers['user-agent'].includes('curl'))) {
 				res.status(200).end('Success\n');
 			} else {
 				res.redirect('/');

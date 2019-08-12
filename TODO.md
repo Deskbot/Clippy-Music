@@ -11,13 +11,11 @@ List
     * tests run
     * prune unnecessary modules
     * add strictness
-        * "alwaysStrict": true,
         * "noImplicitAny": true,
         * "noImplicitThis": true,
         * "noImplicitReturns": true,
         * "strict": true,
         * "strictFunctionTypes": true,
-        * "strictNullChecks": true,
         * "strictPropertyInitialization": true,
     * state something about the use of ts in the readme
     * update readme

@@ -14,11 +14,11 @@ import { ClippyQueue } from './ClippyQueue';
 import * as ContentType from './ContentType';
 import { downloadYtInfo } from './music';
 import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError } from './errors';
-import { UploadData } from '../types/UploadData';
+import { UploadData, ItemData } from '../types/UploadData';
 
 export class ContentManager extends EventEmitter {
 	//data stores
-	private playQueue = null;
+	private playQueue;
 	private musicHashes = {};
 	private picHashes = {};
 	private ytIds = {};
@@ -30,9 +30,9 @@ export class ContentManager extends EventEmitter {
 	private ytDownloader;
 
 	//processes
-	private runningMusicProc = null;
-	private runningPicProc = null;
-	public currentlyPlaying = null;
+	private runningMusicProc: cp.ChildProcess | null = null;
+	private runningPicProc: cp.ChildProcess | null = null;
+	public currentlyPlaying: ItemData | null = null;
 
 	private stop?: boolean;
 
@@ -210,7 +210,11 @@ export class ContentManager extends EventEmitter {
 	getBucketsForPublic() {
 		let userId, bucketTitles;
 		let userIds = this.playQueue.getUsersByPosteriority();
-		let returnList = [];
+		let returnList: {
+			bucket: string[],
+			nickname: string,
+			userId: string,
+		}[] = [];
 
 		//map and filter
 		for (let i=0; i < userIds.length; i++) {

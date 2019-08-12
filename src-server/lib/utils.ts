@@ -108,19 +108,13 @@ export function extractYtVideoId(s) {
 	}
 }
 
-export function fileHash(path) {
+export function fileHash(path): Promise<number> {
 	return new Promise((resolve, reject) => {
 		fs.readFile(path, (err, data) => {
 			if (err) return reject(err);
 			return resolve(crc_32.buf(data));
 		});
 	});
-}
-
-export function keyList(obj) {
-	const l = [];
-	for (let key in obj) l.push(key);
-	return l;
 }
 
 export function looksLikeIpAddress(str) {
@@ -235,12 +229,6 @@ export function toShortSizeString(fileSizeInBytes) {
 	return (Math.max(fileSizeInBytes, 0.1).toFixed(1) + byteUnits[i]);
 }
 
-export function valList(obj) {
-	const l = [];
-	for (let key in obj) l.push(obj[key]);
-	return l;
-}
-
 export function ytTimeStrToSec(str) {
 	let timeArr = str.split(':');
 	if (timeArr.length === 1)      return parseInt(str);
@@ -249,8 +237,8 @@ export function ytTimeStrToSec(str) {
 	else throw `Unable to convert yt time, ${str}, to seconds.`;
 }
 
-export function zip(a1, a2) {
-	const a = [];
+export function zip<T,U>(a1: T[], a2: U[]): [T,U][] {
+	const a: [T,U][] = [];
 	for (let i = 0; i < Math.max(a1.length, a2.length); i++) {
 		a[i] = [a1[i], a2[i]];
 	}
