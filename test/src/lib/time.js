@@ -1,5 +1,5 @@
-const baseDir = "../../../";
-const time = require(baseDir + "lib/time.js");
+const baseDir = "../../../build/";
+const time = require(baseDir + "lib/time");
 
 const assert = require("assert").strict;
 

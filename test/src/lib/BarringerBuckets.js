@@ -1,6 +1,6 @@
-const baseDir = "../../../";
+const baseDir = "../../../build/";
 
-const BarringerBuckets = require(baseDir + "lib/BarringerBuckets.js");
+const { BarringerBuckets } = require(baseDir + "lib/BarringerBuckets.js");
 
 const assert = require("assert").strict;
 

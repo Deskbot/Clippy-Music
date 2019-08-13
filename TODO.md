@@ -7,8 +7,6 @@ List
 ----
 
 * typescript
-    * check everything works
-    * tests run
     * prune unnecessary modules
     * add strictness
         * "noImplicitAny": true,

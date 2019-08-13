@@ -1,4 +1,4 @@
-const baseDir = "../../../";
+const baseDir = "../../../build/";
 const utils = require(baseDir + "lib/utils.js");
 
 const assert = require("assert").strict;

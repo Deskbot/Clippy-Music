@@ -20,7 +20,7 @@ function main() {
         files = [];
         for (const arg of args) {
             const targetPath = resolvePath(arg);
-            files.push(targetPath, ...getFiles(targetPath));
+            files.push(...getFiles(targetPath));
         }
     }
 
