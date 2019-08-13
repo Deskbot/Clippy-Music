@@ -10,11 +10,7 @@ class Api {
 	private wsh;
 
 	constructor() {
-		this.wsh = new WebSocketHandler(onConnect.bind(this), onMessage.bind(this), onClose.bind(this), socToUserId.bind(this));
-
-		//where clause:
-
-		function onConnect(soc, id) {
+		const onConnect = (soc, id) => {
 			//save user
 			UserRecordService.add(id);
 			UserRecordService.setWS(id, soc);
@@ -30,7 +26,7 @@ class Api {
 			this.sendDlQueue(soc, id);
 		}
 
-		function onMessage(soc, id, data, flags) {
+		const onMessage = (soc, id, data, flags) => {
 			const dataObj = JSON.parse(data);
 
 			if (dataObj.type === 'delete-content') {
@@ -51,13 +47,20 @@ class Api {
 			}
 		}
 
-		function onClose(soc, id) {
+		const onClose = (soc, id) => {
 			UserRecordService.unsetWS(id, soc);
 		}
 
-		function socToUserId(soc) {
+		const socToUserId = (soc) => {
 			return soc._socket.remoteAddress;
 		}
+
+		this.wsh = new WebSocketHandler(
+			onConnect,
+			onMessage,
+			onClose,
+			socToUserId,
+		);
 	}
 
 	//message related

@@ -9,7 +9,6 @@ List
 * typescript
     * add strictness
         * "noImplicitAny": true,
-        * "noImplicitThis": true,
     * state something about the use of ts in the readme
     * update readme
 * skip-penalise-button doesn't work, it says you need to give the admin password
