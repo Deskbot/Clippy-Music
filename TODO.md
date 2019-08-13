@@ -7,14 +7,9 @@ List
 ----
 
 * typescript
-    * prune unnecessary modules
     * add strictness
         * "noImplicitAny": true,
         * "noImplicitThis": true,
-        * "noImplicitReturns": true,
-        * "strict": true,
-        * "strictFunctionTypes": true,
-        * "strictPropertyInitialization": true,
     * state something about the use of ts in the readme
     * update readme
 * skip-penalise-button doesn't work, it says you need to give the admin password

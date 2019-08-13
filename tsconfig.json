@@ -7,6 +7,7 @@
         "sourceMap": true,
         "sourceRoot": "../src-front",
         "strictNullChecks": true,
+        "strictPropertyInitialization": true,
         "target": "ES2017",
     },
 
