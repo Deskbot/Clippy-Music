@@ -7,8 +7,6 @@ List
 ----
 
 * typescript
-    * add strictness
-        * "noImplicitAny": true,
     * state something about the use of ts in the readme
     * update readme
 * skip-penalise-button doesn't work, it says you need to give the admin password
@@ -19,7 +17,10 @@ List
     * render new kind of bucketing on the front
     * refactor to not use ifs everywhere
     * when using ClippyQueue see if we can avoid getting the duration before playing with or just don't count the seconds actually played
-* make options extend default_options, considering that the data won't be in there if default_options is updated, as has just happened with ffprobe path
+* add strictness
+    * make the options file a .json
+    * make options extend default_options, considering that the data won't be in there if default_options is updated, as has just happened with ffprobe path
+    * "noImplicitAny": true,
 * add eog path to options and its arguments
 * Reddit support
     * youtube-dl does it
