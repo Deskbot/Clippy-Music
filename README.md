@@ -35,6 +35,7 @@ All available from the links given. It's also likely you can get them from your 
 git clone https://github.com/Deskbot/Clippy-Music
 cd Clippy-Music
 npm install
+npm run build
 ```
 
 Configuration

@@ -11,3 +11,6 @@ else
 		echo 'update failed'
 	fi
 fi
+
+echo "Rebuilding Clippy-Music..."
+npm run build

@@ -6,8 +6,7 @@ This list is in a rough order of priority.
 List
 ----
 
-* typescript
-    * update readme
+* test everything
 * skip-penalise-button doesn't work, it says you need to give the admin password
 * Barringer's Bucketing system
     * add bucketing type to options
