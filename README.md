@@ -129,6 +129,11 @@ Please contribute, preferably with code, issues on GitHub is fine.
 
 Check out the [todo list](./TODO.md) to see what changes would be good to make.
 
+Language
+----------
+
+Initially Clippy-Music was written in JavaScript. I switched to TypeScript long after I thought the project to be finished because I got a new feature request that required very siginificant alterations to the code and I thought type safety would make these changes easier to make. There's a lot of room to improve the TypeScript and use the language to its fullest, but it's not worth the time it would take to update the entire codebase.
+
 License
 -------
 
