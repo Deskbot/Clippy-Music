@@ -6,7 +6,6 @@ This list is in a rough order of priority.
 List
 ----
 
-* test everything
 * skip-penalise-button doesn't work, it says you need to give the admin password
 * Barringer's Bucketing system
     * add bucketing type to options
@@ -19,7 +18,8 @@ List
     * make the options file a .json
     * make options extend default_options, considering that the data won't be in there if default_options is updated, as has just happened with ffprobe path
     * "noImplicitAny": true,
-* add eog path to options and its arguments
+* add eog command to options and its arguments
+    * rename existing path options with "???command"
 * Reddit support
     * youtube-dl does it
     * mpv can stream it but it takes ages
@@ -93,6 +93,7 @@ List
 * Add integration tests
     * Worth doing before refactors
 * Check what method is used for each HTTP endpoint, is there a better one?
+* Replace websockets with long poll http
 
 ---
 
