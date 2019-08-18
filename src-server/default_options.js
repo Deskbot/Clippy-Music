@@ -1,12 +1,29 @@
 module.exports = {
 	httpPort: 8080,
+
+	// inbound and outbound
 	webSocketPort: 3000,
 
+	// how long before the same image can be shown again, in seconds
+	// Infinity = nothing can be played twice
+	// 0 = never check for uniqueness
 	imageUniqueCoolOff: 3600,
+
+	// how long before the same music can be shown again, in seconds
+	// Infinity = nothing can be played twice
+	// 0 = never check for uniqueness
 	musicUniqueCoolOff: 3600,
+
+	// videos longer than this in seconds will be streamed from YouTube and not downloaded first
+	// (Long videos can take a while to download, regardless of what duration is played.)
+	// (Streaming a video causes a small delay before playback begins.)
 	streamYtOverDur: 1200,
+
+	// the maximum duration of a single queue item, in seconds
 	timeout: 644,
 
+	// the location on disk where uploaded content is stored
+	// A relative path will be relative to the working directory the server is ran from.
 	storageDir: '/tmp/Clippy-Music-Tmp',
 
 	ffprobePath: 'ffprobe',
@@ -14,20 +31,18 @@ module.exports = {
 	mpvArgs: ['-fs', '--af=dynaudnorm'],
 	youtubeDlPath: 'youtube-dl',
 
+	// how frequently the download bar progress is updated
 	dlPercentUpdateFreq: 250,
+
+	// maximum image file size, in bytes
 	imageSizeLimit: 100000000,
+
+	// maximum music file size, in bytes
 	musicSizeLimit: 400000000,
+
+	// maximum character length of nicknames
 	nicknameSizeLimit: 67,
+
+	// number of file name characters shown on front end
 	fileNameSizeLimit: 57,
 };
-
-//imageUniqueCoolOff  = how many seconds before it's ok to play the same music again. Can use Infinity for nothing to ever be played twice, or 0 to never check for uniqueness
-//musicUniqueCoolOff  = how many seconds before it's ok to show the same picture again. Can use Infinity for nothing to ever be played twice, or 0 to never check for uniqueness
-//streamYtOverDur     = videos longer than this in seconds will be streamed from YouTube not downloaded first. (Long videos can take a while to download, even though a small fragment of them may be played; streaming a video causes a small delay between content.)
-//timeout             = the maximum number of seconds content can play for
-//storageDir          = the location on disk where uploaded content is stored, if a relative path is given, the directory will be relative to where the process was ran
-//dlPercentUpdateFreq = how many milliseconds between updating the download percentage for videos on the front end
-//imageSizeLimit      = largest image file that can be downloaded, in bytes
-//musicSizeLimit      = largest music file that can be downloaded, in bytes
-//nicknameSizeLimit   = maximum nickname length
-//fileNameSizeLimit   = number of file name characters shown on front end
