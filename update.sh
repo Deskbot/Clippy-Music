@@ -12,5 +12,8 @@ else
 	fi
 fi
 
+echo "Updating packages..."
+npm install
+
 echo "Rebuilding Clippy-Music..."
 npm run build
