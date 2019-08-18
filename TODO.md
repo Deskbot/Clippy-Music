@@ -52,6 +52,7 @@ List
 
 ---
 
+* Cancelling an upload shouldn't put an error in the console
 * Improve FileUploadError to be spoken as Clippy
 * FileUploadError probably only needs to take file paths and not files
 * Make internal errors that aren't user errors get put in the terminal
