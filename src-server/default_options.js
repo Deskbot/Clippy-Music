@@ -14,7 +14,7 @@ module.exports = {
 	mpvArgs: ['-fs', '--af=dynaudnorm'],
 	youtubeDlPath: 'youtube-dl',
 
-	dlPercentUpdateFreq: 2000,
+	dlPercentUpdateFreq: 250,
 	imageSizeLimit: 100000000,
 	musicSizeLimit: 400000000,
 	nicknameSizeLimit: 67,

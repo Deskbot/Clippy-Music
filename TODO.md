@@ -6,7 +6,6 @@ This list is in a rough order of priority.
 List
 ----
 
-* increase download progress update rate
 * Barringer's Bucketing system
     * add bucketing type to options
     * integrate the new bucketing object in every location with an if to decide which queue
