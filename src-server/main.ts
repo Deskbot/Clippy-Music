@@ -21,7 +21,6 @@ main();
 
 function main() {
 	handleArguments().then(() => {
-		validateOptions();
 		setUpDirs();
 		setUpServices();
 		setUpControls();
@@ -154,46 +153,4 @@ function setUpControls() {
 
 function setUpServices() {
 	startHttpService();
-}
-
-function validateOptions() {
-	let valid = true;
-
-	const validTypeOfKey: {
-		[key: string]: string
-	} = {
-		httpPort: "number",
-		webSocketPort: "number",
-		imageUniqueCoolOff: "number",
-		musicUniqueCoolOff: "number",
-		streamYtOverDur: "number",
-		timeout: "number",
-		storageDir: "string",
-		ffprobePath: "string",
-		mpvPath: "string",
-		youtubeDlPath: "string",
-		dlPercentUpdateFreq: "number",
-		imageSizeLimit: "number",
-		musicSizeLimit: "number",
-		nicknameSizeLimit: "number",
-		fileNameSizeLimit: "number",
-	}
-
-	for (const key in validTypeOfKey) {
-		if (typeof opt[key] !== validTypeOfKey[key]) {
-			valid = false;
-			console.error(`Error: "${key}" setting in options.js is not a "${validTypeOfKey[key]}".`);
-		}
-	}
-
-	// ensure mpvArgs is an array
-
-	if (!Array.isArray(opt.mpvArgs))  {
-		valid = false;
-		console.error("Error: \"mpvArgs\" setting in options.js is not an array of string.");
-	}
-
-	if (!valid) {
-		process.exit(1);
-	}
 }
