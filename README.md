@@ -41,13 +41,13 @@ npm run build
 Configuration
 -------------
 
-Certain choices about program behaviour can be found in `./options.ts`. If `./options.ts` does not exist, execute `npm run build` and it will create that file from a copy of the default.
+Certain choices about program behaviour can be found in `./config.ts`. If `./config.ts` does not exist, execute `npm run build` and it will create that file from a copy of the default.
 
-After altering `./options.ts`, run `npm run build` to validate your configuration and make it usable the next time the server is started.
+After altering `./config.ts`, run `npm run build` to validate your configuration and make it usable the next time the server is started.
 
 The configuration can not be changed at run time.
 
-Program updates may overwrite `default_options.ts` but not `options.ts`.
+Program updates may overwrite `default_config.ts` but not `config.ts`.
 
 Run
 ---
@@ -62,7 +62,7 @@ To use a port below 1024 you will need to run as root.
 
 If you have a web server installed such as Apache2 and intend to expose the web page on port 80, you may have to run `sudo service apache2 stop` or expose Clippy Music on a different port and [configure your server](https://wiwifos.blogspot.com/2017/09/apache2-port-rerouting.html) to reroute port 80 to Clippy Music's port.
 
-### Options
+### Arguments
 
 * `-c --clean`: deletes all stored data that would otherwise be reloaded between runs
 * `-m --mute`: all media is played muted

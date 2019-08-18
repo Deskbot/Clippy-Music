@@ -13,12 +13,12 @@ function runTsc() {
 }
 
 function setUpOptions() {
-    const optionsPath = __dirname + '/options.ts';
+    const configPath = __dirname + '/config.ts';
 
-    if (fs.existsSync(optionsPath)) return;
+    if (fs.existsSync(configPath)) return;
 
-    console.log('Creating new options.ts file from the default.');
+    console.log('Creating new config.ts file from the default.');
 
-    const defaultFilePath = __dirname + '/default_options.ts';
-    fs.copyFileSync(defaultFilePath, optionsPath);
+    const defaultFilePath = __dirname + '/default_config.ts';
+    fs.copyFileSync(defaultFilePath, configPath);
 }

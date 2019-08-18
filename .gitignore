@@ -1,6 +1,6 @@
 /build/
 node_modules/
 /npm-debug.log
-/options.ts
+/config.ts
 /.sublime*
 /.vscode*

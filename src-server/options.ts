@@ -1,4 +1,4 @@
-import { options } from "./user-options";
+import { config } from "./user-config";
 
 class Wrapper<T> {
     private value: T;
@@ -16,22 +16,22 @@ class Wrapper<T> {
     }
 }
 
-export const dlPercentUpdateFreq: number = options.dlPercentUpdateFreq;
-export const fileNameSizeLimit: number = options.fileNameSizeLimit;
-export const ffprobePath: string = options.ffprobePath;
-export const httpPort: number = options.httpPort;
-export const imageSizeLimit: number = options.imageSizeLimit;
-export const imageUniqueCoolOff: number = options.imageUniqueCoolOff;
-export const mpvPath: string = options.mpvPath;
-export const mpvArgs: string[] = options.mpvArgs;
-export const musicSizeLimit: number = options.musicSizeLimit;
-export const musicUniqueCoolOff: number = options.musicUniqueCoolOff;
-export const nicknameSizeLimit: number = options.nicknameSizeLimit;
-export const timeout: number = options.timeout;
-export const storageDir: string = options.storageDir;
-export const streamYtOverDur: number = options.streamYtOverDur;
-export const webSocketPort: number = options.webSocketPort;
-export const youtubeDlPath: string = options.youtubeDlPath;
+export const dlPercentUpdateFreq: number = config.dlPercentUpdateFreq;
+export const fileNameSizeLimit: number = config.fileNameSizeLimit;
+export const ffprobePath: string = config.ffprobePath;
+export const httpPort: number = config.httpPort;
+export const imageSizeLimit: number = config.imageSizeLimit;
+export const imageUniqueCoolOff: number = config.imageUniqueCoolOff;
+export const mpvPath: string = config.mpvPath;
+export const mpvArgs: string[] = config.mpvArgs;
+export const musicSizeLimit: number = config.musicSizeLimit;
+export const musicUniqueCoolOff: number = config.musicUniqueCoolOff;
+export const nicknameSizeLimit: number = config.nicknameSizeLimit;
+export const timeout: number = config.timeout;
+export const storageDir: string = config.storageDir;
+export const streamYtOverDur: number = config.streamYtOverDur;
+export const webSocketPort: number = config.webSocketPort;
+export const youtubeDlPath: string = config.youtubeDlPath;
 
 export const mute: Wrapper<boolean> = new Wrapper(false);
 

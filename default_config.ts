@@ -1,6 +1,6 @@
 // execute `npm run build` after altering this file
 
-export const options = {
+export const config = {
 	httpPort: 8080,
 
 	// inbound and outbound
