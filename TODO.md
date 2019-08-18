@@ -7,6 +7,7 @@ List
 ----
 
 * skip-penalise-button doesn't work, it says you need to give the admin password
+* increase download progress update rate
 * Barringer's Bucketing system
     * add bucketing type to options
     * integrate the new bucketing object in every location with an if to decide which queue
@@ -35,10 +36,14 @@ List
     * These need making consistent anyway
 * Gifv support
 * update the state of the choose music file button when pasting into youtube url box
+* playlist upload
+* multiple file uploads at once
 * Allow admins to remove anything before it gets played
 * Allow downloading of content
     * Must give a legal warning at the user's first attempt, which prompts the user to confirm their intent
     * Only allow downloading of the currently playing content. I hate seeing people waste their time looking ahead. It ruins the fun.
+    * allow downloading of things that have just played
+    * image download
 * Allow killing the thing you yourself are playing
 * Put development diagrams in repo
 * Sometimes unmoved windows move by a small amount when a window above is closed
