@@ -3,48 +3,48 @@ import * as default_config from "./default_options";
 
 class OptionsValidator {
     private expectedArrays: string[];
-    private optionsToTest: any;
-    private valid: boolean;
     private validPrimitives: { [key: string]: string; };
 
     constructor(
-        optionsToTest: any,
         validPrimitives: {
             [key: string]: string
         },
         expectedArrays: string[]
     ) {
         this.expectedArrays = expectedArrays;
-        this.optionsToTest = optionsToTest;
-        this.valid = true;
         this.validPrimitives = validPrimitives;
     }
 
-    public validate() {
-        this.validatePrimitives();
-        this.validateArrays();
+    public validate(optionsToTest: any): boolean {
+        let valid = this.validatePrimitives(optionsToTest);
 
-        if (!this.valid) {
-            process.exit(1);
-        }
+        return this.validateArrays(optionsToTest) && valid;
     }
 
-    private validatePrimitives() {
+    private validatePrimitives(optionsToTest: any): boolean {
+        let valid = true;
+
         for (const key in this.validPrimitives) {
-            if (typeof this.optionsToTest[key] !== this.validPrimitives[key]) {
-                this.valid = false;
+            if (typeof optionsToTest[key] !== this.validPrimitives[key]) {
+                valid = false;
                 console.error(`Error: "${key}" setting in options.js is not a "${this.validPrimitives[key]}".`);
             }
         }
+
+        return valid;
     }
 
-    private validateArrays() {
+    private validateArrays(optionsToTest: any): boolean {
+        let valid = true;
+
         for (const key of this.expectedArrays)  {
-            if (!Array.isArray(this.optionsToTest[key])) {
-                this.valid = false;
-                console.error("Error: \"mpvArgs\" setting in options.js is not an array of string.");
+            if (!Array.isArray(optionsToTest[key])) {
+                valid = false;
+                console.error(`Error: "${key}" setting in options.js is not an array of string.`);
             }
         }
+
+        return valid;
     }
 }
 
@@ -54,7 +54,6 @@ const combinedOptions = {
 };
 
 const validator = new OptionsValidator(
-    combinedOptions,
     {
         httpPort: "number",
         webSocketPort: "number",
@@ -75,7 +74,9 @@ const validator = new OptionsValidator(
     ["mpvArgs"]
 );
 
-validator.validate();
+if (!validator.validate(combinedOptions)) {
+    process.exit(1);
+}
 
 export const dlPercentUpdateFreq: number = combinedOptions.dlPercentUpdateFreq;
 export const fileNameSizeLimit: number = combinedOptions.fileNameSizeLimit;
