@@ -12,7 +12,7 @@ else
 	fi
 fi
 
-echo "Updating packages..."
+echo "Updating package versions..."
 npm install
 
 echo "Rebuilding Clippy-Music..."
