@@ -19,6 +19,6 @@ function setUpOptions() {
 
     console.log('Creating new options.js file from the default.');
 
-    const defaultFilePath = __dirname + '/src-server/default_options.js';
+    const defaultFilePath = __dirname + '/default_options.js';
     fs.copyFileSync(defaultFilePath, optionsPath);
 }

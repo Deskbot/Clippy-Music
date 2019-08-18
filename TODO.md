@@ -14,7 +14,6 @@ List
     * refactor to not use ifs everywhere
     * when using ClippyQueue see if we can avoid getting the duration before playing with or just don't count the seconds actually played
 * add strictness
-    * make options extend default_options, considering that the data won't be in there if default_options is updated, as has just happened with ffprobe path
     * "noImplicitAny": true,
 * add eog command to options and its arguments
     * rename existing path options with "???command"
