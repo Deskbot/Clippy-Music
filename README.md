@@ -41,13 +41,13 @@ npm run build
 Configuration
 -------------
 
-Certain choices about program behaviour can be found in `./options.js`. If `./options.js` does not exist, execute `npm run build` and it will create that file from a copy of the default.
+Certain choices about program behaviour can be found in `./options.ts`. If `./options.ts` does not exist, execute `npm run build` and it will create that file from a copy of the default.
 
-After altering `./options.js`, run `npm run build` to validate your configuration and make it usable the next time the server is started.
+After altering `./options.ts`, run `npm run build` to validate your configuration and make it usable the next time the server is started.
 
 The configuration can not be changed at run time.
 
-Program updates may overwrite `default_options.js` but not `options.js`.
+Program updates may overwrite `default_options.ts` but not `options.ts`.
 
 Run
 ---

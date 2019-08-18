@@ -403,7 +403,7 @@ export class ContentManager extends EventEmitter {
 			args.push(endTime);
 		}
 
-		if (opt.mute) {
+		if (opt.mute.get()) {
 			args.push('--mute=yes');
 		}
 

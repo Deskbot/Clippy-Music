@@ -124,7 +124,7 @@ List
     * harder than it looks
 * Grey bar at the top of unfocused windows
 * Nickname uniqueness
-* It's not obvious that you can't run tests without an "options.js".
+* It's not obvious that you can't run tests without an "options.ts".
 * Move timer from ContentManager into a stopwatch class
 * Check it uses the minimum required JQuery UI
 * Change the options at run time from the admin panel
