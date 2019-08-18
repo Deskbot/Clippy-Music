@@ -1,3 +1,5 @@
+// execute `npm run build` after altering this file
+
 module.exports = {
 	httpPort: 8080,
 

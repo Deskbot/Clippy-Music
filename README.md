@@ -41,7 +41,9 @@ npm run build
 Configuration
 -------------
 
-Certain choices about program behaviour can be found in `options.js`. If `options.js` does not exist, run the program and it will create that file from a copy of `default_options.js`.
+Certain choices about program behaviour can be found in `./options.js`. If `./options.js` does not exist, execute `npm run build` and it will create that file from a copy of the default.
+
+After altering `./options.js`, run `npm run build` to validate your configuration and make it usable the next time the server is started.
 
 The configuration can not be changed at run time.
 
