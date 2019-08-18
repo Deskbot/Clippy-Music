@@ -57,8 +57,6 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	//static
-
 	static recover() {
 		//retreive suspended queue
 		let obj, pqContent;
@@ -97,8 +95,6 @@ export class ContentManager extends EventEmitter {
 		return success ? obj : null;
 	}
 
-	//object methods
-
 	add(uplData: UploadData): Promise<UploadData> {
 		const that = this;
 
@@ -111,7 +107,7 @@ export class ContentManager extends EventEmitter {
 
 			if (that.ytIdIsUnique(ytId)) {
 				downloadYtInfo(uplData.music.path)
-				.then((info) => {
+				.then(info => {
 					uplData.music.title = info.title;
 					uplData.duration = time.clipTimeByStartAndEnd(Math.floor(info.duration), uplData.startTime, uplData.endTime);
 
