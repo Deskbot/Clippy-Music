@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { Html5Entities } from 'html-entities';
 import { URL } from 'url';
 
-import * as opt from '../../options.js';
+import * as opt from '../options';
 
 export function arrFirstMatch(arr, f) {
 	for (let e of arr) {

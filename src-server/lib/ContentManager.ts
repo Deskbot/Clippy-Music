@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import * as consts from './consts';
 import * as debug from './debug';
 import * as utils from './utils';
-import * as opt from '../../options.js';
+import * as opt from '../options';
 import * as time from './time';
 
 import { ClippyQueue } from './ClippyQueue';

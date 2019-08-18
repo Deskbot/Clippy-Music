@@ -1,4 +1,4 @@
-import * as opt from '../../options';
+import * as opt from '../options';
 import * as path from "path";
 import * as utils from './utils';
 

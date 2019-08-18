@@ -1,6 +1,6 @@
-build/
+/build/
 node_modules/
-npm-debug.log
-options.js
-.sublime*
-.vscode*
+/npm-debug.log
+/options.js
+/.sublime*
+/.vscode*

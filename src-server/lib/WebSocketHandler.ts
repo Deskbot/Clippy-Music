@@ -2,7 +2,7 @@
 
 import * as ws from 'ws';
 
-import * as opt from '../../options.js';
+import * as opt from '../options';
 
 export class WebSocketHandler {
 	private wss;

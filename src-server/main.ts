@@ -3,7 +3,7 @@ import * as readline from 'readline';
 
 import * as consts from './lib/consts';
 import * as debug from './lib/debug';
-import * as opt from '../options.js';
+import * as opt from './options';
 import * as utils from './lib/utils';
 
 import { PasswordService } from './service/PasswordService';
@@ -112,7 +112,7 @@ function setUpControls() {
 
 	//when this is about to be killed
 	process.on('exit', () => {
-		console.log('Closing down Clippy-Music.');
+		console.log('Closing down Clippy-Music...');
 
 		ContentManagerService.store();
 		IdFactoryService.store();

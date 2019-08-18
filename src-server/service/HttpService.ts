@@ -12,7 +12,7 @@ import { WebSocketService } from './WebSocketService';
 import * as consts from '../lib/consts';
 import * as debug from '../lib/debug';
 import * as time from '../lib/time';
-import * as opt from '../../options.js';
+import * as opt from '../options';
 import * as utils from '../lib/utils';
 
 import { getFileDuration } from '../lib/music';
