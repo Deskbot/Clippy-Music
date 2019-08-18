@@ -394,11 +394,11 @@ $('#skip-button').click(function() {
 	});
 });
 
-$('#skip-penalise-button').click(function(e) {
-	var adminPassword = $('#admin-password-input').val();
+$('#skip-penalise-button').click(function() {
+	var adminPassword = $adminPasswordInput.val();
 
 	//no empty password
-	if (adminPassword) {
+	if (!adminPassword) {
 		main.clippyAgent.stop();
 		main.clippyAgent.speak('You need to give the admin password.');
 		main.clippyAgent.play('Searching');

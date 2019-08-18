@@ -6,7 +6,6 @@ This list is in a rough order of priority.
 List
 ----
 
-* skip-penalise-button doesn't work, it says you need to give the admin password
 * increase download progress update rate
 * Barringer's Bucketing system
     * add bucketing type to options
