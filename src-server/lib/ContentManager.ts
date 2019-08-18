@@ -430,6 +430,8 @@ export class ContentManager extends EventEmitter {
 	}
 
 	store() {
+		console.log("Storing content manager...");
+
 		let storeObj = {
 			playQueue: this.playQueue, //luckily this is jsonable
 			hashes: this.musicHashes,

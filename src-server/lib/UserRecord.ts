@@ -120,6 +120,8 @@ export class UserRecord {
 	}
 
 	store() {
+		console.log("Storing user record...");
+
 		const thisObj = {
 			idToUser: (() => {
 				const obj = {};

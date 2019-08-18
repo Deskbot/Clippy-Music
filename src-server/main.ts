@@ -43,7 +43,6 @@ function chooseAdminPassword() {
 			message: 'Verify Admin Password (hidden) (2/2): ',
 			hidden: true,
 			required: true,
-
 		}], (err, result) => {
 
 			if (err) return reject(err);
@@ -108,28 +107,28 @@ function setUpDirs() {
 }
 
 function setUpControls() {
-	const { ContentService } = require('./service/ContentService.js');
-	const { IdFactoryService } = require('./service/IdFactoryService.js');
-	const { UserRecordService } = require('./service/UserRecordService.js');
+	const { ContentManagerService } = require('./service/ContentService');
+	const { IdFactoryService } = require('./service/IdFactoryService');
+	const { UserRecordService } = require('./service/UserRecordService');
 
 	//when this is about to be killed
-	process.on('SIGINT', () => {
+	process.on('exit', () => {
 		console.log('Closing down Clippy-Music.');
 
-		ContentService.store();
+		ContentManagerService.store();
 		IdFactoryService.store();
 		UserRecordService.store();
 
-		if (ContentService.isPlaying()) {
+		if (ContentManagerService.isPlaying()) {
 			console.log('Waiting for content being played to get deleted.');
-			ContentService.on('end', () => {
+			ContentManagerService.on('end', () => {
 				process.exit(0);
 			});
 		} else {
 			process.exit(0);
 		}
 
-		ContentService.end();
+		ContentManagerService.end();
 	});
 
 	//stdin controls
@@ -142,7 +141,7 @@ function setUpControls() {
 	}
 
 	process.stdin.on('keypress', (ch, key) => {
-		if (key.name === 'end') ContentService.killCurrent();
+		if (key.name === 'end') ContentManagerService.killCurrent();
 
 		//I'm having to put these in because the settings that allow me to use 'end' prevent normal interrupts key commands
 		else if (key.name === 'c' && key.ctrl)  process.kill(process.pid, 'SIGINT');

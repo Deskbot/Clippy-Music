@@ -38,6 +38,7 @@ export class IdFactory {
 	}
 
 	store() {
+		console.log("Storing id factory...");
 		fs.writeFileSync(consts.files.idFactory, this.nextId);
 	}
 }
