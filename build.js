@@ -9,7 +9,7 @@ function main() {
 }
 
 function runTsc() {
-    child_process.spawn(__dirname + '/node_modules/typescript/bin/tsc', { stdio: "inherit" });
+    child_process.spawnSync(__dirname + '/node_modules/typescript/bin/tsc', { stdio: "inherit" });
 }
 
 function setUpOptions() {
