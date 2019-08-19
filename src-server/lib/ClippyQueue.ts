@@ -11,7 +11,16 @@ export class ClippyQueue {
 	private userIds: string[] = [];
 	private currPosteriority = 0;
 
-	constructor(queueObj?) {
+	constructor(queueObj?: {
+		currPosteriority: number,
+		userBuckets: {
+			[userId: string]: ItemData[]
+		},
+		userIds: string[],
+		userPosteriority: {
+			[userId: string]: number
+		},
+	}) {
 		if (queueObj) {
 			this.userPosteriority = queueObj.userPosteriority;
 			this.userBuckets = queueObj.userBuckets;
@@ -20,7 +29,7 @@ export class ClippyQueue {
 		}
 	}
 
-	add(itemData: ItemData & { userId: string }) {
+	add(itemData: ItemData) {
 		let userBucket = this.userBuckets[itemData.userId];
 
 		if (!userBucket) { //first visit
@@ -32,7 +41,7 @@ export class ClippyQueue {
 		userBucket.push(itemData);
 	}
 
-	boostPosteriority(userId, val) {
+	boostPosteriority(userId: string, val: number) {
 		if (this.userPosteriority[userId]) {
 			this.userPosteriority[userId] += val;
 		} else {
@@ -44,7 +53,7 @@ export class ClippyQueue {
 		return this.userBuckets;
 	}
 
-	getContent(uid, cid) {
+	getContent(uid: string, cid: number) {
 		let bucket = this.userBuckets[uid];
 
 		if (bucket) {
@@ -57,7 +66,7 @@ export class ClippyQueue {
 		return null;
 	}
 
-	getTitlesFromUserBucket(userId) {
+	getTitlesFromUserBucket(userId: string) {
 		const bucket = this.userBuckets[userId];
 
 		if (bucket) return bucket.map((item) => {
@@ -70,7 +79,7 @@ export class ClippyQueue {
 		else return [];
 	}
 
-	getUserBucket(uid) {
+	getUserBucket(uid: string) {
 		return this.userBuckets[uid];
 	}
 
@@ -119,7 +128,7 @@ export class ClippyQueue {
 		return targetUser ? this.userBuckets[targetUser].shift() : null;
 	}
 
-	penalise(uid) {
+	penalise(uid: string) {
 		if (uid in this.userPosteriority) {
 			//get max of all posterioritys in userPosteriorty object
 			let biggestPos = Math.max(...Object.values(this.userPosteriority));
@@ -127,12 +136,12 @@ export class ClippyQueue {
 		}
 	}
 
-	purge(uid) {
+	purge(uid: string) {
 		this.userBuckets[uid] = [];
 	}
 
 	// remove a user's item
-	remove(uid, obj) {
+	remove(uid: string, obj: ItemData) {
 		let buckets = this.userBuckets[uid];
 		if (buckets) {
 			buckets.splice(buckets.indexOf(obj), 1);
@@ -141,8 +150,4 @@ export class ClippyQueue {
 
 		return false;
 	}
-}
-
-function durToBucketOffset(dur) { //assumes duration is in seconds
-	return Math.ceil(dur / 60); //gives number of total minutes passed plus 1
 }
