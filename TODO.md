@@ -6,6 +6,9 @@ This list is in a rough order of priority.
 List
 ----
 
+* add strictness
+    * "noImplicitAny": true,
+    * test delete-content ws request where
 * Barringer's Bucketing system
     * add bucketing type to options
     * integrate the new bucketing object in every location with an if to decide which queue
@@ -13,8 +16,6 @@ List
     * render new kind of bucketing on the front
     * refactor to not use ifs everywhere
     * when using ClippyQueue see if we can avoid getting the duration before playing with or just don't count the seconds actually played
-* add strictness
-    * "noImplicitAny": true,
 * add eog command to options and its arguments
     * rename existing path options with "???command"
 * Reddit support
