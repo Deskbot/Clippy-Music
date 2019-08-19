@@ -1,6 +1,6 @@
-export interface UploadData {
-    id?: number;
-    userId?: string;
+export interface ItemData {
+    id: number;
+    userId: string;
     music: {
         isUrl: boolean | null,
         title: string | null,
@@ -14,7 +14,7 @@ export interface UploadData {
         title: string | null,
         path: string | null,
     },
-    duration: number | null,
+    duration: number,
     startTime: string | null,
     endTime: string | null,
 };
