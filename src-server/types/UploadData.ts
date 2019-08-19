@@ -35,7 +35,7 @@ export interface ItemData {
         title: string | null,
         path: string | null,
     },
-    duration: number | null,
+    duration: number,
     startTime: string | null,
     endTime: string | null,
 };
