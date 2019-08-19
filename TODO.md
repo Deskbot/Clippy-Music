@@ -9,6 +9,8 @@ List
 * add strictness
     * "noImplicitAny": true,
     * test delete-content ws request where
+* commas at the end of interface lines
+* consistent double quotes
 * Barringer's Bucketing system
     * add bucketing type to options
     * integrate the new bucketing object in every location with an if to decide which queue
