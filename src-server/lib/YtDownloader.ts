@@ -7,21 +7,35 @@ import * as utils from './utils';
 import { CancelError, UnknownDownloadError } from './errors';
 
 import * as ContentType from './ContentType';
+import { ProgressQueue } from './ProgressQueue';
+
+interface YtQueueItem {
+	cancelled: boolean,
+	cid: number,
+	defer: q.Deferred<void>,
+	destination: string,
+	percent: number,
+	proc?: cp.ChildProcess,
+	title: string,
+	userId: string,
+	vid: string,
+}
 
 export class YtDownloader {
-	private progressQueue;
-	private userQueues;
+	private progressQueue: ProgressQueue;
+	private userQueues: {
+		[userId: string]: (YtQueueItem)[]
+	};
 
-	constructor(progressQueue) {
+	constructor(progressQueue: ProgressQueue) {
 		this.progressQueue = progressQueue;
 		this.userQueues = {};
 	}
 
-	download(vid, destination) {
-		let proc;
+	download(vid: string, destination: string): [Promise<void>, cp.ChildProcess] {
+		let proc = cp.spawn(opt.youtubeDlPath, ['--no-playlist', vid, '-o', destination]);
 
-		const prom = new Promise((resolve, reject) => {
-			proc = cp.spawn(opt.youtubeDlPath, ['--no-playlist', vid, '-o', destination]);
+		const prom = new Promise<void>((resolve, reject) => {
 			let errMessage = '';
 
 			proc.on('close', (code, signal) => {
@@ -32,6 +46,7 @@ export class YtDownloader {
 						return resolve();
 					});
 				} else {
+					console.error(errMessage);
 					return reject(new UnknownDownloadError(`A non-zero exit code (${code}) downloading a YouTube video.`, ContentType.music));
 				}
 			});
@@ -44,13 +59,13 @@ export class YtDownloader {
 		return [ prom, proc ];
 	}
 
-	downloadNext(uid) {
+	downloadNext(uid: string) {
 		const queue = this.userQueues[uid];
 
 		if (queue.length === 0) return;
 
 		const head = queue[0]; //item at head of the queue
-		const { cid, defer, destination, title, vid } = head;
+		const { cid, defer, destination, vid } = head;
 
 		const [ dlProm, dlProc ] = this.download(vid, destination);
 		dlProm.then(() => {
@@ -69,7 +84,7 @@ export class YtDownloader {
 
 		dlProc.stdout.pause();
 
-		queue[0].proc = dlProc; //save ref to proc
+		head.proc = dlProc; //save ref to proc
 
 		//deal with progress updating
 
@@ -83,7 +98,7 @@ export class YtDownloader {
 		this.progressQueue.addCancelFunc(uid, cid, () => this.tryCancel(uid, cid));
 	}
 
-	getQueue(uid) {
+	getQueue(uid: string): unknown[] {
 		const queue = this.userQueues[uid];
 
 		if (!queue) return [];
@@ -93,13 +108,22 @@ export class YtDownloader {
 		});
 	}
 
-	new(cid, userId, title, vid, destination) {
+	new(cid: number, userId: string, title: string, vid: string, destination: string): q.Promise<void> {
 		let queue = this.userQueues[userId];
 		if (!queue) queue = this.userQueues[userId] = [];
 
-		const defer = q.defer();
+		const defer = q.defer<void>();
 
-		queue.push({ cid, userId, title, vid, destination, defer, percent: 0 });
+		queue.push({
+			cancelled: false,
+			cid,
+			defer,
+			destination,
+			percent: 0,
+			title,
+			userId,
+			vid,
+		});
 
 		//if the queue was empty just now, need to initiate download sequence
 		//otherwise the download queue is already being worked on
@@ -108,7 +132,7 @@ export class YtDownloader {
 		return defer.promise;
 	}
 
-	tryCancel(uid, cid) {
+	tryCancel(uid: string, cid: number): boolean {
 		const queue = this.userQueues[uid];
 
 		if (!queue) return false;
@@ -127,7 +151,7 @@ export class YtDownloader {
 
 	//static
 
-	static cancel(queue, index) {
+	static cancel(queue: YtQueueItem[], index: number) {
 		const item = queue[index];
 
 		if (item.proc) {
@@ -142,17 +166,17 @@ export class YtDownloader {
 }
 
 class PercentReader {
-	private lastPercent;
-	private phase;
-	private proc;
+	private lastPercent: number;
+	private phase: number;
+	private proc: cp.ChildProcess;
 
-	constructor(dlProc) {
+	constructor(dlProc: cp.ChildProcess) {
 		this.lastPercent = 0;
 		this.phase = 1;
 		this.proc = dlProc;
 	}
 
-	get() {
+	get(): number {
 		let data = this.proc.stdout.read();
 
 		if (data === null) return this.lastPercent;
@@ -187,7 +211,7 @@ class PercentReader {
 		return pc;
 	}
 
-	static extractPercent(s) {
+	static extractPercent(s: string): number {
 		const start = s.lastIndexOf('[download]') + 10; //[download] has length 10
 		const end = s.lastIndexOf('%');
 		const pcStr = s.substring(start, end).trim();
