@@ -291,7 +291,7 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 	handlePotentialBan(req.ip) //assumes ip address is userId
 	.then(() => ProgressQueueService.add(req.ip, contentId))
 	.then(() => handleFileUpload(req, contentId))
-	.then(utils.spread((form, fields, files) => { //nesting in order to get the scoping right
+	.then(([form, fields, files]) => { //nesting in order to get the scoping right
 		return parseUploadForm(form, fields, files)
 		.then((uplData) => {
 			uplData.id = contentId;
@@ -336,7 +336,7 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 				res.redirect('/');
 			}
 		});
-	}))
+	})
 	.catch((err) => {
 		if (err instanceof FileUploadError) {
 			debug.log("deleting these bad uploads: ", err.files);

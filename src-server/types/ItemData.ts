@@ -16,7 +16,6 @@ export interface ItemData {
     timePlayedAt?: number;
 };
 
-
 type PicData = {
     exists: true,
     hash?: number,

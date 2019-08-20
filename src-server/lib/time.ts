@@ -4,7 +4,7 @@
  * @param {(number\|null\|undefined)} start
  * @param {(number\|null\|undefined)} end
  */
-export function clipTimeByStartAndEnd(totalTime, start, end) {
+export function clipTimeByStartAndEnd(totalTime: number, start: number, end: number): number {
     if (start === null || start === undefined) {
         start = 0;
     }
