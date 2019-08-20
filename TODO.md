@@ -6,6 +6,7 @@ This list is in a rough order of priority.
 List
 ----
 
+* extracting picname from downloaded pic could be better
 * Barringer's Bucketing system
     * add bucketing type to options
     * integrate the new bucketing object in every location with an if to decide which queue

@@ -3,6 +3,7 @@ import { EventEmitter } from 'events';
 import { Html5Entities } from 'html-entities';
 import * as request from 'request';
 import * as fs from 'fs';
+import * as q from "q";
 
 import * as consts from './consts';
 import * as debug from './debug';
@@ -14,20 +15,47 @@ import { ClippyQueue } from './ClippyQueue';
 import * as ContentType from './ContentType';
 import { downloadYtInfo } from './music';
 import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError } from './errors';
-import { UploadData, ItemData } from '../types/UploadData';
+import { UploadData } from '../types/UploadData';
+import { IdFactory } from './IdFactory';
+import { ItemData } from '../types/ItemData';
+import { YtDownloader } from './YtDownloader';
+import { UserRecord } from './UserRecord';
+import { ProgressQueue } from './ProgressQueue';
+
+interface BucketForPublic {
+	bucket: {
+		title: string,
+		id: number,
+	}[];
+	nickname: string;
+	userId: string;
+}
+
+interface SuspendedContentManager {
+	playQueue: any;
+	hashes: any;
+	picHashes: any;
+	ytIds: any;
+}
 
 export class ContentManager extends EventEmitter {
 	//data stores
-	private playQueue;
-	private musicHashes = {};
-	private picHashes = {};
-	private ytIds = {};
+	private playQueue: ClippyQueue;
+	private musicHashes: {
+		[hash: string]: number
+	} = {};
+	private picHashes: {
+		[hash: string]: number
+	} = {};
+	private ytIds: {
+		[hash: string]: number
+	} = {};
 
 	//injected objects
-	private idFactory;
-	private progressQueue;
-	private userRecord;
-	private ytDownloader;
+	private idFactory: IdFactory;
+	private progressQueue: ProgressQueue;
+	private userRecord: UserRecord;
+	private ytDownloader: YtDownloader;
 
 	//processes
 	private runningMusicProc: cp.ChildProcess | null = null;
@@ -36,7 +64,13 @@ export class ContentManager extends EventEmitter {
 
 	private stop?: boolean;
 
-	constructor(startState, idFactory, progressQueue, userRecord, ytDownloader) {
+	constructor(
+		startState: SuspendedContentManager | null,
+		idFactory: IdFactory,
+		progressQueue: ProgressQueue,
+		userRecord: UserRecord,
+		ytDownloader: YtDownloader
+	) {
 		super();
 
 		//injected objects
@@ -57,38 +91,34 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	static recover() {
-		//retreive suspended queue
-		let obj, pqContent;
+	// retreive suspended ContentManger
+	static recover(): SuspendedContentManager | null {
+		let obj;
+		let pqContent: Buffer;
 		let success = true;
 
-		//I'm trying some weird control flow because I don't like try catch.
-		//Usually there's only 1 line you want to try and you don't want to assume something has been caught for the wrong reasons.
 		try {
-			success = true;
 			pqContent = fs.readFileSync(consts.files.content);
 
 		} catch (e) {
-			success = false;
 			console.log('No suspended content manager found. This is ok.');
+			return null;
 		}
 
-		if (success) {
-			console.log('Reading suspended content manager');
+		console.log('Reading suspended content manager');
 
-			try {
-				success = true;
-				obj = JSON.parse(pqContent);
+		try {
+			success = true;
+			obj = JSON.parse(pqContent.toString());
 
-			} catch (e) {
-				success = false;
-				if (e instanceof SyntaxError) {
-					console.error('Syntax error in suspendedContentManager.json file.');
-					console.error(e);
-					console.log('Ignoring suspended content manager');
-				} else {
-					throw e;
-				}
+		} catch (e) {
+			success = false;
+			if (e instanceof SyntaxError) {
+				console.error('Syntax error in suspendedContentManager.json file.');
+				console.error(e);
+				console.log('Ignoring suspended content manager');
+			} else {
+				throw e;
 			}
 		}
 
@@ -131,24 +161,24 @@ export class ContentManager extends EventEmitter {
 		return p;
 	}
 
-	addHash(hash) {
+	addHash(hash: string) {
 		this.musicHashes[hash] = new Date().getTime();
 	}
 
-	addPicHash(hash) {
+	addPicHash(hash: string) {
 		this.picHashes[hash] = new Date().getTime();
 	}
 
-	addYtId(id) {
+	addYtId(id: string) {
 		this.ytIds[id] = new Date().getTime();
 	}
 
-	deleteContent(contentObj) {
+	deleteContent(contentObj: ItemData) {
 		if (!contentObj.music.stream) utils.deleteFile(contentObj.music.path);
 		if (contentObj.pic.exists) utils.deleteFile(contentObj.pic.path); //empty picture files can be uploaded and will persist
 	}
 
-	downloadPic(url, destination): Promise<{ title: string }> {
+	downloadPic(url: string, destination: string): Promise<{ title: string }> {
 		return new Promise((resolve, reject) => {
 			request.head(url, (err, res, body) => {
 				if (err) {
@@ -163,17 +193,21 @@ export class ContentManager extends EventEmitter {
 					return reject(new UnknownDownloadError(ContentType.pic, 'Could not get a response for the request.'));
 				}
 
-				const typeFound = res.headers['content-type'];
+				const typeFound = res.headers['content-type'] as string;
 
 				if (typeFound.split('/')[0] !== 'image') {
 					return reject(new DownloadWrongTypeError(ContentType.pic, 'image', typeFound));
 				}
-				if (res.headers['content-length'] > opt.imageSizeLimit) {
+				if (parseInt(res.headers['content-length'] as string) > opt.imageSizeLimit) {
 					return reject(new DownloadTooLargeError(ContentType.pic));
 				}
 
-				let picName = url.split('/').pop();
-				picName = picName.length <= 1 ? null : picName.split('.').shift();
+				let picName: string | null = url.split('/').pop() as string;
+				picName = picName.length <= 1 ? null : picName.split('.').shift() as string;
+
+				if (picName == null) {
+					picName = "";
+				}
 
 				const picinfo = {
 					title: new Html5Entities().encode(picName),
@@ -197,20 +231,16 @@ export class ContentManager extends EventEmitter {
 		this.killCurrent();
 	}
 
-	forget(itemData) {
+	forget(itemData: ItemData) {
 		if (itemData.music.ytId) delete this.ytIds[itemData.music.ytId];
 		if (itemData.music.hash) delete this.musicHashes[itemData.music.hash];
 		if (itemData.pic.hash) delete this.picHashes[itemData.pic.hash];
 	}
 
-	getBucketsForPublic() {
+	getBucketsForPublic(): BucketForPublic[] {
 		let userId, bucketTitles;
 		let userIds = this.playQueue.getUsersByPosteriority();
-		let returnList: {
-			bucket: string[],
-			nickname: string,
-			userId: string,
-		}[] = [];
+		let returnList: BucketForPublic[] = [];
 
 		//map and filter
 		for (let i=0; i < userIds.length; i++) {
@@ -248,7 +278,7 @@ export class ContentManager extends EventEmitter {
 		this.stopPic();
 	}
 
-	logPlay(contentData) {
+	logPlay(contentData: ItemData) {
 		const nickname = this.userRecord.getNickname(contentData.userId);
 		const currentTime = new Date().toString();
 
@@ -271,7 +301,7 @@ export class ContentManager extends EventEmitter {
 		});
 	}
 
-	musicHashIsUnique(hash) {
+	musicHashIsUnique(hash: string) {
 		let lastPlayed = this.musicHashes[hash];
 		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
 	}
@@ -284,16 +314,16 @@ export class ContentManager extends EventEmitter {
 		return consts.dirs.pic + this.idFactory.new();
 	}
 
-	penalise(id) {
+	penalise(id: string) {
 		this.playQueue.penalise(id);
 	}
 
-	picHashIsUnique(hash) {
+	picHashIsUnique(hash: number) {
 		let lastPlayed = this.picHashes[hash];
 		return !lastPlayed || lastPlayed + opt.imageUniqueCoolOff * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
 	}
 
-	playNext() {
+	playNext(): boolean {
 		if (this.stop) return false;
 
 		const contentData = this.playQueue.next();
@@ -352,7 +382,7 @@ export class ContentManager extends EventEmitter {
 		return true;
 	}
 
-	purgeUser(uid) {
+	purgeUser(uid: string) {
 		const itemList = this.playQueue.getUserBucket(uid);
 
 		if (itemList) itemList.forEach((itemData) => {
@@ -365,13 +395,13 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	remember(itemData) {
+	remember(itemData: ItemData) {
 		if (itemData.music.ytId) this.addYtId(itemData.music.ytId);
 		if (itemData.music.hash) this.addHash(itemData.music.hash);
 		if (itemData.pic.exists) this.addPicHash(itemData.pic.hash);
 	}
 
-	remove(userId, contentId) {
+	remove(userId: string, contentId: number) {
 		const itemData = this.playQueue.getContent(userId, contentId);
 
 		if (itemData) {
@@ -390,17 +420,17 @@ export class ContentManager extends EventEmitter {
 		this.emit('end'); //kick start the cycle of checking for things
 	}
 
-	startMusic(path, duration, startTime, endTime) {
+	startMusic(path: string, duration: number, startTime: number, endTime: number) {
 		const args = [duration + 's', opt.mpvPath, ...opt.mpvArgs, '--quiet', path];
 
 		if (startTime) {
 			args.push('--start');
-			args.push(startTime);
+			args.push(startTime.toString());
 		}
 
 		if (endTime) {
 			args.push('--end');
-			args.push(endTime);
+			args.push(endTime.toString());
 		}
 
 		if (opt.mute.get()) {
@@ -414,7 +444,7 @@ export class ContentManager extends EventEmitter {
 		if (this.runningMusicProc) this.runningMusicProc.kill();
 	}
 
-	startPic(path, duration) {
+	startPic(path: string, duration: number) {
 		this.runningPicProc = cp.spawn('timeout', [duration + 's', 'eog', path, '-f']);
 	}
 
@@ -438,7 +468,7 @@ export class ContentManager extends EventEmitter {
 		fs.writeFileSync(consts.files.content, JSON.stringify(storeObj));
 	}
 
-	tryQueue(itemData) {
+	tryQueue(itemData: ItemData) {
 		const musicPrepProm = this.tryPrepMusic(itemData);
 		const picPrepProm = this.tryPrepPicture(itemData);
 
@@ -462,7 +492,7 @@ export class ContentManager extends EventEmitter {
 		});
 	}
 
-	tryPrepMusic(itemData) {
+	tryPrepMusic(itemData: ItemData): Promise<void> | q.Promise<void> {
 		if (itemData.music.isUrl) {
 			if (itemData.duration <= opt.streamYtOverDur) {
 				let nmp = this.nextMusicPath();
@@ -489,7 +519,7 @@ export class ContentManager extends EventEmitter {
 					//hash the music (async)
 					return utils.fileHash(nmp);
 				})
-				.then((resultHash) => {
+				.then(resultHash => {
 					//this exists to prevent a YouTube video from
 					//being downloaded by user and played, then played again by url
 					//or being downloaded twice in quick succession
@@ -503,6 +533,7 @@ export class ContentManager extends EventEmitter {
 
 			} else { //just stream it because it's so big
 				itemData.music.stream = true;
+				return Promise.resolve();
 			}
 		} else {
 			return Promise.resolve()
@@ -519,7 +550,7 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	tryPrepPicture(itemData) {
+	async tryPrepPicture(itemData: ItemData): Promise<void> {
 		if (!itemData.pic.exists) return Promise.resolve();
 
 		//we may already have the picture downloaded, but we always need to check the uniqueness
@@ -537,18 +568,18 @@ export class ContentManager extends EventEmitter {
 			promPic = Promise.resolve();
 		}
 
-		return promPic
-		.then(() => utils.fileHash(itemData.pic.path))
-		.then((picHash) => {
-			if (this.picHashIsUnique(picHash)) {
-				itemData.pic.hash = picHash;
-			} else {
-				throw new UniqueError(ContentType.pic);
-			}
-		});
+		await promPic;
+
+		const picHash = await utils.fileHash(itemData.pic.path);
+
+		if (this.picHashIsUnique(picHash)) {
+			itemData.pic.hash = picHash;
+		} else {
+			throw new UniqueError(ContentType.pic);
+		}
 	}
 
-	ytIdIsUnique(id) {
+	ytIdIsUnique(id: string): boolean {
 		let lastPlayed = this.ytIds[id];
 		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff * 1000 < new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
 	}

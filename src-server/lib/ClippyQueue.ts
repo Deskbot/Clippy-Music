@@ -1,5 +1,5 @@
 import * as utils from './utils';
-import { ItemData } from '../types/UploadData';
+import { ItemData } from '../types/ItemData';
 
 export class ClippyQueue {
 	private userPosteriority: {
@@ -90,7 +90,7 @@ export class ClippyQueue {
 		return this.userIds.sort((a, b) => this.userPosteriority[a] - this.userPosteriority[b]);
 	}
 
-	next() {
+	next(): ItemData | null {
 		let possibleUsers: string[] = [];
 		let targetUser: string | null = null;
 		let targetPo = Infinity;
@@ -125,7 +125,7 @@ export class ClippyQueue {
 			}
 		}
 
-		return targetUser ? this.userBuckets[targetUser].shift() : null;
+		return targetUser ? this.userBuckets[targetUser].shift() as ItemData : null;
 	}
 
 	penalise(uid: string) {

@@ -1,5 +1,5 @@
-import * as utils from "./utils.js";
-import { ItemData } from "../types/UploadData.js";
+import * as utils from "./utils";
+import { ItemData } from "../types/ItemData";
 
 export class BarringerBuckets {
     private buckets: ItemData[][];
