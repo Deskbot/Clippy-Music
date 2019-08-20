@@ -1,20 +1,39 @@
 export interface UploadData {
     id?: number;
     userId?: string;
-    music: {
-        isUrl: boolean | null,
-        title: string | null,
-        path: string | null,
-        stream: boolean,
-        ytId?: string,
-    },
-    pic: {
-        exists: boolean,
-        isUrl: boolean | null,
-        title: string | null,
-        path: string | null,
-    },
-    duration: number | null,
-    startTime: string | null,
-    endTime: string | null,
+    music: UrlMusic | FileMusic;
+    pic: UrlPic | FilePic | NoPic;
+    startTime: number | null;
+    endTime: number | null;
 };
+
+export interface UrlMusic {
+    isUrl: true;
+    path: string;
+}
+
+export interface FileMusic {
+    isUrl: false;
+    path: string;
+    title: string;
+}
+
+export interface UrlPic {
+    exists: true;
+    isUrl: true;
+    path: string;
+}
+
+export interface FilePic {
+    exists: true;
+    isUrl: false;
+    path: string;
+    title: string;
+}
+
+export interface NoPic {
+    exists: false;
+    isUrl: null;
+    path: null;
+    title: null;
+}
