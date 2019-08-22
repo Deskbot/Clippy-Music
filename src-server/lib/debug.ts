@@ -1,14 +1,14 @@
 let isOn = false;
 
-export function err(...args) {
+export function err(...args: any[]) {
 	if (isOn) console.error('debug', ...args);
 }
 
-export function error(...args) {
+export function error(...args: any[]) {
 	if (isOn) console.error('debug', ...args);
 }
 
-export function log(...args) {
+export function log(...args: any[]) {
 	if (isOn) console.log('debug', ...args);
 }
 
