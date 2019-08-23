@@ -1,4 +1,5 @@
 export interface UploadData {
+    duration?: number;
     id?: number;
     userId?: string;
     music: UrlMusic | FileMusic;
