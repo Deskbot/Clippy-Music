@@ -513,12 +513,13 @@ export class ContentManager extends EventEmitter {
 				this.ytDownloader.tryCancel(someItemData.userId, someItemData.id);
 			});
 
-			await musicPrepProm;
+			const music = await musicPrepProm;
 			const pic = await picPrepProm;
 
 			const itemData = {
 				...someItemData,
 				pic,
+				music,
 			};
 
 			this.playQueue.add(itemData);
@@ -571,7 +572,7 @@ export class ContentManager extends EventEmitter {
 
 			} else { //just stream it because it's so big
 				itemData.music.stream = true;
-				return;
+				return itemData.music;
 			}
 		} else {
 			//validate by music hash
@@ -582,6 +583,8 @@ export class ContentManager extends EventEmitter {
 				throw new UniqueError(ContentType.Music);
 			}
 		}
+
+		return itemData.music;
 	}
 
 	private async tryPrepPicture(pic: NoPic | FilePic | UrlPic) {
