@@ -47,6 +47,7 @@ export interface NoPic {
 
 export interface UploadDataWithId extends UploadData {
     id: number;
+    userId: string;
 }
 
 export interface UploadDataWithIdAndTitle extends UploadDataWithId {
