@@ -131,6 +131,7 @@ export class ContentManager extends EventEmitter {
 			// awaits everything that needs to happen before http response
 			const dataToQueue = await this.getDataToQueue(uplData);
 			this.tryQueue(dataToQueue);
+			return dataToQueue;
 		} catch (err) {
 			// errors here are sent by websocket
 			debug.error(err);
