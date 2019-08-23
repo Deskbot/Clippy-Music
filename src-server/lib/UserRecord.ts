@@ -76,7 +76,7 @@ export class UserRecord {
 		return success ? obj : null;
 	}
 
-	static get suspendedFilePath() {
+	static get suspendedFilePath(): string {
 		return recordFilePath;
 	}
 
@@ -99,20 +99,20 @@ export class UserRecord {
 		return this.idToUser[id];
 	}
 
-	getNickname(id: string) {
+	getNickname(id: string): string {
 		const user = this.idToUser[id];
-		return user ? user.nickname : null;
+		return user.nickname;
 	}
 
-	getSockets(id: string) {
+	getSockets(id: string): ws[] {
 		return this.idToUser[id].socs;
 	}
 
-	isBanned(id: string) {
+	isBanned(id: string): boolean {
 		return this.banlist.includes(id);
 	}
 
-	isUser(id: string) {
+	isUser(id: string): boolean {
 		return this.idToUser.hasOwnProperty(id);
 	}
 

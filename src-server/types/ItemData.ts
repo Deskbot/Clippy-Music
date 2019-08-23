@@ -4,7 +4,7 @@ export interface ItemData {
     music: {
         isUrl: boolean | null,
         hash?: string,
-        path: string | null,
+        path: string,
         stream: boolean,
         title: string,
         ytId?: string,

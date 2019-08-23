@@ -54,9 +54,9 @@ export class DownloadWrongTypeError extends DeferredContentError {
 }
 
 export class FileUploadError extends Error {
-	public files: formidable.Files;
+	public files: formidable.File[];
 
-	constructor(message: string, files: formidable.Files) {
+	constructor(message: string, files: formidable.File[]) {
 		super(message);
 		this.files = files;
 	}

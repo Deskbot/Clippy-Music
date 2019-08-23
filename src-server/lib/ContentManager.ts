@@ -538,7 +538,7 @@ export class ContentManager extends EventEmitter {
 		} else {
 			return Promise.resolve()
 			.then(() => utils.fileHash(itemData.music.path))
-			.then((resultHash) => {
+			.then(resultHash => {
 				//validate by music hash
 				let musicHash = resultHash.toString();
 				if (this.musicHashIsUnique(musicHash)) {

@@ -12,6 +12,7 @@ List
     * test delete-content ws request where
 * commas at the end of interface lines
 * consistent double quotes
+* move static methods to services
 * I could use a custom defer class instead of using q
 * Barringer's Bucketing system
     * add bucketing type to options
