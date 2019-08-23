@@ -126,7 +126,7 @@ export class ContentManager extends EventEmitter {
 		return success ? obj : null;
 	}
 
-	async add(uplData: UploadDataWithId): Promise<UploadDataWithIdTitleDuration> {
+	async add(uplData: UploadDataWithId) {
 		try {
 			// awaits everything that needs to happen before http response
 			const dataToQueue = await this.getDataToQueue(uplData);
@@ -504,28 +504,29 @@ export class ContentManager extends EventEmitter {
 		fs.writeFileSync(consts.files.content, JSON.stringify(storeObj));
 	}
 
-	tryQueue(itemData: UploadDataWithIdTitleDuration) {
-		const musicPrepProm = this.tryPrepMusic(itemData);
-		const picPrepProm = this.tryPrepPicture(itemData);
+	private async tryQueue(itemData: UploadDataWithIdTitleDuration) {
+		try {
+			const musicPrepProm = this.tryPrepMusic(itemData);
 
-		Promise.all([musicPrepProm, picPrepProm])
-		.then(() => {
+			// if the picture fails, make sure any yt download is stopped
+			const picPrepProm = this.tryPrepPicture(itemData).catch(() => {
+				this.ytDownloader.tryCancel(itemData.userId, itemData.id);
+			});
+
+			await musicPrepProm;
+			await picPrepProm;
+
 			this.playQueue.add(itemData);
 			this.progressQueue.finished(itemData.userId, itemData.id);
 			this.emit('queue-update');
-		})
-		.catch((err) => {
+
+		} catch (err) {
 			if (!(err instanceof CancelError)) {
 				this.progressQueue.finishedWithError(itemData.userId, itemData.id, err);
 			} else {
 				console.error(err);
 			}
-		});
-
-		// if the picture fails, make sure any yt download is stopped
-		picPrepProm.catch(() => {
-			this.ytDownloader.tryCancel(itemData.userId, itemData.id);
-		});
+		}
 	}
 
 	tryPrepMusic(itemData: UploadDataWithIdTitleDuration): Promise<void> | q.Promise<void> {
