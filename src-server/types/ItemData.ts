@@ -1,3 +1,5 @@
+import { UrlPic, FilePic, NoPic } from "./UploadData";
+
 export interface ItemData {
     id: number;
     userId: string;
@@ -7,20 +9,6 @@ export interface ItemData {
     startTime: number | null;
     endTime: number | null;
     timePlayedAt?: number;
-};
-
-export type CompletePicture = {
-    exists: true,
-    hash?: number,
-    isUrl: boolean,
-    title: string,
-    path: string,
-} | {
-    exists: false,
-    hash?: string,
-    isUrl: boolean,
-    title: null,
-    path: null,
 };
 
 export type CompleteMusic = {
@@ -38,3 +26,5 @@ export type CompleteMusic = {
     title: string,
     ytId?: string,
 }
+
+export type CompletePicture = UrlPic | FilePic | NoPic;

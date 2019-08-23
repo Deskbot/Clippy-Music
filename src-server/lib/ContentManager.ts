@@ -546,7 +546,7 @@ export class ContentManager extends EventEmitter {
 
 		} catch (err) {
 			if (!(err instanceof CancelError)) {
-				this.progressQueue.finishedWithError(itemData.userId, itemData.id, err);
+				this.progressQueue.finishedWithError(someItemData.userId, someItemData.id, err);
 			} else {
 				console.error(err);
 			}
