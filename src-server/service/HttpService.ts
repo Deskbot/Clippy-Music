@@ -11,11 +11,9 @@ import { WebSocketService } from './WebSocketService';
 
 import * as consts from '../lib/consts';
 import * as debug from '../lib/debug';
-import * as time from '../lib/time';
 import * as opt from '../options';
 import * as utils from '../lib/utils';
 
-import { getFileDuration } from '../lib/music';
 import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingError } from '../lib/errors';
 import { UploadData, UrlPic, NoPic, FilePic, FileMusic, UrlMusic, UploadDataWithId } from '../types/UploadData';
 
