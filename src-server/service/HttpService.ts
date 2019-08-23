@@ -305,49 +305,45 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 	handlePotentialBan(req.ip) //assumes ip address is userId
 	.then(() => ProgressQueueService.add(req.ip, contentId))
 	.then(() => handleFileUpload(req, contentId))
-	.then(([form, fields, files]) => { //nesting in order to get the scoping right
-		return parseUploadForm(form, fields, files)
-		.then(uplData => {
-			uplData.id = contentId;
-			uplData.userId = req.ip;
+	.then(async ([form, fields, files]) => { //nesting in order to get the scoping right
+		const uplData = await parseUploadForm(form, fields, files);
 
-			if (uplData.music.isUrl) {
-				ProgressQueueService.setTitle(req.ip, contentId, uplData.music.path, true);
+		uplData.id = contentId;
+		uplData.userId = req.ip;
 
-				// the title and duration are set later by `ContentService.add(uplData)`
+		if (uplData.music.isUrl) {
+			ProgressQueueService.setTitle(req.ip, contentId, uplData.music.path, true);
+			// the title and duration are set later by `ContentService.add(uplData)`
 
+		} else {
+			// read the music file to determine its duration
+			await getFileDuration(uplData.music.path)
+			.then(duration => {
+				uplData.duration = time.clipTimeByStartAndEnd(Math.floor(duration), uplData.startTime, uplData.endTime);
 				return uplData;
+			})
+			.catch(err => {
+				console.error("Error reading discerning the duration of a music file.", err, uplData.music.path);
+				throw new FileUploadError(
+					`I could not discern the duration of the music file you uploaded (${uplData.music.title}).`,
+					Object.values(files)
+				);
+			});
+		}
 
-			} else {
-				// read the music file to determine its duration
-				return getFileDuration(uplData.music.path)
-					.then(duration => {
-						uplData.duration = time.clipTimeByStartAndEnd(Math.floor(duration), uplData.startTime, uplData.endTime);
-						return uplData;
-					})
-					.catch(err => {
-						console.error("Error reading discerning the duration of a music file.", err, uplData.music.path);
-						throw new FileUploadError(
-							`I could not discern the duration of the music file you uploaded (${uplData.music.title}).`,
-							Object.values(files)
-						);
-					});
-			}
-		})
-		.then(uplData => ContentService.add(uplData))
-		.then(uplData => {
-			if (uplData.music.isUrl) {
-				ProgressQueueService.setTitle(req.ip, contentId, uplData.music.title);
-			}
+		await ContentService.add(uplData);
 
-			debug.log("successful upload: ", uplData);
+		if (uplData.music.isUrl) {
+			ProgressQueueService.setTitle(req.ip, contentId, uplData.music.title);
+		}
 
-			if (fields.ajax || (req.headers['user-agent'] && req.headers['user-agent'].includes('curl'))) {
-				res.status(200).end('Success\n');
-			} else {
-				res.redirect('/');
-			}
-		});
+		debug.log("successful upload: ", uplData);
+
+		if (fields.ajax || (req.headers['user-agent'] && req.headers['user-agent'].includes('curl'))) {
+			res.status(200).end('Success\n');
+		} else {
+			res.redirect('/');
+		}
 	})
 	.catch((err) => {
 		if (err instanceof FileUploadError) {
