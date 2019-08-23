@@ -13,8 +13,8 @@ import * as time from './time';
 
 import { ClippyQueue } from './ClippyQueue';
 import { ContentType } from '../types/ContentType';
-import { downloadYtInfo } from './music';
-import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError } from './errors';
+import { downloadYtInfo, getFileDuration } from './music';
+import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError, FileUploadError } from './errors';
 import { UploadData, UploadDataWithId, UploadDataWithIdAndTitle } from '../types/UploadData';
 import { QueueableData } from "../types/QueueableData";
 import { IdFactory } from './IdFactory';
@@ -126,49 +126,16 @@ export class ContentManager extends EventEmitter {
 		return success ? obj : null;
 	}
 
-	add(uplData: UploadDataWithId): Promise<UploadDataWithIdAndTitle> {
-		const that = this;
-
-		const p = new Promise<UploadDataWithIdAndTitle>(function(resolve, reject) {
-			if (!uplData.music.isUrl) {
-				return resolve(uplData);
-			}
-
-			const ytId = uplData.music.ytId = utils.extractYtVideoId(uplData.music.path);
-
-			if (ytId === undefined) throw new Error("youtube id is undefined");
-
-			if (that.ytIdIsUnique(ytId)) {
-				downloadYtInfo(uplData.music.path)
-				.then(info => {
-					const musicData = {
-						...uplData.music,
-						title: info.title,
-					};
-					const itemData = {
-						...uplData,
-						music: musicData,
-						duration: time.clipTimeByStartAndEnd(Math.floor(info.duration), uplData.startTime, uplData.endTime),
-					};
-
-					return resolve(itemData);
-
-				}, (e) => {
-					debug.error(e);
-					return reject(new YTError(`I could not find the YouTube video requested (${ytId}). Is the URL correct?`));
-				});
-
-			} else {
-				return reject(new UniqueError(ContentType.Music));
-			}
-		});
-
-		p.then(uplData => {
-			this.tryQueue(uplData); //errors here are sent by websocket
-		}, utils.doNothing);
-
-		//p includes everything that needs to happen before http response
-		return p;
+	async add(uplData: UploadDataWithId): Promise<UploadDataWithIdAndTitle> {
+		try {
+			// awaits everything that needs to happen before http response
+			const dataToQueue = await this.getDataToQueue(uplData);
+			this.tryQueue(dataToQueue);
+		} catch (err) {
+			// errors here are sent by websocket
+			debug.error(err);
+			throw err;
+		}
 	}
 
 	addHash(hash: number) {
@@ -277,6 +244,51 @@ export class ContentManager extends EventEmitter {
 		};
 
 		else return null;
+	}
+
+	async getDataToQueue(uplData: UploadDataWithId): Promise<UploadDataWithIdAndTitle> {
+		if (!uplData.music.isUrl) {
+			// read the music file to determine its duration
+			const duration = await getFileDuration(uplData.music.path);
+			const uplDataWithDuration = {
+				...uplData,
+				duration: time.clipTimeByStartAndEnd(Math.floor(duration), uplData.startTime, uplData.endTime),
+			};
+
+			this.tryQueue(uplDataWithDuration);
+
+			return uplDataWithDuration;
+		}
+
+		const ytId = uplData.music.ytId = utils.extractYtVideoId(uplData.music.path);
+
+		if (ytId === undefined) throw new Error("youtube id is undefined");
+
+		if (this.ytIdIsUnique(ytId)) {
+			let info;
+
+			try {
+				info = await downloadYtInfo(uplData.music.path);
+			} catch (err) {
+				debug.error(err);
+				throw new YTError(`I could not find the YouTube video requested (${ytId}). Is the URL correct?`);
+			}
+
+			const musicData = {
+				...uplData.music,
+				title: info.title,
+			};
+			const itemData = {
+				...uplData,
+				music: musicData,
+				duration: time.clipTimeByStartAndEnd(Math.floor(info.duration), uplData.startTime, uplData.endTime),
+			};
+
+			return itemData;
+
+		} else {
+			throw new UniqueError(ContentType.Music);
+		}
 	}
 
 	isPlaying() {
@@ -489,7 +501,7 @@ export class ContentManager extends EventEmitter {
 		fs.writeFileSync(consts.files.content, JSON.stringify(storeObj));
 	}
 
-	tryQueue(itemData: QueueableData) {
+	tryQueue(itemData: UploadDataWithIdAndTitle) {
 		const musicPrepProm = this.tryPrepMusic(itemData);
 		const picPrepProm = this.tryPrepPicture(itemData);
 
@@ -513,7 +525,7 @@ export class ContentManager extends EventEmitter {
 		});
 	}
 
-	tryPrepMusic(itemData: ItemData): Promise<void> | q.Promise<void> {
+	tryPrepMusic(itemData: UploadDataWithIdAndTitle): Promise<void> | q.Promise<void> {
 		if (itemData.music.isUrl) {
 			if (itemData.duration <= opt.streamYtOverDur) {
 				let nmp = this.nextMusicPath();
@@ -569,7 +581,7 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	async tryPrepPicture(itemData: ItemData): Promise<void> {
+	async tryPrepPicture(itemData: UploadDataWithIdAndTitle): Promise<void> {
 		if (!itemData.pic.exists) return Promise.resolve();
 
 		//we may already have the picture downloaded, but we always need to check the uniqueness

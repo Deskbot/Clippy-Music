@@ -42,6 +42,10 @@ export class DownloadTooLargeError extends DeferredContentError {
 	}
 }
 
+export class DurationFindingError extends Error {
+
+}
+
 export class DownloadWrongTypeError extends DeferredContentError {
 	public readonly actualTypeDesc: string;
 	public readonly expectedType: string;

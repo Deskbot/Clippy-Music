@@ -16,7 +16,7 @@ import * as opt from '../options';
 import * as utils from '../lib/utils';
 
 import { getFileDuration } from '../lib/music';
-import { BannedError, FileUploadError, UniqueError, YTError } from '../lib/errors';
+import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingError } from '../lib/errors';
 import { UploadData, UrlPic, NoPic, FilePic, FileMusic, UrlMusic, UploadDataWithId } from '../types/UploadData';
 
 type RequestWithFormData = express.Request & {
@@ -315,25 +315,23 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 		if (uplData.music.isUrl) {
 			ProgressQueueService.setTitle(req.ip, contentId, uplData.music.path, true);
 			// the title and duration are set later by `ContentService.add(uplData)`
+		}
 
-		} else {
-			// read the music file to determine its duration
-			try {
-				const duration = await getFileDuration(uplData.music.path);
-				uplData = {
-					...uplData,
-					duration: time.clipTimeByStartAndEnd(Math.floor(duration), uplData.startTime, uplData.endTime),
-				};
-			} catch (err) {
+		let itemData;
+
+		try {
+			itemData = await ContentService.add(uplData);
+		} catch (err) {
+			if (err instanceof DurationFindingError) {
 				console.error("Error reading discerning the duration of a music file.", err, uplData.music.path);
 				throw new FileUploadError(
 					`I could not discern the duration of the music file you uploaded (${uplData.music.title}).`,
 					Object.values(files)
 				);
+			} else {
+				throw err;
 			}
 		}
-
-		const itemData = await ContentService.add(uplData);
 
 		if (uplData.music.isUrl) {
 			ProgressQueueService.setTitle(req.ip, contentId, itemData.music.title);

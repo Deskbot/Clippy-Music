@@ -3,6 +3,7 @@ import { Html5Entities } from 'html-entities';
 import * as debug from './debug';
 import * as opt from '../options';
 import * as utils from './utils';
+import { DurationFindingError } from './errors';
 
 interface YtData {
     title: string,
@@ -38,7 +39,7 @@ function getFFProbeFormatDataContainingDuration(filePath: string): Promise<strin
 
         proc.on('close', (code) => {
             if (code !== 0) {
-                return reject(new Error(processErrorMessage));
+                return reject(new DurationFindingError(processErrorMessage));
             } else {
                 return resolve(processOutput);
             }
