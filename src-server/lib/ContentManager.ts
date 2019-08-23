@@ -582,24 +582,17 @@ export class ContentManager extends EventEmitter {
 	}
 
 	async tryPrepPicture(itemData: UploadDataWithIdAndTitle): Promise<void> {
-		if (!itemData.pic.exists) return Promise.resolve();
+		if (!itemData.pic.exists) return;
 
 		//we may already have the picture downloaded, but we always need to check the uniqueness
 
-		let promPic;
-
 		if (itemData.pic.isUrl) {
 			const npp = this.nextPicPath();
-			promPic = this.downloadPic(itemData.pic.path, npp).then((picInfo) => {
-				itemData.pic.path = npp;
-				itemData.pic.title = picInfo.title;
-			});
+			const picInfo = await this.downloadPic(itemData.pic.path, npp);
 
-		} else {
-			promPic = Promise.resolve();
+			itemData.pic.path = npp;
+			itemData.pic.title = picInfo.title;
 		}
-
-		await promPic;
 
 		const picHash = await utils.fileHash(itemData.pic.path);
 

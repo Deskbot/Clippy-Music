@@ -23,12 +23,15 @@ export interface FileMusic {
 
 export interface UrlPic {
     exists: true;
+    hash?: number;
     isUrl: true;
     path: string;
+    title?: string;
 }
 
 export interface FilePic {
     exists: true;
+    hash?: number;
     isUrl: false;
     path: string;
     title: string;
@@ -36,6 +39,7 @@ export interface FilePic {
 
 export interface NoPic {
     exists: false;
+    hash?: number;
     isUrl: null;
     path: null;
     title: null;
