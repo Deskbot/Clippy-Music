@@ -23,11 +23,18 @@ export type CompletePicture = {
     path: null,
 };
 
-export interface CompleteMusic {
+export type CompleteMusic = {
     isUrl: boolean,
     hash: number,
     path: string,
-    stream: boolean,
+    stream: false,
+    title: string,
+    ytId?: string,
+} | {
+    isUrl: boolean,
+    hash: undefined,
+    path: string,
+    stream: true,
     title: string,
     ytId?: string,
 }

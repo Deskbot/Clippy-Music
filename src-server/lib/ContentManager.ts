@@ -18,7 +18,7 @@ import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError
 import { UploadData, UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic, UrlMusic, FileMusic } from '../types/UploadData';
 import { QueueableData } from "../types/QueueableData";
 import { IdFactory } from './IdFactory';
-import { ItemData } from '../types/ItemData';
+import { ItemData, CompleteMusic, CompletePicture } from '../types/ItemData';
 import { YtDownloader } from './YtDownloader';
 import { UserRecord } from './UserRecord';
 import { ProgressQueue } from './ProgressQueue';
@@ -249,12 +249,20 @@ export class ContentManager extends EventEmitter {
 		return null;
 	}
 
-	private async getDataToQueue(uplData: UploadDataWithId) {
+	private async getDataToQueue(uplData: UploadDataWithId): Promise<UploadDataWithIdTitleDuration> {
 		if (!uplData.music.isUrl) {
+			const poop = uplData.music;
+
 			// read the music file to determine its duration
 			const duration = await getFileDuration(uplData.music.path);
 			const uplDataWithDuration = {
 				...uplData,
+				music: {
+					...uplData.music,
+				},
+				pic: {
+					...uplData.pic
+				},
 				duration: time.clipTimeByStartAndEnd(Math.floor(duration), uplData.startTime, uplData.endTime),
 			};
 
@@ -540,7 +548,10 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	private async tryPrepMusic(music: UrlMusic | FileMusic, cid: number, uid: string, duration: number) {
+	private async tryPrepMusic(music: UrlMusic | FileMusic, cid: number, uid: string, duration: number): Promise<CompleteMusic> {
+		let stream = false;
+		let hash;
+
 		if (music.isUrl) {
 			if (duration <= opt.streamYtOverDur) {
 				let nmp = this.nextMusicPath();
@@ -567,37 +578,32 @@ export class ContentManager extends EventEmitter {
 				//being downloaded by user and played, then played again by url
 				//or being downloaded twice in quick succession
 				if (this.musicHashIsUnique(musicHash)) {
-					music = {
-						...music,
-						hash: musicHash,
-					};
+					hash = musicHash;
 				} else {
 					throw new UniqueError(ContentType.Music);
 				}
 
 			} else { //just stream it because it's so big
-				return {
-					...music,
-					stream: true,
-				};
+				stream = true;
 			}
 		} else {
 			//validate by music hash
 			const musicHash = await utils.fileHash(music.path);
 			if (this.musicHashIsUnique(musicHash)) {
-				music = {
-					...music,
-					hash: musicHash,
-				};
+				hash = musicHash;
 			} else {
 				throw new UniqueError(ContentType.Music);
 			}
 		}
 
-		return music;
+		return {
+			...music,
+			hash,
+			stream,
+		};
 	}
 
-	private async tryPrepPicture(pic: NoPic | FilePic | UrlPic) {
+	private async tryPrepPicture(pic: NoPic | FilePic | UrlPic): Promise<CompletePicture> {
 		if (!pic.exists) return pic;
 
 		//we may already have the picture downloaded, but we always need to check the uniqueness

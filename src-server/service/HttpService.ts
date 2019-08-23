@@ -333,7 +333,7 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 			}
 		}
 
-		if (uplData.music.isUrl) {
+		if (itemData.music.isUrl) {
 			ProgressQueueService.setTitle(req.ip, contentId, itemData.music.title);
 		}
 
