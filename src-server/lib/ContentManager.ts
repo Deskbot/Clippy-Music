@@ -504,17 +504,22 @@ export class ContentManager extends EventEmitter {
 		fs.writeFileSync(consts.files.content, JSON.stringify(storeObj));
 	}
 
-	private async tryQueue(itemData: UploadDataWithIdTitleDuration) {
+	private async tryQueue(someItemData: UploadDataWithIdTitleDuration) {
 		try {
-			const musicPrepProm = this.tryPrepMusic(itemData);
+			const musicPrepProm = this.tryPrepMusic(someItemData);
 
 			// if the picture fails, make sure any yt download is stopped
-			const picPrepProm = this.tryPrepPicture(itemData).catch(() => {
-				this.ytDownloader.tryCancel(itemData.userId, itemData.id);
+			const picPrepProm = this.tryPrepPicture(someItemData).catch(() => {
+				this.ytDownloader.tryCancel(someItemData.userId, someItemData.id);
 			});
 
 			await musicPrepProm;
-			await picPrepProm;
+			const pic = await picPrepProm;
+
+			const itemData = {
+				...someItemData,
+				pic
+			};
 
 			this.playQueue.add(itemData);
 			this.progressQueue.finished(itemData.userId, itemData.id);
@@ -585,8 +590,8 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	async tryPrepPicture(itemData: UploadDataWithIdTitleDuration): Promise<void> {
-		if (!itemData.pic.exists) return;
+	async tryPrepPicture(itemData: UploadDataWithIdTitleDuration) {
+		if (!itemData.pic.exists) return itemData.pic;
 
 		//we may already have the picture downloaded, but we always need to check the uniqueness
 
@@ -605,6 +610,8 @@ export class ContentManager extends EventEmitter {
 		} else {
 			throw new UniqueError(ContentType.Picture);
 		}
+
+		return itemData.pic;
 	}
 
 	ytIdIsUnique(id: string): boolean {
