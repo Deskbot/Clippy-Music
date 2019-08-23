@@ -15,7 +15,7 @@ import { ClippyQueue } from './ClippyQueue';
 import { ContentType } from '../types/ContentType';
 import { downloadYtInfo, getFileDuration } from './music';
 import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError, FileUploadError } from './errors';
-import { UploadData, UploadDataWithId, UploadDataWithIdAndTitle } from '../types/UploadData';
+import { UploadData, UploadDataWithId, UploadDataWithIdTitleDuration } from '../types/UploadData';
 import { QueueableData } from "../types/QueueableData";
 import { IdFactory } from './IdFactory';
 import { ItemData } from '../types/ItemData';
@@ -126,7 +126,7 @@ export class ContentManager extends EventEmitter {
 		return success ? obj : null;
 	}
 
-	async add(uplData: UploadDataWithId): Promise<UploadDataWithIdAndTitle> {
+	async add(uplData: UploadDataWithId): Promise<UploadDataWithIdTitleDuration> {
 		try {
 			// awaits everything that needs to happen before http response
 			const dataToQueue = await this.getDataToQueue(uplData);
@@ -247,7 +247,7 @@ export class ContentManager extends EventEmitter {
 		else return null;
 	}
 
-	private async getDataToQueue(uplData: UploadDataWithId): Promise<UploadDataWithIdAndTitle> {
+	private async getDataToQueue(uplData: UploadDataWithId): Promise<UploadDataWithIdTitleDuration> {
 		if (!uplData.music.isUrl) {
 			// read the music file to determine its duration
 			const duration = await getFileDuration(uplData.music.path);
@@ -502,7 +502,7 @@ export class ContentManager extends EventEmitter {
 		fs.writeFileSync(consts.files.content, JSON.stringify(storeObj));
 	}
 
-	tryQueue(itemData: UploadDataWithIdAndTitle) {
+	tryQueue(itemData: UploadDataWithIdTitleDuration) {
 		const musicPrepProm = this.tryPrepMusic(itemData);
 		const picPrepProm = this.tryPrepPicture(itemData);
 
@@ -526,7 +526,7 @@ export class ContentManager extends EventEmitter {
 		});
 	}
 
-	tryPrepMusic(itemData: UploadDataWithIdAndTitle): Promise<void> | q.Promise<void> {
+	tryPrepMusic(itemData: UploadDataWithIdTitleDuration): Promise<void> | q.Promise<void> {
 		if (itemData.music.isUrl) {
 			if (itemData.duration <= opt.streamYtOverDur) {
 				let nmp = this.nextMusicPath();
@@ -582,7 +582,7 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	async tryPrepPicture(itemData: UploadDataWithIdAndTitle): Promise<void> {
+	async tryPrepPicture(itemData: UploadDataWithIdTitleDuration): Promise<void> {
 		if (!itemData.pic.exists) return;
 
 		//we may already have the picture downloaded, but we always need to check the uniqueness

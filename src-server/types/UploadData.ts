@@ -1,3 +1,5 @@
+import { CompleteMusic } from "./ItemData";
+
 export interface UploadData {
     duration?: number;
     id?: number;
@@ -50,8 +52,7 @@ export interface UploadDataWithId extends UploadData {
     userId: string;
 }
 
-export interface UploadDataWithIdAndTitle extends UploadDataWithId {
-    music: UploadDataWithId["music"] & {
-        title: string;
-    }
+export interface UploadDataWithIdTitleDuration extends UploadDataWithId {
+    duration: number;
+    music: CompleteMusic;
 }

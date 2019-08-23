@@ -1,22 +1,15 @@
 export interface ItemData {
     id: number;
     userId: string;
-    music: {
-        isUrl: boolean | null,
-        hash: number,
-        path: string,
-        stream: boolean,
-        title: string,
-        ytId?: string,
-    };
-    pic: PicData;
+    music: CompleteMusic;
+    pic: CompletePicture;
     duration: number;
     startTime: number | null;
     endTime: number | null;
     timePlayedAt?: number;
 };
 
-type PicData = {
+export type CompletePicture = {
     exists: true,
     hash?: number,
     isUrl: boolean,
@@ -25,7 +18,16 @@ type PicData = {
 } | {
     exists: false,
     hash?: string,
-    isUrl: boolean | null,
+    isUrl: boolean,
     title: null,
     path: null,
 };
+
+export interface CompleteMusic {
+    isUrl: boolean,
+    hash: number,
+    path: string,
+    stream: boolean,
+    title: string,
+    ytId?: string,
+}
