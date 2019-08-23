@@ -15,7 +15,7 @@ import { ClippyQueue } from './ClippyQueue';
 import { ContentType } from '../types/ContentType';
 import { downloadYtInfo, getFileDuration } from './music';
 import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError, FileUploadError } from './errors';
-import { UploadData, UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic } from '../types/UploadData';
+import { UploadData, UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic, UrlMusic, FileMusic } from '../types/UploadData';
 import { QueueableData } from "../types/QueueableData";
 import { IdFactory } from './IdFactory';
 import { ItemData } from '../types/ItemData';
@@ -506,7 +506,12 @@ export class ContentManager extends EventEmitter {
 
 	private async tryQueue(someItemData: UploadDataWithIdTitleDuration) {
 		try {
-			const musicPrepProm = this.tryPrepMusic(someItemData);
+			const musicPrepProm = this.tryPrepMusic(
+				someItemData.music,
+				someItemData.id,
+				someItemData.userId,
+				someItemData.duration,
+			);
 
 			// if the picture fails, make sure any yt download is stopped
 			const picPrepProm = this.tryPrepPicture(someItemData.pic).catch(() => {
@@ -535,28 +540,25 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	private async tryPrepMusic(itemData: UploadDataWithIdTitleDuration) {
-		if (itemData.music.isUrl) {
-			if (itemData.duration <= opt.streamYtOverDur) {
+	private async tryPrepMusic(music: UrlMusic | FileMusic, cid: number, uid: string, duration: number) {
+		if (music.isUrl) {
+			if (duration <= opt.streamYtOverDur) {
 				let nmp = this.nextMusicPath();
 
 				let st = new Date().getTime();
 
-				let uid = itemData.userId;
-				let cid = itemData.id;
-
-				await this.ytDownloader.new(cid, uid, itemData.music.title, itemData.music.path, nmp);
+				await this.ytDownloader.new(cid, uid, music.title, music.path, nmp);
 
 				// when download is completed, then
 				// count how long it took
 				let et = new Date().getTime();
 				let dlTime = utils.roundDps((et - st) / 1000, 2);
-				let ratio = utils.roundDps(itemData.duration / dlTime, 2);
+				let ratio = utils.roundDps(duration / dlTime, 2);
 
-				itemData.music.path = nmp; //play from this path not url
+				music.path = nmp; //play from this path not url
 
 				//log the duration
-				console.log(`Yt vid (${itemData.music.ytId}) of length ${itemData.duration}s took ${dlTime}s to download, ratio: ${ratio}`);
+				console.log(`Yt vid (${music.ytId}) of length ${duration}s took ${dlTime}s to download, ratio: ${ratio}`);
 
 				//hash the music (async)
 				const musicHash = await utils.fileHash(nmp);
@@ -565,26 +567,34 @@ export class ContentManager extends EventEmitter {
 				//being downloaded by user and played, then played again by url
 				//or being downloaded twice in quick succession
 				if (this.musicHashIsUnique(musicHash)) {
-					itemData.music.hash = musicHash;
+					music = {
+						...music,
+						hash: musicHash,
+					};
 				} else {
 					throw new UniqueError(ContentType.Music);
 				}
 
 			} else { //just stream it because it's so big
-				itemData.music.stream = true;
-				return itemData.music;
+				return {
+					...music,
+					stream: true,
+				};
 			}
 		} else {
 			//validate by music hash
-			const musicHash = await utils.fileHash(itemData.music.path);
+			const musicHash = await utils.fileHash(music.path);
 			if (this.musicHashIsUnique(musicHash)) {
-				itemData.music.hash = musicHash;
+				music = {
+					...music,
+					hash: musicHash,
+				};
 			} else {
 				throw new UniqueError(ContentType.Music);
 			}
 		}
 
-		return itemData.music;
+		return music;
 	}
 
 	private async tryPrepPicture(pic: NoPic | FilePic | UrlPic) {
