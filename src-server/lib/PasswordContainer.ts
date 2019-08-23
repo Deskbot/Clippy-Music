@@ -6,21 +6,21 @@
 import * as crypto from "crypto";
 
 export class PasswordContainer {
-	private salt;
-	private password;
+	private salt: string;
+	private password: string;
 
-	constructor(inputPass) {
+	constructor(inputPass: string) {
 		this.salt = PasswordContainer.newSalt(32);
 		this.password = hash(inputPass + this.salt);
 	}
 
-	verify(inputPass) {
+	verify(inputPass: string) {
 		return hash(inputPass + this.salt) === this.password;
 	}
 
 	//static
 
-	static newSalt(len) {
+	static newSalt(len: number) {
 		let str = "";
 
 		//8 is the number of chars added to str each time
