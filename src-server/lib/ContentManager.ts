@@ -549,9 +549,6 @@ export class ContentManager extends EventEmitter {
 	}
 
 	private async tryPrepMusic(music: TitledMusic, cid: number, uid: string, duration: number): Promise<CompleteMusic> {
-		let stream = false;
-		let hash;
-
 		if (music.isUrl) {
 			if (duration <= opt.streamYtOverDur) {
 				let nmp = this.nextMusicPath();
@@ -578,29 +575,35 @@ export class ContentManager extends EventEmitter {
 				//being downloaded by user and played, then played again by url
 				//or being downloaded twice in quick succession
 				if (this.musicHashIsUnique(musicHash)) {
-					hash = musicHash;
+					return {
+						...music,
+						hash: musicHash,
+						stream: false,
+					};
 				} else {
 					throw new UniqueError(ContentType.Music);
 				}
 
 			} else { //just stream it because it's so big
-				stream = true;
+				return {
+					...music,
+					hash: undefined,
+					stream: true,
+				};
 			}
 		} else {
 			//validate by music hash
 			const musicHash = await utils.fileHash(music.path);
 			if (this.musicHashIsUnique(musicHash)) {
-				hash = musicHash;
+				return {
+					...music,
+					hash: musicHash,
+					stream: false,
+				};
 			} else {
 				throw new UniqueError(ContentType.Music);
 			}
 		}
-
-		return {
-			...music,
-			hash,
-			stream,
-		};
 	}
 
 	private async tryPrepPicture(pic: NoPic | FilePic | UrlPic) {
