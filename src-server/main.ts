@@ -28,7 +28,7 @@ function main() {
 	}).catch(utils.reportError);
 }
 
-function chooseAdminPassword() {
+function chooseAdminPassword(): Promise<string> {
 	return new Promise((resolve, reject) => {
 		prompt.start(promptOpts);
 
