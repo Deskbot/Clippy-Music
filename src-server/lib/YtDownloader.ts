@@ -6,7 +6,7 @@ import * as utils from './utils';
 
 import { CancelError, UnknownDownloadError } from './errors';
 
-import * as ContentType from './ContentType';
+import { ContentType } from '../types/ContentType';
 import { ProgressQueue } from './ProgressQueue';
 
 interface YtQueueItem {
@@ -47,7 +47,7 @@ export class YtDownloader {
 					});
 				} else {
 					console.error(errMessage);
-					return reject(new UnknownDownloadError(`A non-zero exit code (${code}) downloading a YouTube video.`, ContentType.music));
+					return reject(new UnknownDownloadError(`A non-zero exit code (${code}) downloading a YouTube video.`, ContentType.Music));
 				}
 			});
 
@@ -72,7 +72,7 @@ export class YtDownloader {
 			defer.resolve();
 		}, (e) => {
 			if (head.cancelled) {
-				defer.reject(new CancelError(ContentType.music));
+				defer.reject(new CancelError(ContentType.Music));
 			} else {
 				defer.reject(e);
 			}

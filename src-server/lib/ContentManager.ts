@@ -12,7 +12,7 @@ import * as opt from '../options';
 import * as time from './time';
 
 import { ClippyQueue } from './ClippyQueue';
-import * as ContentType from './ContentType';
+import { ContentType } from '../types/ContentType';
 import { downloadYtInfo } from './music';
 import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError } from './errors';
 import { UploadData } from '../types/UploadData';
@@ -149,7 +149,7 @@ export class ContentManager extends EventEmitter {
 				});
 
 			} else {
-				return reject(new UniqueError(ContentType.music));
+				return reject(new UniqueError(ContentType.Music));
 			}
 		});
 
@@ -182,24 +182,24 @@ export class ContentManager extends EventEmitter {
 		return new Promise((resolve, reject) => {
 			request.head(url, (err, res, body) => {
 				if (err) {
-					err.contentType = ContentType.pic;
+					err.contentType = ContentType.Picture;
 					if (err.code === 'ENOTFOUND' || err.code === 'ETIMEDOUT') {
-						return reject(new BadUrlError(ContentType.pic));
+						return reject(new BadUrlError(ContentType.Picture));
 					}
 					return reject(err);
 				}
 
 				if (!res) {
-					return reject(new UnknownDownloadError(ContentType.pic, 'Could not get a response for the request.'));
+					return reject(new UnknownDownloadError(ContentType.Picture, 'Could not get a response for the request.'));
 				}
 
 				const typeFound = res.headers['content-type'] as string;
 
 				if (typeFound.split('/')[0] !== 'image') {
-					return reject(new DownloadWrongTypeError(ContentType.pic, 'image', typeFound));
+					return reject(new DownloadWrongTypeError(ContentType.Picture, 'image', typeFound));
 				}
 				if (parseInt(res.headers['content-length'] as string) > opt.imageSizeLimit) {
-					return reject(new DownloadTooLargeError(ContentType.pic));
+					return reject(new DownloadTooLargeError(ContentType.Picture));
 				}
 
 				let picName: string | null = url.split('/').pop() as string;
@@ -219,7 +219,7 @@ export class ContentManager extends EventEmitter {
 					return resolve(picinfo);
 				});
 				stream.on('error', (err) => {
-					err.contentType = ContentType.pic;
+					err.contentType = ContentType.Picture;
 					return reject(err);
 				});
 			});
@@ -527,7 +527,7 @@ export class ContentManager extends EventEmitter {
 					if (this.musicHashIsUnique(musicHash)) {
 						itemData.music.hash = musicHash;
 					} else {
-						throw new UniqueError(ContentType.music);
+						throw new UniqueError(ContentType.Music);
 					}
 				});
 
@@ -544,7 +544,7 @@ export class ContentManager extends EventEmitter {
 				if (this.musicHashIsUnique(musicHash)) {
 					itemData.music.hash = musicHash;
 				} else {
-					throw new UniqueError(ContentType.music);
+					throw new UniqueError(ContentType.Music);
 				}
 			});
 		}
@@ -575,7 +575,7 @@ export class ContentManager extends EventEmitter {
 		if (this.picHashIsUnique(picHash)) {
 			itemData.pic.hash = picHash;
 		} else {
-			throw new UniqueError(ContentType.pic);
+			throw new UniqueError(ContentType.Picture);
 		}
 	}
 

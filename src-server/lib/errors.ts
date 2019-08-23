@@ -2,7 +2,7 @@ import * as formidable from "formidable";
 
 import * as consts from './consts';
 
-import { ContentType } from './ContentType';
+import { ContentType } from '../types/ContentType';
 
 abstract class DeferredContentError extends Error {
 	public readonly contentType: ContentType;
@@ -44,9 +44,9 @@ export class DownloadTooLargeError extends DeferredContentError {
 
 export class DownloadWrongTypeError extends DeferredContentError {
 	public readonly actualTypeDesc: string;
-	public readonly expectedType: ContentType;
+	public readonly expectedType: string;
 
-	constructor(contentType: ContentType, expectedType: ContentType, actualTypeDesc: string) {
+	constructor(contentType: ContentType, expectedType: string, actualTypeDesc: string) {
 		super(`The ${expectedType.toString()} you requested was the wrong type. It's actually a "${actualTypeDesc}".`, contentType);
 		this.actualTypeDesc = actualTypeDesc;
 		this.expectedType = expectedType;
