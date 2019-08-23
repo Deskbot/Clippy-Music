@@ -238,16 +238,18 @@ export class ContentManager extends EventEmitter {
 	}
 
 	getCurrentlyPlaying() {
-		if (this.currentlyPlaying) return {
-			nickname: this.userRecord.getNickname(this.currentlyPlaying.userId),
-			title: this.currentlyPlaying.music.title,
-			userId: this.currentlyPlaying.userId,
-		};
+		if (this.currentlyPlaying) {
+			return {
+				nickname: this.userRecord.getNickname(this.currentlyPlaying.userId),
+				title: this.currentlyPlaying.music.title,
+				userId: this.currentlyPlaying.userId,
+			};
+		}
 
-		else return null;
+		return null;
 	}
 
-	private async getDataToQueue(uplData: UploadDataWithId): Promise<UploadDataWithIdTitleDuration> {
+	private async getDataToQueue(uplData: UploadDataWithId) {
 		if (!uplData.music.isUrl) {
 			// read the music file to determine its duration
 			const duration = await getFileDuration(uplData.music.path);
