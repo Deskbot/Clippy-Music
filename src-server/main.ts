@@ -100,9 +100,9 @@ function setUpAdmin(): Promise<void> {
 function setUpDirs() {
 	utils.mkdirSafelySync(opt.storageDir, 0o777);
 
-	for (let key in consts.dirs) {
-		utils.mkdirSafelySync(consts.dirs[key], 0o777);
-	}
+	Object.values(consts.dirs).forEach(dir => {
+		utils.mkdirSafelySync(dir, 0o777);
+	});
 }
 
 function setUpControls() {
