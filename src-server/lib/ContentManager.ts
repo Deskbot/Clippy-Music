@@ -534,7 +534,7 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	tryPrepMusic(itemData: UploadDataWithIdTitleDuration): Promise<void> | q.Promise<void> {
+	private async tryPrepMusic(itemData: UploadDataWithIdTitleDuration) {
 		if (itemData.music.isUrl) {
 			if (itemData.duration <= opt.streamYtOverDur) {
 				let nmp = this.nextMusicPath();
@@ -544,49 +544,43 @@ export class ContentManager extends EventEmitter {
 				let uid = itemData.userId;
 				let cid = itemData.id;
 
-				const downloadedProm = this.ytDownloader.new(cid, uid, itemData.music.title, itemData.music.path, nmp);
+				await this.ytDownloader.new(cid, uid, itemData.music.title, itemData.music.path, nmp);
 
-				//when download is completed, then...
-				return downloadedProm.then(() => {
-					//count how long it took
-					let et = new Date().getTime();
-					let dlTime = utils.roundDps((et - st) / 1000, 2);
-					let ratio = utils.roundDps(itemData.duration / dlTime, 2);
+				// when download is completed, then
+				// count how long it took
+				let et = new Date().getTime();
+				let dlTime = utils.roundDps((et - st) / 1000, 2);
+				let ratio = utils.roundDps(itemData.duration / dlTime, 2);
 
-					itemData.music.path = nmp; //play from this path not url
+				itemData.music.path = nmp; //play from this path not url
 
-					//log the duration
-					console.log(`Yt vid (${itemData.music.ytId}) of length ${itemData.duration}s took ${dlTime}s to download, ratio: ${ratio}`);
+				//log the duration
+				console.log(`Yt vid (${itemData.music.ytId}) of length ${itemData.duration}s took ${dlTime}s to download, ratio: ${ratio}`);
 
-					//hash the music (async)
-					return utils.fileHash(nmp);
-				})
-				.then(musicHash => {
-					//this exists to prevent a YouTube video from
-					//being downloaded by user and played, then played again by url
-					//or being downloaded twice in quick succession
-					if (this.musicHashIsUnique(musicHash)) {
-						itemData.music.hash = musicHash;
-					} else {
-						throw new UniqueError(ContentType.Music);
-					}
-				});
+				//hash the music (async)
+				const musicHash = await utils.fileHash(nmp);
 
-			} else { //just stream it because it's so big
-				itemData.music.stream = true;
-				return Promise.resolve();
-			}
-		} else {
-			return Promise.resolve()
-			.then(() => utils.fileHash(itemData.music.path))
-				.then(musicHash => {
-				//validate by music hash
+				//this exists to prevent a YouTube video from
+				//being downloaded by user and played, then played again by url
+				//or being downloaded twice in quick succession
 				if (this.musicHashIsUnique(musicHash)) {
 					itemData.music.hash = musicHash;
 				} else {
 					throw new UniqueError(ContentType.Music);
 				}
-			});
+
+			} else { //just stream it because it's so big
+				itemData.music.stream = true;
+				return;
+			}
+		} else {
+			//validate by music hash
+			const musicHash = await utils.fileHash(itemData.music.path);
+			if (this.musicHashIsUnique(musicHash)) {
+				itemData.music.hash = musicHash;
+			} else {
+				throw new UniqueError(ContentType.Music);
+			}
 		}
 	}
 
