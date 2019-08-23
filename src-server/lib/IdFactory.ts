@@ -5,7 +5,7 @@ import * as consts from './consts';
 export class IdFactory {
 	private nextId: number;
 
-	constructor(startingId: number) {
+	constructor(startingId?: number) {
 		if (typeof startingId != 'undefined') {
 			console.log('Using suspended ID Factory');
 			this.nextId = startingId;
@@ -16,7 +16,7 @@ export class IdFactory {
 
 	//static
 
-	static restore() {
+	static restore(): number | undefined {
 		let fileContent: string;
 
 		try {
