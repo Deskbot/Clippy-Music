@@ -15,7 +15,7 @@ import { ClippyQueue } from './ClippyQueue';
 import { ContentType } from '../types/ContentType';
 import { downloadYtInfo, getFileDuration } from './music';
 import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError, FileUploadError } from './errors';
-import { UploadData, UploadDataWithId, UploadDataWithIdTitleDuration } from '../types/UploadData';
+import { UploadData, UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic } from '../types/UploadData';
 import { QueueableData } from "../types/QueueableData";
 import { IdFactory } from './IdFactory';
 import { ItemData } from '../types/ItemData';
@@ -509,7 +509,7 @@ export class ContentManager extends EventEmitter {
 			const musicPrepProm = this.tryPrepMusic(someItemData);
 
 			// if the picture fails, make sure any yt download is stopped
-			const picPrepProm = this.tryPrepPicture(someItemData).catch(() => {
+			const picPrepProm = this.tryPrepPicture(someItemData.pic).catch(() => {
 				this.ytDownloader.tryCancel(someItemData.userId, someItemData.id);
 			});
 
@@ -518,7 +518,7 @@ export class ContentManager extends EventEmitter {
 
 			const itemData = {
 				...someItemData,
-				pic
+				pic,
 			};
 
 			this.playQueue.add(itemData);
@@ -590,28 +590,34 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	async tryPrepPicture(itemData: UploadDataWithIdTitleDuration) {
-		if (!itemData.pic.exists) return itemData.pic;
+	private async tryPrepPicture(pic: NoPic | FilePic | UrlPic) {
+		if (!pic.exists) return pic;
 
 		//we may already have the picture downloaded, but we always need to check the uniqueness
 
-		if (itemData.pic.isUrl) {
+		if (pic.isUrl) {
 			const npp = this.nextPicPath();
-			const picInfo = await this.downloadPic(itemData.pic.path, npp);
+			const picInfo = await this.downloadPic(pic.path, npp);
 
-			itemData.pic.path = npp;
-			itemData.pic.title = picInfo.title;
+			pic = {
+				...pic,
+				path: npp,
+				title: picInfo.title
+			};
 		}
 
-		const picHash = await utils.fileHash(itemData.pic.path);
+		const picHash = await utils.fileHash(pic.path);
 
 		if (this.picHashIsUnique(picHash)) {
-			itemData.pic.hash = picHash;
+			pic = {
+				...pic,
+				hash: picHash
+			};
 		} else {
 			throw new UniqueError(ContentType.Picture);
 		}
 
-		return itemData.pic;
+		return pic;
 	}
 
 	ytIdIsUnique(id: string): boolean {
