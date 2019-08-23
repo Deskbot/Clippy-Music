@@ -27,4 +27,8 @@ export type CompleteMusic = {
     ytId?: string,
 }
 
-export type CompletePicture = UrlPic | FilePic | NoPic;
+export type CompleteUrlPic = UrlPic & {
+    title: string;
+};
+
+export type CompletePicture = CompleteUrlPic | FilePic | NoPic;
