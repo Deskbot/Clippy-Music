@@ -12,6 +12,7 @@ export interface UrlMusic {
     isUrl: true;
     path: string;
     title?: string;
+    ytId?: string;
 }
 
 export interface FileMusic {

@@ -306,10 +306,11 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 	.then(() => ProgressQueueService.add(req.ip, contentId))
 	.then(() => handleFileUpload(req, contentId))
 	.then(async ([form, fields, files]) => { //nesting in order to get the scoping right
-		const uplData = await parseUploadForm(form, fields, files);
-
-		uplData.id = contentId;
-		uplData.userId = req.ip;
+		let uplData: UploadData = {
+			...await parseUploadForm(form, fields, files),
+			id: contentId,
+			userId: req.ip,
+		};
 
 		if (uplData.music.isUrl) {
 			ProgressQueueService.setTitle(req.ip, contentId, uplData.music.path, true);
@@ -317,24 +318,25 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 
 		} else {
 			// read the music file to determine its duration
-			await getFileDuration(uplData.music.path)
-			.then(duration => {
-				uplData.duration = time.clipTimeByStartAndEnd(Math.floor(duration), uplData.startTime, uplData.endTime);
-				return uplData;
-			})
-			.catch(err => {
+			try {
+				const duration = await getFileDuration(uplData.music.path);
+				uplData = {
+					...uplData,
+					duration: time.clipTimeByStartAndEnd(Math.floor(duration), uplData.startTime, uplData.endTime),
+				};
+			} catch (err) {
 				console.error("Error reading discerning the duration of a music file.", err, uplData.music.path);
 				throw new FileUploadError(
 					`I could not discern the duration of the music file you uploaded (${uplData.music.title}).`,
 					Object.values(files)
 				);
-			});
+			}
 		}
 
-		await ContentService.add(uplData);
+		const itemData = await ContentService.add(uplData);
 
 		if (uplData.music.isUrl) {
-			ProgressQueueService.setTitle(req.ip, contentId, uplData.music.title);
+			ProgressQueueService.setTitle(req.ip, contentId, itemData.music.title);
 		}
 
 		debug.log("successful upload: ", uplData);
@@ -345,7 +347,7 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 			res.redirect('/');
 		}
 	})
-	.catch((err) => {
+	.catch(err => {
 		if (err instanceof FileUploadError) {
 			debug.log("deleting these bad uploads: ", err.files);
 

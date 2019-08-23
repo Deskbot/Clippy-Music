@@ -125,15 +125,15 @@ export class ContentManager extends EventEmitter {
 		return success ? obj : null;
 	}
 
-	add(uplData: UploadData): Promise<UploadData> {
+	add(uplData: UploadData): Promise<ItemData> {
 		const that = this;
 
-		const p = new Promise<UploadData>(function(resolve, reject) {
+		const p = new Promise<ItemData>(function(resolve, reject) {
 			if (!uplData.music.isUrl) {
 				return resolve(uplData);
 			}
 
-			let ytId = uplData.music.ytId = utils.extractYtVideoId(uplData.music.path);
+			const ytId = uplData.music.ytId = utils.extractYtVideoId(uplData.music.path);
 
 			if (that.ytIdIsUnique(ytId)) {
 				downloadYtInfo(uplData.music.path)
@@ -153,7 +153,7 @@ export class ContentManager extends EventEmitter {
 			}
 		});
 
-		p.then(() => {
+		p.then(uplData => {
 			this.tryQueue(uplData); //errors here are sent by websocket
 		}, utils.doNothing);
 

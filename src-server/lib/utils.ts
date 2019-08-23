@@ -80,14 +80,16 @@ export function deleteFileIfExistsSync(dir: string) {
 
 export function doNothing() {}
 
-export function extractYtVideoId(s: string): string | null | undefined {
+export function extractYtVideoId(s: string): string | undefined {
 	const urlObj = new URL(s);
 
 	if (urlObj.hostname.includes('youtu.be')) { // shortened YouTube url
 		const pathParts = urlObj.pathname.split('/');
 		return arrFirstMatch(pathParts, (part) => part.length !== 0);
 	} else {
-		return urlObj.searchParams.get("v");
+		const param = urlObj.searchParams.get("v");
+		if (param) return param;
+		return undefined;
 	}
 }
 

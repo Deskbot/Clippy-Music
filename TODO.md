@@ -6,6 +6,7 @@ This list is in a rough order of priority.
 List
 ----
 
+* does itemdata definitely have a title? when is it added for yt downloads
 * extracting picname from downloaded pic could be better
 * add strictness
     * "noImplicitAny": true,
