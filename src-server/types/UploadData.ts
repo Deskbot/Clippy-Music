@@ -54,7 +54,9 @@ export interface UploadDataWithId extends UploadData {
 
 export interface UploadDataWithIdTitleDuration extends UploadDataWithId {
     duration: number;
-    music: (UrlMusic | FileMusic) & {
-        title: string,
-    };
+    music: TitledMusic;
 }
+
+export type TitledMusic = (UrlMusic | FileMusic) & {
+    title: string,
+};

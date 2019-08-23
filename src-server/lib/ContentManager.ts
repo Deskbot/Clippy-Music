@@ -15,7 +15,7 @@ import { ClippyQueue } from './ClippyQueue';
 import { ContentType } from '../types/ContentType';
 import { downloadYtInfo, getFileDuration } from './music';
 import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError, FileUploadError } from './errors';
-import { UploadData, UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic, UrlMusic, FileMusic } from '../types/UploadData';
+import { UploadData, UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic, UrlMusic, FileMusic, TitledMusic } from '../types/UploadData';
 import { QueueableData } from "../types/QueueableData";
 import { IdFactory } from './IdFactory';
 import { ItemData, CompleteMusic, CompletePicture } from '../types/ItemData';
@@ -548,7 +548,7 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	private async tryPrepMusic(music: UrlMusic | FileMusic, cid: number, uid: string, duration: number): Promise<CompleteMusic> {
+	private async tryPrepMusic(music: TitledMusic, cid: number, uid: string, duration: number): Promise<CompleteMusic> {
 		let stream = false;
 		let hash;
 
@@ -603,7 +603,7 @@ export class ContentManager extends EventEmitter {
 		};
 	}
 
-	private async tryPrepPicture(pic: NoPic | FilePic | UrlPic): Promise<CompletePicture> {
+	private async tryPrepPicture(pic: NoPic | FilePic | UrlPic) {
 		if (!pic.exists) return pic;
 
 		//we may already have the picture downloaded, but we always need to check the uniqueness
