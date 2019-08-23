@@ -15,7 +15,7 @@ interface YtData {
  * duration=numberOfSeconds
  * [/FORMAT]
  */
-function getFFProbeFormatDataContainingDuration(filePath): Promise<string> {
+function getFFProbeFormatDataContainingDuration(filePath: string): Promise<string> {
     return new Promise((resolve, reject) => {
         // -v error (high logging)
         // -show_entries format=duration (get the duration data)
@@ -47,7 +47,7 @@ function getFFProbeFormatDataContainingDuration(filePath): Promise<string> {
 }
 
 
-export function getFileDuration(filePath) {
+export function getFileDuration(filePath: string) {
     return getFFProbeFormatDataContainingDuration(filePath)
     .then((ffProbeData) => {
         const durationLine = ffProbeData.split('\n')[1];
@@ -60,7 +60,7 @@ export function getFileDuration(filePath) {
     });
 }
 
-export function downloadYtInfo(urlOrId): Promise<YtData> {
+export function downloadYtInfo(urlOrId: string): Promise<YtData> {
     return new Promise(function (resolve, reject) {
         let infoProc = cp.spawn(opt.youtubeDlPath, ['--no-playlist', '--get-title', '--get-duration', urlOrId]);
         let rawData = '';
