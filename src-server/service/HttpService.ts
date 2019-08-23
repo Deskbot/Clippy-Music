@@ -17,7 +17,7 @@ import * as utils from '../lib/utils';
 
 import { getFileDuration } from '../lib/music';
 import { BannedError, FileUploadError, UniqueError, YTError } from '../lib/errors';
-import { UploadData, UrlPic, NoPic, FilePic, FileMusic, UrlMusic } from '../types/UploadData';
+import { UploadData, UrlPic, NoPic, FilePic, FileMusic, UrlMusic, UploadDataWithId } from '../types/UploadData';
 
 type RequestWithFormData = express.Request & {
 	fields: formidable.Fields;
@@ -306,7 +306,7 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 	.then(() => ProgressQueueService.add(req.ip, contentId))
 	.then(() => handleFileUpload(req, contentId))
 	.then(async ([form, fields, files]) => { //nesting in order to get the scoping right
-		let uplData: UploadData = {
+		let uplData: UploadDataWithId = {
 			...await parseUploadForm(form, fields, files),
 			id: contentId,
 			userId: req.ip,

@@ -3,7 +3,7 @@ export interface ItemData {
     userId: string;
     music: {
         isUrl: boolean | null,
-        hash?: string,
+        hash: number,
         path: string,
         stream: boolean,
         title: string,
@@ -11,8 +11,8 @@ export interface ItemData {
     };
     pic: PicData;
     duration: number;
-    startTime: string | null;
-    endTime: string | null;
+    startTime: number | null;
+    endTime: number | null;
     timePlayedAt?: number;
 };
 

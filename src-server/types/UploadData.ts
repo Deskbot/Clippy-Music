@@ -40,3 +40,13 @@ export interface NoPic {
     path: null;
     title: null;
 }
+
+export interface UploadDataWithId extends UploadData {
+    id: number;
+}
+
+export interface UploadDataWithIdAndTitle extends UploadDataWithId {
+    music: UploadDataWithId["music"] & {
+        title: string;
+    }
+}
