@@ -27,13 +27,17 @@ export type CompleteMusic = {
     ytId?: string,
 }
 
-export type CompleteUrlPic = UrlPic & {
+export interface CompleteUrlPic extends UrlPic {
     hash: number;
     title: string;
 };
 
-export type CompleteFilePic = FilePic & {
+export interface CompleteFilePic extends FilePic {
     hash: number;
 };
 
-export type CompletePicture = CompleteUrlPic | CompleteFilePic | NoPic;
+export interface CompleteNoPic extends NoPic {
+    hash: undefined;
+}
+
+export type CompletePicture = CompleteUrlPic | CompleteFilePic | CompleteNoPic;
