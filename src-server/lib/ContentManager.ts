@@ -408,11 +408,12 @@ export class ContentManager extends EventEmitter {
 		});
 
 		if (contentData.pic.exists) {
+			const picPath = contentData.pic.path;
 			musicProc.stdout.on('data', function showPicture(buf) {
 				//we want to play the picture after the video has appeared, which takes a long time when doing it remotely
 				//so we have to check the output of mpv, for signs it's not just started up, but also playing :/
 				if (buf.includes('(+)') || buf.includes('Audio') || buf.includes('Video')) {
-					that.startPic(contentData.pic.path, opt.timeout);
+					that.startPic(picPath, opt.timeout);
 					musicProc.stdout.removeListener('data', showPicture); //make sure we only check for this once, for efficiency
 				}
 			});
