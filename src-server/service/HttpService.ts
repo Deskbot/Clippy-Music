@@ -200,9 +200,9 @@ function parseUploadForm(
 
 		let pic: UrlPic | FilePic | NoPic = {
 			exists: false,
-			isUrl: null,
-			path: null,
-			title: null,
+			isUrl: undefined,
+			path: undefined,
+			title: undefined,
 		};
 
 		//pic

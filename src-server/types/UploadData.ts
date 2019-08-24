@@ -37,9 +37,9 @@ export interface FilePic {
 
 export interface NoPic {
     exists: false;
-    isUrl: null;
-    path: null;
-    title: null;
+    isUrl: undefined;
+    path: undefined;
+    title: undefined;
 }
 
 export interface UploadDataWithId extends UploadData {

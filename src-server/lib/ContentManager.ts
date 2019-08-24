@@ -615,7 +615,12 @@ export class ContentManager extends EventEmitter {
 	}
 
 	private async tryPrepPicture(pic: NoPic | FilePic | UrlPic): Promise<CompletePicture> {
-		if (!pic.exists) return pic;
+		if (!pic.exists) {
+			return {
+				...pic,
+				hash: undefined,
+			};
+		}
 
 		//we may already have the picture downloaded, but we always need to check the uniqueness
 
@@ -623,10 +628,10 @@ export class ContentManager extends EventEmitter {
 			const npp = this.nextPicPath();
 			const picInfo = await this.downloadPic(pic.path, npp);
 
-			return {
+			pic = {
 				...pic,
 				path: npp,
-				title: picInfo.title
+				title: picInfo.title,
 			};
 		}
 
@@ -635,8 +640,9 @@ export class ContentManager extends EventEmitter {
 		if (this.picHashIsUnique(picHash)) {
 			return {
 				...pic,
-				hash: picHash
+				hash: picHash,
 			};
+
 		} else {
 			throw new UniqueError(ContentType.Picture);
 		}
