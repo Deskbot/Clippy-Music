@@ -332,6 +332,18 @@ export class ContentManager extends EventEmitter {
 		});
 	}
 
+	private musicIsUnique(music: CompleteMusic): boolean {
+		if (music.hash !== undefined && !this.musicHashIsUnique(music.hash)) {
+			return false;
+		}
+
+		if (music.ytId !== undefined && !this.ytIdIsUnique(music.ytId)) {
+			return false;
+		}
+
+		return true;
+	}
+
 	musicHashIsUnique(hash: number) {
 		let lastPlayed = this.musicHashes[hash];
 		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
@@ -367,7 +379,7 @@ export class ContentManager extends EventEmitter {
 		}
 
 		//double check the content is still unique, only checking music as it is the main feature
-		if (!this.musicHashIsUnique(contentData.music.hash) || !this.ytIdIsUnique(contentData.music.ytId)) {
+		if (!this.musicIsUnique(contentData.music)) {
 			this.deleteContent(contentData);
 			return this.playNext();
 		}
