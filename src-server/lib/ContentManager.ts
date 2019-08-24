@@ -624,15 +624,18 @@ export class ContentManager extends EventEmitter {
 
 		//we may already have the picture downloaded, but we always need to check the uniqueness
 
+		let path: string;
+		let title: string;
+
 		if (pic.isUrl) {
 			const npp = this.nextPicPath();
 			const picInfo = await this.downloadPic(pic.path, npp);
 
-			pic = {
-				...pic,
-				path: npp,
-				title: picInfo.title,
-			};
+			path = npp;
+			title = picInfo.title;
+		} else {
+			path = pic.path;
+			title = pic.title;
 		}
 
 		const picHash = await utils.fileHash(pic.path);
@@ -640,6 +643,8 @@ export class ContentManager extends EventEmitter {
 		if (this.picHashIsUnique(picHash)) {
 			return {
 				...pic,
+				path,
+				title,
 				hash: picHash,
 			};
 
