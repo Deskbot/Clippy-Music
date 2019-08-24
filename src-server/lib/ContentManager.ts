@@ -367,9 +367,6 @@ export class ContentManager extends EventEmitter {
 		}
 
 		//double check the content is still unique, only checking music as it is the main feature
-		if (typeof contentData.music.hash !== "string") throw new Error("type error");
-		if (typeof contentData.music.ytId !== "string") throw new Error("type error");
-
 		if (!this.musicHashIsUnique(contentData.music.hash) || !this.ytIdIsUnique(contentData.music.ytId)) {
 			this.deleteContent(contentData);
 			return this.playNext();
@@ -382,8 +379,6 @@ export class ContentManager extends EventEmitter {
 		let musicProc = this.startMusic(contentData.music.path, opt.timeout, contentData.startTime, contentData.endTime);
 
 		musicProc.on('close', (code, signal) => { // runs before next call to playNext
-			if (contentData.timePlayedAt === undefined) throw new Error("type error");
-
 			let secs = 1 + Math.ceil((Date.now() - contentData.timePlayedAt) / 1000); //seconds ran for, adds a little bit to prevent infinite <1 second content
 
 			that.playQueue.boostPosteriority(contentData.userId, secs);
@@ -400,8 +395,6 @@ export class ContentManager extends EventEmitter {
 
 		if (contentData.pic.exists) {
 			musicProc.stdout.on('data', function showPicture(buf) {
-				if (contentData.pic.path === null) throw new Error("type error");
-
 				//we want to play the picture after the video has appeared, which takes a long time when doing it remotely
 				//so we have to check the output of mpv, for signs it's not just started up, but also playing :/
 				if (buf.includes('(+)') || buf.includes('Audio') || buf.includes('Video')) {
@@ -438,7 +431,6 @@ export class ContentManager extends EventEmitter {
 		if (itemData.music.hash) this.addHash(itemData.music.hash);
 
 		if (itemData.pic.exists) {
-			if (itemData.pic.hash === undefined) throw new Error("type error");
 			this.addPicHash(itemData.pic.hash);
 		}
 	}
