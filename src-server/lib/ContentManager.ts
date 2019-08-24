@@ -388,10 +388,12 @@ export class ContentManager extends EventEmitter {
 
 		this.currentlyPlaying = contentData;
 
+		const timePlayedAt = Date.now();
+
 		let musicProc = this.startMusic(contentData.music.path, opt.timeout, contentData.startTime, contentData.endTime);
 
 		musicProc.on('close', (code, signal) => { // runs before next call to playNext
-			let secs = 1 + Math.ceil((Date.now() - contentData.timePlayedAt) / 1000); //seconds ran for, adds a little bit to prevent infinite <1 second content
+			let secs = 1 + Math.ceil((Date.now() - timePlayedAt) / 1000); //seconds ran for, adds a little bit to prevent infinite <1 second content
 
 			that.playQueue.boostPosteriority(contentData.userId, secs);
 
@@ -417,8 +419,6 @@ export class ContentManager extends EventEmitter {
 		}
 
 		this.logPlay(contentData);
-
-		contentData.timePlayedAt = Date.now();
 
 		this.emit('queue-update');
 
