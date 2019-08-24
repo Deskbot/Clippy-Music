@@ -28,7 +28,12 @@ export type CompleteMusic = {
 }
 
 export type CompleteUrlPic = UrlPic & {
+    hash: number;
     title: string;
 };
 
-export type CompletePicture = CompleteUrlPic | FilePic | NoPic;
+export type CompleteFilePic = FilePic & {
+    hash: number;
+};
+
+export type CompletePicture = CompleteUrlPic | CompleteFilePic | NoPic;
