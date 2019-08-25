@@ -245,8 +245,12 @@ function parseUploadForm(
 		let startTime: number | null = null;
 		let endTime: number | null = null;
 
-		if (time = fields['start-time'] as string) startTime = parseInt(time);
-		if (time = fields['end-time'] as string)   endTime   = parseInt(time);
+		if (time = fields['start-time'] as string) {
+			startTime = utils.timeCodeToSeconds(time);
+		}
+		if (time = fields['end-time'] as string) {
+			endTime   = utils.timeCodeToSeconds(time);
+		}
 
 		resolve({
 			music,
