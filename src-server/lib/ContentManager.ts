@@ -249,8 +249,6 @@ export class ContentManager extends EventEmitter {
 
 	private async getDataToQueue(uplData: UploadDataWithId): Promise<UploadDataWithIdTitleDuration> {
 		if (!uplData.music.isUrl) {
-			const poop = uplData.music;
-
 			// read the music file to determine its duration
 			const duration = await getFileDuration(uplData.music.path);
 			const uplDataWithDuration = {

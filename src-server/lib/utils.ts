@@ -173,7 +173,7 @@ export function sizeToReadbleStr(s: number): string {
 }
 
 //assume at most 2 colons
-export function timeCodeToNum(s: string): number {
+export function timeCodeToSeconds(s: string): number {
 	const a = s.split(':');
 	let t = 0;
 

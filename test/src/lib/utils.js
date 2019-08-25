@@ -45,4 +45,25 @@ module.exports = {
         assert(utils.looksLikeIpAddress(":ffff::127.0.0.1"));
         assert(utils.looksLikeIpAddress(":ffff:1234:6564:45:127.0.0.1"));
     },
+
+    timeCodeToSeconds: () => {
+        assert.strictEqual(utils.timeCodeToSeconds("0"), 0);
+        assert.strictEqual(utils.timeCodeToSeconds("00"), 0);
+        assert.strictEqual(utils.timeCodeToSeconds("5"), 5);
+        assert.strictEqual(utils.timeCodeToSeconds("50"), 50);
+        assert.strictEqual(utils.timeCodeToSeconds("0:0"), 0);
+        assert.strictEqual(utils.timeCodeToSeconds("00:0"), 0);
+        assert.strictEqual(utils.timeCodeToSeconds("0:00"), 0);
+        assert.strictEqual(utils.timeCodeToSeconds("00:00"), 0);
+        assert.strictEqual(utils.timeCodeToSeconds("1:0"), 60);
+        assert.strictEqual(utils.timeCodeToSeconds("1:00"), 60);
+        assert.strictEqual(utils.timeCodeToSeconds("1:1"), 61);
+        assert.strictEqual(utils.timeCodeToSeconds("1:10"), 70);
+        assert.strictEqual(utils.timeCodeToSeconds("10:00"), 600);
+        assert.strictEqual(utils.timeCodeToSeconds("1:00:00"), 3600);
+        assert.strictEqual(utils.timeCodeToSeconds("1:00:01"), 3601);
+        assert.strictEqual(utils.timeCodeToSeconds("1:01:00"), 3660);
+        assert.strictEqual(utils.timeCodeToSeconds("10:00:00"), 36000);
+        assert.strictEqual(utils.timeCodeToSeconds("100:00:00"), 360000);
+    },
 };
