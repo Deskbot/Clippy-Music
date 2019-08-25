@@ -342,16 +342,16 @@ export class ContentManager extends EventEmitter {
 		return true;
 	}
 
-	musicHashIsUnique(hash: number) {
+	musicHashIsUnique(hash: number): boolean {
 		let lastPlayed = this.musicHashes[hash];
 		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
 	}
 
-	nextMusicPath() {
+	nextMusicPath(): string {
 		return consts.dirs.music + this.idFactory.new();
 	}
 
-	nextPicPath() {
+	nextPicPath(): string {
 		return consts.dirs.pic + this.idFactory.new();
 	}
 
@@ -359,7 +359,7 @@ export class ContentManager extends EventEmitter {
 		this.playQueue.penalise(id);
 	}
 
-	picHashIsUnique(hash: number) {
+	picHashIsUnique(hash: number): boolean {
 		let lastPlayed = this.picHashes[hash];
 		return !lastPlayed || lastPlayed + opt.imageUniqueCoolOff * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
 	}
@@ -367,7 +367,7 @@ export class ContentManager extends EventEmitter {
 	playNext(): boolean {
 		if (this.stop) return false;
 
-		const contentData = this.playQueue.next();
+        const contentData = this.playQueue.next();
 		const that = this;
 
 		if (contentData === null) {
@@ -378,6 +378,7 @@ export class ContentManager extends EventEmitter {
 
 		//double check the content is still unique, only checking music as it is the main feature
 		if (!this.musicIsUnique(contentData.music)) {
+			console.log("music not unique");
 			this.deleteContent(contentData);
 			return this.playNext();
 		}
@@ -387,11 +388,10 @@ export class ContentManager extends EventEmitter {
 		this.currentlyPlaying = contentData;
 
 		const timePlayedAt = Date.now();
-
-		let musicProc = this.startMusic(contentData.music.path, opt.timeout, contentData.startTime, contentData.endTime);
+		const musicProc = this.startMusic(contentData.music.path, opt.timeout, contentData.startTime, contentData.endTime);
 
 		musicProc.on('close', (code, signal) => { // runs before next call to playNext
-			let secs = 1 + Math.ceil((Date.now() - timePlayedAt) / 1000); //seconds ran for, adds a little bit to prevent infinite <1 second content
+			const secs = 1 + Math.ceil((Date.now() - timePlayedAt) / 1000); //seconds ran for, adds a little bit to prevent infinite <1 second content
 
 			that.playQueue.boostPosteriority(contentData.userId, secs);
 

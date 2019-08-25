@@ -249,7 +249,7 @@ function parseUploadForm(
 			startTime = utils.timeCodeToSeconds(time);
 		}
 		if (time = fields['end-time'] as string) {
-			endTime   = utils.timeCodeToSeconds(time);
+			endTime = utils.timeCodeToSeconds(time);
 		}
 
 		resolve({
