@@ -260,9 +260,7 @@ export class ContentManager extends EventEmitter {
 					...uplData.pic
 				},
 				duration: time.clipTimeByStartAndEnd(Math.floor(duration), uplData.startTime, uplData.endTime),
-			};
-
-			this.tryQueue(uplDataWithDuration);
+            };
 
 			return uplDataWithDuration;
 		}
