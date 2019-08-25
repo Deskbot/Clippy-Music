@@ -282,14 +282,13 @@ export class ContentManager extends EventEmitter {
 			const musicData = {
 				...uplData.music,
 				title: info.title,
-			};
-			const itemData = {
+            };
+
+			return {
 				...uplData,
 				music: musicData,
 				duration: time.clipTimeByStartAndEnd(Math.floor(info.duration), uplData.startTime, uplData.endTime),
 			};
-
-			return itemData;
 
 		} else {
 			throw new UniqueError(ContentType.Music);
