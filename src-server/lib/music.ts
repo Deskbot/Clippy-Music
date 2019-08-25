@@ -5,7 +5,7 @@ import * as opt from '../options';
 import * as utils from './utils';
 import { DurationFindingError } from './errors';
 
-interface YtData {
+export interface YtData {
     title: string,
     duration: number,
 }

@@ -12,7 +12,7 @@ import * as time from './time';
 
 import { ClippyQueue } from './ClippyQueue';
 import { ContentType } from '../types/ContentType';
-import { downloadYtInfo, getFileDuration } from './music';
+import { downloadYtInfo, getFileDuration, YtData } from './music';
 import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError } from './errors';
 import { UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic, TitledMusic } from '../types/UploadData';
 import { IdFactory } from './IdFactory';
@@ -270,7 +270,7 @@ export class ContentManager extends EventEmitter {
 		if (ytId === undefined) throw new Error("youtube id is undefined");
 
 		if (this.ytIdIsUnique(ytId)) {
-			let info;
+			let info: YtData;
 
 			try {
 				info = await downloadYtInfo(uplData.music.path);
