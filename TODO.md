@@ -6,7 +6,6 @@ This list is in a rough order of priority.
 List
 ----
 
-* make clean option work
 * add strictness
     * "noImplicitAny": true,
     * test everything works

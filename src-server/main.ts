@@ -7,7 +7,6 @@ import * as opt from './options';
 import * as utils from './lib/utils';
 
 import { PasswordService } from './service/PasswordService';
-import { startHttpService } from './service/HttpService';
 
 // prompt settings
 prompt.colors = false;
@@ -152,5 +151,6 @@ function setUpControls() {
 }
 
 function setUpServices() {
+	const { startHttpService } = require('./service/HttpService');
 	startHttpService();
 }
