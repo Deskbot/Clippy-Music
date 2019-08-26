@@ -520,17 +520,12 @@ export class ContentManager extends EventEmitter {
 			);
 
 			// if the picture fails, make sure any yt download is stopped
-			const picPrepProm = this.tryPrepPicture(someItemData.pic);
-
-			const music = await musicPrepProm;
-
-			let pic;
-			try {
-				pic = await picPrepProm;
-			} catch (err) {
+			const picPrepProm = this.tryPrepPicture(someItemData.pic).catch(err => {
 				this.ytDownloader.tryCancel(someItemData.userId, someItemData.id);
 				throw err;
-			}
+			});
+
+			const [ music, pic ] = await Promise.all([musicPrepProm, picPrepProm]);
 
 			const itemData = {
 				...someItemData,
