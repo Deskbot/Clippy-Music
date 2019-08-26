@@ -11,23 +11,50 @@ import * as opt from '../options';
 import * as time from './time';
 
 import { ClippyQueue } from './ClippyQueue';
-import * as ContentType from './ContentType';
-import { downloadYtInfo } from './music';
+import { ContentType } from '../types/ContentType';
+import { downloadYtInfo, getFileDuration, YtData } from './music';
 import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError } from './errors';
-import { UploadData, ItemData } from '../types/UploadData';
+import { UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic, TitledMusic } from '../types/UploadData';
+import { IdFactory } from './IdFactory';
+import { ItemData, CompleteMusic, CompletePicture } from '../types/ItemData';
+import { YtDownloader } from './YtDownloader';
+import { UserRecord } from './UserRecord';
+import { ProgressQueue } from './ProgressQueue';
+
+interface BucketForPublic {
+	bucket: {
+		title: string,
+		id: number,
+	}[];
+	nickname: string;
+	userId: string;
+}
+
+interface SuspendedContentManager {
+	playQueue: any;
+	hashes: any;
+	picHashes: any;
+	ytIds: any;
+}
 
 export class ContentManager extends EventEmitter {
 	//data stores
-	private playQueue;
-	private musicHashes = {};
-	private picHashes = {};
-	private ytIds = {};
+	private playQueue: ClippyQueue;
+	private musicHashes: {
+		[hash: string]: number
+	} = {};
+	private picHashes: {
+		[hash: string]: number
+	} = {};
+	private ytIds: {
+		[hash: string]: number
+	} = {};
 
 	//injected objects
-	private idFactory;
-	private progressQueue;
-	private userRecord;
-	private ytDownloader;
+	private idFactory: IdFactory;
+	private progressQueue: ProgressQueue;
+	private userRecord: UserRecord;
+	private ytDownloader: YtDownloader;
 
 	//processes
 	private runningMusicProc: cp.ChildProcess | null = null;
@@ -36,7 +63,13 @@ export class ContentManager extends EventEmitter {
 
 	private stop?: boolean;
 
-	constructor(startState, idFactory, progressQueue, userRecord, ytDownloader) {
+	constructor(
+		startState: SuspendedContentManager | null,
+		idFactory: IdFactory,
+		progressQueue: ProgressQueue,
+		userRecord: UserRecord,
+		ytDownloader: YtDownloader
+	) {
 		super();
 
 		//injected objects
@@ -57,123 +90,100 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	static recover() {
-		//retreive suspended queue
-		let obj, pqContent;
+	// retreive suspended ContentManger
+	static recover(): SuspendedContentManager | null {
+		let obj;
+		let pqContent: Buffer;
 		let success = true;
 
-		//I'm trying some weird control flow because I don't like try catch.
-		//Usually there's only 1 line you want to try and you don't want to assume something has been caught for the wrong reasons.
 		try {
-			success = true;
 			pqContent = fs.readFileSync(consts.files.content);
 
 		} catch (e) {
-			success = false;
 			console.log('No suspended content manager found. This is ok.');
+			return null;
 		}
 
-		if (success) {
-			console.log('Reading suspended content manager');
+		console.log('Reading suspended content manager');
 
-			try {
-				success = true;
-				obj = JSON.parse(pqContent);
+		try {
+			success = true;
+			obj = JSON.parse(pqContent.toString());
 
-			} catch (e) {
-				success = false;
-				if (e instanceof SyntaxError) {
-					console.error('Syntax error in suspendedContentManager.json file.');
-					console.error(e);
-					console.log('Ignoring suspended content manager');
-				} else {
-					throw e;
-				}
+		} catch (e) {
+			success = false;
+			if (e instanceof SyntaxError) {
+				console.error('Syntax error in suspendedContentManager.json file.');
+				console.error(e);
+				console.log('Ignoring suspended content manager');
+			} else {
+				throw e;
 			}
 		}
 
 		return success ? obj : null;
 	}
 
-	add(uplData: UploadData): Promise<UploadData> {
-		const that = this;
-
-		const p = new Promise<UploadData>(function(resolve, reject) {
-			if (!uplData.music.isUrl) {
-				return resolve(uplData);
-			}
-
-			let ytId = uplData.music.ytId = utils.extractYtVideoId(uplData.music.path);
-
-			if (that.ytIdIsUnique(ytId)) {
-				downloadYtInfo(uplData.music.path)
-				.then(info => {
-					uplData.music.title = info.title;
-					uplData.duration = time.clipTimeByStartAndEnd(Math.floor(info.duration), uplData.startTime, uplData.endTime);
-
-					return resolve(uplData);
-
-				}, (e) => {
-					debug.error(e);
-					return reject(new YTError(`I could not find the YouTube video requested (${uplData.music.ytId}). Is the URL correct?`));
-				});
-
-			} else {
-				return reject(new UniqueError(ContentType.music));
-			}
-		});
-
-		p.then(() => {
-			this.tryQueue(uplData); //errors here are sent by websocket
-		}, utils.doNothing);
-
-		//p includes everything that needs to happen before http response
-		return p;
+	async add(uplData: UploadDataWithId) {
+		try {
+			// awaits everything that needs to happen before http response
+			const dataToQueue = await this.getDataToQueue(uplData);
+			this.tryQueue(dataToQueue);
+			return dataToQueue;
+		} catch (err) {
+			// errors here are sent by websocket
+			debug.error(err);
+			throw err;
+		}
 	}
 
-	addHash(hash) {
+	addHash(hash: number) {
 		this.musicHashes[hash] = new Date().getTime();
 	}
 
-	addPicHash(hash) {
+	addPicHash(hash: number) {
 		this.picHashes[hash] = new Date().getTime();
 	}
 
-	addYtId(id) {
+	addYtId(id: string) {
 		this.ytIds[id] = new Date().getTime();
 	}
 
-	deleteContent(contentObj) {
+	deleteContent(contentObj: ItemData) {
 		if (!contentObj.music.stream) utils.deleteFile(contentObj.music.path);
 		if (contentObj.pic.exists) utils.deleteFile(contentObj.pic.path); //empty picture files can be uploaded and will persist
 	}
 
-	downloadPic(url, destination): Promise<{ title: string }> {
+	downloadPic(url: string, destination: string): Promise<{ title: string }> {
 		return new Promise((resolve, reject) => {
 			request.head(url, (err, res, body) => {
 				if (err) {
-					err.contentType = ContentType.pic;
+					err.contentType = ContentType.Picture;
 					if (err.code === 'ENOTFOUND' || err.code === 'ETIMEDOUT') {
-						return reject(new BadUrlError(ContentType.pic));
+						return reject(new BadUrlError(ContentType.Picture));
 					}
 					return reject(err);
 				}
 
 				if (!res) {
-					return reject(new UnknownDownloadError(ContentType.pic, 'Could not get a response for the request.'));
+					return reject(new UnknownDownloadError('Could not get a response for the request.', ContentType.Picture));
 				}
 
-				const typeFound = res.headers['content-type'];
+				const typeFound = res.headers['content-type'] as string;
 
 				if (typeFound.split('/')[0] !== 'image') {
-					return reject(new DownloadWrongTypeError(ContentType.pic, 'image', typeFound));
+					return reject(new DownloadWrongTypeError(ContentType.Picture, 'image', typeFound));
 				}
-				if (res.headers['content-length'] > opt.imageSizeLimit) {
-					return reject(new DownloadTooLargeError(ContentType.pic));
+				if (parseInt(res.headers['content-length'] as string) > opt.imageSizeLimit) {
+					return reject(new DownloadTooLargeError(ContentType.Picture));
 				}
 
-				let picName = url.split('/').pop();
-				picName = picName.length <= 1 ? null : picName.split('.').shift();
+				let picName: string | null = url.split('/').pop() as string;
+				picName = picName.length <= 1 ? null : picName.split('.').shift() as string;
+
+				if (picName == null) {
+					picName = "";
+				}
 
 				const picinfo = {
 					title: new Html5Entities().encode(picName),
@@ -185,7 +195,7 @@ export class ContentManager extends EventEmitter {
 					return resolve(picinfo);
 				});
 				stream.on('error', (err) => {
-					err.contentType = ContentType.pic;
+					err.contentType = ContentType.Picture;
 					return reject(err);
 				});
 			});
@@ -197,20 +207,16 @@ export class ContentManager extends EventEmitter {
 		this.killCurrent();
 	}
 
-	forget(itemData) {
+	forget(itemData: ItemData) {
 		if (itemData.music.ytId) delete this.ytIds[itemData.music.ytId];
 		if (itemData.music.hash) delete this.musicHashes[itemData.music.hash];
 		if (itemData.pic.hash) delete this.picHashes[itemData.pic.hash];
 	}
 
-	getBucketsForPublic() {
+	getBucketsForPublic(): BucketForPublic[] {
 		let userId, bucketTitles;
 		let userIds = this.playQueue.getUsersByPosteriority();
-		let returnList: {
-			bucket: string[],
-			nickname: string,
-			userId: string,
-		}[] = [];
+		let returnList: BucketForPublic[] = [];
 
 		//map and filter
 		for (let i=0; i < userIds.length; i++) {
@@ -230,13 +236,63 @@ export class ContentManager extends EventEmitter {
 	}
 
 	getCurrentlyPlaying() {
-		if (this.currentlyPlaying) return {
-			nickname: this.userRecord.getNickname(this.currentlyPlaying.userId),
-			title: this.currentlyPlaying.music.title,
-			userId: this.currentlyPlaying.userId,
-		};
+		if (this.currentlyPlaying) {
+			return {
+				nickname: this.userRecord.getNickname(this.currentlyPlaying.userId),
+				title: this.currentlyPlaying.music.title,
+				userId: this.currentlyPlaying.userId,
+			};
+		}
 
-		else return null;
+		return null;
+	}
+
+	private async getDataToQueue(uplData: UploadDataWithId): Promise<UploadDataWithIdTitleDuration> {
+		if (!uplData.music.isUrl) {
+			// read the music file to determine its duration
+			const duration = await getFileDuration(uplData.music.path);
+			const uplDataWithDuration = {
+				...uplData,
+				music: {
+					...uplData.music,
+				},
+				pic: {
+					...uplData.pic,
+				},
+				duration: time.clipTimeByStartAndEnd(Math.floor(duration), uplData.startTime, uplData.endTime),
+            };
+
+			return uplDataWithDuration;
+		}
+
+		const ytId = uplData.music.ytId = utils.extractYtVideoId(uplData.music.path);
+
+		if (ytId === undefined) throw new Error("youtube id is undefined");
+
+		if (this.ytIdIsUnique(ytId)) {
+			let info: YtData;
+
+			try {
+				info = await downloadYtInfo(uplData.music.path);
+			} catch (err) {
+				debug.error(err);
+				throw new YTError(`I could not find the YouTube video requested (${ytId}). Is the URL correct?`);
+			}
+
+			const musicData = {
+				...uplData.music,
+				title: info.title,
+            };
+
+			return {
+				...uplData,
+				music: musicData,
+				duration: time.clipTimeByStartAndEnd(Math.floor(info.duration), uplData.startTime, uplData.endTime),
+			};
+
+		} else {
+			throw new UniqueError(ContentType.Music);
+		}
 	}
 
 	isPlaying() {
@@ -248,7 +304,7 @@ export class ContentManager extends EventEmitter {
 		this.stopPic();
 	}
 
-	logPlay(contentData) {
+	logPlay(contentData: ItemData) {
 		const nickname = this.userRecord.getNickname(contentData.userId);
 		const currentTime = new Date().toString();
 
@@ -271,32 +327,44 @@ export class ContentManager extends EventEmitter {
 		});
 	}
 
-	musicHashIsUnique(hash) {
+	private musicIsUnique(music: CompleteMusic): boolean {
+		if (music.hash !== undefined && !this.musicHashIsUnique(music.hash)) {
+			return false;
+		}
+
+		if (music.ytId !== undefined && !this.ytIdIsUnique(music.ytId)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	musicHashIsUnique(hash: number): boolean {
 		let lastPlayed = this.musicHashes[hash];
 		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
 	}
 
-	nextMusicPath() {
+	nextMusicPath(): string {
 		return consts.dirs.music + this.idFactory.new();
 	}
 
-	nextPicPath() {
+	nextPicPath(): string {
 		return consts.dirs.pic + this.idFactory.new();
 	}
 
-	penalise(id) {
+	penalise(id: string) {
 		this.playQueue.penalise(id);
 	}
 
-	picHashIsUnique(hash) {
+	picHashIsUnique(hash: number): boolean {
 		let lastPlayed = this.picHashes[hash];
 		return !lastPlayed || lastPlayed + opt.imageUniqueCoolOff * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
 	}
 
-	playNext() {
+	playNext(): boolean {
 		if (this.stop) return false;
 
-		const contentData = this.playQueue.next();
+        const contentData = this.playQueue.next();
 		const that = this;
 
 		if (contentData === null) {
@@ -306,7 +374,8 @@ export class ContentManager extends EventEmitter {
 		}
 
 		//double check the content is still unique, only checking music as it is the main feature
-		if (!this.musicHashIsUnique(contentData.music.hash) || !this.ytIdIsUnique(contentData.music.ytId)) {
+		if (!this.musicIsUnique(contentData.music)) {
+			console.log("music not unique");
 			this.deleteContent(contentData);
 			return this.playNext();
 		}
@@ -315,10 +384,11 @@ export class ContentManager extends EventEmitter {
 
 		this.currentlyPlaying = contentData;
 
-		let musicProc = this.startMusic(contentData.music.path, opt.timeout, contentData.startTime, contentData.endTime);
+		const timePlayedAt = Date.now();
+		const musicProc = this.startMusic(contentData.music.path, opt.timeout, contentData.startTime, contentData.endTime);
 
 		musicProc.on('close', (code, signal) => { // runs before next call to playNext
-			let secs = 1 + Math.ceil((Date.now() - contentData.timePlayedAt) / 1000); //seconds ran for, adds a little bit to prevent infinite <1 second content
+			const secs = 1 + Math.ceil((Date.now() - timePlayedAt) / 1000); //seconds ran for, adds a little bit to prevent infinite <1 second content
 
 			that.playQueue.boostPosteriority(contentData.userId, secs);
 
@@ -333,11 +403,12 @@ export class ContentManager extends EventEmitter {
 		});
 
 		if (contentData.pic.exists) {
+			const picPath = contentData.pic.path;
 			musicProc.stdout.on('data', function showPicture(buf) {
 				//we want to play the picture after the video has appeared, which takes a long time when doing it remotely
 				//so we have to check the output of mpv, for signs it's not just started up, but also playing :/
 				if (buf.includes('(+)') || buf.includes('Audio') || buf.includes('Video')) {
-					that.startPic(contentData.pic.path, opt.timeout);
+					that.startPic(picPath, opt.timeout);
 					musicProc.stdout.removeListener('data', showPicture); //make sure we only check for this once, for efficiency
 				}
 			});
@@ -345,14 +416,12 @@ export class ContentManager extends EventEmitter {
 
 		this.logPlay(contentData);
 
-		contentData.timePlayedAt = Date.now();
-
 		this.emit('queue-update');
 
 		return true;
 	}
 
-	purgeUser(uid) {
+	purgeUser(uid: string) {
 		const itemList = this.playQueue.getUserBucket(uid);
 
 		if (itemList) itemList.forEach((itemData) => {
@@ -365,13 +434,16 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	remember(itemData) {
+	remember(itemData: ItemData) {
 		if (itemData.music.ytId) this.addYtId(itemData.music.ytId);
 		if (itemData.music.hash) this.addHash(itemData.music.hash);
-		if (itemData.pic.exists) this.addPicHash(itemData.pic.hash);
+
+		if (itemData.pic.exists) {
+			this.addPicHash(itemData.pic.hash);
+		}
 	}
 
-	remove(userId, contentId) {
+	remove(userId: string, contentId: number) {
 		const itemData = this.playQueue.getContent(userId, contentId);
 
 		if (itemData) {
@@ -390,17 +462,17 @@ export class ContentManager extends EventEmitter {
 		this.emit('end'); //kick start the cycle of checking for things
 	}
 
-	startMusic(path, duration, startTime, endTime) {
+	startMusic(path: string, duration: number, startTime: number | null | undefined, endTime: number | null | undefined) {
 		const args = [duration + 's', opt.mpvPath, ...opt.mpvArgs, '--quiet', path];
 
 		if (startTime) {
 			args.push('--start');
-			args.push(startTime);
+			args.push(startTime.toString());
 		}
 
 		if (endTime) {
 			args.push('--end');
-			args.push(endTime);
+			args.push(endTime.toString());
 		}
 
 		if (opt.mute.get()) {
@@ -414,7 +486,7 @@ export class ContentManager extends EventEmitter {
 		if (this.runningMusicProc) this.runningMusicProc.kill();
 	}
 
-	startPic(path, duration) {
+	startPic(path: string, duration: number) {
 		this.runningPicProc = cp.spawn('timeout', [duration + 's', 'eog', path, '-f']);
 	}
 
@@ -438,117 +510,140 @@ export class ContentManager extends EventEmitter {
 		fs.writeFileSync(consts.files.content, JSON.stringify(storeObj));
 	}
 
-	tryQueue(itemData) {
-		const musicPrepProm = this.tryPrepMusic(itemData);
-		const picPrepProm = this.tryPrepPicture(itemData);
+	private async tryQueue(someItemData: UploadDataWithIdTitleDuration) {
+		try {
+			const musicPrepProm = this.tryPrepMusic(
+				someItemData.music,
+				someItemData.id,
+				someItemData.userId,
+				someItemData.duration,
+			);
 
-		Promise.all([musicPrepProm, picPrepProm])
-		.then(() => {
+			// if the picture fails, make sure any yt download is stopped
+			const picPrepProm = this.tryPrepPicture(someItemData.pic).catch(err => {
+				this.ytDownloader.tryCancel(someItemData.userId, someItemData.id);
+				throw err;
+			});
+
+			const [ music, pic ] = await Promise.all([musicPrepProm, picPrepProm]);
+
+			const itemData = {
+				...someItemData,
+				pic,
+				music,
+			};
+
 			this.playQueue.add(itemData);
 			this.progressQueue.finished(itemData.userId, itemData.id);
 			this.emit('queue-update');
-		})
-		.catch((err) => {
-			if (!(err instanceof CancelError)) {
-				this.progressQueue.finishedWithError(itemData.userId, itemData.id, err);
-			} else {
-				console.error(err);
-			}
-		});
 
-		// if the picture fails, make sure any yt download is stopped
-		picPrepProm.catch(() => {
-			this.ytDownloader.tryCancel(itemData.userId, itemData.id);
-		});
+		} catch (err) {
+			if (err instanceof CancelError) {
+				console.error(err);
+			} else {
+				this.progressQueue.finishedWithError(someItemData.userId, someItemData.id, err);
+			}
+		}
 	}
 
-	tryPrepMusic(itemData) {
-		if (itemData.music.isUrl) {
-			if (itemData.duration <= opt.streamYtOverDur) {
+	private async tryPrepMusic(music: TitledMusic, cid: number, uid: string, duration: number): Promise<CompleteMusic> {
+		if (music.isUrl) {
+			if (duration <= opt.streamYtOverDur) {
 				let nmp = this.nextMusicPath();
 
 				let st = new Date().getTime();
 
-				let uid = itemData.userId;
-				let cid = itemData.id;
+				await this.ytDownloader.new(cid, uid, music.title, music.path, nmp);
 
-				const downloadedProm = this.ytDownloader.new(cid, uid, itemData.music.title, itemData.music.path, nmp);
+				// when download is completed, then
+				// count how long it took
+				let et = new Date().getTime();
+				let dlTime = utils.roundDps((et - st) / 1000, 2);
+				let ratio = utils.roundDps(duration / dlTime, 2);
 
-				//when download is completed, then...
-				return downloadedProm.then(() => {
-					//count how long it took
-					let et = new Date().getTime();
-					let dlTime = utils.roundDps((et - st) / 1000, 2);
-					let ratio = utils.roundDps(itemData.duration / dlTime, 2);
+				music.path = nmp; //play from this path not url
 
-					itemData.music.path = nmp; //play from this path not url
+				//log the duration
+				console.log(`Yt vid (${music.ytId}) of length ${duration}s took ${dlTime}s to download, ratio: ${ratio}`);
 
-					//log the duration
-					console.log(`Yt vid (${itemData.music.ytId}) of length ${itemData.duration}s took ${dlTime}s to download, ratio: ${ratio}`);
+				//hash the music (async)
+				const musicHash = await utils.fileHash(nmp);
 
-					//hash the music (async)
-					return utils.fileHash(nmp);
-				})
-				.then((resultHash) => {
-					//this exists to prevent a YouTube video from
-					//being downloaded by user and played, then played again by url
-					//or being downloaded twice in quick succession
-					let musicHash = resultHash.toString();
-					if (this.musicHashIsUnique(musicHash)) {
-						itemData.music.hash = musicHash;
-					} else {
-						throw new UniqueError(ContentType.music);
-					}
-				});
+				//this exists to prevent a YouTube video from
+				//being downloaded by user and played, then played again by url
+				//or being downloaded twice in quick succession
+				if (this.musicHashIsUnique(musicHash)) {
+					return {
+						...music,
+						hash: musicHash,
+						stream: false,
+					};
+				} else {
+					throw new UniqueError(ContentType.Music);
+				}
 
 			} else { //just stream it because it's so big
-				itemData.music.stream = true;
+				return {
+					...music,
+					hash: undefined,
+					stream: true,
+				};
 			}
 		} else {
-			return Promise.resolve()
-			.then(() => utils.fileHash(itemData.music.path))
-			.then((resultHash) => {
-				//validate by music hash
-				let musicHash = resultHash.toString();
-				if (this.musicHashIsUnique(musicHash)) {
-					itemData.music.hash = musicHash;
-				} else {
-					throw new UniqueError(ContentType.music);
-				}
-			});
+			//validate by music hash
+			const musicHash = await utils.fileHash(music.path);
+			if (this.musicHashIsUnique(musicHash)) {
+				return {
+					...music,
+					hash: musicHash,
+					stream: false,
+				};
+			} else {
+				throw new UniqueError(ContentType.Music);
+			}
 		}
 	}
 
-	tryPrepPicture(itemData) {
-		if (!itemData.pic.exists) return Promise.resolve();
+	private async tryPrepPicture(pic: NoPic | FilePic | UrlPic): Promise<CompletePicture> {
+		if (!pic.exists) {
+			return {
+				...pic,
+				hash: undefined,
+			};
+		}
 
 		//we may already have the picture downloaded, but we always need to check the uniqueness
 
-		let promPic;
+		let pathOnDisk: string;
+		let title: string;
 
-		if (itemData.pic.isUrl) {
+		if (pic.isUrl) {
 			const npp = this.nextPicPath();
-			promPic = this.downloadPic(itemData.pic.path, npp).then((picInfo) => {
-				itemData.pic.path = npp;
-				itemData.pic.title = picInfo.title;
-			});
+			const picInfo = await this.downloadPic(pic.path, npp);
 
+			pathOnDisk = npp;
+			title = picInfo.title;
 		} else {
-			promPic = Promise.resolve();
+			pathOnDisk = pic.path;
+			title = pic.title;
 		}
 
-		return promPic
-		.then(() => utils.fileHash(itemData.pic.path))
-		.then((picHash) => {
-			if (this.picHashIsUnique(picHash)) {
-				itemData.pic.hash = picHash;
-			} else {
-				throw new UniqueError(ContentType.pic);
-			}
-		});
+		const picHash = await utils.fileHash(pathOnDisk);
+
+		if (this.picHashIsUnique(picHash)) {
+			return {
+				...pic,
+				path: pathOnDisk,
+				title,
+				hash: picHash,
+			};
+
+		} else {
+			throw new UniqueError(ContentType.Picture);
+		}
 	}
 
-	ytIdIsUnique(id) {
+	ytIdIsUnique(id: string): boolean {
 		let lastPlayed = this.ytIds[id];
 		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff * 1000 < new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
 	}

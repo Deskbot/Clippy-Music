@@ -3,9 +3,9 @@ import * as fs from 'fs';
 import * as consts from './consts';
 
 export class IdFactory {
-	private nextId;
+	private nextId: number;
 
-	constructor(startingId) {
+	constructor(startingId?: number) {
 		if (typeof startingId != 'undefined') {
 			console.log('Using suspended ID Factory');
 			this.nextId = startingId;
@@ -16,11 +16,11 @@ export class IdFactory {
 
 	//static
 
-	static restore() {
-		let fileContent;
+	static restore(): number | undefined {
+		let fileContent: string;
 
 		try {
-			fileContent = fs.readFileSync(consts.files.idFactory);
+			fileContent = fs.readFileSync(consts.files.idFactory).toString();
 			console.log('Reading suspended ID Factory');
 
 		} catch (e) {

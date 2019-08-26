@@ -7,7 +7,6 @@ import * as opt from './options';
 import * as utils from './lib/utils';
 
 import { PasswordService } from './service/PasswordService';
-import { startHttpService } from './service/HttpService';
 
 // prompt settings
 prompt.colors = false;
@@ -28,7 +27,7 @@ function main() {
 	}).catch(utils.reportError);
 }
 
-function chooseAdminPassword() {
+function chooseAdminPassword(): Promise<string> {
 	return new Promise((resolve, reject) => {
 		prompt.start(promptOpts);
 
@@ -100,9 +99,9 @@ function setUpAdmin(): Promise<void> {
 function setUpDirs() {
 	utils.mkdirSafelySync(opt.storageDir, 0o777);
 
-	for (let key in consts.dirs) {
-		utils.mkdirSafelySync(consts.dirs[key], 0o777);
-	}
+	Object.values(consts.dirs).forEach(dir => {
+		utils.mkdirSafelySync(dir, 0o777);
+	});
 }
 
 function setUpControls() {
@@ -152,5 +151,6 @@ function setUpControls() {
 }
 
 function setUpServices() {
+	const { startHttpService } = require('./service/HttpService');
 	startHttpService();
 }

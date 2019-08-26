@@ -6,6 +6,17 @@ This list is in a rough order of priority.
 List
 ----
 
+* add strictness
+    * "noImplicitAny": true,
+    * test everything works
+    * test delete-content ws request where
+* improve play log format
+* does itemdata definitely have a title? when is it added for yt downloads
+* extracting picname from downloaded pic could be better
+* commas at the end of interface lines
+* consistent double quotes
+* move static methods to services
+* I could use a custom defer class instead of using q
 * Barringer's Bucketing system
     * add bucketing type to options
     * integrate the new bucketing object in every location with an if to decide which queue
@@ -13,8 +24,6 @@ List
     * render new kind of bucketing on the front
     * refactor to not use ifs everywhere
     * when using ClippyQueue see if we can avoid getting the duration before playing with or just don't count the seconds actually played
-* add strictness
-    * "noImplicitAny": true,
 * add eog command to options and its arguments
     * rename existing path options with "???command"
 * Reddit support

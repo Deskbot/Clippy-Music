@@ -1,41 +1,57 @@
 export interface UploadData {
+    duration?: number;
     id?: number;
     userId?: string;
-    music: {
-        isUrl: boolean | null,
-        title: string | null,
-        path: string | null,
-        stream: boolean,
-        ytId?: string,
-    },
-    pic: {
-        exists: boolean,
-        isUrl: boolean | null,
-        title: string | null,
-        path: string | null,
-    },
-    duration: number | null,
-    startTime: string | null,
-    endTime: string | null,
+    music: UrlMusic | FileMusic;
+    pic: UrlPic | FilePic | NoPic;
+    startTime: number | null;
+    endTime: number | null;
 };
 
-export interface ItemData {
+export interface UrlMusic {
+    isUrl: true;
+    path: string;
+    title?: string;
+    ytId?: string;
+}
+
+export interface FileMusic {
+    isUrl: false;
+    path: string;
+    title: string;
+}
+
+export interface UrlPic {
+    exists: true;
+    isUrl: true;
+    path: string;
+    title?: string;
+}
+
+export interface FilePic {
+    exists: true;
+    isUrl: false;
+    path: string;
+    title: string;
+}
+
+export interface NoPic {
+    exists: false;
+    isUrl: undefined;
+    path: undefined;
+    title: undefined;
+}
+
+export interface UploadDataWithId extends UploadData {
     id: number;
     userId: string;
-    music: {
-        isUrl: boolean | null,
-        title: string | null,
-        path: string | null,
-        stream: boolean,
-        ytId?: string,
-    },
-    pic: {
-        exists: boolean,
-        isUrl: boolean | null,
-        title: string | null,
-        path: string | null,
-    },
-    duration: number | null,
-    startTime: string | null,
-    endTime: string | null,
+}
+
+export interface UploadDataWithIdTitleDuration extends UploadDataWithId {
+    duration: number;
+    music: TitledMusic;
+}
+
+export type TitledMusic = (UrlMusic | FileMusic) & {
+    title: string,
 };

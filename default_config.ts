@@ -37,10 +37,10 @@ export const config = {
 	dlPercentUpdateFreq: 250,
 
 	// maximum image file size, in bytes
-	imageSizeLimit: 100000000,
+	imageSizeLimit: 500000000,
 
 	// maximum music file size, in bytes
-	musicSizeLimit: 400000000,
+	musicSizeLimit: 500000000,
 
 	// maximum character length of nicknames
 	nicknameSizeLimit: 67,

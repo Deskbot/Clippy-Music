@@ -91,28 +91,26 @@ module.exports = {
     remove: () => {
         const q = new BarringerBuckets(1000);
 
-        const items = [
-            {
-                contentId: 1,
-                userId: 1,
-                duration: 900,
-            },
-            {
-                contentId: 2,
-                userId: 1,
-                duration: 900,
-            },
-            {
-                contentId: 3,
-                userId: 1,
-                duration: 900,
-            },
-            {
-                contentId: 4,
-                userId: 1,
-                duration: 900,
-            }
-        ];
+        const items = [{
+            id: 1,
+            userId: 1,
+            duration: 900,
+        },
+        {
+            id: 2,
+            userId: 1,
+            duration: 900,
+        },
+        {
+            id: 3,
+            userId: 1,
+            duration: 900,
+        },
+        {
+            id: 4,
+            userId: 1,
+            duration: 900,
+        }];
 
         for (const item of items) {
             q.add(item);
@@ -123,7 +121,7 @@ module.exports = {
         const allItems = q.getBuckets().reduce((allItems, bucket) => allItems.concat(bucket));
 
         assert(!allItems.find(item => item.contentId === 4),
-            "The removed item is not the queue."
+            "The removed item is not in the queue."
         );
     },
 

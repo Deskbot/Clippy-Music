@@ -1,4 +1,5 @@
 import * as debug from '../lib/debug';
+import ws = require("ws");
 import { WebSocketHandler } from '../lib/WebSocketHandler';
 
 import { ContentManagerService as ContentService } from './ContentService';
@@ -7,10 +8,10 @@ import { UserRecordService } from './UserRecordService';
 
 //really a namespace where all functions are hoisted
 class Api {
-	private wsh;
+	private wsh: WebSocketHandler;
 
 	constructor() {
-		const onConnect = (soc, id) => {
+		const onConnect = (soc: ws, id: string) => {
 			//save user
 			UserRecordService.add(id);
 			UserRecordService.setWS(id, soc);
@@ -24,13 +25,13 @@ class Api {
 			//send queue
 			this.sendQueue(soc);
 			this.sendDlQueue(soc, id);
-		}
+		};
 
-		const onMessage = (soc, id, data, flags) => {
+		const onMessage = (soc: ws, id: string, data: any) => {
 			const dataObj = JSON.parse(data);
 
 			if (dataObj.type === 'delete-content') {
-				if (!ContentService.remove(this.wsh.socToUserId(soc), dataObj.contentId)) {
+				if (!ContentService.remove(id, dataObj.contentId)) {
 					soc.send(JSON.stringify({
 						type: dataObj.type,
 						success: false,
@@ -45,27 +46,22 @@ class Api {
 					reason: 'The server did not recognise the type of message you were trying to send.',
 				}));
 			}
-		}
+		};
 
-		const onClose = (soc, id) => {
+		const onClose = (soc: ws, id: string) => {
 			UserRecordService.unsetWS(id, soc);
-		}
-
-		const socToUserId = (soc) => {
-			return soc._socket.remoteAddress;
-		}
+		};
 
 		this.wsh = new WebSocketHandler(
 			onConnect,
 			onMessage,
 			onClose,
-			socToUserId,
 		);
 	}
 
 	//message related
 
-	sendMessage(socs, type, mes) {
+	sendMessage(socs: ws[] | undefined, type: string, mes: any) {
 		if (!socs) {
 			debug.log('no socs given');
 			debug.trace();
@@ -81,16 +77,16 @@ class Api {
 		this.wsh.sendToMany(socs, message);
 	}
 
-	sendNickname(soc, nickname) {
-		this.sendMessage(soc, 'nickname', nickname);
+	sendNickname(soc: ws, nickname: string) {
+		this.sendMessage([soc], 'nickname', nickname);
 	}
 
-	sendNicknameToUser(userId, nickname) {
+	sendNicknameToUser(userId: string, nickname: string) {
 		const socs = UserRecordService.getSockets(userId);
 		for (let soc of socs) this.sendNickname(soc, nickname);
 	}
 
-	sendBanned(socs) {
+	sendBanned(socs: ws | ws[]) {
 		if (!socs) {
 			debug.log('no socs given');
 			debug.trace();
@@ -106,12 +102,12 @@ class Api {
 		this.wsh.sendToMany(socs, message);
 	}
 
-	sendDlQueue(soc, userId) {
+	sendDlQueue(soc: ws, userId: string) {
 		const queue = ProgressQueueService.getQueue(userId);
-		if (queue) WebSocketService.sendMessage(soc, 'dl-list', queue);
+		if (queue) WebSocketService.sendMessage([soc], 'dl-list', queue);
 	}
 
-	broadcastMessage(type, mes) {
+	broadcastMessage(type: string, mes: string) {
 		const message = JSON.stringify({
 			type: type,
 			message: mes,
@@ -130,7 +126,7 @@ class Api {
 		};
 	}
 
-	sendQueue(socs) {
+	sendQueue(socs: ws | ws[]) {
 		if (!socs) {
 			debug.log('no socs given');
 			debug.trace();

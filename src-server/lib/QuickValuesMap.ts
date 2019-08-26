@@ -5,11 +5,11 @@
 */
 
 export class QuickValuesMap<K,V> extends Map<K,V> {
-    private quickValuesArr;
-    private valuesNeedUpdating;
+    private quickValuesArr: V[];
+    private valuesNeedUpdating: boolean;
 
-    constructor(oldMap?) {
-        super(oldMap);
+    constructor() {
+        super();
         this.quickValuesArr = [];
         this.valuesNeedUpdating = true;
     }
@@ -19,13 +19,13 @@ export class QuickValuesMap<K,V> extends Map<K,V> {
         this.valuesNeedUpdating = true;
     }
 
-    delete(key): boolean {
+    delete(key: K): boolean {
         const isSuccess = super.delete(key);
         this.valuesNeedUpdating = true;
         return isSuccess;
     }
 
-    set(key, val): this {
+    set(key: K, val: V): this {
         super.set(key,val);
         this.valuesNeedUpdating = true;
         return this;

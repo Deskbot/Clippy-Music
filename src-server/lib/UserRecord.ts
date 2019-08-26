@@ -1,14 +1,27 @@
 import * as fs from 'fs';
+import ws = require("ws");
 
 import * as consts from './consts';
 
 const recordFilePath = consts.files.users;
 
-export class UserRecord {
-	private idToUser;
-	private banlist;
+interface User {
+	nickname: string,
+	socs: ws[],
+}
 
-	constructor(startState) {
+export class UserRecord {
+	private idToUser: {
+		[id: string]: User
+	};
+	private banlist: string[];
+
+	constructor(startState?: {
+		banlist: string[],
+		idToUser: {
+			[id: string]: User
+		},
+	}) {
 		this.idToUser = {}; //ip -> (nickname,socs)
 		this.banlist = [];
 
@@ -35,45 +48,41 @@ export class UserRecord {
 		let obj, recordContent;
 		let success = true;
 
-		//I'm trying some weird control flow because I don't like try catch. Usually there's only 1 line you want to try and you don't want to assume something has been caught for the wrong reasons.
 		try {
-			success = true && success;
-			recordContent = fs.readFileSync(recordFilePath);
+			recordContent = fs.readFileSync(recordFilePath).toString();
 
 		} catch (e) {
-			success = false && success;
 			console.log('No suspended user record found. This is ok.');
+			return null
 		}
 
-		if (success) {
-			console.log('Reading suspended user record');
+		console.log('Reading suspended user record');
 
-			try {
-				success = true && success;
-				obj = JSON.parse(recordContent);
+		try {
+			success = true && success;
+			obj = JSON.parse(recordContent);
 
-			} catch (e) {
-				success = false && success;
-				if (e instanceof SyntaxError) {
-					console.error('Syntax error in suspendedUserRecord.json file.');
-					console.error(e);
-					console.error('Ignoring suspended content manager');
-				} else {
-					throw e;
-				}
+		} catch (e) {
+			success = false;
+			if (e instanceof SyntaxError) {
+				console.error('Syntax error in suspendedUserRecord.json file.');
+				console.error(e);
+				console.error('Ignoring suspended content manager');
+			} else {
+				throw e;
 			}
 		}
 
 		return success ? obj : null;
 	}
 
-	static get suspendedFilePath() {
+	static get suspendedFilePath(): string {
 		return recordFilePath;
 	}
 
 	//object methods
 
-	add(id, soc?) {
+	add(id: string, soc?: ws) {
 		if (!this.isUser(id)) {
 			this.idToUser[id] = {
 				nickname: id,
@@ -82,73 +91,73 @@ export class UserRecord {
 		}
 	}
 
-	addBan(id) {
+	addBan(id: string) {
 		if (!this.isBanned(id)) this.banlist.push(id); //no duplicates in list
 	}
 
-	get(id) {
+	get(id: string) {
 		return this.idToUser[id];
 	}
 
-	getNickname(id) {
+	getNickname(id: string): string {
 		const user = this.idToUser[id];
-		return user ? user.nickname : null;
+		return user.nickname;
 	}
 
-	getSockets(id) {
+	getSockets(id: string): ws[] {
 		return this.idToUser[id].socs;
 	}
 
-	isBanned(id) {
+	isBanned(id: string): boolean {
 		return this.banlist.includes(id);
 	}
 
-	isUser(id) {
+	isUser(id: string): boolean {
 		return this.idToUser.hasOwnProperty(id);
 	}
 
-	removeBan(id) {
+	removeBan(id: string) {
 		this.banlist.splice(this.banlist.indexOf(id), 1);
 	}
 
-	setNickname(id, nickname) {
+	setNickname(id: string, nickname: string) {
 		this.idToUser[id].nickname = nickname;
 	}
 
-	setWS(id, soc) {
+	setWS(id: string, soc: ws) {
 		this.idToUser[id].socs.push(soc);
 	}
 
 	store() {
 		console.log("Storing user record...");
 
+		const idToUser: {
+			[id: string]: User
+		} = {};
+
+		for (let key in this.idToUser) {
+			if (this.idToUser.hasOwnProperty(key)) {
+				idToUser[key] = {
+					nickname: this.idToUser[key].nickname,
+					socs: []
+				};
+			}
+		}
+
 		const thisObj = {
-			idToUser: (() => {
-				const obj = {};
-
-				for (let key in this.idToUser) {
-					if (this.idToUser.hasOwnProperty(key)) {
-						obj[key] = {
-							nickname: this.idToUser[key].nickname,
-						};
-					}
-				}
-
-				return obj;
-			})(),
-
 			banlist: this.banlist,
+			idToUser,
 		};
 
 		fs.writeFileSync(recordFilePath, JSON.stringify(thisObj));
 	}
 
-	unsetWS(id, soc) {
+	unsetWS(id: string, soc: ws) {
 		const socs = this.idToUser[id].socs;
 		socs.splice(socs.indexOf(soc), 1);
 	}
 
-	whoHasNickname(nn): string[] {
+	whoHasNickname(nn: string): string[] {
 		const ids: string[] = [];
 
 		for (let uid in this.idToUser) {

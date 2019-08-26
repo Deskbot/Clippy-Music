@@ -11,37 +11,39 @@ import { WebSocketService } from './WebSocketService';
 
 import * as consts from '../lib/consts';
 import * as debug from '../lib/debug';
-import * as time from '../lib/time';
 import * as opt from '../options';
 import * as utils from '../lib/utils';
 
-import { getFileDuration } from '../lib/music';
-import { BannedError, FileUploadError, UniqueError, YTError } from '../lib/errors';
-import { UploadData } from '../types/UploadData';
+import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingError } from '../lib/errors';
+import { UploadData, UrlPic, NoPic, FilePic, FileMusic, UrlMusic, UploadDataWithId } from '../types/UploadData';
 
 type RequestWithFormData = express.Request & {
 	fields: formidable.Fields;
 	files: formidable.Files;
 };
 
-function adminCredentialsRequired(req, res, next) {
-	if (!PasswordService.isSet()) {
+function adminCredentialsRequired(req: RequestWithFormData, res: express.Response, next: () => void) {
+	const passwordService = PasswordService.get();
+	if (passwordService == null) {
 		res.status(400).end('The admin controls can not be used because no admin password was set.\n');
-	} else if (!PasswordService.get()!.verify(req.fields.password)) {
-		res.status(400).end('Admin password incorrect.\n');
-	} else {
+	} else if (passwordService.verify(req.fields.password as string)) {
 		next();
+	} else {
+		res.status(400).end('Admin password incorrect.\n');
 	}
 }
 
-function getFileForm(req, generateProgressHandler) {
-	const defer = q.defer();
+function getFileForm(
+	req: express.Request,
+	generateProgressHandler: (file: formidable.File) => ((soFar: number, total: number) => void)
+): q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]> {
+	const defer = q.defer<[formidable.IncomingForm, formidable.Fields, formidable.Files]>();
 
 	const form = new formidable.IncomingForm();
 	form.maxFileSize = consts.biggestFileSizeLimit;
 	form.uploadDir = consts.dirs.httpUpload;
 
-	let lastFileField;
+	let lastFileField: string | undefined;
 	let files: formidable.File[] = [];
 
 	form.on('fileBegin', (fieldName) => {
@@ -75,7 +77,7 @@ function getFileForm(req, generateProgressHandler) {
 
 	form.on('fileBegin', (fieldName, file) => {
 		if (fieldName === 'music-file' && file && file.name) {
-			const onProgress = generateProgressHandler(defer.promise, file);
+			const onProgress = generateProgressHandler(file);
 			form.on('progress', onProgress);
 		}
 	});
@@ -83,7 +85,7 @@ function getFileForm(req, generateProgressHandler) {
 	return defer.promise;
 }
 
-function getFormMiddleware(req, res, next) {
+function getFormMiddleware(req: express.Request, res: express.Response, next: () => void) {
 	const form = new formidable.IncomingForm();
 
 	form.parse(req, (err, fields, files) => {
@@ -92,8 +94,9 @@ function getFormMiddleware(req, res, next) {
 			res.status(500).end(err.message);
 
 		} else {
-			req.fields = fields;
-			req.files = files;
+			const modifiedReq = req as RequestWithFormData;
+			modifiedReq.fields = fields;
+			modifiedReq.files = files;
 
 			debug.log('fields', fields);
 
@@ -102,13 +105,13 @@ function getFormMiddleware(req, res, next) {
 	});
 }
 
-function handleFileUpload(req, contentId) {
-	const generateProgressHandler = (promise, file) => {
+function handleFileUpload(req: express.Request, contentId: number): q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]> {
+	const generateProgressHandler = (file: formidable.File) => {
 		ProgressQueueService.setTitle(req.ip, contentId, file.name);
 
 		const updater = ProgressQueueService.createUpdater(req.ip, contentId);
 
-		return (sofar, total) => {
+		return (sofar: number, total: number) => {
 			updater(sofar / total);
 		};
 	}
@@ -117,7 +120,7 @@ function handleFileUpload(req, contentId) {
 	return getFileForm(req, generateProgressHandler);
 }
 
-function handlePotentialBan(userId) {
+function handlePotentialBan(userId: string) {
 	return new Promise((resolve, reject) => {
 		if (UserRecordService.isBanned(userId)) {
 			WebSocketService.sendBanned(UserRecordService.getSockets(userId));
@@ -128,38 +131,24 @@ function handlePotentialBan(userId) {
 	});
 }
 
-function makeImageTooBigError(files) {
+function makeImageTooBigError(files: formidable.File[]) {
 	return new FileUploadError(`The image file you gave was too large (exceeded the limit of ${consts.imageSizeLimStr}).`, files);
 }
 
-function makeMusicTooBigError(files) {
+function makeMusicTooBigError(files: formidable.File[]) {
 	return new FileUploadError(`The music file you gave was too large (exceeded the limit of ${consts.musicSizeLimStr}).`, files);
 }
 
-function noRedirect(req) {
-	return req.fields.ajax || req.headers['user-agent'].includes('curl');
+function noRedirect(req: RequestWithFormData) {
+	return req.fields.ajax || (req.headers['user-agent'] as string).includes('curl');
 }
 
-function parseUploadForm(form, fields, files): Promise<UploadData> {
+function parseUploadForm(
+	form: formidable.IncomingForm,
+	fields: formidable.Fields,
+	files: formidable.Files
+): Promise<UploadData> {
 	return new Promise((resolve, reject) => {
-		const uploadInfo: UploadData = {
-			music: {
-				isUrl: null,
-				title: null,
-				path: null,
-				stream: false,
-			},
-			pic: {
-				exists: false,
-				isUrl: null,
-				title: null,
-				path: null,
-			},
-			duration: null,
-			startTime: null,
-			endTime: null,
-		};
-
 		if (form.type != 'multipart') {
 			throw new FileUploadError('Multipart form type required. Received "' + form.type + '" instead.', []);
 		}
@@ -167,10 +156,15 @@ function parseUploadForm(form, fields, files): Promise<UploadData> {
 		const musicFile = files['music-file'];
 		const picFile = files['image-file'];
 
+		let music: FileMusic | UrlMusic;
+
 		//music & video
 		if (fields['music-url']) {
-			uploadInfo.music.isUrl = true;
-			uploadInfo.music.path = fields['music-url'];
+			music = {
+				isUrl: true,
+				path: fields['music-url'] as string,
+			};
+
 			if (musicFile) utils.deleteFile(musicFile.path);
 
 		} else {
@@ -197,16 +191,27 @@ function parseUploadForm(form, fields, files): Promise<UploadData> {
 			}
 
 			//success
-			uploadInfo.music.isUrl = false;
-			uploadInfo.music.path = musicFile.path;
-			uploadInfo.music.title = utils.sanitiseFilename(musicFile.name);
+			music = {
+				isUrl: false,
+				path: musicFile.path,
+				title: utils.sanitiseFilename(musicFile.name),
+			};
 		}
+
+		let pic: UrlPic | FilePic | NoPic = {
+			exists: false,
+			isUrl: undefined,
+			path: undefined,
+			title: undefined,
+		};
 
 		//pic
 		if (fields['image-url']) {
-			uploadInfo.pic.exists = true;
-			uploadInfo.pic.isUrl = true;
-			uploadInfo.pic.path = fields['image-url'];
+			pic = {
+				exists: true,
+				isUrl: true,
+				path: fields['image-url'] as string,
+			};
 
 			if (picFile) utils.deleteFile(picFile.path);
 
@@ -224,28 +229,39 @@ function parseUploadForm(form, fields, files): Promise<UploadData> {
 				}
 
 				//success
-				uploadInfo.pic.exists = true;
-				uploadInfo.pic.isUrl = false;
-				uploadInfo.pic.path = picFile.path;
-				uploadInfo.pic.title = utils.sanitiseFilename(picFile.name);
+				pic = {
+					exists: true,
+					isUrl: false,
+					path: picFile.path,
+					title: utils.sanitiseFilename(picFile.name),
+				};
 
 			} else { //empty picture given, as is typical with multipart forms where no picture is chosen
 				utils.deleteFile(picFile.path);
 			}
-		} else { //no file or url
-			uploadInfo.pic.exists = false;
 		}
 
-		let time;
+		let time: string;
+		let startTime: number | null = null;
+		let endTime: number | null = null;
 
-		if (time = fields['start-time']) uploadInfo.startTime = time;
-		if (time = fields['end-time'])   uploadInfo.endTime   = time;
+		if (time = fields['start-time'] as string) {
+			startTime = utils.timeCodeToSeconds(time);
+		}
+		if (time = fields['end-time'] as string) {
+			endTime = utils.timeCodeToSeconds(time);
+		}
 
-		return resolve(uploadInfo);
+		resolve({
+			music,
+			pic,
+			startTime,
+			endTime,
+		});
 	});
 }
 
-function recordUserMiddleware(req, res, next) {
+function recordUserMiddleware(req: express.Request, res: express.Response, next: () => void) {
 	if (!UserRecordService.isUser(req.ip)) UserRecordService.add(req.ip);
 
 	const expiryDate = new Date();
@@ -291,53 +307,47 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 	handlePotentialBan(req.ip) //assumes ip address is userId
 	.then(() => ProgressQueueService.add(req.ip, contentId))
 	.then(() => handleFileUpload(req, contentId))
-	.then(utils.spread((form, fields, files) => { //nesting in order to get the scoping right
-		return parseUploadForm(form, fields, files)
-		.then((uplData) => {
-			uplData.id = contentId;
-			uplData.userId = req.ip;
+	.then(async ([form, fields, files]) => { //nesting in order to get the scoping right
+		let uplData: UploadDataWithId = {
+			...await parseUploadForm(form, fields, files),
+			id: contentId,
+			userId: req.ip,
+		};
 
-			if (uplData.music.isUrl) {
-				ProgressQueueService.setTitle(req.ip, contentId, uplData.music.path, true);
+		if (uplData.music.isUrl) {
+			ProgressQueueService.setTitle(req.ip, contentId, uplData.music.path, true);
+			// the title and duration are set later by `ContentService.add(uplData)`
+		}
 
-				// the title and duration are set later by `ContentService.add(uplData)`
+		let itemData;
 
-				return uplData;
-
+		try {
+			itemData = await ContentService.add(uplData);
+		} catch (err) {
+			if (err instanceof DurationFindingError) {
+				console.error("Error reading discerning the duration of a music file.", err, uplData.music.path);
+				throw new FileUploadError(
+					`I could not discern the duration of the music file you uploaded (${uplData.music.title}).`,
+					Object.values(files)
+				);
 			} else {
-				// read the music file to determine its duration
-				return getFileDuration(uplData.music.path)
-					.then((duration) => {
-						uplData.duration = time.clipTimeByStartAndEnd(Math.floor(duration), uplData.startTime, uplData.endTime);
-						return uplData;
-					})
-					.catch((err) => {
-						console.error("Error reading discerning the duration of a music file.", err, uplData.music.path);
-						throw new FileUploadError(
-							`I could not discern the duration of the music file you uploaded (${uplData.music.title}).`,
-							Object.values(files)
-						);
-					});
+				throw err;
 			}
-		})
-		.then((uplData) => {
-			return ContentService.add(uplData);
-		})
-		.then((uplData) => {
-			if (uplData.music.isUrl) {
-				ProgressQueueService.setTitle(req.ip, contentId, uplData.music.title);
-			}
+		}
 
-			debug.log("successful upload: ", uplData);
+		if (itemData.music.isUrl) {
+			ProgressQueueService.setTitle(req.ip, contentId, itemData.music.title);
+		}
 
-			if (fields.ajax || (req.headers['user-agent'] && req.headers['user-agent'].includes('curl'))) {
-				res.status(200).end('Success\n');
-			} else {
-				res.redirect('/');
-			}
-		});
-	}))
-	.catch((err) => {
+		debug.log("successful upload: ", uplData);
+
+		if (fields.ajax || (req.headers['user-agent'] && req.headers['user-agent'].includes('curl'))) {
+			res.status(200).end('Success\n');
+		} else {
+			res.redirect('/');
+		}
+	})
+	.catch(err => {
 		if (err instanceof FileUploadError) {
 			debug.log("deleting these bad uploads: ", err.files);
 
@@ -401,7 +411,7 @@ app.post('/api/download/cancel', (req: RequestWithFormData, res) => {
 
 //POST variable: nickname
 app.post('/api/nickname/set', recordUserMiddleware, (req: RequestWithFormData, res) => {
-	const nickname = utils.sanitiseNickname(req.fields.nickname);
+	const nickname = utils.sanitiseNickname(req.fields.nickname as string);
 
 	if (nickname.length === 0) {
 		res.status(400).end('Empty nicknames are not allowed.');
@@ -424,19 +434,19 @@ app.post('/api/nickname/set', recordUserMiddleware, (req: RequestWithFormData, r
 //POST variable: password, id, nickname
 app.post('/api/ban/add', adminCredentialsRequired, (req: RequestWithFormData, res) => {
 	if (req.fields.id) {
-		if (!UserRecordService.isUser(req.fields.id)) {
+		if (!UserRecordService.isUser(req.fields.id as string)) {
 			res.status(400).end('That user doesn\'t exist.\n');
 			return;
 
 		} else {
-			UserRecordService.addBan(req.fields.id);
-			ContentService.purgeUser(req.fields.id);
+			UserRecordService.addBan(req.fields.id as string);
+			ContentService.purgeUser(req.fields.id as string);
 			if (noRedirect(req)) res.status(200).end('Success\n');
 			else                 res.redirect('/');
 		}
 
 	} else if (req.fields.nickname) {
-		const uids = UserRecordService.whoHasNickname(utils.sanitiseNickname(req.fields.nickname));
+		const uids = UserRecordService.whoHasNickname(utils.sanitiseNickname(req.fields.nickname as string));
 
 		if (uids.length === 0) {
 			res.status(400).end('That user doesn\'t exist.\n');
@@ -460,18 +470,18 @@ app.post('/api/ban/add', adminCredentialsRequired, (req: RequestWithFormData, re
 //POST variable: password, id
 app.post('/api/ban/remove', adminCredentialsRequired, (req: RequestWithFormData, res) => {
 	if (req.fields.id) {
-		if (!UserRecordService.isUser(req.fields.id)) {
+		if (!UserRecordService.isUser(req.fields.id as string)) {
 			res.status(400).end('That user doesn\'t exist.\n');
 			return;
 
 		} else {
-			UserRecordService.removeBan(req.fields.id);
+			UserRecordService.removeBan(req.fields.id as string);
 			if (noRedirect(req)) res.status(200).end('Success\n');
 			else                 res.redirect('/');
 		}
 
 	} else if (req.fields.nickname) {
-		const uids = UserRecordService.whoHasNickname(utils.sanitiseNickname(req.fields.nickname));
+		const uids = UserRecordService.whoHasNickname(utils.sanitiseNickname(req.fields.nickname as string));
 		if (uids.length === 0) {
 			res.status(400).end('That user doesn\'t exist.\n');
 			return;

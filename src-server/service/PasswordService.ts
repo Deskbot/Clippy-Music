@@ -7,11 +7,7 @@ class Api {
 		return this.container;
 	}
 
-	isSet() {
-		return this.container !== null;
-	}
-
-	set(pw) {
+	set(pw: string) {
 		this.container = new PasswordContainer(pw);
 	}
 }
