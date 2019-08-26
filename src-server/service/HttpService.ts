@@ -25,11 +25,11 @@ type RequestWithFormData = express.Request & {
 function adminCredentialsRequired(req: RequestWithFormData, res: express.Response, next: () => void) {
 	const passwordService = PasswordService.get();
 	if (passwordService == null) {
-		res.status(400).end('Admin password incorrect.\n');
-	} else if (passwordService.verify(req.fields.password as string)) {
 		res.status(400).end('The admin controls can not be used because no admin password was set.\n');
-	} else {
+	} else if (passwordService.verify(req.fields.password as string)) {
 		next();
+	} else {
+		res.status(400).end('Admin password incorrect.\n');
 	}
 }
 

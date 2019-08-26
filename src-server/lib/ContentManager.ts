@@ -257,7 +257,7 @@ export class ContentManager extends EventEmitter {
 					...uplData.music,
 				},
 				pic: {
-					...uplData.pic
+					...uplData.pic,
 				},
 				duration: time.clipTimeByStartAndEnd(Math.floor(duration), uplData.startTime, uplData.endTime),
             };
