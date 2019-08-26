@@ -27,8 +27,8 @@ export class BannedError extends Error {
 }
 
 export class CancelError extends Error {
-	constructor(message: string) {
-		super(message);
+	constructor(url: string) {
+		super(`Download cancelled (${url}`);
 	}
 }
 

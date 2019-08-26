@@ -10,6 +10,7 @@ List
     * "noImplicitAny": true,
     * test everything works
     * test delete-content ws request where
+* improve play log format
 * does itemdata definitely have a title? when is it added for yt downloads
 * extracting picname from downloaded pic could be better
 * commas at the end of interface lines

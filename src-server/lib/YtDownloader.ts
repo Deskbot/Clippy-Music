@@ -72,7 +72,7 @@ export class YtDownloader {
 			defer.resolve();
 		}, (e) => {
 			if (head.cancelled) {
-				defer.reject(new CancelError(ContentType.Music));
+				defer.reject(new CancelError(vid));
 			} else {
 				defer.reject(e);
 			}
@@ -94,8 +94,6 @@ export class YtDownloader {
 		this.progressQueue.addAutoUpdate(uid, cid, () => {
 			updater(percentReader.get());
 		});
-
-		this.progressQueue.addCancelFunc(uid, cid, () => this.tryCancel(uid, cid));
 	}
 
 	getQueue(uid: string): unknown[] {
@@ -128,6 +126,8 @@ export class YtDownloader {
 		//if the queue was empty just now, need to initiate download sequence
 		//otherwise the download queue is already being worked on
 		if (queue.length === 1) this.downloadNext(userId);
+
+		this.progressQueue.addCancelFunc(userId, cid, () => this.tryCancel(userId, cid));
 
 		return defer.promise;
 	}
