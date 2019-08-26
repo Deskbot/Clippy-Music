@@ -1,3 +1,4 @@
+const fs = require("fs");
 const glob = require("glob");
 const process = require("process");
 
@@ -49,7 +50,11 @@ function escape(str, badChars) {
 function getFiles(dir) {
     dir = escape(dir, ["*", "(", ")", "!", "?", "@", "[", "]", "^", "+"]);
 
-    return glob.sync(`${dir}/**/*`, {
+    const globStr = fs.lstatSync(dir).isDirectory()
+        ? dir + "/**"
+        : dir;
+
+    return glob.sync(globStr, {
         dot: true,
         nodir: true
     });
