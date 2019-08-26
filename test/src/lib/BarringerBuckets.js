@@ -92,22 +92,22 @@ module.exports = {
         const q = new BarringerBuckets(1000);
 
         const items = [{
-            contentId: 1,
+            id: 1,
             userId: 1,
             duration: 900,
         },
         {
-            contentId: 2,
+            id: 2,
             userId: 1,
             duration: 900,
         },
         {
-            contentId: 3,
+            id: 3,
             userId: 1,
             duration: 900,
         },
         {
-            contentId: 4,
+            id: 4,
             userId: 1,
             duration: 900,
         }];
@@ -115,11 +115,11 @@ module.exports = {
         for (const item of items) {
             q.add(item);
         }
-console.log(q);
+
         q.remove(4);
 
         const allItems = q.getBuckets().reduce((allItems, bucket) => allItems.concat(bucket));
-        console.log(q);
+
         assert(!allItems.find(item => item.contentId === 4),
             "The removed item is not in the queue."
         );
