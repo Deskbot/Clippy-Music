@@ -2,9 +2,13 @@ import * as debug from '../lib/debug';
 import ws = require("ws");
 import { WebSocketHandler } from '../lib/WebSocketHandler';
 
-import { ContentManagerService as ContentService } from './ContentService';
-import { ProgressQueueService } from './ProgressQueueService';
-import { UserRecordService } from './UserRecordService';
+import { ContentServiceGetter } from './ContentService';
+import { ProgressQueueServiceGetter } from './ProgressQueueService';
+import { UserRecordServiceGetter } from './UserRecordService';
+
+const ContentService = ContentServiceGetter.get();
+const ProgressQueueService = ProgressQueueServiceGetter.get();
+const UserRecordService = UserRecordServiceGetter.get();
 
 //really a namespace where all functions are hoisted
 class Api {

@@ -1,3 +1,8 @@
 import { UserRecord } from '../lib/UserRecord';
+import { MakeOnce } from '../lib/MakeOnce';
 
-export const UserRecordService = new UserRecord(UserRecord.recover());
+export const UserRecordServiceGetter = new (class extends MakeOnce<UserRecord> {
+    make(): UserRecord {
+        return new UserRecord(UserRecord.recover());
+    }
+})();
