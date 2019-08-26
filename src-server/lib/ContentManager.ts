@@ -633,7 +633,7 @@ export class ContentManager extends EventEmitter {
 			title = pic.title;
 		}
 
-		const picHash = await utils.fileHash(pic.path);
+		const picHash = await utils.fileHash(path);
 
 		if (this.picHashIsUnique(picHash)) {
 			return {
