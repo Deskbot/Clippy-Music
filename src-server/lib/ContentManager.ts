@@ -458,10 +458,6 @@ export class ContentManager extends EventEmitter {
 		return false;
 	}
 
-	run() {
-		this.emit('end'); //kick start the cycle of checking for things
-	}
-
 	startMusic(path: string, duration: number, startTime: number | null | undefined, endTime: number | null | undefined) {
 		const args = [duration + 's', opt.mpvPath, ...opt.mpvArgs, '--quiet', path];
 
