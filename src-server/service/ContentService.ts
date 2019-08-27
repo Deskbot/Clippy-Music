@@ -5,23 +5,39 @@ import { YtDownloader } from '../lib/YtDownloader';
 
 import * as utils from '../lib/utils';
 
-import { IdFactoryService } from './IdFactoryService';
-import { ProgressQueueService } from './ProgressQueueService';
-import { UserRecordService } from './UserRecordService';
+import { IdFactoryServiceGetter } from './IdFactoryService';
+import { ProgressQueueServiceGetter } from './ProgressQueueService';
+import { UserRecordServiceGetter } from './UserRecordService';
+import { MakeOnce } from '../lib/MakeOnce';
 
-export const ContentManagerService = new ContentManager(ContentManager.recover(), IdFactoryService, ProgressQueueService, UserRecordService, new YtDownloader(ProgressQueueService));
+export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> {
 
-//set up
-function play() {
-	const isNext = ContentManagerService.playNext();
+	protected make(): ContentManager {
+		const cm = new ContentManager(
+			ContentManager.recover(),
+			IdFactoryServiceGetter.get(),
+			ProgressQueueServiceGetter.get(),
+			UserRecordServiceGetter.get(),
+			new YtDownloader(ProgressQueueServiceGetter.get())
+		);
 
-	if (!isNext) {
-		q.delay(1000)
-		.then(play)
-		.catch(utils.reportError);
+		cm.on('end', () => this.play());
+
+		// start this asyncronously to prevent recursion
+		// also this.get() in this.play() can't return a value
+		// until this function exits the first time
+		setImmediate(() => this.play());
+
+		return cm;
 	}
-}
 
-ContentManagerService.on('end', play);
+	play() {
+		const isNext = this.get().playNext();
 
-ContentManagerService.run();
+		if (!isNext) {
+			q.delay(1000)
+				.then(() => this.play())
+				.catch(utils.reportError);
+		}
+	}
+})();

@@ -114,7 +114,7 @@ function setUpControls() {
 		console.log('Closing down Clippy-Music...');
 
 		ContentManagerService.store();
-		IdFactoryService.store();
+		IdFactoryService.get().store();
 		UserRecordService.store();
 
 		if (ContentManagerService.isPlaying()) {

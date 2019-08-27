@@ -2,11 +2,11 @@ import * as express from 'express';
 import * as formidable from 'formidable';
 import * as q from 'q';
 
-import { ContentManagerService as ContentService } from './ContentService';
-import { IdFactoryService } from './IdFactoryService';
-import { ProgressQueueService } from './ProgressQueueService';
+import { ContentServiceGetter } from './ContentService';
+import { IdFactoryServiceGetter } from './IdFactoryService';
+import { ProgressQueueServiceGetter } from './ProgressQueueService';
 import { PasswordService } from './PasswordService';
-import { UserRecordService } from './UserRecordService';
+import { UserRecordServiceGetter } from './UserRecordService';
 import { WebSocketService } from './WebSocketService';
 
 import * as consts from '../lib/consts';
@@ -16,6 +16,11 @@ import * as utils from '../lib/utils';
 
 import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingError } from '../lib/errors';
 import { UploadData, UrlPic, NoPic, FilePic, FileMusic, UrlMusic, UploadDataWithId } from '../types/UploadData';
+
+const ContentService = ContentServiceGetter.get();
+const IdFactoryService = IdFactoryServiceGetter.get();
+const ProgressQueueService = ProgressQueueServiceGetter.get();
+const UserRecordService = UserRecordServiceGetter.get();
 
 type RequestWithFormData = express.Request & {
 	fields: formidable.Fields;
@@ -107,9 +112,9 @@ function getFormMiddleware(req: express.Request, res: express.Response, next: ()
 
 function handleFileUpload(req: express.Request, contentId: number): q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]> {
 	const generateProgressHandler = (file: formidable.File) => {
-		ProgressQueueService.setTitle(req.ip, contentId, file.name);
+		ProgressQueueServiceGetter.get().setTitle(req.ip, contentId, file.name);
 
-		const updater = ProgressQueueService.createUpdater(req.ip, contentId);
+		const updater = ProgressQueueServiceGetter.get().createUpdater(req.ip, contentId);
 
 		return (sofar: number, total: number) => {
 			updater(sofar / total);
@@ -122,8 +127,8 @@ function handleFileUpload(req: express.Request, contentId: number): q.Promise<[f
 
 function handlePotentialBan(userId: string) {
 	return new Promise((resolve, reject) => {
-		if (UserRecordService.isBanned(userId)) {
-			WebSocketService.sendBanned(UserRecordService.getSockets(userId));
+		if (UserRecordServiceGetter.get().isBanned(userId)) {
+			WebSocketService.sendBanned(UserRecordServiceGetter.get().getSockets(userId));
 			return reject(new BannedError());
 		}
 
@@ -262,7 +267,7 @@ function parseUploadForm(
 }
 
 function recordUserMiddleware(req: express.Request, res: express.Response, next: () => void) {
-	if (!UserRecordService.isUser(req.ip)) UserRecordService.add(req.ip);
+	if (!UserRecordServiceGetter.get().isUser(req.ip)) UserRecordServiceGetter.get().add(req.ip);
 
 	const expiryDate = new Date();
 	expiryDate.setFullYear(expiryDate.getFullYear() + 1);
@@ -302,10 +307,10 @@ app.get('/api/wsport', (req, res) => {
 	* end-time
  */
 app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
-	const contentId = IdFactoryService.new();
+	const contentId = IdFactoryServiceGetter.get().new();
 
 	handlePotentialBan(req.ip) //assumes ip address is userId
-	.then(() => ProgressQueueService.add(req.ip, contentId))
+	.then(() => ProgressQueueServiceGetter.get().add(req.ip, contentId))
 	.then(() => handleFileUpload(req, contentId))
 	.then(async ([form, fields, files]) => { //nesting in order to get the scoping right
 		let uplData: UploadDataWithId = {
@@ -315,14 +320,14 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 		};
 
 		if (uplData.music.isUrl) {
-			ProgressQueueService.setTitle(req.ip, contentId, uplData.music.path, true);
+			ProgressQueueServiceGetter.get().setTitle(req.ip, contentId, uplData.music.path, true);
 			// the title and duration are set later by `ContentService.add(uplData)`
 		}
 
 		let itemData;
 
 		try {
-			itemData = await ContentService.add(uplData);
+			itemData = await ContentServiceGetter.get().add(uplData);
 		} catch (err) {
 			if (err instanceof DurationFindingError) {
 				console.error("Error reading discerning the duration of a music file.", err, uplData.music.path);
@@ -336,7 +341,7 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 		}
 
 		if (itemData.music.isUrl) {
-			ProgressQueueService.setTitle(req.ip, contentId, itemData.music.title);
+			ProgressQueueServiceGetter.get().setTitle(req.ip, contentId, itemData.music.title);
 		}
 
 		debug.log("successful upload: ", uplData);
