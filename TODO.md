@@ -6,11 +6,12 @@ This list is in a rough order of priority.
 List
 ----
 
+* when closing down "TypeError: Cannot read property 'store' of undefined"
+* consistent double quotes
 * improve play log format
 * does itemdata definitely have a title? when is it added for yt downloads
 * extracting picname from downloaded pic could be better
 * commas at the end of interface lines
-* consistent double quotes
 * move static methods to services
 * I could use a custom defer class instead of using q
 * Barringer's Bucketing system
