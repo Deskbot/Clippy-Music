@@ -1,13 +1,13 @@
-import * as cp from 'child_process';
-import * as q from 'q';
+import * as cp from "child_process";
+import * as q from "q";
 
-import * as opt from '../options';
-import * as utils from './utils';
+import * as opt from "../options";
+import * as utils from "./utils";
 
-import { CancelError, UnknownDownloadError } from './errors';
+import { CancelError, UnknownDownloadError } from "./errors";
 
-import { ContentType } from '../types/ContentType';
-import { ProgressQueue } from './ProgressQueue';
+import { ContentType } from "../types/ContentType";
+import { ProgressQueue } from "./ProgressQueue";
 
 interface YtQueueItem {
 	cancelled: boolean,
@@ -33,16 +33,16 @@ export class YtDownloader {
 	}
 
 	download(vid: string, destination: string): [Promise<void>, cp.ChildProcess] {
-		let proc = cp.spawn(opt.youtubeDlPath, ['--no-playlist', vid, '-o', destination]);
+		let proc = cp.spawn(opt.youtubeDlPath, ["--no-playlist", vid, "-o", destination]);
 
 		const prom = new Promise<void>((resolve, reject) => {
-			let errMessage = '';
+			let errMessage = "";
 
-			proc.on('close', (code, signal) => {
+			proc.on("close", (code, signal) => {
 				if (code === 0) {
 					//youtube-dl adds an unknown file extension
-					const mvProc = cp.spawn('mv', [destination + '.*', destination], {shell:true});
-					mvProc.on('close', () => {
+					const mvProc = cp.spawn("mv", [destination + ".*", destination], {shell:true});
+					mvProc.on("close", () => {
 						return resolve();
 					});
 				} else {
@@ -51,7 +51,7 @@ export class YtDownloader {
 				}
 			});
 
-			proc.on('error', (part) => {
+			proc.on("error", (part) => {
 				errMessage += part;
 			});
 		});
@@ -102,7 +102,7 @@ export class YtDownloader {
 		if (!queue) return [];
 
 		return queue.map((item) => {
-			return utils.cloneWithout(item, ['defer', 'destination', 'proc', 'vid']);
+			return utils.cloneWithout(item, ["defer", "destination", "proc", "vid"]);
 		});
 	}
 
@@ -212,8 +212,8 @@ class PercentReader {
 	}
 
 	static extractPercent(s: string): number {
-		const start = s.lastIndexOf('[download]') + 10; //[download] has length 10
-		const end = s.lastIndexOf('%');
+		const start = s.lastIndexOf("[download]") + 10; //[download] has length 10
+		const end = s.lastIndexOf("%");
 		const pcStr = s.substring(start, end).trim();
 
 		return parseFloat(pcStr);

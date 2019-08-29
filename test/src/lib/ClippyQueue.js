@@ -250,7 +250,7 @@ module.exports = {
             q.add(item);
         }
 
-        // regardless of the duration of these items, the users' previous items should affect the item order
+        // regardless of the duration of these items, the users" previous items should affect the item order
 
         const usersInPriorityOrder = items1
             .slice()

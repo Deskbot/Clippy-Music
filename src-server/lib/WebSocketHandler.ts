@@ -1,8 +1,8 @@
 //all purpose handler for incoming web sockets connections and messages
 
-import ws = require('ws');
+import ws = require("ws");
 
-import * as opt from '../options';
+import * as opt from "../options";
 
 export class WebSocketHandler {
 	private wss: ws.Server;
@@ -14,15 +14,15 @@ export class WebSocketHandler {
 	) {
 		this.wss = new ws.Server({ port: opt.webSocketPort });
 
-		this.wss.on('connection', (soc, req) => { //when a client connects
+		this.wss.on("connection", (soc, req) => { //when a client connects
 			const id = req.connection.remoteAddress!;
 
 			//add handler to do something when the client sends a message
-			soc.on('message', data => {
+			soc.on("message", data => {
 				onMessage(soc, id, data);
 			});
 
-			soc.on('close', () => {
+			soc.on("close", () => {
 				onClose(soc, id);
 			});
 

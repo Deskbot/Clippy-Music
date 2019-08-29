@@ -1,6 +1,6 @@
-const { QuickValuesMap } = require('../../../build/lib/QuickValuesMap');
+const { QuickValuesMap } = require("../../../build/lib/QuickValuesMap");
 
-const assert = require('assert');
+const assert = require("assert");
 
 module.exports = {
     clear: () => {

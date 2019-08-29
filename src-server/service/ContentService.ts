@@ -1,14 +1,14 @@
-import * as q from 'q';
+import * as q from "q";
 
-import { ContentManager } from '../lib/ContentManager';
-import { YtDownloader } from '../lib/YtDownloader';
+import { ContentManager } from "../lib/ContentManager";
+import { YtDownloader } from "../lib/YtDownloader";
 
-import * as utils from '../lib/utils';
+import * as utils from "../lib/utils";
 
-import { IdFactoryServiceGetter } from './IdFactoryService';
-import { ProgressQueueServiceGetter } from './ProgressQueueService';
-import { UserRecordServiceGetter } from './UserRecordService';
-import { MakeOnce } from '../lib/MakeOnce';
+import { IdFactoryServiceGetter } from "./IdFactoryService";
+import { ProgressQueueServiceGetter } from "./ProgressQueueService";
+import { UserRecordServiceGetter } from "./UserRecordService";
+import { MakeOnce } from "../lib/MakeOnce";
 
 export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> {
 
@@ -21,7 +21,7 @@ export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> 
 			new YtDownloader(ProgressQueueServiceGetter.get())
 		);
 
-		cm.on('end', () => this.play());
+		cm.on("end", () => this.play());
 
 		// start this asyncronously to prevent recursion
 		// also this.get() in this.play() can't return a value

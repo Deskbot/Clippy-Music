@@ -1,6 +1,6 @@
 var DlList = (function() {
-	var $dlListContainer = $('#dl-list-container');
-	var $dlQueueBucket = $dlListContainer.children('.bucket');
+	var $dlListContainer = $("#dl-list-container");
+	var $dlQueueBucket = $dlListContainer.children(".bucket");
 
 	var fullWidth = 444; //based on css; can't evaluate at run time due to width being unknown if $bar is not in DOM
 	var blockWidth = 10; //based on css; they're all the same width
@@ -8,7 +8,7 @@ var DlList = (function() {
 	var maxBlocks = Math.ceil(fullWidth / blockWidth);
 
 	var DlList = {
-		$sectionWithin: $('#upload-section'),
+		$sectionWithin: $("#upload-section"),
 
 		add: function add(content) {
 			$dlQueueBucket.append(this.contentToDlItemElem(content));
@@ -17,17 +17,17 @@ var DlList = (function() {
 		contentToDlItemElem: function contentToDlItemElem(content) {
 			var $dlItem = templates.makeDlItem();
 
-			$dlItem.find('.title').html(content.title);
-			$dlItem.attr('data-cid', content.contentId);
-			if (content.cancellable) $dlItem.find('.cancel').removeClass('hidden');
-			if (content.percent) this.fillDlBar($dlItem.find('.dl-bar'), content.percent);
+			$dlItem.find(".title").html(content.title);
+			$dlItem.attr("data-cid", content.contentId);
+			if (content.cancellable) $dlItem.find(".cancel").removeClass("hidden");
+			if (content.percent) this.fillDlBar($dlItem.find(".dl-bar"), content.percent);
 			if (content.error) this.showError($dlItem);
 
 			return $dlItem;
 		},
 
 		fillDlBar: function fillDlBar($bar, percent) {
-			var blocksAlready = $bar.find('.dl-block').length;
+			var blocksAlready = $bar.find(".dl-block").length;
 			var targetBlockCount = Math.ceil(percent / blockPercent);
 
 			for (var i = blocksAlready; i < targetBlockCount; i++) {
@@ -36,11 +36,11 @@ var DlList = (function() {
 		},
 
 		findDlItemElem: function findDlItemElem(contentId) {
-			return $dlQueueBucket.find('[data-cid=' + contentId + ']');
+			return $dlQueueBucket.find("[data-cid=" + contentId + "]");
 		},
 
 		hideContainer: function hideContainer() {
-			$dlListContainer.addClass('hidden');
+			$dlListContainer.addClass("hidden");
 		},
 
 		remove: function remove(contentId) {
@@ -51,22 +51,22 @@ var DlList = (function() {
 		},
 
 		showCancelButton: function showCancellable($elem) {
-			$elem.find('.cancel').removeClass('hidden');
+			$elem.find(".cancel").removeClass("hidden");
 		},
 
 		showContainer: function showContainer() {
-			$dlListContainer.removeClass('hidden');
+			$dlListContainer.removeClass("hidden");
 		},
 
 		showError: function showError($li) {
-			$li.children('.dismiss').removeClass('hidden');
+			$li.children(".dismiss").removeClass("hidden");
 
 			// change block colour; it's the main error indicator
-			$li.addClass('error');
+			$li.addClass("error");
 
 			// don't let an error show an empty bar or a full bar
-			var $bar = $li.find('.dl-bar');
-			var $blocks = $bar.find('.dl-block');
+			var $bar = $li.find(".dl-bar");
+			var $blocks = $bar.find(".dl-block");
 
 			if ($blocks.length == 0) {
 				$bar.append(templates.makeDlBlock());
@@ -100,12 +100,12 @@ var DlList = (function() {
 					var $elem = this.findDlItemElem(item.contentId);
 
 					if (item.percent !== itemOld.percent) {
-						var $bar = $elem.find('.dl-bar');
+						var $bar = $elem.find(".dl-bar");
 						this.fillDlBar($bar, item.percent);
 					}
 
 					if (item.title !== itemOld.title) {
-						$elem.find('.title').html(item.title);
+						$elem.find(".title").html(item.title);
 					}
 
 					if (item.cancellable) {

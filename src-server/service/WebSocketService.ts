@@ -1,10 +1,10 @@
-import * as debug from '../lib/debug';
+import * as debug from "../lib/debug";
 import ws = require("ws");
-import { WebSocketHandler } from '../lib/WebSocketHandler';
+import { WebSocketHandler } from "../lib/WebSocketHandler";
 
-import { ContentServiceGetter } from './ContentService';
-import { ProgressQueueServiceGetter } from './ProgressQueueService';
-import { UserRecordServiceGetter } from './UserRecordService';
+import { ContentServiceGetter } from "./ContentService";
+import { ProgressQueueServiceGetter } from "./ProgressQueueService";
+import { UserRecordServiceGetter } from "./UserRecordService";
 
 const ContentService = ContentServiceGetter.get();
 const ProgressQueueService = ProgressQueueServiceGetter.get();
@@ -34,12 +34,12 @@ class Api {
 		const onMessage = (soc: ws, id: string, data: any) => {
 			const dataObj = JSON.parse(data);
 
-			if (dataObj.type === 'delete-content') {
+			if (dataObj.type === "delete-content") {
 				if (!ContentService.remove(id, dataObj.contentId)) {
 					soc.send(JSON.stringify({
 						type: dataObj.type,
 						success: false,
-						reason: 'The queue item you tried to remove was not chosen by you.',
+						reason: "The queue item you tried to remove was not chosen by you.",
 					}));
 				}
 
@@ -47,7 +47,7 @@ class Api {
 				soc.send(JSON.stringify({
 					type: dataObj.type,
 					success: false,
-					reason: 'The server did not recognise the type of message you were trying to send.',
+					reason: "The server did not recognise the type of message you were trying to send.",
 				}));
 			}
 		};
@@ -67,7 +67,7 @@ class Api {
 
 	sendMessage(socs: ws[] | undefined, type: string, mes: any) {
 		if (!socs) {
-			debug.log('no socs given');
+			debug.log("no socs given");
 			debug.trace();
 			return;
 		}
@@ -82,7 +82,7 @@ class Api {
 	}
 
 	sendNickname(soc: ws, nickname: string) {
-		this.sendMessage([soc], 'nickname', nickname);
+		this.sendMessage([soc], "nickname", nickname);
 	}
 
 	sendNicknameToUser(userId: string, nickname: string) {
@@ -92,13 +92,13 @@ class Api {
 
 	sendBanned(socs: ws | ws[]) {
 		if (!socs) {
-			debug.log('no socs given');
+			debug.log("no socs given");
 			debug.trace();
 			return;
 		}
 
 		const message = JSON.stringify({
-			type: 'banned',
+			type: "banned",
 			success: true,
 			banned: true,
 		});
@@ -108,7 +108,7 @@ class Api {
 
 	sendDlQueue(soc: ws, userId: string) {
 		const queue = ProgressQueueService.getQueue(userId);
-		if (queue) WebSocketService.sendMessage([soc], 'dl-list', queue);
+		if (queue) WebSocketService.sendMessage([soc], "dl-list", queue);
 	}
 
 	broadcastMessage(type: string, mes: string) {
@@ -124,7 +124,7 @@ class Api {
 
 	makeQueueMessage() {
 		return {
-			type: 'queue',
+			type: "queue",
 			current: ContentService.getCurrentlyPlaying(),
 			queue: ContentService.getBucketsForPublic(),
 		};
@@ -132,7 +132,7 @@ class Api {
 
 	sendQueue(socs: ws | ws[]) {
 		if (!socs) {
-			debug.log('no socs given');
+			debug.log("no socs given");
 			debug.trace();
 			return;
 		}
@@ -144,7 +144,7 @@ class Api {
 
 	broadcastEmptyQueue() {
 		this.wsh.broadcast(JSON.stringify({
-			type: 'queue',
+			type: "queue",
 			current: null,
 			queue: [],
 		}));
@@ -158,29 +158,29 @@ class Api {
 export const WebSocketService = new Api();
 
 let lastQueueWasEmpty = false;
-ContentService.on('queue-empty', () => {
+ContentService.on("queue-empty", () => {
 	if (!lastQueueWasEmpty) {
 		WebSocketService.broadcastEmptyQueue();
 		lastQueueWasEmpty = true;
 	}
 });
 
-ContentService.on('queue-update', () => {
+ContentService.on("queue-update", () => {
 	lastQueueWasEmpty = false;
 	WebSocketService.broadcastQueue();
 });
 
-ProgressQueueService.on('prepared', (userId, content) => {
-	WebSocketService.sendMessage(UserRecordService.getSockets(userId), 'dl-prep', content);
+ProgressQueueService.on("prepared", (userId, content) => {
+	WebSocketService.sendMessage(UserRecordService.getSockets(userId), "dl-prep", content);
 });
 
-ProgressQueueService.on('delete', (userId, contentId) => {
+ProgressQueueService.on("delete", (userId, contentId) => {
 	const socs = UserRecordService.getSockets(userId);
-	WebSocketService.sendMessage(socs, 'dl-delete', contentId);
+	WebSocketService.sendMessage(socs, "dl-delete", contentId);
 });
 
 //extraInfo is an optional argument
-ProgressQueueService.on('error', (userId, contentId, error, extraInfo) => {
+ProgressQueueService.on("error", (userId, contentId, error, extraInfo) => {
 	const data = {
 		contentId,
 		error,
@@ -188,9 +188,9 @@ ProgressQueueService.on('error', (userId, contentId, error, extraInfo) => {
 		errorType: error.constructor.name
 	};
 
-	WebSocketService.sendMessage(UserRecordService.getSockets(userId), 'dl-error', data);
+	WebSocketService.sendMessage(UserRecordService.getSockets(userId), "dl-error", data);
 });
 
-ProgressQueueService.on('list', (userId, list) => {
-	WebSocketService.sendMessage(UserRecordService.getSockets(userId), 'dl-list', list);
+ProgressQueueService.on("list", (userId, list) => {
+	WebSocketService.sendMessage(UserRecordService.getSockets(userId), "dl-list", list);
 });

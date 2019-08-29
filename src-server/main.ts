@@ -1,17 +1,17 @@
-import prompt = require('prompt');
-import * as readline from 'readline';
+import prompt = require("prompt");
+import * as readline from "readline";
 
-import * as consts from './lib/consts';
-import * as debug from './lib/debug';
-import * as opt from './options';
-import * as utils from './lib/utils';
+import * as consts from "./lib/consts";
+import * as debug from "./lib/debug";
+import * as opt from "./options";
+import * as utils from "./lib/utils";
 
-import { PasswordService } from './service/PasswordService';
+import { PasswordService } from "./service/PasswordService";
 
 // prompt settings
 prompt.colors = false;
-prompt.message = '';
-prompt.delimiter = '';
+prompt.message = "";
+prompt.delimiter = "";
 const promptOpts = {
 	noHandleSIGINT: true,
 }
@@ -32,13 +32,13 @@ function chooseAdminPassword(): Promise<string> {
 		prompt.start(promptOpts);
 
 		prompt.get([{
-			name: 'password1',
-			message: 'Set Admin Password (hidden) (1/2): ',
+			name: "password1",
+			message: "Set Admin Password (hidden) (1/2): ",
 			hidden: true,
 			required: true,
 		}, {
-			name: 'password2',
-			message: 'Verify Admin Password (hidden) (2/2): ',
+			name: "password2",
+			message: "Verify Admin Password (hidden) (2/2): ",
 			hidden: true,
 			required: true,
 		}], (err, result) => {
@@ -49,7 +49,7 @@ function chooseAdminPassword(): Promise<string> {
 				return resolve(result.password1);
 			}
 
-			console.log('Passwords did not match. Try again.');
+			console.log("Passwords did not match. Try again.");
 			return resolve(chooseAdminPassword());
 		});
 	});
@@ -63,16 +63,16 @@ function handleArguments(): Promise<void[]> {
 	for (let i = 2; i < process.argv.length; i++) { //skip the 2 initial arguments which are the path to node and the file path
 		let arg = process.argv[i];
 
-		if (arg === '-c' || arg === '--clean') {
-			console.log('Deleting any suspended user record, content manager, or log file.');
+		if (arg === "-c" || arg === "--clean") {
+			console.log("Deleting any suspended user record, content manager, or log file.");
 
 			utils.deleteDirRecursiveSync(opt.storageDir);
 
-		} else if (arg === '-d' || arg === '--debug') {
+		} else if (arg === "-d" || arg === "--debug") {
 			debug.on();
-		} else if (arg === '-m' || arg === '--mute') {
+		} else if (arg === "-m" || arg === "--mute") {
 			opt.mute.set(true);
-		} else if (arg === '--no-admin') {
+		} else if (arg === "--no-admin") {
 			admin = false;
 		}
 	}
@@ -89,7 +89,7 @@ function setUpAdmin(): Promise<void> {
 		PasswordService.set(pass);
 	})
 	.catch(err => {
-		console.error('Unable to get admin password');
+		console.error("Unable to get admin password");
 		console.error(err);
 		process.exit(1);
 	});
@@ -105,21 +105,21 @@ function setUpDirs() {
 }
 
 function setUpControls() {
-	const { ContentManagerService } = require('./service/ContentService');
-	const { IdFactoryService } = require('./service/IdFactoryService');
-	const { UserRecordService } = require('./service/UserRecordService');
+	const { ContentManagerService } = require("./service/ContentService");
+	const { IdFactoryService } = require("./service/IdFactoryService");
+	const { UserRecordService } = require("./service/UserRecordService");
 
 	//when this is about to be killed
-	process.on('exit', () => {
-		console.log('Closing down Clippy-Music...');
+	process.on("exit", () => {
+		console.log("Closing down Clippy-Music...");
 
 		ContentManagerService.store();
 		IdFactoryService.get().store();
 		UserRecordService.store();
 
 		if (ContentManagerService.isPlaying()) {
-			console.log('Waiting for content being played to get deleted.');
-			ContentManagerService.on('end', () => {
+			console.log("Waiting for content being played to get deleted.");
+			ContentManagerService.on("end", () => {
 				process.exit(0);
 			});
 		} else {
@@ -138,19 +138,19 @@ function setUpControls() {
 		process.stdin.setRawMode(true);
 	}
 
-	process.stdin.on('keypress', (ch, key) => {
-		if (key.name === 'end') ContentManagerService.killCurrent();
+	process.stdin.on("keypress", (ch, key) => {
+		if (key.name === "end") ContentManagerService.killCurrent();
 
-		//I'm having to put these in because the settings that allow me to use 'end' prevent normal interrupts key commands
-		else if (key.name === 'c' && key.ctrl)  process.kill(process.pid, 'SIGINT');
-		else if (key.name === 's' && key.ctrl)  process.kill(process.pid, 'SIGSTOP');
-		else if (key.name === 'u' && key.ctrl)  process.kill(process.pid, 'SIGKILL');
-		else if (key.name === 'z' && key.ctrl)  process.kill(process.pid, 'SIGTSTP');
-		else if (key.name === '\\' && key.ctrl) process.kill(process.pid, 'SIGQUIT'); //single backslash
+		//I'm having to put these in because the settings that allow me to use "end" prevent normal interrupts key commands
+		else if (key.name === "c" && key.ctrl)  process.kill(process.pid, "SIGINT");
+		else if (key.name === "s" && key.ctrl)  process.kill(process.pid, "SIGSTOP");
+		else if (key.name === "u" && key.ctrl)  process.kill(process.pid, "SIGKILL");
+		else if (key.name === "z" && key.ctrl)  process.kill(process.pid, "SIGTSTP");
+		else if (key.name === "\\" && key.ctrl) process.kill(process.pid, "SIGQUIT"); //single backslash
 	});
 }
 
 function setUpServices() {
-	const { startHttpService } = require('./service/HttpService');
+	const { startHttpService } = require("./service/HttpService");
 	startHttpService();
 }

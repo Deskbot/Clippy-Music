@@ -1,5 +1,5 @@
-import { UserRecord } from '../lib/UserRecord';
-import { MakeOnce } from '../lib/MakeOnce';
+import { UserRecord } from "../lib/UserRecord";
+import { MakeOnce } from "../lib/MakeOnce";
 
 export const UserRecordServiceGetter = new (class extends MakeOnce<UserRecord> {
     make(): UserRecord {
