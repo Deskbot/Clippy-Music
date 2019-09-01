@@ -7,6 +7,9 @@ import * as opt from "./options";
 import * as utils from "./lib/utils";
 
 import { PasswordService } from "./service/PasswordService";
+import { ContentServiceGetter } from "./service/ContentService";
+import { IdFactoryServiceGetter } from "./service/IdFactoryService";
+import { UserRecordServiceGetter } from "./service/UserRecordService";
 
 // prompt settings
 prompt.colors = false;
@@ -105,10 +108,6 @@ function setUpDirs() {
 }
 
 function setUpControls() {
-	const { ContentServiceGetter } = require("./service/ContentService");
-	const { IdFactoryServiceGetter } = require("./service/IdFactoryService");
-	const { UserRecordServiceGetter } = require("./service/UserRecordService");
-
 	const ContentManager = ContentServiceGetter.get();
 	const IdFactoryService = IdFactoryServiceGetter.get();
 	const UserRecordService = UserRecordServiceGetter.get();
