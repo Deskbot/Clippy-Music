@@ -105,28 +105,32 @@ function setUpDirs() {
 }
 
 function setUpControls() {
-	const { ContentManagerService } = require("./service/ContentService");
-	const { IdFactoryService } = require("./service/IdFactoryService");
-	const { UserRecordService } = require("./service/UserRecordService");
+	const { ContentServiceGetter } = require("./service/ContentService");
+	const { IdFactoryServiceGetter } = require("./service/IdFactoryService");
+	const { UserRecordServiceGetter } = require("./service/UserRecordService");
+
+	const ContentManager = ContentServiceGetter.get();
+	const IdFactoryService = IdFactoryServiceGetter.get();
+	const UserRecordService = UserRecordServiceGetter.get();
 
 	//when this is about to be killed
 	process.on("exit", () => {
 		console.log("Closing down Clippy-Music...");
 
-		ContentManagerService.store();
-		IdFactoryService.get().store();
+		ContentManager.store();
+		IdFactoryService.store();
 		UserRecordService.store();
 
-		if (ContentManagerService.isPlaying()) {
+		if (ContentManager.isPlaying()) {
 			console.log("Waiting for content being played to get deleted.");
-			ContentManagerService.on("end", () => {
+			ContentManager.on("end", () => {
 				process.exit(0);
 			});
 		} else {
 			process.exit(0);
 		}
 
-		ContentManagerService.end();
+		ContentManager.end();
 	});
 
 	//stdin controls
@@ -139,7 +143,7 @@ function setUpControls() {
 	}
 
 	process.stdin.on("keypress", (ch, key) => {
-		if (key.name === "end") ContentManagerService.killCurrent();
+		if (key.name === "end") ContentManager.killCurrent();
 
 		//I'm having to put these in because the settings that allow me to use "end" prevent normal interrupts key commands
 		else if (key.name === "c" && key.ctrl)  process.kill(process.pid, "SIGINT");
