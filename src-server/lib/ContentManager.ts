@@ -260,7 +260,7 @@ export class ContentManager extends EventEmitter {
 					...uplData.pic,
 				},
 				duration: time.clipTimeByStartAndEnd(Math.floor(duration), uplData.startTime, uplData.endTime),
-            };
+			};
 
 			return uplDataWithDuration;
 		}
@@ -282,7 +282,7 @@ export class ContentManager extends EventEmitter {
 			const musicData = {
 				...uplData.music,
 				title: info.title,
-            };
+			};
 
 			return {
 				...uplData,
@@ -364,7 +364,7 @@ export class ContentManager extends EventEmitter {
 	playNext(): boolean {
 		if (this.stop) return false;
 
-        const contentData = this.playQueue.next();
+		const contentData = this.playQueue.next();
 		const that = this;
 
 		if (contentData === null) {

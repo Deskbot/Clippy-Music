@@ -20,15 +20,15 @@ export const minPlayTimeToPreventReplay = 5; //seconds
 
 export const dirs = {
 	httpUpload: opt.storageDir + "/httpUploads/",
-	music:      opt.storageDir + "/music/",
-	pic:        opt.storageDir + "/pictures/",
+	music:	  opt.storageDir + "/music/",
+	pic:		opt.storageDir + "/pictures/",
 };
 
 export const files = {
 	content:   opt.storageDir + "/suspendedContentManager.json",
 	idFactory: opt.storageDir + "/idFactory.txt",
-	log:       opt.storageDir + "/log.txt",
-	users:     opt.storageDir + "/suspendedUserRecord.json",
+	log:	   opt.storageDir + "/log.txt",
+	users:	 opt.storageDir + "/suspendedUserRecord.json",
 };
 
 export const queueUpdateMaxFreq = 2000;

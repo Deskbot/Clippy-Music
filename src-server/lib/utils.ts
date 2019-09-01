@@ -167,8 +167,8 @@ export function secToTimeStr(s: number): string {
 //based on Hristo's solution that he got from somewhere else https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable
 export function sizeToReadbleStr(s: number): string {
 	if (s > 1000000000) return "~" + Math.ceil(s / 1000000000) + "GB";
-	if (s > 1000000)    return "~" + Math.ceil(s / 1000000)    + "MB";
-	if (s > 1000)       return "~" + Math.ceil(s / 1000000)    + "kB";
+	if (s > 1000000)	return "~" + Math.ceil(s / 1000000)	+ "MB";
+	if (s > 1000)	   return "~" + Math.ceil(s / 1000000)	+ "kB";
 	return s + "B";
 }
 
@@ -199,7 +199,7 @@ export function toShortSizeString(fileSizeInBytes: number): string {
 export function ytTimeStrToSec(str: string): number {
 	let timeArr = str.split(":");
 
-	if (timeArr.length === 1)      return parseInt(str);
+	if (timeArr.length === 1)	  return parseInt(str);
 	else if (timeArr.length === 2) return parseInt(timeArr[0]) * 60 + parseInt(timeArr[1]);
 	else if (timeArr.length === 3) return parseInt(timeArr[0]) * 3600 + parseInt(timeArr[1]) * 60 + parseInt(timeArr[2]);
 	else throw `Unable to convert yt time, ${str}, to seconds.`;

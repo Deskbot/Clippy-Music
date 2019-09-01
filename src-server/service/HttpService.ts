@@ -398,7 +398,7 @@ app.use(getFormMiddleware);
 app.post("/api/queue/remove", (req: RequestWithFormData, res) => {
 	if (ContentService.remove(req.ip, parseInt(req.fields["content-id"] as string))) {
 		if (noRedirect(req)) res.status(200).end("Success\n");
-		else                 res.redirect("/");
+		else				 res.redirect("/");
 	} else {
 		res.status(400).end("OwnershipError");
 	}
@@ -408,7 +408,7 @@ app.post("/api/queue/remove", (req: RequestWithFormData, res) => {
 app.post("/api/download/cancel", (req: RequestWithFormData, res) => {
 	if (ProgressQueueService.cancel(req.ip, parseInt(req.fields["content-id"] as string))) {
 		if (noRedirect(req)) res.status(200).end("Success\n");
-		else                 res.redirect("/");
+		else				 res.redirect("/");
 	} else {
 		res.status(400).end("The download item specified was not recognised.\n");
 	}
@@ -433,7 +433,7 @@ app.post("/api/nickname/set", recordUserMiddleware, (req: RequestWithFormData, r
 	WebSocketService.sendNicknameToUser(req.ip, nickname);
 
 	if (noRedirect(req)) res.status(200).end("Success\n");
-	else                 res.redirect("/");
+	else				 res.redirect("/");
 });
 
 //POST variable: password, id, nickname
@@ -447,7 +447,7 @@ app.post("/api/ban/add", adminCredentialsRequired, (req: RequestWithFormData, re
 			UserRecordService.addBan(req.fields.id as string);
 			ContentService.purgeUser(req.fields.id as string);
 			if (noRedirect(req)) res.status(200).end("Success\n");
-			else                 res.redirect("/");
+			else				 res.redirect("/");
 		}
 
 	} else if (req.fields.nickname) {
@@ -464,7 +464,7 @@ app.post("/api/ban/add", adminCredentialsRequired, (req: RequestWithFormData, re
 			});
 
 			if (noRedirect(req)) res.status(200).end("Success\n");
-			else                 res.redirect("/");
+			else				 res.redirect("/");
 		}
 
 	} else {
@@ -482,7 +482,7 @@ app.post("/api/ban/remove", adminCredentialsRequired, (req: RequestWithFormData,
 		} else {
 			UserRecordService.removeBan(req.fields.id as string);
 			if (noRedirect(req)) res.status(200).end("Success\n");
-			else                 res.redirect("/");
+			else				 res.redirect("/");
 		}
 
 	} else if (req.fields.nickname) {
@@ -497,7 +497,7 @@ app.post("/api/ban/remove", adminCredentialsRequired, (req: RequestWithFormData,
 			});
 
 			if (noRedirect(req)) res.status(200).end("Success\n");
-			else                 res.redirect("/");
+			else				 res.redirect("/");
 		}
 
 	} else {

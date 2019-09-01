@@ -37,7 +37,7 @@ $uploadForm.find("input[name=music-file]").change(function(e) {
 	var $musicUrl = $uploadForm.find("[name=music-url]");
 
 	if (utils.inputHasFile(this)) $musicUrl.attr("disabled", true);
-	else                          $musicUrl.attr("disabled", false);
+	else						  $musicUrl.attr("disabled", false);
 
 	var $this = $(this);
 
@@ -50,7 +50,7 @@ $uploadForm.find("input[name=image-file]").change(function(e) {
 	var $musicUrl = $uploadForm.find("[name=image-url]");
 
 	if (utils.inputHasFile(this)) $musicUrl.attr("disabled", true);
-	else                          $musicUrl.attr("disabled", false);
+	else						  $musicUrl.attr("disabled", false);
 
 	var $this = $(this);
 

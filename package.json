@@ -4,46 +4,46 @@
   "description": "A music/video/image server",
   "main": "main.js",
   "scripts": {
-    "build": "node build.js",
-    "start": "node -r source-map-support/register build/main.js",
-    "test": "node test/index.js"
+	"build": "node build.js",
+	"start": "node -r source-map-support/register build/main.js",
+	"test": "node test/index.js"
   },
   "repository": {
-    "type": "git",
-    "url": "https://github.com/Deskbot/Clippy-Music"
+	"type": "git",
+	"url": "https://github.com/Deskbot/Clippy-Music"
   },
   "keywords": [
-    "music",
-    "video",
-    "image",
-    "server",
-    "LAN"
+	"music",
+	"video",
+	"image",
+	"server",
+	"LAN"
   ],
   "author": "Thomas Richards",
   "license": "ISC",
   "dependencies": {
-    "crc-32": "^1.2.0",
-    "express": "^4.17.1",
-    "formidable": "^1.2.1",
-    "glob": "^7.1.4",
-    "html-entities": "^1.2.1",
-    "keypress": "^0.2.1",
-    "prompt": "^1.0.0",
-    "q": "^1.5.1",
-    "request": "^2.88.0",
-    "source-map-support": "^0.5.13",
-    "typescript": "^3.5.3",
-    "ws": "^5.2.2"
+	"crc-32": "^1.2.0",
+	"express": "^4.17.1",
+	"formidable": "^1.2.1",
+	"glob": "^7.1.4",
+	"html-entities": "^1.2.1",
+	"keypress": "^0.2.1",
+	"prompt": "^1.0.0",
+	"q": "^1.5.1",
+	"request": "^2.88.0",
+	"source-map-support": "^0.5.13",
+	"typescript": "^3.5.3",
+	"ws": "^5.2.2"
   },
   "devDependencies": {
-    "@types/cookie-parser": "^1.4.1",
-    "@types/express": "^4.17.0",
-    "@types/formidable": "^1.0.31",
-    "@types/html-entities": "^1.2.16",
-    "@types/keypress.js": "^2.0.30",
-    "@types/node": "^10.0.0",
-    "@types/q": "^1.5.2",
-    "@types/request": "^2.48.2",
-    "@types/ws": "^6.0.1"
+	"@types/cookie-parser": "^1.4.1",
+	"@types/express": "^4.17.0",
+	"@types/formidable": "^1.0.31",
+	"@types/html-entities": "^1.2.16",
+	"@types/keypress.js": "^2.0.30",
+	"@types/node": "^10.0.0",
+	"@types/q": "^1.5.2",
+	"@types/request": "^2.48.2",
+	"@types/ws": "^6.0.1"
   }
 }

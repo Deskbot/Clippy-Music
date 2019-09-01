@@ -1,4 +1,4 @@
 export enum ContentType {
-    Music = "music",
-    Picture = "picture",
+	Music = "music",
+	Picture = "picture",
 }
