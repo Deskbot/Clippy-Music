@@ -1,13 +1,13 @@
 export abstract class MakeOnce<T> {
-    private object: T | undefined;
+	private object: T | undefined;
 
-    get(): T {
-        if (!this.object) {
-            this.object = this.make();
-        }
+	get(): T {
+		if (!this.object) {
+			this.object = this.make();
+		}
 
-        return this.object;
-    }
+		return this.object;
+	}
 
-    protected abstract make(): T;
+	protected abstract make(): T;
 }

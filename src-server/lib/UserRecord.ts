@@ -1,7 +1,7 @@
-import * as fs from 'fs';
+import * as fs from "fs";
 import ws = require("ws");
 
-import * as consts from './consts';
+import * as consts from "./consts";
 
 const recordFilePath = consts.files.users;
 
@@ -26,7 +26,7 @@ export class UserRecord {
 		this.banlist = [];
 
 		if (startState) {
-			console.log('Using suspended user record');
+			console.log("Using suspended user record");
 
 			this.idToUser = startState.idToUser;
 
@@ -52,11 +52,11 @@ export class UserRecord {
 			recordContent = fs.readFileSync(recordFilePath).toString();
 
 		} catch (e) {
-			console.log('No suspended user record found. This is ok.');
+			console.log("No suspended user record found. This is ok.");
 			return null
 		}
 
-		console.log('Reading suspended user record');
+		console.log("Reading suspended user record");
 
 		try {
 			success = true && success;
@@ -65,9 +65,9 @@ export class UserRecord {
 		} catch (e) {
 			success = false;
 			if (e instanceof SyntaxError) {
-				console.error('Syntax error in suspendedUserRecord.json file.');
+				console.error("Syntax error in suspendedUserRecord.json file.");
 				console.error(e);
-				console.error('Ignoring suspended content manager');
+				console.error("Ignoring suspended content manager");
 			} else {
 				throw e;
 			}

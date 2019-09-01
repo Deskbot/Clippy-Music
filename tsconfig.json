@@ -1,22 +1,22 @@
 {
-    "compilerOptions": {
-        "alwaysStrict": true,
-        "module": "commonjs",
-        "noImplicitAny": true,
-        "noImplicitReturns": true,
-        "outDir": "./build",
-        "sourceMap": true,
-        "sourceRoot": "../src-front",
-        "strictNullChecks": true,
-        "strictPropertyInitialization": true,
-        "target": "ES2017",
-    },
+	"compilerOptions": {
+		"alwaysStrict": true,
+		"module": "commonjs",
+		"noImplicitAny": true,
+		"noImplicitReturns": true,
+		"outDir": "./build",
+		"sourceMap": true,
+		"sourceRoot": "../src-front",
+		"strictNullChecks": true,
+		"strictPropertyInitialization": true,
+		"target": "ES2017",
+	},
 
-    "exclude": [
-        "./src-front"
-    ],
+	"exclude": [
+		"./src-front"
+	],
 
-    "include": [
-        "./src-server"
-    ],
+	"include": [
+		"./src-server"
+	],
 }

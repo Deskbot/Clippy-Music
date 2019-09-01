@@ -1,13 +1,13 @@
-import * as fs from 'fs';
+import * as fs from "fs";
 
-import * as consts from './consts';
+import * as consts from "./consts";
 
 export class IdFactory {
 	private nextId: number;
 
 	constructor(startingId?: number) {
-		if (typeof startingId != 'undefined') {
-			console.log('Using suspended ID Factory');
+		if (typeof startingId != "undefined") {
+			console.log("Using suspended ID Factory");
 			this.nextId = startingId;
 		} else {
 			this.nextId = 0;
@@ -21,7 +21,7 @@ export class IdFactory {
 
 		try {
 			fileContent = fs.readFileSync(consts.files.idFactory).toString();
-			console.log('Reading suspended ID Factory');
+			console.log("Reading suspended ID Factory");
 
 		} catch (e) {
 			if (e.message.includes("ENOENT")) return undefined;

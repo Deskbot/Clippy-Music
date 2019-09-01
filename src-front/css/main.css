@@ -20,8 +20,8 @@ html {
 	-webkit-user-select: none; /* Safari */
 	 -khtml-user-select: none; /* Konqueror HTML */
 	   -moz-user-select: none; /* Firefox */
-	    -ms-user-select: none; /* Internet Explorer/Edge */
-	        user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+		-ms-user-select: none; /* Internet Explorer/Edge */
+			user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
 }
 
 html.progress {
@@ -43,13 +43,13 @@ main {
 }
 
 main::-webkit-scrollbar {
-    background-image: url("/media/Scrollbar Background.png");
-    width: 16px;
+	background-image: url("/media/Scrollbar Background.png");
+	width: 16px;
 }
 
 main::-webkit-scrollbar-button:single-button {
 	background-color: #D6D3CE;
-	border-top:    1px solid #D6D3CE;
+	border-top:	1px solid #D6D3CE;
 	border-bottom: 1px solid #424142;
 	border-left:   1px solid #D6D3CE;
 	border-right:  1px solid #424142;
@@ -78,7 +78,7 @@ main::-webkit-scrollbar-button:horizontal:increment {
 
 main::-webkit-scrollbar-thumb {
 	background-color: #D6D3CE;
-	border-top:    1px solid #D6D3CE;
+	border-top:	1px solid #D6D3CE;
 	border-bottom: 1px solid #424142;
 	border-left:   1px solid #D6D3CE;
 	border-right:  1px solid #424142;
@@ -184,7 +184,7 @@ ul.text {
 
 ul.text li {
 	list-style-type: square;
-    margin-left: 25px;
+	margin-left: 25px;
 }
 
 button.file {
@@ -238,7 +238,7 @@ main {
 
 section {
 	background-color: #D6D3CE;
-	border-top:    1px solid #D6D3CE;
+	border-top:	1px solid #D6D3CE;
 	border-bottom: 1px solid #424142;
 	border-left:   1px solid #D6D3CE;
 	border-right:  1px solid #424142;
@@ -247,7 +247,7 @@ section {
 }
 
 section div.section-borders {
-	border-top:    1px solid #FFFFFF;
+	border-top:	1px solid #FFFFFF;
 	border-bottom: 1px solid #848284;
 	border-left:   1px solid #FFFFFF;
 	border-right:  1px solid #848284;
@@ -291,7 +291,7 @@ legend {
 }
 
 #admin-form {
-    padding: 6px 0 0 0;
+	padding: 6px 0 0 0;
 }
 
 #admin-section fieldset {
@@ -326,12 +326,12 @@ button.action {
 }
 
 .x-button {
-    display: inline-block;
-    float: right;
-    margin: 2px;
-    width: 16px;
-    height: 14px;
-    background-image: url("/media/X Button.png");
+	display: inline-block;
+	float: right;
+	margin: 2px;
+	width: 16px;
+	height: 14px;
+	background-image: url("/media/X Button.png");
 }
 
 .bag {
@@ -379,12 +379,12 @@ button.action {
 }
 
 .dl-block {
-    background-color: #08246B;
-    display: inline-block;
-    height: 100%;
+	background-color: #08246B;
+	display: inline-block;
+	height: 100%;
 	margin: 0 1px;
 	vertical-align: top;
-    width: 8px;
+	width: 8px;
 }
 
 .error .dl-block {

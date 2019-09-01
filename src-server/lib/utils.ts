@@ -1,9 +1,9 @@
-import * as crc_32 from 'crc-32';
-import * as fs from 'fs';
-import { Html5Entities } from 'html-entities';
-import { URL } from 'url';
+import * as crc_32 from "crc-32";
+import * as fs from "fs";
+import { Html5Entities } from "html-entities";
+import { URL } from "url";
 
-import * as opt from '../options';
+import * as opt from "../options";
 
 export function arrFirstMatch<T>(arr: T[], predicate: (elem: T) => boolean): T | undefined {
 	for (let e of arr) {
@@ -32,7 +32,7 @@ export function arrSum(a: number[]): number {
 }
 
 export function asciiOnly(str: string): string {
-	return str.replace(/[^\x00-\x7F]/g, '');
+	return str.replace(/[^\x00-\x7F]/g, "");
 }
 
 export function cloneWithout<T extends object>(o: T, badAttrs: (keyof T)[]) {
@@ -50,7 +50,7 @@ export function cloneWithout<T extends object>(o: T, badAttrs: (keyof T)[]) {
 export function deleteDirRecursiveSync(path: string) {
 	if(fs.existsSync(path)) {
 		fs.readdirSync(path).forEach(file => {
-			const curPath = path + '/' + file;
+			const curPath = path + "/" + file;
 
 			if (fs.lstatSync(curPath).isDirectory()) { //recurse
 				deleteDirRecursiveSync(curPath);
@@ -64,7 +64,7 @@ export function deleteDirRecursiveSync(path: string) {
 export function deleteFile(path: string) {
 	fs.unlink(path, (err) => {
 		if (err) {
-			console.error('Attempt to delete file failed: ' + path + ' Error message:');
+			console.error("Attempt to delete file failed: " + path + " Error message:");
 			console.error(err.message);
 		}
 	});
@@ -83,8 +83,8 @@ export function doNothing() {}
 export function extractYtVideoId(s: string): string | undefined {
 	const urlObj = new URL(s);
 
-	if (urlObj.hostname.includes('youtu.be')) { // shortened YouTube url
-		const pathParts = urlObj.pathname.split('/');
+	if (urlObj.hostname.includes("youtu.be")) { // shortened YouTube url
+		const pathParts = urlObj.pathname.split("/");
 		return arrFirstMatch(pathParts, (part) => part.length !== 0);
 	} else {
 		const param = urlObj.searchParams.get("v");
@@ -157,24 +157,24 @@ export function secToTimeStr(s: number): string {
 	const secs = s % 60;
 
 	let str;
-	str  = hours > 0 ? ' ' + hours + 'h' : '';
-	str += mins  > 0 ? ' ' + mins  + 'm' : '';
-	str += secs  > 0 ? ' ' + secs  + 's' : '';
+	str  = hours > 0 ? " " + hours + "h" : "";
+	str += mins  > 0 ? " " + mins  + "m" : "";
+	str += secs  > 0 ? " " + secs  + "s" : "";
 
 	return str.trim();
 }
 
 //based on Hristo's solution that he got from somewhere else https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable
 export function sizeToReadbleStr(s: number): string {
-	if (s > 1000000000) return '~' + Math.ceil(s / 1000000000) + 'GB';
-	if (s > 1000000)    return '~' + Math.ceil(s / 1000000)    + 'MB';
-	if (s > 1000)       return '~' + Math.ceil(s / 1000000)    + 'kB';
-	return s + 'B';
+	if (s > 1000000000) return "~" + Math.ceil(s / 1000000000) + "GB";
+	if (s > 1000000)	return "~" + Math.ceil(s / 1000000)	+ "MB";
+	if (s > 1000)	   return "~" + Math.ceil(s / 1000000)	+ "kB";
+	return s + "B";
 }
 
 //assume at most 2 colons
 export function timeCodeToSeconds(s: string): number {
-	const a = s.split(':');
+	const a = s.split(":");
 	let t = 0;
 
 	for (let i = 0; i < a.length; i++) {
@@ -187,7 +187,7 @@ export function timeCodeToSeconds(s: string): number {
 //altered version of https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable
 export function toShortSizeString(fileSizeInBytes: number): string {
 	var i = -1;
-	var byteUnits = ['k', 'm', ' g', ' t', 'p', 'e', 'z', 'y'];
+	var byteUnits = ["k", "m", " g", " t", "p", "e", "z", "y"];
 	do {
 		fileSizeInBytes = fileSizeInBytes / 1024;
 		i++;
@@ -197,9 +197,9 @@ export function toShortSizeString(fileSizeInBytes: number): string {
 }
 
 export function ytTimeStrToSec(str: string): number {
-	let timeArr = str.split(':');
+	let timeArr = str.split(":");
 
-	if (timeArr.length === 1)      return parseInt(str);
+	if (timeArr.length === 1)	  return parseInt(str);
 	else if (timeArr.length === 2) return parseInt(timeArr[0]) * 60 + parseInt(timeArr[1]);
 	else if (timeArr.length === 3) return parseInt(timeArr[0]) * 3600 + parseInt(timeArr[1]) * 60 + parseInt(timeArr[2]);
 	else throw `Unable to convert yt time, ${str}, to seconds.`;

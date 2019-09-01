@@ -1,19 +1,19 @@
 import { config } from "./user-config";
 
 class Wrapper<T> {
-    private value: T;
+	private value: T;
 
-    constructor(value: T) {
-        this.value = value;
-    }
+	constructor(value: T) {
+		this.value = value;
+	}
 
-    get(): T {
-        return this.value;
-    }
+	get(): T {
+		return this.value;
+	}
 
-    set(value: T) {
-        this.value = value;
-    }
+	set(value: T) {
+		this.value = value;
+	}
 }
 
 export const dlPercentUpdateFreq: number = config.dlPercentUpdateFreq;

@@ -1,14 +1,14 @@
 import * as formidable from "formidable";
 
-import * as consts from './consts';
+import * as consts from "./consts";
 
-import { ContentType } from '../types/ContentType';
+import { ContentType } from "../types/ContentType";
 
 abstract class DeferredContentError extends Error {
 	public readonly contentType: ContentType;
 
 	constructor(reason: string, contentType: ContentType) {
-		super(reason + ' So the content was not downloaded.');
+		super(reason + " So the content was not downloaded.");
 		this.contentType = contentType;
 	}
 }
@@ -16,13 +16,13 @@ abstract class DeferredContentError extends Error {
 
 export class BadUrlError extends DeferredContentError {
 	constructor(contentType: ContentType) {
-		super('The url resource requested does not exist.', contentType);
+		super("The url resource requested does not exist.", contentType);
 	}
 }
 
 export class BannedError extends Error {
 	constructor() {
-		super('You can\'t upload becuase you are banned.');
+		super("You can't upload becuase you are banned.");
 	}
 }
 

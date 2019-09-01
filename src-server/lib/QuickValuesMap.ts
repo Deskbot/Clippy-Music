@@ -5,39 +5,39 @@
 */
 
 export class QuickValuesMap<K,V> extends Map<K,V> {
-    private quickValuesArr: V[];
-    private valuesNeedUpdating: boolean;
+	private quickValuesArr: V[];
+	private valuesNeedUpdating: boolean;
 
-    constructor() {
-        super();
-        this.quickValuesArr = [];
-        this.valuesNeedUpdating = true;
-    }
+	constructor() {
+		super();
+		this.quickValuesArr = [];
+		this.valuesNeedUpdating = true;
+	}
 
-    clear() {
-        super.clear();
-        this.valuesNeedUpdating = true;
-    }
+	clear() {
+		super.clear();
+		this.valuesNeedUpdating = true;
+	}
 
-    delete(key: K): boolean {
-        const isSuccess = super.delete(key);
-        this.valuesNeedUpdating = true;
-        return isSuccess;
-    }
+	delete(key: K): boolean {
+		const isSuccess = super.delete(key);
+		this.valuesNeedUpdating = true;
+		return isSuccess;
+	}
 
-    set(key: K, val: V): this {
-        super.set(key,val);
-        this.valuesNeedUpdating = true;
-        return this;
-    }
+	set(key: K, val: V): this {
+		super.set(key,val);
+		this.valuesNeedUpdating = true;
+		return this;
+	}
 
-    valuesQuick() {
-        if (this.valuesNeedUpdating) {
-            this.quickValuesArr = [...super.values()];
-        }
+	valuesQuick() {
+		if (this.valuesNeedUpdating) {
+			this.quickValuesArr = [...super.values()];
+		}
 
-        this.valuesNeedUpdating = false;
+		this.valuesNeedUpdating = false;
 
-        return this.quickValuesArr;
-    }
+		return this.quickValuesArr;
+	}
 }

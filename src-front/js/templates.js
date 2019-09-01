@@ -4,13 +4,13 @@ var templates = (function() {
 		return $($e.html());
 	}
 
-	var $templates = $('#templates');
+	var $templates = $("#templates");
 
-	var bucketContainerTemplate = toTempl($templates.children('#bucket-container-template'));
-	var bucketItemTemplate = toTempl($templates.children('#bucket-item-template'));
-	var dlBlockTemplate = toTempl($templates.children('#dl-block-template'));
-	var dlQueueTemplate = toTempl($templates.children('#dl-queue-template'));
-	var dlItemTemplate = toTempl($templates.children('#dl-item-template'));
+	var bucketContainerTemplate = toTempl($templates.children("#bucket-container-template"));
+	var bucketItemTemplate = toTempl($templates.children("#bucket-item-template"));
+	var dlBlockTemplate = toTempl($templates.children("#dl-block-template"));
+	var dlQueueTemplate = toTempl($templates.children("#dl-queue-template"));
+	var dlItemTemplate = toTempl($templates.children("#dl-item-template"));
 
 	return {
 		makeBucketContainer: function() {

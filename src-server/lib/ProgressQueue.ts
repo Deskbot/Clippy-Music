@@ -2,13 +2,13 @@
  * percentages are 0 to 1
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 
-import * as consts from './consts';
-import * as opt from '../options';
-import * as utils from './utils';
+import * as consts from "./consts";
+import * as opt from "../options";
+import * as utils from "./utils";
 
-import { QuickValuesMap } from './QuickValuesMap';
+import { QuickValuesMap } from "./QuickValuesMap";
 
 interface ProgressItem {
 	autoUpdate?: Function;
@@ -49,7 +49,7 @@ export class ProgressQueue extends EventEmitter {
 		const newItem = {
 			contentId,
 			percent: 0,
-			title: title || '',
+			title: title || "",
 			unprepared: true,
 			userId
 		};
@@ -120,12 +120,12 @@ export class ProgressQueue extends EventEmitter {
 
 	finished(userId: string, contentId: number) {
 		this.deleteQueueItem(this.findQueueItem(userId, contentId) as ProgressItem);
-		this.emit('delete', userId, contentId);
+		this.emit("delete", userId, contentId);
 	}
 
 	finishedWithError(userId: string, contentId: number, error: Error) {
 		this.deleteQueueItem(this.findQueueItem(userId, contentId) as ProgressItem);
-		this.emit('error', userId, contentId, error);
+		this.emit("error", userId, contentId, error);
 	}
 
 	getQueue(userId: string): ProgressItem[] | undefined {
@@ -136,14 +136,14 @@ export class ProgressQueue extends EventEmitter {
 		return undefined;
 	}
 
-	/* emits a 'prepared' event when the item has all the data needed
+	/* emits a "prepared" event when the item has all the data needed
 	 * for Clippy to talk to the user about the item by name
 	 */
 	maybeItemIsPrepared(item: ProgressItem) {
 		if (item.unprepared && item.title && !item.titleIsTemp) {
 			delete item.unprepared;
 			delete item.titleIsTemp;
-			this.emit('prepared', item.userId, item);
+			this.emit("prepared", item.userId, item);
 		}
 	}
 
@@ -191,7 +191,7 @@ export class ProgressQueue extends EventEmitter {
 
 		if (queueLength > 0 || this.lastQueueLength[userId] > 0) {
 			this.autoUpdateQueue(queueMap);
-			this.emit('list', userId, queueMap.valuesQuick());
+			this.emit("list", userId, queueMap.valuesQuick());
 			this.lastQueueLength[userId] = queueLength;
 		}
 	}

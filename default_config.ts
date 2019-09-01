@@ -26,12 +26,12 @@ export const config = {
 
 	// the location on disk where uploaded content is stored
 	// A relative path will be relative to the working directory the server is ran from.
-	storageDir: '/tmp/Clippy-Music-Tmp',
+	storageDir: "/tmp/Clippy-Music-Tmp",
 
-	ffprobePath: 'ffprobe',
-	mpvPath: 'mpv',
-	mpvArgs: ['-fs', '--af=dynaudnorm'],
-	youtubeDlPath: 'youtube-dl',
+	ffprobePath: "ffprobe",
+	mpvPath: "mpv",
+	mpvArgs: ["-fs", "--af=dynaudnorm"],
+	youtubeDlPath: "youtube-dl",
 
 	// how frequently the download bar progress is updated
 	dlPercentUpdateFreq: 250,

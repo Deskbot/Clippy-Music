@@ -1,4 +1,4 @@
-import { PasswordContainer } from '../lib/PasswordContainer';
+import { PasswordContainer } from "../lib/PasswordContainer";
 
 class Api {
 	private container: PasswordContainer | null = null;

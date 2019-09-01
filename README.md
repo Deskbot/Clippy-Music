@@ -112,18 +112,18 @@ curl --form "field1=@/my/file/path;field2=value2" [url]/api/content/upload
 
 Please note the difference in term separator: `&` vs `;`.
 
-Method | Path                 | Variables                                                          | Effect |
+Method | Path				 | Variables														  | Effect |
 -------|----------------------|--------------------------------------------------------------------|--------|
-GET    | /api/wsport          |                                                                    | Gives the web socket port being used for front end communication
-POST   | /api/queue/add       | music-file, music-url, image-file, image-url, start-time, end-time | Add an item to the queue
-POST   | /api/queue/remove    | content-id                                                         | Removes an item from the queue
-POST   | /api/download/cancel | dl-index                                                           | Cancel a download
-POST   | /api/nickname/set    | nickname                                                           | Set your nickname
-POST   | /api/ban/add         | password, id, nickname                                             | Ban a specific player by name or id
-POST   | /api/ban/remove      | password, id                                                       | Un-Ban a specific player by id
-POST   | /api/skip            | password                                                           | Skip the current track
-POST   | /api/skipAndPenalise | password                                                           | Skip the current track and add a send the uploader to the back of the queue
-POST   | /api/skipAndBan      | password                                                           | Skip the current track and ban the uploader
+GET	| /api/wsport		  |																	| Gives the web socket port being used for front end communication
+POST   | /api/queue/add	   | music-file, music-url, image-file, image-url, start-time, end-time | Add an item to the queue
+POST   | /api/queue/remove	| content-id														 | Removes an item from the queue
+POST   | /api/download/cancel | dl-index														   | Cancel a download
+POST   | /api/nickname/set	| nickname														   | Set your nickname
+POST   | /api/ban/add		 | password, id, nickname											 | Ban a specific player by name or id
+POST   | /api/ban/remove	  | password, id													   | Un-Ban a specific player by id
+POST   | /api/skip			| password														   | Skip the current track
+POST   | /api/skipAndPenalise | password														   | Skip the current track and add a send the uploader to the back of the queue
+POST   | /api/skipAndBan	  | password														   | Skip the current track and ban the uploader
 
 Contributions
 -------------

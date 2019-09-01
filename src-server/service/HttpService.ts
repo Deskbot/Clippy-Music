@@ -1,21 +1,21 @@
-import * as express from 'express';
-import * as formidable from 'formidable';
-import * as q from 'q';
+import * as express from "express";
+import * as formidable from "formidable";
+import * as q from "q";
 
-import { ContentServiceGetter } from './ContentService';
-import { IdFactoryServiceGetter } from './IdFactoryService';
-import { ProgressQueueServiceGetter } from './ProgressQueueService';
-import { PasswordService } from './PasswordService';
-import { UserRecordServiceGetter } from './UserRecordService';
-import { WebSocketService } from './WebSocketService';
+import { ContentServiceGetter } from "./ContentService";
+import { IdFactoryServiceGetter } from "./IdFactoryService";
+import { ProgressQueueServiceGetter } from "./ProgressQueueService";
+import { PasswordService } from "./PasswordService";
+import { UserRecordServiceGetter } from "./UserRecordService";
+import { WebSocketService } from "./WebSocketService";
 
-import * as consts from '../lib/consts';
-import * as debug from '../lib/debug';
-import * as opt from '../options';
-import * as utils from '../lib/utils';
+import * as consts from "../lib/consts";
+import * as debug from "../lib/debug";
+import * as opt from "../options";
+import * as utils from "../lib/utils";
 
-import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingError } from '../lib/errors';
-import { UploadData, UrlPic, NoPic, FilePic, FileMusic, UrlMusic, UploadDataWithId } from '../types/UploadData';
+import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingError } from "../lib/errors";
+import { UploadData, UrlPic, NoPic, FilePic, FileMusic, UrlMusic, UploadDataWithId } from "../types/UploadData";
 
 const ContentService = ContentServiceGetter.get();
 const IdFactoryService = IdFactoryServiceGetter.get();
@@ -30,11 +30,11 @@ type RequestWithFormData = express.Request & {
 function adminCredentialsRequired(req: RequestWithFormData, res: express.Response, next: () => void) {
 	const passwordService = PasswordService.get();
 	if (passwordService == null) {
-		res.status(400).end('The admin controls can not be used because no admin password was set.\n');
+		res.status(400).end("The admin controls can not be used because no admin password was set.\n");
 	} else if (passwordService.verify(req.fields.password as string)) {
 		next();
 	} else {
-		res.status(400).end('Admin password incorrect.\n');
+		res.status(400).end("Admin password incorrect.\n");
 	}
 }
 
@@ -51,21 +51,21 @@ function getFileForm(
 	let lastFileField: string | undefined;
 	let files: formidable.File[] = [];
 
-	form.on('fileBegin', (fieldName) => {
+	form.on("fileBegin", (fieldName) => {
 		lastFileField = fieldName;
 	});
 
-	form.on('file', (fieldName: string, file: formidable.File) => {
+	form.on("file", (fieldName: string, file: formidable.File) => {
 		files.push(file);
 	});
 
-	form.on('error', (err) => {
+	form.on("error", (err) => {
 		let fileError;
 
-		if (lastFileField === 'music-file') {
+		if (lastFileField === "music-file") {
 			fileError = makeMusicTooBigError(files);
 		}
-		else if (lastFileField === 'image-file') {
+		else if (lastFileField === "image-file") {
 			fileError = makeImageTooBigError(files);
 		}
 		else {
@@ -80,10 +80,10 @@ function getFileForm(
 		defer.resolve([form, fields, files]);
 	});
 
-	form.on('fileBegin', (fieldName, file) => {
-		if (fieldName === 'music-file' && file && file.name) {
+	form.on("fileBegin", (fieldName, file) => {
+		if (fieldName === "music-file" && file && file.name) {
 			const onProgress = generateProgressHandler(file);
-			form.on('progress', onProgress);
+			form.on("progress", onProgress);
 		}
 	});
 
@@ -95,7 +95,7 @@ function getFormMiddleware(req: express.Request, res: express.Response, next: ()
 
 	form.parse(req, (err, fields, files) => {
 		if (err) {
-			console.error('Unknown data submission error: ', err);
+			console.error("Unknown data submission error: ", err);
 			res.status(500).end(err.message);
 
 		} else {
@@ -103,7 +103,7 @@ function getFormMiddleware(req: express.Request, res: express.Response, next: ()
 			modifiedReq.fields = fields;
 			modifiedReq.files = files;
 
-			debug.log('fields', fields);
+			debug.log("fields", fields);
 
 			next();
 		}
@@ -145,7 +145,7 @@ function makeMusicTooBigError(files: formidable.File[]) {
 }
 
 function noRedirect(req: RequestWithFormData) {
-	return req.fields.ajax || (req.headers['user-agent'] as string).includes('curl');
+	return req.fields.ajax || (req.headers["user-agent"] as string).includes("curl");
 }
 
 function parseUploadForm(
@@ -154,33 +154,33 @@ function parseUploadForm(
 	files: formidable.Files
 ): Promise<UploadData> {
 	return new Promise((resolve, reject) => {
-		if (form.type != 'multipart') {
-			throw new FileUploadError('Multipart form type required. Received "' + form.type + '" instead.', []);
+		if (form.type != "multipart") {
+			throw new FileUploadError("Multipart form type required. Received '" + form.type + "' instead.", []);
 		}
 
-		const musicFile = files['music-file'];
-		const picFile = files['image-file'];
+		const musicFile = files["music-file"];
+		const picFile = files["image-file"];
 
 		let music: FileMusic | UrlMusic;
 
 		//music & video
-		if (fields['music-url']) {
+		if (fields["music-url"]) {
 			music = {
 				isUrl: true,
-				path: fields['music-url'] as string,
+				path: fields["music-url"] as string,
 			};
 
 			if (musicFile) utils.deleteFile(musicFile.path);
 
 		} else {
 			if (!musicFile) {
-				throw new FileUploadError('The server thinks you gave a music file but could not find it.', [musicFile, picFile]);
+				throw new FileUploadError("The server thinks you gave a music file but could not find it.", [musicFile, picFile]);
 			}
 
 			//no file
 			if (musicFile.size === 0) {
 				utils.deleteFile(musicFile.path); //empty file will still persist otherwise, due to the way multipart form uploads work / are handled
-				throw new FileUploadError('No music file or URL given.', [musicFile, picFile]);
+				throw new FileUploadError("No music file or URL given.", [musicFile, picFile]);
 			}
 
 			//file too big
@@ -190,8 +190,8 @@ function parseUploadForm(
 
 			//file wrong type
 			const mimetype = musicFile.type;
-			const lhs = mimetype.split('/')[0];
-			if (!(lhs === 'audio' || lhs === 'video' || mimetype === 'application/octet-stream')) { //audio, video, or default (un-typed) file
+			const lhs = mimetype.split("/")[0];
+			if (!(lhs === "audio" || lhs === "video" || mimetype === "application/octet-stream")) { //audio, video, or default (un-typed) file
 				throw new FileUploadError(`The audio or video file you gave was of the wrong type; "${musicFile.type}" was received instead.`, [musicFile, picFile]);
 			}
 
@@ -211,11 +211,11 @@ function parseUploadForm(
 		};
 
 		//pic
-		if (fields['image-url']) {
+		if (fields["image-url"]) {
 			pic = {
 				exists: true,
 				isUrl: true,
-				path: fields['image-url'] as string,
+				path: fields["image-url"] as string,
 			};
 
 			if (picFile) utils.deleteFile(picFile.path);
@@ -228,8 +228,8 @@ function parseUploadForm(
 				}
 
 				//file wrong type
-				const lhs = picFile.type.split('/')[0];
-				if (lhs !== 'image') {
+				const lhs = picFile.type.split("/")[0];
+				if (lhs !== "image") {
 					throw new FileUploadError(`The image file you gave was of the wrong type; "${picFile.type}" was received instead.`, [musicFile, picFile]);
 				}
 
@@ -250,10 +250,10 @@ function parseUploadForm(
 		let startTime: number | null = null;
 		let endTime: number | null = null;
 
-		if (time = fields['start-time'] as string) {
+		if (time = fields["start-time"] as string) {
 			startTime = utils.timeCodeToSeconds(time);
 		}
-		if (time = fields['end-time'] as string) {
+		if (time = fields["end-time"] as string) {
 			endTime = utils.timeCodeToSeconds(time);
 		}
 
@@ -273,7 +273,7 @@ function recordUserMiddleware(req: express.Request, res: express.Response, next:
 	expiryDate.setFullYear(expiryDate.getFullYear() + 1);
 
 	//store user id in cookie
-	res.cookie('id', req.ip, {
+	res.cookie("id", req.ip, {
 		encode: a => a,
 		expires: expiryDate,
 	});
@@ -285,16 +285,16 @@ function recordUserMiddleware(req: express.Request, res: express.Response, next:
 
 const app = express();
 
-app.use('/', express.static(consts.staticDirPath));
+app.use("/", express.static(consts.staticDirPath));
 
-app.use('/admin', express.static(consts.staticDirPath + '/index.html'));
+app.use("/admin", express.static(consts.staticDirPath + "/index.html"));
 
-app.use('/', (req, res, next) => {
-	res.type('text/plain');
+app.use("/", (req, res, next) => {
+	res.type("text/plain");
 	next();
 });
 
-app.get('/api/wsport', (req, res) => {
+app.get("/api/wsport", (req, res) => {
 	res.status(200).end(opt.webSocketPort.toString());
 });
 
@@ -306,7 +306,7 @@ app.get('/api/wsport', (req, res) => {
 	* start-time
 	* end-time
  */
-app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
+app.post("/api/queue/add", recordUserMiddleware, (req, res) => {
 	const contentId = IdFactoryServiceGetter.get().new();
 
 	handlePotentialBan(req.ip) //assumes ip address is userId
@@ -346,10 +346,10 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 
 		debug.log("successful upload: ", uplData);
 
-		if (fields.ajax || (req.headers['user-agent'] && req.headers['user-agent'].includes('curl'))) {
-			res.status(200).end('Success\n');
+		if (fields.ajax || (req.headers["user-agent"] && req.headers["user-agent"].includes("curl"))) {
+			res.status(200).end("Success\n");
 		} else {
-			res.redirect('/');
+			res.redirect("/");
 		}
 	})
 	.catch(err => {
@@ -379,7 +379,7 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 			ProgressQueueService.finishedWithError(req.ip, contentId, err);
 
 		} else {
-			console.error('Unknown upload error: ', err);
+			console.error("Unknown upload error: ", err);
 			res.status(500);
 			ProgressQueueService.finishedWithError(req.ip, contentId, err);
 		}
@@ -395,66 +395,66 @@ app.post('/api/queue/add', recordUserMiddleware, (req, res) => {
 app.use(getFormMiddleware);
 
 //POST variable: content-id
-app.post('/api/queue/remove', (req: RequestWithFormData, res) => {
-	if (ContentService.remove(req.ip, parseInt(req.fields['content-id'] as string))) {
-		if (noRedirect(req)) res.status(200).end('Success\n');
-		else                 res.redirect('/');
+app.post("/api/queue/remove", (req: RequestWithFormData, res) => {
+	if (ContentService.remove(req.ip, parseInt(req.fields["content-id"] as string))) {
+		if (noRedirect(req)) res.status(200).end("Success\n");
+		else				 res.redirect("/");
 	} else {
-		res.status(400).end('OwnershipError');
+		res.status(400).end("OwnershipError");
 	}
 });
 
 //POST variable: content-id
-app.post('/api/download/cancel', (req: RequestWithFormData, res) => {
-	if (ProgressQueueService.cancel(req.ip, parseInt(req.fields['content-id'] as string))) {
-		if (noRedirect(req)) res.status(200).end('Success\n');
-		else                 res.redirect('/');
+app.post("/api/download/cancel", (req: RequestWithFormData, res) => {
+	if (ProgressQueueService.cancel(req.ip, parseInt(req.fields["content-id"] as string))) {
+		if (noRedirect(req)) res.status(200).end("Success\n");
+		else				 res.redirect("/");
 	} else {
-		res.status(400).end('The download item specified was not recognised.\n');
+		res.status(400).end("The download item specified was not recognised.\n");
 	}
 });
 
 //POST variable: nickname
-app.post('/api/nickname/set', recordUserMiddleware, (req: RequestWithFormData, res) => {
+app.post("/api/nickname/set", recordUserMiddleware, (req: RequestWithFormData, res) => {
 	const nickname = utils.sanitiseNickname(req.fields.nickname as string);
 
 	if (nickname.length === 0) {
-		res.status(400).end('Empty nicknames are not allowed.');
+		res.status(400).end("Empty nicknames are not allowed.");
 		return;
 	}
 
 	// check sanitised version because that's what admins will see
 	if (utils.looksLikeIpAddress(nickname)) {
-		res.status(400).end('Your nickname can not look like an IP address.');
+		res.status(400).end("Your nickname can not look like an IP address.");
 		return;
 	}
 
 	UserRecordService.setNickname(req.ip, nickname);
 	WebSocketService.sendNicknameToUser(req.ip, nickname);
 
-	if (noRedirect(req)) res.status(200).end('Success\n');
-	else                 res.redirect('/');
+	if (noRedirect(req)) res.status(200).end("Success\n");
+	else				 res.redirect("/");
 });
 
 //POST variable: password, id, nickname
-app.post('/api/ban/add', adminCredentialsRequired, (req: RequestWithFormData, res) => {
+app.post("/api/ban/add", adminCredentialsRequired, (req: RequestWithFormData, res) => {
 	if (req.fields.id) {
 		if (!UserRecordService.isUser(req.fields.id as string)) {
-			res.status(400).end('That user doesn\'t exist.\n');
+			res.status(400).end("That user doesn't exist.\n");
 			return;
 
 		} else {
 			UserRecordService.addBan(req.fields.id as string);
 			ContentService.purgeUser(req.fields.id as string);
-			if (noRedirect(req)) res.status(200).end('Success\n');
-			else                 res.redirect('/');
+			if (noRedirect(req)) res.status(200).end("Success\n");
+			else				 res.redirect("/");
 		}
 
 	} else if (req.fields.nickname) {
 		const uids = UserRecordService.whoHasNickname(utils.sanitiseNickname(req.fields.nickname as string));
 
 		if (uids.length === 0) {
-			res.status(400).end('That user doesn\'t exist.\n');
+			res.status(400).end("That user doesn't exist.\n");
 			return;
 
 		} else {
@@ -463,32 +463,32 @@ app.post('/api/ban/add', adminCredentialsRequired, (req: RequestWithFormData, re
 				ContentService.purgeUser(id);
 			});
 
-			if (noRedirect(req)) res.status(200).end('Success\n');
-			else                 res.redirect('/');
+			if (noRedirect(req)) res.status(200).end("Success\n");
+			else				 res.redirect("/");
 		}
 
 	} else {
-		res.status(400).end('User not specified.\n');
+		res.status(400).end("User not specified.\n");
 	}
 });
 
 //POST variable: password, id
-app.post('/api/ban/remove', adminCredentialsRequired, (req: RequestWithFormData, res) => {
+app.post("/api/ban/remove", adminCredentialsRequired, (req: RequestWithFormData, res) => {
 	if (req.fields.id) {
 		if (!UserRecordService.isUser(req.fields.id as string)) {
-			res.status(400).end('That user doesn\'t exist.\n');
+			res.status(400).end("That user doesn't exist.\n");
 			return;
 
 		} else {
 			UserRecordService.removeBan(req.fields.id as string);
-			if (noRedirect(req)) res.status(200).end('Success\n');
-			else                 res.redirect('/');
+			if (noRedirect(req)) res.status(200).end("Success\n");
+			else				 res.redirect("/");
 		}
 
 	} else if (req.fields.nickname) {
 		const uids = UserRecordService.whoHasNickname(utils.sanitiseNickname(req.fields.nickname as string));
 		if (uids.length === 0) {
-			res.status(400).end('That user doesn\'t exist.\n');
+			res.status(400).end("That user doesn't exist.\n");
 			return;
 
 		} else {
@@ -496,34 +496,34 @@ app.post('/api/ban/remove', adminCredentialsRequired, (req: RequestWithFormData,
 				UserRecordService.removeBan(id);
 			});
 
-			if (noRedirect(req)) res.status(200).end('Success\n');
-			else                 res.redirect('/');
+			if (noRedirect(req)) res.status(200).end("Success\n");
+			else				 res.redirect("/");
 		}
 
 	} else {
-		res.status(400).end('User not specified.\n');
+		res.status(400).end("User not specified.\n");
 	}
 });
 
 //POST variable: password
-app.post('/api/skip', adminCredentialsRequired, (req, res) => {
+app.post("/api/skip", adminCredentialsRequired, (req, res) => {
 	ContentService.killCurrent();
-	res.status(200).end('Success\n');
+	res.status(200).end("Success\n");
 });
 
 //POST variable: password
-app.post('/api/skipAndPenalise', adminCredentialsRequired, (req, res) => {
+app.post("/api/skipAndPenalise", adminCredentialsRequired, (req, res) => {
 	if (ContentService.currentlyPlaying) {
 		ContentService.penalise(ContentService.currentlyPlaying.userId);
 	}
 
 	ContentService.killCurrent();
 
-	res.status(200).end('Success\n');
+	res.status(200).end("Success\n");
 });
 
 //POST variable: password
-app.post('/api/skipAndBan', adminCredentialsRequired, (req, res) => {
+app.post("/api/skipAndBan", adminCredentialsRequired, (req, res) => {
 	if (ContentService.currentlyPlaying) {
 		const id = ContentService.currentlyPlaying.userId;
 		UserRecordService.addBan(id);
@@ -532,13 +532,13 @@ app.post('/api/skipAndBan', adminCredentialsRequired, (req, res) => {
 
 	ContentService.killCurrent();
 
-	res.status(200).end('Success\n');
+	res.status(200).end("Success\n");
 });
 
 export function startHttpService() {
 	app.listen(opt.httpPort, (err) => {
 		if (err) throw err;
 
-		console.log('Web server started');
+		console.log("Web server started");
 	});
 }

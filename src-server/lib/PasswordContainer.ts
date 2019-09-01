@@ -34,7 +34,7 @@ export class PasswordContainer {
 }
 
 function hash(data: string): string {
-	return crypto.createHash('sha256')
+	return crypto.createHash("sha256")
 		.update(data)
 		.digest()
 		.toString();

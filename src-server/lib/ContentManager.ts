@@ -1,25 +1,25 @@
-import * as cp from 'child_process';
-import { EventEmitter } from 'events';
-import { Html5Entities } from 'html-entities';
-import * as request from 'request';
-import * as fs from 'fs';
+import * as cp from "child_process";
+import { EventEmitter } from "events";
+import { Html5Entities } from "html-entities";
+import * as request from "request";
+import * as fs from "fs";
 
-import * as consts from './consts';
-import * as debug from './debug';
-import * as utils from './utils';
-import * as opt from '../options';
-import * as time from './time';
+import * as consts from "./consts";
+import * as debug from "./debug";
+import * as utils from "./utils";
+import * as opt from "../options";
+import * as time from "./time";
 
-import { ClippyQueue } from './ClippyQueue';
-import { ContentType } from '../types/ContentType';
-import { downloadYtInfo, getFileDuration, YtData } from './music';
-import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError } from './errors';
-import { UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic, TitledMusic } from '../types/UploadData';
-import { IdFactory } from './IdFactory';
-import { ItemData, CompleteMusic, CompletePicture } from '../types/ItemData';
-import { YtDownloader } from './YtDownloader';
-import { UserRecord } from './UserRecord';
-import { ProgressQueue } from './ProgressQueue';
+import { ClippyQueue } from "./ClippyQueue";
+import { ContentType } from "../types/ContentType";
+import { downloadYtInfo, getFileDuration, YtData } from "./music";
+import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError } from "./errors";
+import { UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic, TitledMusic } from "../types/UploadData";
+import { IdFactory } from "./IdFactory";
+import { ItemData, CompleteMusic, CompletePicture } from "../types/ItemData";
+import { YtDownloader } from "./YtDownloader";
+import { UserRecord } from "./UserRecord";
+import { ProgressQueue } from "./ProgressQueue";
 
 interface BucketForPublic {
 	bucket: {
@@ -79,7 +79,7 @@ export class ContentManager extends EventEmitter {
 		this.ytDownloader = ytDownloader;
 
 		if (startState) {
-			console.log('Using suspended content manager');
+			console.log("Using suspended content manager");
 
 			this.playQueue = new ClippyQueue(startState.playQueue);
 			this.musicHashes = startState.hashes;
@@ -100,11 +100,11 @@ export class ContentManager extends EventEmitter {
 			pqContent = fs.readFileSync(consts.files.content);
 
 		} catch (e) {
-			console.log('No suspended content manager found. This is ok.');
+			console.log("No suspended content manager found. This is ok.");
 			return null;
 		}
 
-		console.log('Reading suspended content manager');
+		console.log("Reading suspended content manager");
 
 		try {
 			success = true;
@@ -113,9 +113,9 @@ export class ContentManager extends EventEmitter {
 		} catch (e) {
 			success = false;
 			if (e instanceof SyntaxError) {
-				console.error('Syntax error in suspendedContentManager.json file.');
+				console.error("Syntax error in suspendedContentManager.json file.");
 				console.error(e);
-				console.log('Ignoring suspended content manager');
+				console.log("Ignoring suspended content manager");
 			} else {
 				throw e;
 			}
@@ -159,27 +159,27 @@ export class ContentManager extends EventEmitter {
 			request.head(url, (err, res, body) => {
 				if (err) {
 					err.contentType = ContentType.Picture;
-					if (err.code === 'ENOTFOUND' || err.code === 'ETIMEDOUT') {
+					if (err.code === "ENOTFOUND" || err.code === "ETIMEDOUT") {
 						return reject(new BadUrlError(ContentType.Picture));
 					}
 					return reject(err);
 				}
 
 				if (!res) {
-					return reject(new UnknownDownloadError('Could not get a response for the request.', ContentType.Picture));
+					return reject(new UnknownDownloadError("Could not get a response for the request.", ContentType.Picture));
 				}
 
-				const typeFound = res.headers['content-type'] as string;
+				const typeFound = res.headers["content-type"] as string;
 
-				if (typeFound.split('/')[0] !== 'image') {
-					return reject(new DownloadWrongTypeError(ContentType.Picture, 'image', typeFound));
+				if (typeFound.split("/")[0] !== "image") {
+					return reject(new DownloadWrongTypeError(ContentType.Picture, "image", typeFound));
 				}
-				if (parseInt(res.headers['content-length'] as string) > opt.imageSizeLimit) {
+				if (parseInt(res.headers["content-length"] as string) > opt.imageSizeLimit) {
 					return reject(new DownloadTooLargeError(ContentType.Picture));
 				}
 
-				let picName: string | null = url.split('/').pop() as string;
-				picName = picName.length <= 1 ? null : picName.split('.').shift() as string;
+				let picName: string | null = url.split("/").pop() as string;
+				picName = picName.length <= 1 ? null : picName.split(".").shift() as string;
 
 				if (picName == null) {
 					picName = "";
@@ -191,10 +191,10 @@ export class ContentManager extends EventEmitter {
 
 				const stream = request(url).pipe(fs.createWriteStream(destination));
 
-				stream.on('close', () => {
+				stream.on("close", () => {
 					return resolve(picinfo);
 				});
-				stream.on('error', (err) => {
+				stream.on("error", (err) => {
 					err.contentType = ContentType.Picture;
 					return reject(err);
 				});
@@ -260,7 +260,7 @@ export class ContentManager extends EventEmitter {
 					...uplData.pic,
 				},
 				duration: time.clipTimeByStartAndEnd(Math.floor(duration), uplData.startTime, uplData.endTime),
-            };
+			};
 
 			return uplDataWithDuration;
 		}
@@ -282,7 +282,7 @@ export class ContentManager extends EventEmitter {
 			const musicData = {
 				...uplData.music,
 				title: info.title,
-            };
+			};
 
 			return {
 				...uplData,
@@ -312,7 +312,7 @@ export class ContentManager extends EventEmitter {
 		if (contentData.pic.exists) {
 			picName = new Html5Entities().decode(contentData.pic.title);
 		} else {
-			picName = 'no picture';
+			picName = "no picture";
 		}
 
 		let nonEntityTile = new Html5Entities().decode(contentData.music.title);
@@ -364,12 +364,12 @@ export class ContentManager extends EventEmitter {
 	playNext(): boolean {
 		if (this.stop) return false;
 
-        const contentData = this.playQueue.next();
+		const contentData = this.playQueue.next();
 		const that = this;
 
 		if (contentData === null) {
 			this.currentlyPlaying = null;
-			this.emit('queue-empty');
+			this.emit("queue-empty");
 			return false;
 		}
 
@@ -387,7 +387,7 @@ export class ContentManager extends EventEmitter {
 		const timePlayedAt = Date.now();
 		const musicProc = this.startMusic(contentData.music.path, opt.timeout, contentData.startTime, contentData.endTime);
 
-		musicProc.on('close', (code, signal) => { // runs before next call to playNext
+		musicProc.on("close", (code, signal) => { // runs before next call to playNext
 			const secs = 1 + Math.ceil((Date.now() - timePlayedAt) / 1000); //seconds ran for, adds a little bit to prevent infinite <1 second content
 
 			that.playQueue.boostPosteriority(contentData.userId, secs);
@@ -399,24 +399,24 @@ export class ContentManager extends EventEmitter {
 			// save hashes if the music played for long enough
 			if (secs >= consts.minPlayTimeToPreventReplay) this.remember(contentData);
 
-			that.emit('end');
+			that.emit("end");
 		});
 
 		if (contentData.pic.exists) {
 			const picPath = contentData.pic.path;
-			musicProc.stdout.on('data', function showPicture(buf) {
+			musicProc.stdout.on("data", function showPicture(buf) {
 				//we want to play the picture after the video has appeared, which takes a long time when doing it remotely
 				//so we have to check the output of mpv, for signs it's not just started up, but also playing :/
-				if (buf.includes('(+)') || buf.includes('Audio') || buf.includes('Video')) {
+				if (buf.includes("(+)") || buf.includes("Audio") || buf.includes("Video")) {
 					that.startPic(picPath, opt.timeout);
-					musicProc.stdout.removeListener('data', showPicture); //make sure we only check for this once, for efficiency
+					musicProc.stdout.removeListener("data", showPicture); //make sure we only check for this once, for efficiency
 				}
 			});
 		}
 
 		this.logPlay(contentData);
 
-		this.emit('queue-update');
+		this.emit("queue-update");
 
 		return true;
 	}
@@ -450,7 +450,7 @@ export class ContentManager extends EventEmitter {
 			this.deleteContent(itemData);
 			this.playQueue.remove(userId, itemData);
 			this.forget(itemData);
-			this.emit('queue-update');
+			this.emit("queue-update");
 
 			return true;
 		}
@@ -459,23 +459,23 @@ export class ContentManager extends EventEmitter {
 	}
 
 	startMusic(path: string, duration: number, startTime: number | null | undefined, endTime: number | null | undefined) {
-		const args = [duration + 's', opt.mpvPath, ...opt.mpvArgs, '--quiet', path];
+		const args = [duration + "s", opt.mpvPath, ...opt.mpvArgs, "--quiet", path];
 
 		if (startTime) {
-			args.push('--start');
+			args.push("--start");
 			args.push(startTime.toString());
 		}
 
 		if (endTime) {
-			args.push('--end');
+			args.push("--end");
 			args.push(endTime.toString());
 		}
 
 		if (opt.mute.get()) {
-			args.push('--mute=yes');
+			args.push("--mute=yes");
 		}
 
-		return this.runningMusicProc = cp.spawn('timeout', args);
+		return this.runningMusicProc = cp.spawn("timeout", args);
 	}
 
 	stopMusic() {
@@ -483,7 +483,7 @@ export class ContentManager extends EventEmitter {
 	}
 
 	startPic(path: string, duration: number) {
-		this.runningPicProc = cp.spawn('timeout', [duration + 's', 'eog', path, '-f']);
+		this.runningPicProc = cp.spawn("timeout", [duration + "s", "eog", path, "-f"]);
 	}
 
 	stopPic() {
@@ -531,7 +531,7 @@ export class ContentManager extends EventEmitter {
 
 			this.playQueue.add(itemData);
 			this.progressQueue.finished(itemData.userId, itemData.id);
-			this.emit('queue-update');
+			this.emit("queue-update");
 
 		} catch (err) {
 			if (err instanceof CancelError) {
