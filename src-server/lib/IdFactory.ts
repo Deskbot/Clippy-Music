@@ -14,25 +14,6 @@ export class IdFactory {
 		}
 	}
 
-	//static
-
-	static restore(): number | undefined {
-		let fileContent: string;
-
-		try {
-			fileContent = fs.readFileSync(consts.files.idFactory).toString();
-			console.log("Reading suspended ID Factory");
-
-		} catch (e) {
-			if (e.message.includes("ENOENT")) return undefined;
-			else throw e;
-		}
-
-		return parseInt(fileContent);
-	}
-
-	//object methods
-
 	new() {
 		return this.nextId++;
 	}

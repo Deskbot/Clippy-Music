@@ -6,7 +6,7 @@ This list is in a rough order of priority.
 List
 ----
 
-* move static methods to services
+* move store methods to services
 * I could use a custom defer class instead of using q
 * Barringer's Bucketing system
 	* add bucketing type to options

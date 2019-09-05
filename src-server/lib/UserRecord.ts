@@ -1,9 +1,7 @@
 import * as fs from "fs";
 import ws = require("ws");
 
-import * as consts from "./consts";
-
-const recordFilePath = consts.files.users;
+import * as consts from "../lib/consts";
 
 interface User {
 	nickname: string,
@@ -40,47 +38,6 @@ export class UserRecord {
 			this.banlist = startState.banlist;
 		}
 	}
-
-	//static
-
-	static recover() {
-		//retreive suspended queue
-		let obj, recordContent;
-		let success = true;
-
-		try {
-			recordContent = fs.readFileSync(recordFilePath).toString();
-
-		} catch (e) {
-			console.log("No suspended user record found. This is ok.");
-			return null
-		}
-
-		console.log("Reading suspended user record");
-
-		try {
-			success = true && success;
-			obj = JSON.parse(recordContent);
-
-		} catch (e) {
-			success = false;
-			if (e instanceof SyntaxError) {
-				console.error("Syntax error in suspendedUserRecord.json file.");
-				console.error(e);
-				console.error("Ignoring suspended content manager");
-			} else {
-				throw e;
-			}
-		}
-
-		return success ? obj : null;
-	}
-
-	static get suspendedFilePath(): string {
-		return recordFilePath;
-	}
-
-	//object methods
 
 	add(id: string, soc?: ws) {
 		if (!this.isUser(id)) {
@@ -149,7 +106,7 @@ export class UserRecord {
 			idToUser,
 		};
 
-		fs.writeFileSync(recordFilePath, JSON.stringify(thisObj));
+		fs.writeFileSync(consts.files.users, JSON.stringify(thisObj));
 	}
 
 	unsetWS(id: string, soc: ws) {

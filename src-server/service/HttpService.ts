@@ -18,7 +18,6 @@ import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingErro
 import { UploadData, UrlPic, NoPic, FilePic, FileMusic, UrlMusic, UploadDataWithId } from "../types/UploadData";
 
 const ContentService = ContentServiceGetter.get();
-const IdFactoryService = IdFactoryServiceGetter.get();
 const ProgressQueueService = ProgressQueueServiceGetter.get();
 const UserRecordService = UserRecordServiceGetter.get();
 
