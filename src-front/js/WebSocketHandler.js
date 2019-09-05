@@ -114,7 +114,7 @@ var WebSocketHandler = (function() {
 				} else {
 					what = whatPic;
 				}
-				clippySays = "I didn't download " + what + " because the file was the wrong type; "" + contentData.error.actualTypeDesc + "" was received instead.";
+				clippySays = "I didn't download " + what + " because the file was the wrong type; " + contentData.error.actualTypeDesc + " was received instead.";
 
 			} else {
 				clippySays = "I didn't download one of your files because it was of the wrong type.";
