@@ -306,7 +306,7 @@ export class ContentManager extends EventEmitter {
 
 	logPlay(contentData: ItemData) {
 		const nickname = this.userRecord.getNickname(contentData.userId);
-		const currentTime = new Date().toString();
+		const currentTime = new Date().toISOString();
 
 		let picName;
 		if (contentData.pic.exists) {
@@ -315,13 +315,20 @@ export class ContentManager extends EventEmitter {
 			picName = "no picture";
 		}
 
-		let nonEntityTile = new Html5Entities().decode(contentData.music.title);
+		const noHtmlEntityTitle = new Html5Entities().decode(contentData.music.title);
 
 		//public log uses publicly facing info
-		console.log(`"${nickname}" played "${nonEntityTile}" with "${picName}" at ${currentTime}.`);
+		console.log(currentTime);
+		console.log(`user   "${nickname}"`);
+		console.log(`played "${noHtmlEntityTitle}"`);
+		console.log(`with   "${picName}"`);
 
 		//private log uses private facing info
-		let message = `UserId: "${contentData.userId}" played "${nonEntityTile}" with "${picName}" at ${currentTime}.\n`;
+		const message = currentTime + "\n" +
+			`user   "${contentData.userId}\n"` +
+			`played "${noHtmlEntityTitle}\n"` +
+			`with   "${picName}\n"`;
+
 		fs.appendFile(consts.files.log, message, (err) => {
 			if (err) throw err;
 		});

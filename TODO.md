@@ -6,7 +6,6 @@ This list is in a rough order of priority.
 List
 ----
 
-* improve play log format
 * does itemdata definitely have a title? when is it added for yt downloads
 * extracting picname from downloaded pic could be better
 * commas at the end of interface lines
