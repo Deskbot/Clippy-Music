@@ -154,7 +154,7 @@ export class ContentManager extends EventEmitter {
 		if (contentObj.pic.exists) utils.deleteFile(contentObj.pic.path); //empty picture files can be uploaded and will persist
 	}
 
-	downloadPic(url: string, destination: string): Promise<{ title: string }> {
+	downloadPic(url: string, destination: string): Promise<string> {
 		return new Promise((resolve, reject) => {
 			request.head(url, (err, res, body) => {
 				if (err) {
@@ -185,14 +185,12 @@ export class ContentManager extends EventEmitter {
 					picName = "";
 				}
 
-				const picinfo = {
-					title: new Html5Entities().encode(picName),
-				};
+				const title = new Html5Entities().encode(picName);
 
 				const stream = request(url).pipe(fs.createWriteStream(destination));
 
 				stream.on("close", () => {
-					return resolve(picinfo);
+					return resolve(title);
 				});
 				stream.on("error", (err) => {
 					err.contentType = ContentType.Picture;
@@ -621,11 +619,9 @@ export class ContentManager extends EventEmitter {
 		let title: string;
 
 		if (pic.isUrl) {
-			const npp = this.nextPicPath();
-			const picInfo = await this.downloadPic(pic.path, npp);
+			pathOnDisk = this.nextPicPath();
+			title = await this.downloadPic(pic.path, pathOnDisk);
 
-			pathOnDisk = npp;
-			title = picInfo.title;
 		} else {
 			pathOnDisk = pic.path;
 			title = pic.title;
