@@ -22,8 +22,6 @@ export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> 
 
 		cm.on("end", () => play(cm));
 
-		play(cm);
-
 		return cm;
 	}
 
@@ -69,4 +67,8 @@ function recover(): SuspendedContentManager | null {
 	}
 
 	return success ? obj : null;
+}
+
+export function startPlayingContent() {
+	play(ContentServiceGetter.get());
 }
