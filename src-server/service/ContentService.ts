@@ -22,10 +22,7 @@ export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> 
 
 		cm.on("end", () => play(cm));
 
-		// start this asyncronously to prevent recursion
-		// also this.get() in this.play() can't return a value
-		// until this function exits the first time
-		setImmediate(() => play(cm));
+		play(cm);
 
 		return cm;
 	}
