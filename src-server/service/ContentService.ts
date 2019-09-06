@@ -1,15 +1,14 @@
 import * as fs from "fs";
 import * as q from "q";
 
-import { ContentManager, SuspendedContentManager } from "../lib/ContentManager";
-import { YtDownloader } from "../lib/YtDownloader";
-
 import * as consts from "../lib/consts";
 import * as utils from "../lib/utils";
 
 import { IdFactoryServiceGetter } from "./IdFactoryService";
 import { ProgressQueueServiceGetter } from "./ProgressQueueService";
 import { UserRecordServiceGetter } from "./UserRecordService";
+import { ContentManager, SuspendedContentManager } from "../lib/ContentManager";
+import { YtDownloader } from "../lib/YtDownloader";
 import { MakeOnce } from "../lib/MakeOnce";
 
 export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> {
@@ -23,27 +22,27 @@ export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> 
 			new YtDownloader(ProgressQueueServiceGetter.get())
 		);
 
-		const play = () => {
-			const isNext = cm.playNext();
-
-			if (!isNext) {
-				q.delay(1000)
-					.then(() => play())
-					.catch(utils.reportError);
-			}
-		}
-
-		cm.on("end", () => play());
+		cm.on("end", () => play(cm));
 
 		// start this asyncronously to prevent recursion
 		// also this.get() in this.play() can't return a value
 		// until this function exits the first time
-		setImmediate(() => play());
+		setImmediate(() => play(cm));
 
 		return cm;
 	}
 
 })();
+
+function play(cm: ContentManager) {
+	const isNext = cm.playNext();
+
+	if (!isNext) {
+		q.delay(1000)
+			.then(() => play(cm))
+			.catch(utils.reportError);
+	}
+}
 
 // retreive suspended ContentManger
 function recover(): SuspendedContentManager | null {
