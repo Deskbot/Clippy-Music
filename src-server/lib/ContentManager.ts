@@ -30,7 +30,7 @@ interface BucketForPublic {
 	userId: string;
 }
 
-interface SuspendedContentManager {
+export interface SuspendedContentManager {
 	playQueue: any;
 	hashes: any;
 	picHashes: any;
@@ -88,40 +88,6 @@ export class ContentManager extends EventEmitter {
 		} else {
 			this.playQueue = new ClippyQueue();
 		}
-	}
-
-	// retreive suspended ContentManger
-	static recover(): SuspendedContentManager | null {
-		let obj;
-		let pqContent: Buffer;
-		let success = true;
-
-		try {
-			pqContent = fs.readFileSync(consts.files.content);
-
-		} catch (e) {
-			console.log("No suspended content manager found. This is ok.");
-			return null;
-		}
-
-		console.log("Reading suspended content manager");
-
-		try {
-			success = true;
-			obj = JSON.parse(pqContent.toString());
-
-		} catch (e) {
-			success = false;
-			if (e instanceof SyntaxError) {
-				console.error("Syntax error in suspendedContentManager.json file.");
-				console.error(e);
-				console.log("Ignoring suspended content manager");
-			} else {
-				throw e;
-			}
-		}
-
-		return success ? obj : null;
 	}
 
 	async add(uplData: UploadDataWithId) {

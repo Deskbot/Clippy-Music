@@ -5,7 +5,6 @@ import * as opt from "../options";
 import * as utils from "./utils";
 
 import { CancelError, UnknownDownloadError } from "./errors";
-
 import { ContentType } from "../types/ContentType";
 import { ProgressQueue } from "./ProgressQueue";
 

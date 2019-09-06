@@ -6,7 +6,7 @@ This list is in a rough order of priority.
 List
 ----
 
-* move static methods to services
+* move store methods to services
 * I could use a custom defer class instead of using q
 * Barringer's Bucketing system
 	* add bucketing type to options
@@ -73,6 +73,7 @@ List
 * Prevent Firefox getting urls that are POST only
 	* use 405 Method Not Allowed responses
 * Split up HttpService into sub files based on common middleware
+* Make it so Clippy can't be dropped in a place that covers the scroll bar partially
 * Use consistent "id", "cid", "contentId" / "uid", "userId" properties
 * "use strict"
 * Split ContentManager into more modules

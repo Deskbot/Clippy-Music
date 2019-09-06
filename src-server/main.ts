@@ -7,7 +7,7 @@ import * as opt from "./options";
 import * as utils from "./lib/utils";
 
 import { PasswordService } from "./service/PasswordService";
-import { ContentServiceGetter } from "./service/ContentService";
+import { ContentServiceGetter, startPlayingContent } from "./service/ContentService";
 import { IdFactoryServiceGetter } from "./service/IdFactoryService";
 import { UserRecordServiceGetter } from "./service/UserRecordService";
 
@@ -26,6 +26,7 @@ function main() {
 		setUpDirs();
 		setUpServices();
 		setUpControls();
+		startPlayingContent();
 
 	}).catch(utils.reportError);
 }

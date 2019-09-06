@@ -18,8 +18,6 @@ export class PasswordContainer {
 		return hash(inputPass + this.salt) === this.password;
 	}
 
-	//static
-
 	static newSalt(len: number) {
 		let str = "";
 
