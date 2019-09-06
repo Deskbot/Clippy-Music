@@ -1,8 +1,6 @@
 import * as fs from "fs";
-import * as q from "q";
 
 import * as consts from "../lib/consts";
-import * as utils from "../lib/utils";
 
 import { IdFactoryServiceGetter } from "./IdFactoryService";
 import { ProgressQueueServiceGetter } from "./ProgressQueueService";
@@ -38,9 +36,7 @@ function play(cm: ContentManager) {
 	const isNext = cm.playNext();
 
 	if (!isNext) {
-		q.delay(1000)
-			.then(() => play(cm))
-			.catch(utils.reportError);
+		setTimeout(() => play(cm), 1000);
 	}
 }
 
