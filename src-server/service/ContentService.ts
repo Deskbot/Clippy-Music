@@ -23,25 +23,26 @@ export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> 
 			new YtDownloader(ProgressQueueServiceGetter.get())
 		);
 
-		cm.on("end", () => this.play());
+		const play = () => {
+			const isNext = cm.playNext();
+
+			if (!isNext) {
+				q.delay(1000)
+					.then(() => play())
+					.catch(utils.reportError);
+			}
+		}
+
+		cm.on("end", () => play());
 
 		// start this asyncronously to prevent recursion
 		// also this.get() in this.play() can't return a value
 		// until this function exits the first time
-		setImmediate(() => this.play());
+		setImmediate(() => play());
 
 		return cm;
 	}
 
-	play() {
-		const isNext = this.get().playNext();
-
-		if (!isNext) {
-			q.delay(1000)
-				.then(() => this.play())
-				.catch(utils.reportError);
-		}
-	}
 })();
 
 // retreive suspended ContentManger
