@@ -12,6 +12,7 @@ import * as UserRecordService from "./service/UserRecordService";
 
 import { PasswordService } from "./service/PasswordService";
 import { ContentServiceGetter, startPlayingContent } from "./service/ContentService";
+import { startHttpService } from "./service/HttpService";
 
 // prompt settings
 prompt.colors = false;
@@ -26,7 +27,7 @@ main();
 function main() {
 	handleArguments().then(() => {
 		setUpDirs();
-		setUpServices();
+		startHttpService();
 		setUpControls();
 		startPlayingContent();
 
@@ -152,9 +153,4 @@ function setUpControls() {
 		else if (key.name === "z" && key.ctrl)  process.kill(process.pid, "SIGTSTP");
 		else if (key.name === "\\" && key.ctrl) process.kill(process.pid, "SIGQUIT"); //single backslash
 	});
-}
-
-function setUpServices() {
-	const { startHttpService } = require("./service/HttpService");
-	startHttpService();
 }
