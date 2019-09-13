@@ -8,10 +8,10 @@ import * as utils from "./lib/utils";
 
 import * as ContentService from "./service/ContentService";
 import * as IdFactoryService from "./service/IdFactoryService";
+import * as UserRecordService from "./service/UserRecordService";
 
 import { PasswordService } from "./service/PasswordService";
 import { ContentServiceGetter, startPlayingContent } from "./service/ContentService";
-import { UserRecordServiceGetter } from "./service/UserRecordService";
 
 // prompt settings
 prompt.colors = false;
@@ -111,8 +111,7 @@ function setUpDirs() {
 }
 
 function setUpControls() {
-	const ContentManager = ContentServiceGetter.get();
-	const UserRecordService = UserRecordServiceGetter.get();
+	const contentManager = ContentServiceGetter.get();
 
 	//when this is about to be killed
 	process.on("exit", () => {
@@ -122,16 +121,16 @@ function setUpControls() {
 		IdFactoryService.store();
 		UserRecordService.store();
 
-		if (ContentManager.isPlaying()) {
+		if (contentManager.isPlaying()) {
 			console.log("Waiting for content being played to get deleted.");
-			ContentManager.on("end", () => {
+			contentManager.on("end", () => {
 				process.exit(0);
 			});
 		} else {
 			process.exit(0);
 		}
 
-		ContentManager.end();
+		contentManager.end();
 	});
 
 	//stdin controls
@@ -144,7 +143,7 @@ function setUpControls() {
 	}
 
 	process.stdin.on("keypress", (ch, key) => {
-		if (key.name === "end") ContentManager.killCurrent();
+		if (key.name === "end") contentManager.killCurrent();
 
 		//I'm having to put these in because the settings that allow me to use "end" prevent normal interrupts key commands
 		else if (key.name === "c" && key.ctrl)  process.kill(process.pid, "SIGINT");

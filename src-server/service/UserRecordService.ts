@@ -5,8 +5,8 @@ import * as consts from "../lib/consts";
 import { UserRecord } from "../lib/UserRecord";
 import { MakeOnce } from "../lib/MakeOnce";
 
-export const UserRecordServiceGetter = new (class extends MakeOnce<UserRecord> {
-	make(): UserRecord {
+export const UserRecordGetter = new (class extends MakeOnce<UserRecord> {
+	protected make(): UserRecord {
 		return new UserRecord(recover());
 	}
 })();
@@ -42,4 +42,9 @@ function recover() {
 	}
 
 	return success ? obj : null;
+}
+
+export function store() {
+	console.log("Storing user record...");
+	fs.writeFileSync(consts.files.users, UserRecordGetter.get().toJSON());
 }

@@ -4,11 +4,11 @@ import { WebSocketHandler } from "../lib/WebSocketHandler";
 
 import { ContentServiceGetter } from "./ContentService";
 import { ProgressQueueServiceGetter } from "./ProgressQueueService";
-import { UserRecordServiceGetter } from "./UserRecordService";
+import { UserRecordGetter } from "./UserRecordService";
 
 const ContentService = ContentServiceGetter.get();
 const ProgressQueueService = ProgressQueueServiceGetter.get();
-const UserRecordService = UserRecordServiceGetter.get();
+const UserRecordService = UserRecordGetter.get();
 
 //really a namespace where all functions are hoisted
 class Api {

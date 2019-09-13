@@ -85,9 +85,7 @@ export class UserRecord {
 		this.idToUser[id].socs.push(soc);
 	}
 
-	store() {
-		console.log("Storing user record...");
-
+	toJSON() {
 		const idToUser: {
 			[id: string]: User
 		} = {};
@@ -106,7 +104,7 @@ export class UserRecord {
 			idToUser,
 		};
 
-		fs.writeFileSync(consts.files.users, JSON.stringify(thisObj));
+		return JSON.stringify(thisObj);
 	}
 
 	unsetWS(id: string, soc: ws) {

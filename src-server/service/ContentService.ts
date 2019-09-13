@@ -4,7 +4,7 @@ import * as consts from "../lib/consts";
 
 import { IdFactoryGetter } from "./IdFactoryService";
 import { ProgressQueueServiceGetter } from "./ProgressQueueService";
-import { UserRecordServiceGetter } from "./UserRecordService";
+import { UserRecordGetter } from "./UserRecordService";
 import { ContentManager, SuspendedContentManager } from "../lib/ContentManager";
 import { YtDownloader } from "../lib/YtDownloader";
 import { MakeOnce } from "../lib/MakeOnce";
@@ -15,7 +15,7 @@ export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> 
 			recover(),
 			IdFactoryGetter.get(),
 			ProgressQueueServiceGetter.get(),
-			UserRecordServiceGetter.get(),
+			UserRecordGetter.get(),
 			new YtDownloader(ProgressQueueServiceGetter.get())
 		);
 
