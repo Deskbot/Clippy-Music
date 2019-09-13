@@ -166,7 +166,7 @@ export class YtDownloader {
 
 class PercentReader {
 	private lastPercent: number;
-	private phase: number;
+	private phase: 1 | 2;
 	private proc: cp.ChildProcess;
 
 	constructor(dlProc: cp.ChildProcess) {
