@@ -31,6 +31,19 @@ export class YtDownloader {
 		this.userQueues = {};
 	}
 
+	private cancel(queue: YtQueueItem[], index: number) {
+		const item = queue[index];
+
+		// head of the queue can be looked at
+		// so don't remove it from the queue if the download is in progress
+		if (item.proc) {
+			item.cancelled = true;
+			item.proc.kill(); // exit code 2 (SIGINT)
+		} else {
+			queue.splice(index, 1);
+		}
+	}
+
 	download(vid: string, destination: string): [Promise<void>, cp.ChildProcess] {
 		let proc = cp.spawn(opt.youtubeDlPath, ["--no-playlist", vid, "-o", destination]);
 
@@ -137,30 +150,15 @@ export class YtDownloader {
 		if (!queue) return false;
 
 		for (let i = 0; i < queue.length; i++) {
-			let item = queue[i];
+			const item = queue[i];
 
 			if (item.cid == cid) {
-				YtDownloader.cancel(queue, i);
+				this.cancel(queue, i);
 				return true;
 			}
 		}
 
 		return false;
-	}
-
-	//static
-
-	static cancel(queue: YtQueueItem[], index: number) {
-		const item = queue[index];
-
-		if (item.proc) {
-			item.cancelled = true;
-			item.proc.kill(); // exit code 2 (SIGINT)
-		} else {
-			// head of the queue can be looked at
-			// so don't remove it from the queue if the download is in progress
-			queue.splice(index, 1);
-		}
 	}
 }
 
