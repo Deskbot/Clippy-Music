@@ -6,8 +6,6 @@ This list is in a rough order of priority.
 List
 ----
 
-* move store methods to services
-* I could use a custom defer class instead of using q
 * Barringer's Bucketing system
 	* add bucketing type to options
 	* integrate the new bucketing object in every location with an if to decide which queue
@@ -62,8 +60,8 @@ List
 * Remove debug file and commands
 * Split up `static/handlers.js`
 * Replace array.forEach with something better
-* Use more modern JS features on the back end
-	* things have changed a lot in nodejs since the birth of this project
+* use a custom defer class instead of using q
+	* last time I tried using my own implementation, I encounterred an error. I'm not certain it was caused by this though.
 * Separate the 3 upload types into separate functions use "type system"
 	* There's a lot of checking `isUrl` and `stream` which wildly change the behaviour of a function
 * Modernise front end code
