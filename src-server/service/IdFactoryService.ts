@@ -5,8 +5,8 @@ import * as consts from "../lib/consts";
 import { IdFactory } from "../lib/IdFactory";
 import { MakeOnce } from "../lib/MakeOnce";
 
-export const IdFactoryServiceGetter = new (class extends MakeOnce<IdFactory> {
-	make(): IdFactory {
+export const IdFactoryGetter = new (class extends MakeOnce<IdFactory> {
+	protected make(): IdFactory {
 		return new IdFactory(restore());
 	}
 })();
@@ -20,8 +20,14 @@ function restore(): number | undefined {
 
 	} catch (e) {
 		if (e.message.includes("ENOENT")) return undefined;
-		else throw e;
+
+		throw e;
 	}
 
 	return parseInt(fileContent);
+}
+
+export function store() {
+	console.log("Storing id factory...");
+	fs.writeFileSync(consts.files.idFactory, IdFactoryGetter.get().peekNext());
 }

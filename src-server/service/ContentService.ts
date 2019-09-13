@@ -2,21 +2,20 @@ import * as fs from "fs";
 
 import * as consts from "../lib/consts";
 
-import { IdFactoryServiceGetter } from "./IdFactoryService";
+import { IdFactoryGetter } from "./IdFactoryService";
 import { ProgressQueueServiceGetter } from "./ProgressQueueService";
-import { UserRecordServiceGetter } from "./UserRecordService";
+import { UserRecordGetter } from "./UserRecordService";
 import { ContentManager, SuspendedContentManager } from "../lib/ContentManager";
 import { YtDownloader } from "../lib/YtDownloader";
 import { MakeOnce } from "../lib/MakeOnce";
 
 export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> {
-
 	protected make(): ContentManager {
 		const cm = new ContentManager(
 			recover(),
-			IdFactoryServiceGetter.get(),
+			IdFactoryGetter.get(),
 			ProgressQueueServiceGetter.get(),
-			UserRecordServiceGetter.get(),
+			UserRecordGetter.get(),
 			new YtDownloader(ProgressQueueServiceGetter.get())
 		);
 
@@ -24,7 +23,6 @@ export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> 
 
 		return cm;
 	}
-
 })();
 
 function play(cm: ContentManager) {
@@ -71,4 +69,10 @@ function recover(): SuspendedContentManager | null {
 
 export function startPlayingContent() {
 	play(ContentServiceGetter.get());
+}
+
+export function store() {
+	console.log("Storing content manager...");
+	const json =  ContentServiceGetter.get().toJSON();
+	fs.writeFileSync(consts.files.content, json);
 }

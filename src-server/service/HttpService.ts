@@ -3,10 +3,10 @@ import * as formidable from "formidable";
 import * as q from "q";
 
 import { ContentServiceGetter } from "./ContentService";
-import { IdFactoryServiceGetter } from "./IdFactoryService";
+import { IdFactoryGetter } from "./IdFactoryService";
 import { ProgressQueueServiceGetter } from "./ProgressQueueService";
 import { PasswordService } from "./PasswordService";
-import { UserRecordServiceGetter } from "./UserRecordService";
+import { UserRecordGetter } from "./UserRecordService";
 import { WebSocketService } from "./WebSocketService";
 
 import * as consts from "../lib/consts";
@@ -19,7 +19,7 @@ import { UploadData, UrlPic, NoPic, FilePic, FileMusic, UrlMusic, UploadDataWith
 
 const ContentService = ContentServiceGetter.get();
 const ProgressQueueService = ProgressQueueServiceGetter.get();
-const UserRecordService = UserRecordServiceGetter.get();
+const UserRecordService = UserRecordGetter.get();
 
 type RequestWithFormData = express.Request & {
 	fields: formidable.Fields;
@@ -126,8 +126,8 @@ function handleFileUpload(req: express.Request, contentId: number): q.Promise<[f
 
 function handlePotentialBan(userId: string) {
 	return new Promise((resolve, reject) => {
-		if (UserRecordServiceGetter.get().isBanned(userId)) {
-			WebSocketService.sendBanned(UserRecordServiceGetter.get().getSockets(userId));
+		if (UserRecordGetter.get().isBanned(userId)) {
+			WebSocketService.sendBanned(UserRecordGetter.get().getSockets(userId));
 			return reject(new BannedError());
 		}
 
@@ -266,7 +266,7 @@ function parseUploadForm(
 }
 
 function recordUserMiddleware(req: express.Request, res: express.Response, next: () => void) {
-	if (!UserRecordServiceGetter.get().isUser(req.ip)) UserRecordServiceGetter.get().add(req.ip);
+	if (!UserRecordGetter.get().isUser(req.ip)) UserRecordGetter.get().add(req.ip);
 
 	const expiryDate = new Date();
 	expiryDate.setFullYear(expiryDate.getFullYear() + 1);
@@ -306,7 +306,7 @@ app.get("/api/wsport", (req, res) => {
 	* end-time
  */
 app.post("/api/queue/add", recordUserMiddleware, (req, res) => {
-	const contentId = IdFactoryServiceGetter.get().new();
+	const contentId = IdFactoryGetter.get().next();
 
 	handlePotentialBan(req.ip) //assumes ip address is userId
 	.then(() => ProgressQueueServiceGetter.get().add(req.ip, contentId))

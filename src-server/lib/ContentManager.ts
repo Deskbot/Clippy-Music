@@ -316,11 +316,11 @@ export class ContentManager extends EventEmitter {
 	}
 
 	nextMusicPath(): string {
-		return consts.dirs.music + this.idFactory.new();
+		return consts.dirs.music + this.idFactory.next();
 	}
 
 	nextPicPath(): string {
-		return consts.dirs.pic + this.idFactory.new();
+		return consts.dirs.pic + this.idFactory.next();
 	}
 
 	penalise(id: string) {
@@ -464,17 +464,13 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	store() {
-		console.log("Storing content manager...");
-
-		let storeObj = {
+	toJSON() {
+		return JSON.stringify({
 			playQueue: this.playQueue, //luckily this is jsonable
 			hashes: this.musicHashes,
 			picHashes: this.picHashes,
 			ytIds: this.ytIds,
-		};
-
-		fs.writeFileSync(consts.files.content, JSON.stringify(storeObj));
+		});
 	}
 
 	private async tryQueue(someItemData: UploadDataWithIdTitleDuration) {

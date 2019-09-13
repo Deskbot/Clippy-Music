@@ -6,10 +6,13 @@ import * as debug from "./lib/debug";
 import * as opt from "./options";
 import * as utils from "./lib/utils";
 
+import * as ContentService from "./service/ContentService";
+import * as IdFactoryService from "./service/IdFactoryService";
+import * as UserRecordService from "./service/UserRecordService";
+
 import { PasswordService } from "./service/PasswordService";
 import { ContentServiceGetter, startPlayingContent } from "./service/ContentService";
-import { IdFactoryServiceGetter } from "./service/IdFactoryService";
-import { UserRecordServiceGetter } from "./service/UserRecordService";
+import { startHttpService } from "./service/HttpService";
 
 // prompt settings
 prompt.colors = false;
@@ -24,7 +27,7 @@ main();
 function main() {
 	handleArguments().then(() => {
 		setUpDirs();
-		setUpServices();
+		startHttpService();
 		setUpControls();
 		startPlayingContent();
 
@@ -109,28 +112,26 @@ function setUpDirs() {
 }
 
 function setUpControls() {
-	const ContentManager = ContentServiceGetter.get();
-	const IdFactoryService = IdFactoryServiceGetter.get();
-	const UserRecordService = UserRecordServiceGetter.get();
+	const contentManager = ContentServiceGetter.get();
 
 	//when this is about to be killed
 	process.on("exit", () => {
 		console.log("Closing down Clippy-Music...");
 
-		ContentManager.store();
+		ContentService.store();
 		IdFactoryService.store();
 		UserRecordService.store();
 
-		if (ContentManager.isPlaying()) {
+		if (contentManager.isPlaying()) {
 			console.log("Waiting for content being played to get deleted.");
-			ContentManager.on("end", () => {
+			contentManager.on("end", () => {
 				process.exit(0);
 			});
 		} else {
 			process.exit(0);
 		}
 
-		ContentManager.end();
+		contentManager.end();
 	});
 
 	//stdin controls
@@ -143,7 +144,7 @@ function setUpControls() {
 	}
 
 	process.stdin.on("keypress", (ch, key) => {
-		if (key.name === "end") ContentManager.killCurrent();
+		if (key.name === "end") contentManager.killCurrent();
 
 		//I'm having to put these in because the settings that allow me to use "end" prevent normal interrupts key commands
 		else if (key.name === "c" && key.ctrl)  process.kill(process.pid, "SIGINT");
@@ -152,9 +153,4 @@ function setUpControls() {
 		else if (key.name === "z" && key.ctrl)  process.kill(process.pid, "SIGTSTP");
 		else if (key.name === "\\" && key.ctrl) process.kill(process.pid, "SIGQUIT"); //single backslash
 	});
-}
-
-function setUpServices() {
-	const { startHttpService } = require("./service/HttpService");
-	startHttpService();
 }
