@@ -464,17 +464,13 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	store() {
-		console.log("Storing content manager...");
-
-		let storeObj = {
+	toJSON() {
+		return JSON.stringify({
 			playQueue: this.playQueue, //luckily this is jsonable
 			hashes: this.musicHashes,
 			picHashes: this.picHashes,
 			ytIds: this.ytIds,
-		};
-
-		fs.writeFileSync(consts.files.content, JSON.stringify(storeObj));
+		});
 	}
 
 	private async tryQueue(someItemData: UploadDataWithIdTitleDuration) {

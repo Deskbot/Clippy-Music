@@ -72,3 +72,9 @@ function recover(): SuspendedContentManager | null {
 export function startPlayingContent() {
 	play(ContentServiceGetter.get());
 }
+
+export function store() {
+	console.log("Storing content manager...");
+	const json =  ContentServiceGetter.get().toJSON();
+	fs.writeFileSync(consts.files.content, json);
+}

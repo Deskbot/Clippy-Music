@@ -6,6 +6,8 @@ import * as debug from "./lib/debug";
 import * as opt from "./options";
 import * as utils from "./lib/utils";
 
+import * as ContentService from "./service/ContentService";
+
 import { PasswordService } from "./service/PasswordService";
 import { ContentServiceGetter, startPlayingContent } from "./service/ContentService";
 import { IdFactoryServiceGetter } from "./service/IdFactoryService";
@@ -117,7 +119,7 @@ function setUpControls() {
 	process.on("exit", () => {
 		console.log("Closing down Clippy-Music...");
 
-		ContentManager.store();
+		ContentService.store();
 		IdFactoryService.store();
 		UserRecordService.store();
 
