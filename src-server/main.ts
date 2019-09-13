@@ -7,10 +7,10 @@ import * as opt from "./options";
 import * as utils from "./lib/utils";
 
 import * as ContentService from "./service/ContentService";
+import * as IdFactoryService from "./service/IdFactoryService";
 
 import { PasswordService } from "./service/PasswordService";
 import { ContentServiceGetter, startPlayingContent } from "./service/ContentService";
-import { IdFactoryServiceGetter } from "./service/IdFactoryService";
 import { UserRecordServiceGetter } from "./service/UserRecordService";
 
 // prompt settings
@@ -112,7 +112,6 @@ function setUpDirs() {
 
 function setUpControls() {
 	const ContentManager = ContentServiceGetter.get();
-	const IdFactoryService = IdFactoryServiceGetter.get();
 	const UserRecordService = UserRecordServiceGetter.get();
 
 	//when this is about to be killed

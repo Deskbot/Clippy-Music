@@ -3,7 +3,7 @@ import * as formidable from "formidable";
 import * as q from "q";
 
 import { ContentServiceGetter } from "./ContentService";
-import { IdFactoryServiceGetter } from "./IdFactoryService";
+import { IdFactoryGetter } from "./IdFactoryService";
 import { ProgressQueueServiceGetter } from "./ProgressQueueService";
 import { PasswordService } from "./PasswordService";
 import { UserRecordServiceGetter } from "./UserRecordService";
@@ -306,7 +306,7 @@ app.get("/api/wsport", (req, res) => {
 	* end-time
  */
 app.post("/api/queue/add", recordUserMiddleware, (req, res) => {
-	const contentId = IdFactoryServiceGetter.get().new();
+	const contentId = IdFactoryGetter.get().next();
 
 	handlePotentialBan(req.ip) //assumes ip address is userId
 	.then(() => ProgressQueueServiceGetter.get().add(req.ip, contentId))

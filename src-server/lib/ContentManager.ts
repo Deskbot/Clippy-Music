@@ -316,11 +316,11 @@ export class ContentManager extends EventEmitter {
 	}
 
 	nextMusicPath(): string {
-		return consts.dirs.music + this.idFactory.new();
+		return consts.dirs.music + this.idFactory.next();
 	}
 
 	nextPicPath(): string {
-		return consts.dirs.pic + this.idFactory.new();
+		return consts.dirs.pic + this.idFactory.next();
 	}
 
 	penalise(id: string) {
