@@ -136,11 +136,11 @@ function handlePotentialBan(userId: string) {
 }
 
 function makeImageTooBigError(files: formidable.File[]) {
-	return new FileUploadError(`The image file you gave was too large (exceeded the limit of ${consts.imageSizeLimStr}).`, files);
+	return new FileUploadError(`The image file you gave was too large. The maximum size is ${consts.imageSizeLimStr}.`, files);
 }
 
 function makeMusicTooBigError(files: formidable.File[]) {
-	return new FileUploadError(`The music file you gave was too large (exceeded the limit of ${consts.musicSizeLimStr}).`, files);
+	return new FileUploadError(`The music file you gave was too large. The maximum size is ${consts.musicSizeLimStr}.`, files);
 }
 
 function noRedirect(req: RequestWithFormData) {
@@ -154,7 +154,7 @@ function parseUploadForm(
 ): Promise<UploadData> {
 	return new Promise((resolve, reject) => {
 		if (form.type != "multipart") {
-			throw new FileUploadError("Multipart form type required. Received '" + form.type + "' instead.", []);
+			throw new FileUploadError(`"I require a multipart form type. I received '${form.type}' instead.`, []);
 		}
 
 		const musicFile = files["music-file"];
@@ -173,13 +173,13 @@ function parseUploadForm(
 
 		} else {
 			if (!musicFile) {
-				throw new FileUploadError("The server thinks you gave a music file but could not find it.", [musicFile, picFile]);
+				throw new FileUploadError("It looks like you uploaded a music file, but could not find it.", [musicFile, picFile]);
 			}
 
 			//no file
 			if (musicFile.size === 0) {
 				utils.deleteFile(musicFile.path); //empty file will still persist otherwise, due to the way multipart form uploads work / are handled
-				throw new FileUploadError("No music file or URL given.", [musicFile, picFile]);
+				throw new FileUploadError("You didn't specify a music file or a URL given.", [musicFile, picFile]);
 			}
 
 			//file too big
@@ -191,7 +191,7 @@ function parseUploadForm(
 			const mimetype = musicFile.type;
 			const lhs = mimetype.split("/")[0];
 			if (!(lhs === "audio" || lhs === "video" || mimetype === "application/octet-stream")) { //audio, video, or default (un-typed) file
-				throw new FileUploadError(`The audio or video file you gave was of the wrong type; "${musicFile.type}" was received instead.`, [musicFile, picFile]);
+				throw new FileUploadError(`The music you uploaded was not in an audio or video format I recognise. The type of file given was "${musicFile.type}".`, [musicFile, picFile]);
 			}
 
 			//success
@@ -229,7 +229,7 @@ function parseUploadForm(
 				//file wrong type
 				const lhs = picFile.type.split("/")[0];
 				if (lhs !== "image") {
-					throw new FileUploadError(`The image file you gave was of the wrong type; "${picFile.type}" was received instead.`, [musicFile, picFile]);
+					throw new FileUploadError(`The image file you gave was not in a format I recognise. The type of file given was "${picFile.type}".`, [musicFile, picFile]);
 				}
 
 				//success
@@ -329,9 +329,9 @@ app.post("/api/queue/add", recordUserMiddleware, (req, res) => {
 			itemData = await ContentServiceGetter.get().add(uplData);
 		} catch (err) {
 			if (err instanceof DurationFindingError) {
-				console.error("Error reading discerning the duration of a music file.", err, uplData.music.path);
+				console.error("Error discerning the duration of a music file.", err, uplData.music.path);
 				throw new FileUploadError(
-					`I could not discern the duration of the music file you uploaded (${uplData.music.title}).`,
+					`I could not count the duration of the music file you uploaded (${uplData.music.title}).`,
 					Object.values(files)
 				);
 			} else {

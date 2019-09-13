@@ -46,7 +46,6 @@ List
 
 ---
 
-* Improve FileUploadError to be spoken as Clippy
 * FileUploadError probably only needs to take file paths and not files
 * Make internal errors that aren't user errors get put in the terminal
 * Only attach user ids to items belonging to the user the queue is sent to
