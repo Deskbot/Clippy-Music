@@ -10,7 +10,7 @@ import * as utils from "./utils";
 import * as opt from "../options";
 import * as time from "./time";
 
-import { ClippyQueue } from "./ClippyQueue";
+import { ClippyQueue } from "./queue/ClippyQueue";
 import { ContentType } from "../types/ContentType";
 import { downloadYtInfo, getFileDuration, YtData } from "./music";
 import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError } from "./errors";

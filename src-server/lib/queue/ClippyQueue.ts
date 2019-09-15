@@ -1,5 +1,5 @@
-import * as utils from "./utils";
-import { ItemData } from "../types/ItemData";
+import * as utils from "../utils";
+import { ItemData } from "../../types/ItemData";
 
 export class ClippyQueue {
 	private userPosteriority: {

@@ -1,7 +1,7 @@
-import * as utils from "./utils";
-import { ItemData } from "../types/ItemData";
+import * as utils from "../utils";
+import { ItemData } from "../../types/ItemData";
 
-export class BarringerBuckets {
+export class BarringerQueue {
 	private buckets: ItemData[][];
 	private maxTimePerBucket: number;
 
@@ -15,7 +15,7 @@ export class BarringerBuckets {
 
 		for (const bucket of this.buckets.slice(1)) {
 			if (this.spaceForItemInBucket(item.duration, bucket, item.userId)) {
-				BarringerBuckets.randomlyInsert(item, bucket);
+				BarringerQueue.randomlyInsert(item, bucket);
 				return true;
 			}
 		}
