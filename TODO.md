@@ -7,7 +7,6 @@ List
 ----
 
 * Barringer's Bucketing system
-	* add bucketing type to options
 	* integrate the new bucketing object in every location with an if to decide which queue
 	* send bucket type to front end
 	* render new kind of bucketing on the front

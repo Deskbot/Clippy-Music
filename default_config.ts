@@ -33,6 +33,10 @@ export const config = {
 	mpvArgs: ["-fs", "--af=dynaudnorm"],
 	youtubeDlPath: "youtube-dl",
 
+	// what method should be used to order the content
+	// BarringerBuckets, ClippyQueue
+	queuingMethod: "BarringerBuckets",
+
 	// how frequently the download bar progress is updated
 	dlPercentUpdateFreq: 250,
 

@@ -16,6 +16,7 @@ class Wrapper<T> {
 	}
 }
 
+export const queuingMethod: string = config.queuingMethod;
 export const dlPercentUpdateFreq: number = config.dlPercentUpdateFreq;
 export const fileNameSizeLimit: number = config.fileNameSizeLimit;
 export const ffprobePath: string = config.ffprobePath;
