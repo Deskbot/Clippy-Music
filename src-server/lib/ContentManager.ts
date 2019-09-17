@@ -325,10 +325,6 @@ export class ContentManager extends EventEmitter {
 		return consts.dirs.pic + this.idFactory.next();
 	}
 
-	penalise(id: string) {
-		this.playQueue.penalise(id);
-	}
-
 	picHashIsUnique(hash: number): boolean {
 		let lastPlayed = this.picHashes[hash];
 		return !lastPlayed || lastPlayed + opt.imageUniqueCoolOff * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time

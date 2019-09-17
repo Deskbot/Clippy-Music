@@ -511,17 +511,6 @@ app.post("/api/skip", adminCredentialsRequired, (req, res) => {
 });
 
 //POST variable: password
-app.post("/api/skipAndPenalise", adminCredentialsRequired, (req, res) => {
-	if (ContentService.currentlyPlaying) {
-		ContentService.penalise(ContentService.currentlyPlaying.userId);
-	}
-
-	ContentService.killCurrent();
-
-	res.status(200).end("Success\n");
-});
-
-//POST variable: password
 app.post("/api/skipAndBan", adminCredentialsRequired, (req, res) => {
 	if (ContentService.currentlyPlaying) {
 		const id = ContentService.currentlyPlaying.userId;
