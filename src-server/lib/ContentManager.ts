@@ -20,6 +20,7 @@ import { ItemData, CompleteMusic, CompletePicture } from "../types/ItemData";
 import { YtDownloader } from "./YtDownloader";
 import { UserRecord } from "./UserRecord";
 import { ProgressQueue } from "./ProgressQueue";
+import { BarringerQueue } from "./queue/BarringerQueue";
 
 interface BucketForPublic {
 	bucket: {
@@ -39,7 +40,7 @@ export interface SuspendedContentManager {
 
 export class ContentManager extends EventEmitter {
 	//data stores
-	private playQueue: ClippyQueue;
+	private playQueue: BarringerQueue;
 	private musicHashes: {
 		[hash: string]: number
 	} = {};
@@ -64,6 +65,7 @@ export class ContentManager extends EventEmitter {
 	private stop?: boolean;
 
 	constructor(
+		maxTimePerBucket: number,
 		startState: SuspendedContentManager | null,
 		idFactory: IdFactory,
 		progressQueue: ProgressQueue,
@@ -81,12 +83,12 @@ export class ContentManager extends EventEmitter {
 		if (startState) {
 			console.log("Using suspended content manager");
 
-			this.playQueue = new ClippyQueue(startState.playQueue);
+			this.playQueue = new BarringerQueue(maxTimePerBucket, startState.playQueue);
 			this.musicHashes = startState.hashes;
 			this.picHashes = startState.picHashes;
 			this.ytIds = startState.ytIds;
 		} else {
-			this.playQueue = new ClippyQueue();
+			this.playQueue = new BarringerQueue(maxTimePerBucket);
 		}
 	}
 

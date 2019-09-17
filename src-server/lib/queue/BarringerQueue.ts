@@ -5,8 +5,10 @@ export class BarringerQueue {
 	private buckets: ItemData[][];
 	private maxTimePerBucket: number;
 
-	constructor(maxTimePerBucket: number, queueObj: ItemData[][]) {
-		this.buckets = queueObj ? queueObj : [];
+	constructor(maxTimePerBucket: number, buckets?: {
+		queueObj: ItemData[][]
+	}) {
+		this.buckets = buckets && buckets.queueObj ? buckets.queueObj : [];
 		this.maxTimePerBucket = maxTimePerBucket;
 	}
 
