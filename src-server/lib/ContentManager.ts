@@ -336,7 +336,7 @@ export class ContentManager extends EventEmitter {
 		const contentData = this.playQueue.next();
 		const that = this;
 
-		if (contentData === null) {
+		if (!contentData) {
 			this.currentlyPlaying = null;
 			this.emit("queue-empty");
 			return false;
@@ -358,8 +358,6 @@ export class ContentManager extends EventEmitter {
 
 		musicProc.on("close", (code, signal) => { // runs before next call to playNext
 			const secs = 1 + Math.ceil((Date.now() - timePlayedAt) / 1000); //seconds ran for, adds a little bit to prevent infinite <1 second content
-
-			that.playQueue.boostPosteriority(contentData.userId, secs);
 
 			that.stopPic();
 			that.deleteContent(contentData);
@@ -391,7 +389,7 @@ export class ContentManager extends EventEmitter {
 	}
 
 	purgeUser(uid: string) {
-		const itemList = this.playQueue.getUserBucket(uid);
+		const itemList = this.playQueue.getUserItems(uid);
 
 		if (itemList) itemList.forEach((itemData) => {
 			this.forget(itemData);

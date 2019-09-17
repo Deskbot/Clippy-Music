@@ -31,7 +31,21 @@ export class BarringerQueue {
 		return this.buckets;
 	}
 
-	next() {
+	getUserItems(uid: string): ItemData[] {
+		const userItems = [];
+
+		for (const bucket of this.buckets) {
+			for (const item of bucket) {
+				if (item.userId === uid) {
+					userItems.push(item);
+				}
+			}
+		}
+
+		return userItems;
+	}
+
+	next(): ItemData | undefined | null {
 		if (this.buckets.length === 0) return null;
 
 		// make sure the top bucket has something in it
