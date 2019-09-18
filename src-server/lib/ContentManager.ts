@@ -172,16 +172,21 @@ export class ContentManager extends EventEmitter {
 
 	getBucketsForPublic(): PublicItemData[][] {
 		const tooMuchDataInBuckets = this.playQueue.getBuckets();
+		const publicBuckets = [] as PublicItemData[][];
 
-		return tooMuchDataInBuckets.map(bucket => bucket.map(
-			item => ({
+		for (const bucket of tooMuchDataInBuckets) {
+			const publicBucket = bucket.map(item => ({
 				duration: item.duration,
 				id: item.id,
 				nickname: this.userRecord.getNickname(item.userId),
 				title: item.music.title,
 				userId: item.userId,
-			})
-		));
+			}));
+
+			publicBuckets.push(publicBucket);
+		}
+
+		return publicBuckets;
 	}
 
 	getCurrentlyPlaying() {

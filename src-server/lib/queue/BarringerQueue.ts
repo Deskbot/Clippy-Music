@@ -39,8 +39,8 @@ export class BarringerQueue {
 		return undefined;
 	}
 
-	getBuckets() {
-		return [...this.buckets];
+	getBuckets(): IterableIterator<ItemData[]> {
+		return this.buckets[Symbol.iterator]();
 	}
 
 	getUserItems(uid: string): ItemData[] {
