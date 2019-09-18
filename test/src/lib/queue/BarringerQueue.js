@@ -14,7 +14,7 @@ module.exports = {
 		};
 		q.add(item);
 
-		assert(q.getBuckets()[0][0] === item, "The added item is in the top bucket.");
+		assert([...q.getBuckets()][0][0] === item, "The added item is in the top bucket.");
 	},
 
 	can_not_add_to_top_bucket_if_queue_is_not_empty: () => {
@@ -31,7 +31,7 @@ module.exports = {
 		};
 		q.add(item);
 
-		assert(q.getBuckets()[1][0] === item, "The added item is in the second bucket.");
+		assert([...q.getBuckets()][1][0] === item, "The added item is in the second bucket.");
 	},
 
 	exceeding_a_bucket_size_adds_a_new_bucket: () => {
@@ -49,7 +49,7 @@ module.exports = {
 		q.add(item1);
 		q.add(item2);
 
-		const buckets = q.getBuckets();
+		const buckets = [...q.getBuckets()];
 
 		assert(buckets[0][0] === item1,
 			"The added items are in different buckets.");
@@ -118,7 +118,8 @@ module.exports = {
 
 		q.remove(4);
 
-		const allItems = q.getBuckets().reduce((allItems, bucket) => allItems.concat(bucket));
+		const allItems = [...q.getBuckets()]
+			.reduce((allItems, bucket) => allItems.concat(bucket));
 
 		assert(!allItems.find(item => item.contentId === 4),
 			"The removed item is not in the queue."
@@ -149,7 +150,8 @@ module.exports = {
 
 		q.purge(1);
 
-		const allItems = q.getBuckets().reduce((allItems, bucket) => allItems.concat(bucket));
+		const allItems = [...q.getBuckets()]
+			.reduce((allItems, bucket) => allItems.concat(bucket));
 
 		assert(!allItems.includes(item1a),
 			"The purged user's items are not in the queue."
