@@ -40,7 +40,7 @@ export class BarringerQueue {
 	}
 
 	getBuckets() {
-		return this.buckets;
+		return [...this.buckets];
 	}
 
 	getUserItems(uid: string): ItemData[] {

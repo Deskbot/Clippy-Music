@@ -48,7 +48,7 @@ export function cloneWithout<T extends object>(o: T, badAttrs: (keyof T)[]) {
 
 //based on alex030293's solution https://stackoverflow.com/questions/38485622/delete-folder-containing-files-node-js
 export function deleteDirRecursiveSync(path: string) {
-	if(fs.existsSync(path)) {
+	if (fs.existsSync(path)) {
 		fs.readdirSync(path).forEach(file => {
 			const curPath = path + "/" + file;
 

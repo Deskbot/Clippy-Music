@@ -10,7 +10,6 @@ import * as utils from "./utils";
 import * as opt from "../options";
 import * as time from "./time";
 
-import { ClippyQueue } from "./queue/ClippyQueue";
 import { ContentType } from "../types/ContentType";
 import { downloadYtInfo, getFileDuration, YtData } from "./music";
 import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError } from "./errors";
@@ -21,15 +20,7 @@ import { YtDownloader } from "./YtDownloader";
 import { UserRecord } from "./UserRecord";
 import { ProgressQueue } from "./ProgressQueue";
 import { BarringerQueue } from "./queue/BarringerQueue";
-
-interface BucketForPublic {
-	bucket: {
-		title: string,
-		id: number,
-	}[];
-	nickname: string;
-	userId: string;
-}
+import { PublicItemData } from "../types/PublicItemData";
 
 export interface SuspendedContentManager {
 	playQueue: any;
@@ -179,26 +170,18 @@ export class ContentManager extends EventEmitter {
 		if (itemData.pic.hash) delete this.picHashes[itemData.pic.hash];
 	}
 
-	getBucketsForPublic(): BucketForPublic[] {
-		let userId, bucketTitles;
-		let userIds = this.playQueue.getUsersByPosteriority();
-		let returnList: BucketForPublic[] = [];
+	getBucketsForPublic(): PublicItemData[][] {
+		const tooMuchDataInBuckets = this.playQueue.getBuckets();
 
-		//map and filter
-		for (let i=0; i < userIds.length; i++) {
-			userId = userIds[i];
-			bucketTitles = this.playQueue.getTitlesFromUserBucket(userId);
-
-			if (bucketTitles.length !== 0) {
-				returnList.push({
-					bucket: bucketTitles,
-					nickname: this.userRecord.getNickname(userId),
-					userId: userId,
-				});
-			}
-		}
-
-		return returnList;
+		return tooMuchDataInBuckets.map(bucket => bucket.map(
+			item => ({
+				duration: item.duration,
+				id: item.id,
+				nickname: this.userRecord.getNickname(item.userId),
+				title: item.music.title,
+				userId: item.userId,
+			})
+		));
 	}
 
 	getCurrentlyPlaying() {
