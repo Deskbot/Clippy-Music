@@ -1,6 +1,6 @@
-const baseDir = "../../../build/";
+const baseDir = "../../../../build/";
 
-const { ClippyQueue } = require(baseDir + "lib/ClippyQueue.js");
+const { ClippyQueue } = require(baseDir + "lib/queue/ClippyQueue.js");
 
 const utils = require(baseDir + "lib/utils.js");
 

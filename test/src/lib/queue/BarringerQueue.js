@@ -1,12 +1,12 @@
-const baseDir = "../../../build/";
+const baseDir = "../../../../build/";
 
-const { BarringerBuckets } = require(baseDir + "lib/BarringerBuckets.js");
+const { BarringerQueue } = require(baseDir + "lib/queue/BarringerQueue.js");
 
 const assert = require("assert").strict;
 
 module.exports = {
 	can_add_to_empty_queue: () => {
-		const q = new BarringerBuckets(1000);
+		const q = new BarringerQueue(1000);
 
 		const item = {
 			userId: 1,
@@ -18,7 +18,7 @@ module.exports = {
 	},
 
 	can_not_add_to_top_bucket_if_queue_is_not_empty: () => {
-		const q = new BarringerBuckets(1000);
+		const q = new BarringerQueue(1000);
 
 		q.add({
 			userId: 2,
@@ -35,7 +35,7 @@ module.exports = {
 	},
 
 	exceeding_a_bucket_size_adds_a_new_bucket: () => {
-		const q = new BarringerBuckets(1000);
+		const q = new BarringerQueue(1000);
 
 		const item1 = {
 			userId: 1,
@@ -75,7 +75,7 @@ module.exports = {
 		}];
 
 		for (const item of items) {
-			BarringerBuckets.randomlyInsert(item, bucket);
+			BarringerQueue.randomlyInsert(item, bucket);
 			assert(bucket.includes(item),
 				"The inserted item should be in the bucket."
 			);
@@ -89,7 +89,7 @@ module.exports = {
 	},
 
 	remove: () => {
-		const q = new BarringerBuckets(1000);
+		const q = new BarringerQueue(1000);
 
 		const items = [{
 			id: 1,
@@ -126,7 +126,7 @@ module.exports = {
 	},
 
 	purge: () => {
-		const q = new BarringerBuckets(1000);
+		const q = new BarringerQueue(1000);
 
 		const item1a = {
 			contentId: 1,
