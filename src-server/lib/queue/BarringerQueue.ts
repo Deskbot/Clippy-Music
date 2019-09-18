@@ -57,16 +57,26 @@ export class BarringerQueue {
 		return userItems;
 	}
 
-	next(): ItemData | undefined | null {
-		if (this.buckets.length === 0) return null;
-
-		// make sure the top bucket has something in it
+	private makeTopBucketNotEmpty() {
 		while (this.buckets[0].length === 0) {
 			this.buckets.shift();
-			if (this.buckets.length === 0) return null;
+			if (this.buckets.length === 0) return;
 		}
+	}
 
-		return this.buckets[0].shift();
+	next(): ItemData | undefined {
+		if (this.buckets.length === 0) return;
+
+		// make sure the top bucket has something in it to read
+		this.makeTopBucketNotEmpty();
+
+		if (this.buckets.length === 0) return;
+
+		const nextItem = this.buckets[0].shift();
+
+		this.makeTopBucketNotEmpty();
+
+		return nextItem;
 	}
 
 	purge(uid: string) {
