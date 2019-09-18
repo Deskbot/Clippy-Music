@@ -20,15 +20,16 @@ var Queue = {
 			var item = bucket[i];
 
 			var $bucketItem = templates.makeBucketItem();
-			var $bucketNickname = $bucketItem.find(".nickname");
+			var $bucketNickname = $bucketItem.children(".nickname");
 			$bucketNickname.html(item.nickname);
-			$bucketItem.find(".title").html(item.title);
+			$bucketItem.children(".duration").html(formatSeconds(item.duration));
+			$bucketItem.children(".title").html(item.title);
 
 			if (isMine) {
 				$bucketContainer.attr("id", "my-bucket-container");
 				$bucketNickname.addClass("my-nickname");
 
-				$bucketItem.find(".delete")
+				$bucketItem.children(".delete")
 					.attr("data-id", item.id)
 					.removeClass("hidden");
 			}
