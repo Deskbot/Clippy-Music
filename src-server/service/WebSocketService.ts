@@ -35,7 +35,7 @@ class Api {
 			const dataObj = JSON.parse(data);
 
 			if (dataObj.type === "delete-content") {
-				if (!ContentService.remove(id, dataObj.contentId)) {
+				if (!ContentService.remove(dataObj.contentId)) {
 					soc.send(JSON.stringify({
 						type: dataObj.type,
 						success: false,

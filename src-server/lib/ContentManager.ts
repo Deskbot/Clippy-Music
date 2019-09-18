@@ -410,12 +410,12 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	remove(userId: string, contentId: number) {
-		const itemData = this.playQueue.getContent(userId, contentId);
+	remove(contentId: number) {
+		const itemData = this.playQueue.get(contentId);
 
 		if (itemData) {
 			this.deleteContent(itemData);
-			this.playQueue.remove(userId, itemData);
+			this.playQueue.remove(contentId);
 			this.forget(itemData);
 			this.emit("queue-update");
 

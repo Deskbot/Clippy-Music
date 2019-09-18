@@ -395,7 +395,7 @@ app.use(getFormMiddleware);
 
 //POST variable: content-id
 app.post("/api/queue/remove", (req: RequestWithFormData, res) => {
-	if (ContentService.remove(req.ip, parseInt(req.fields["content-id"] as string))) {
+	if (ContentService.remove(parseInt(req.fields["content-id"] as string))) {
 		if (noRedirect(req)) res.status(200).end("Success\n");
 		else				 res.redirect("/");
 	} else {

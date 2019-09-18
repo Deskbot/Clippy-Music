@@ -27,6 +27,18 @@ export class BarringerQueue {
 		return false;
 	}
 
+	get(cid: number): ItemData | undefined {
+		for (const bucket of this.buckets) {
+			for (const item of bucket) {
+				if (item.id === cid) {
+					return item;
+				}
+			}
+		}
+
+		return undefined;
+	}
+
 	getBuckets() {
 		return this.buckets;
 	}
@@ -75,15 +87,17 @@ export class BarringerQueue {
 		bucket.push(newItem, ...itemsAfterNew);
 	}
 
-	remove(cid: number) {
+	remove(cid: number): boolean {
 		for (const bucket of this.buckets) {
 			for (let i = 0; i < bucket.length; i++) {
 				if (bucket[i].id === cid) {
 					bucket.splice(i, 1);
-					return;
+					return true;
 				}
 			}
 		}
+
+		return false;
 	}
 
 	spaceForItemInBucket(time: number, bucket: ItemData[], userId: string) {
