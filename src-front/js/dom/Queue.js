@@ -41,7 +41,15 @@ var Queue = {
 };
 
 function formatSeconds(s) {
-	var mins = Math.floor(s / 60);
+	var hours = Math.floor(s / 3600);
+	var secsInHour = s % 3600;
+	var mins = Math.floor(secsInHour / 60);
 	var secs = s % 60;
-	return `${mins}:${secs}`;
+
+	var str;
+	str = hours > 0 ? hours + ":" : "";
+	str += mins > 0 ? mins + ":" : "";
+	str += secs > 0 ? secs : "";
+
+	return str.trim();
 }
