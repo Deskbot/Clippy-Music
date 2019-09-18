@@ -10,7 +10,7 @@ var Queue = {
 
 		var $bucketContainer = templates.makeBucketContainer();
 		$bucketContainer.children(".timeAvailable")
-			.html(formatSeconds(maxBucketTime - durationUsed) + " unused");
+			.html(utils.formatSeconds(maxBucketTime - durationUsed) + " unused");
 
 		var $bucket = $bucketContainer.children(".bucket");
 
@@ -22,8 +22,8 @@ var Queue = {
 			var $bucketItem = templates.makeBucketItem();
 			var $bucketNickname = $bucketItem.children(".nickname");
 			$bucketNickname.html(item.nickname);
-			$bucketItem.children(".duration").html(formatSeconds(item.duration));
-			$bucketItem.children(".title").html(item.title);
+			$bucketItem.children(".duration").html("[" + utils.formatSeconds(item.duration) + "]");
+			$bucketItem.children(".title").html("(" + item.title + ")");
 
 			if (isMine) {
 				$bucketContainer.attr("id", "my-bucket-container");
@@ -40,17 +40,3 @@ var Queue = {
 		return $bucketContainer;
 	}
 };
-
-function formatSeconds(s) {
-	var hours = Math.floor(s / 3600);
-	var secsInHour = s % 3600;
-	var mins = Math.floor(secsInHour / 60);
-	var secs = s % 60;
-
-	var str;
-	str = hours > 0 ? hours + ":" : "";
-	str += mins > 0 ? mins + ":" : "";
-	str += secs > 0 ? secs : "";
-
-	return str.trim();
-}

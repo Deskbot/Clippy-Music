@@ -189,16 +189,18 @@ export class ContentManager extends EventEmitter {
 		return publicBuckets;
 	}
 
-	getCurrentlyPlaying() {
+	getCurrentlyPlaying(): PublicItemData | undefined {
 		if (this.currentlyPlaying) {
 			return {
+				duration: this.currentlyPlaying.duration,
+				id: this.currentlyPlaying.id,
 				nickname: this.userRecord.getNickname(this.currentlyPlaying.userId),
 				title: this.currentlyPlaying.music.title,
 				userId: this.currentlyPlaying.userId,
 			};
 		}
 
-		return null;
+		return undefined;
 	}
 
 	private async getDataToQueue(uplData: UploadDataWithId): Promise<UploadDataWithIdTitleDuration> {
