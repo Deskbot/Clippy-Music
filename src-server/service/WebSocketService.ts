@@ -1,7 +1,9 @@
-import * as debug from "../lib/debug";
 import ws = require("ws");
-import { WebSocketHandler } from "../lib/WebSocketHandler";
 
+import * as debug from "../lib/debug";
+import * as opt from "../options";
+
+import { WebSocketHandler } from "../lib/WebSocketHandler";
 import { ContentServiceGetter } from "./ContentService";
 import { ProgressQueueServiceGetter } from "./ProgressQueueService";
 import { UserRecordGetter } from "./UserRecordService";
@@ -125,6 +127,7 @@ class Api {
 	makeQueueMessage() {
 		return {
 			current: ContentService.getCurrentlyPlaying(),
+			maxBucketTime: opt.timeout,
 			queue: ContentService.getBucketsForPublic(),
 			type: "queue",
 		};

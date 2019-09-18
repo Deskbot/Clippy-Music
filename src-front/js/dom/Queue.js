@@ -1,27 +1,33 @@
 var Queue = {
 	$sectionWithin: $("#queue-section"),
 
-	contentToBucketElem: function contentToBucketElem(c, myId) {
-		var $bucketCont = templates.makeBucketContainer();
-		var $bucketNickname = $bucketCont.find(".nickname");
-		var $bucket = $bucketCont.find(".bucket");
+	contentToBucketElem: function contentToBucketElem(c, myId, maxBucketTime) {
+		var durationUsed = 0;
 
-		$bucketNickname.html(c.nickname);
+		for (var i = 0; i < c.bucket.length; i++) {
+			durationUsed += c.bucket[i].duration;
+		}
+
+		var $bucketContainer = templates.makeBucketContainer();
+		$bucketContainer.children(".timeAvailable")
+			.html(formatSeconds(durationUsed) + " / " + formatSeconds(maxBucketTime));
+
+		var $bucket = $bucketContainer.children(".bucket");
 
 		var isMine = myId === c.userId;
 
-		if (isMine) {
-			$bucketCont.attr("id", "my-bucket-container");
-			$bucketNickname.addClass("my-nickname");
-		}
-
 		for (var i = 0; i < c.bucket.length; i++) {
 			var item = c.bucket[i];
+
 			var $bucketItem = templates.makeBucketItem();
-			$bucketItem.find(".nickname").html(item.nickname);
+			var $bucketNickname = $bucketItem.find(".nickname");
+			$bucketNickname.html(item.nickname);
 			$bucketItem.find(".title").html(item.title);
 
 			if (isMine) {
+				$bucketContainer.attr("id", "my-bucket-container");
+				$bucketNickname.addClass("my-nickname");
+
 				$bucketItem.find(".delete")
 					.attr("data-id", item.id)
 					.removeClass("hidden");
@@ -30,6 +36,12 @@ var Queue = {
 			$bucket.append($bucketItem);
 		}
 
-		return $bucketCont;
+		return $bucketContainer;
 	}
 };
+
+function formatSeconds(s) {
+	var mins = Math.floor(s / 60);
+	var secs = s % 60;
+	return `${mins}:${secs}`;
+}
