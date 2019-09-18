@@ -34,6 +34,12 @@ module.exports = {
 		assert([...q.getBuckets()][1][0] === item, "The added item is in the second bucket.");
 	},
 
+	empty_queue_is_empty() {
+		const q = new BarringerQueue(1000);
+
+		assert([...q.getBuckets()].length === 0);
+	},
+
 	exceeding_a_bucket_size_adds_a_new_bucket: () => {
 		const q = new BarringerQueue(1000);
 
