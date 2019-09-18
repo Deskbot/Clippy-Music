@@ -237,7 +237,7 @@ var WebSocketHandler = (function() {
 
 		var $queue = $("#queue");
 
-		utils.counterShiftResize($("#queue-section"), function () {
+		utils.counterShiftResize($("#queue-section"), function() {
 			//rest of queue
 			$queue.empty();
 

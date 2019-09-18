@@ -18,10 +18,13 @@ var Queue = {
 		for (var i = 0; i < c.bucket.length; i++) {
 			var item = c.bucket[i];
 			var $bucketItem = templates.makeBucketItem();
+			$bucketItem.find(".nickname").html(item.nickname);
 			$bucketItem.find(".title").html(item.title);
 
 			if (isMine) {
-				$bucketItem.find(".delete").attr("data-id", item.id).removeClass("hidden");
+				$bucketItem.find(".delete")
+					.attr("data-id", item.id)
+					.removeClass("hidden");
 			}
 
 			$bucket.append($bucketItem);

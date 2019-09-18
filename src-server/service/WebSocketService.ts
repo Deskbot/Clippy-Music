@@ -124,9 +124,9 @@ class Api {
 
 	makeQueueMessage() {
 		return {
-			type: "queue",
 			current: ContentService.getCurrentlyPlaying(),
 			queue: ContentService.getBucketsForPublic(),
+			type: "queue",
 		};
 	}
 
