@@ -12,6 +12,7 @@ List
 	* render new kind of bucketing on the front
 	* refactor to not use ifs everywhere
 	* when using ClippyQueue see if we can avoid getting the duration before playing with or just don't count the seconds actually played
+* new uploads spend a lot of time at 100%
 * add eog command to options and its arguments
 	* rename existing path options with "???command"
 * Reddit support

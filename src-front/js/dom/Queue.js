@@ -1,11 +1,11 @@
 var Queue = {
 	$sectionWithin: $("#queue-section"),
 
-	contentToBucketElem: function contentToBucketElem(c, myId, maxBucketTime) {
+	bucketToElem: function bucketToElem(bucket, myId, maxBucketTime) {
 		var durationUsed = 0;
 
-		for (var i = 0; i < c.bucket.length; i++) {
-			durationUsed += c.bucket[i].duration;
+		for (var i = 0; i < bucket.length; i++) {
+			durationUsed += bucket[i].duration;
 		}
 
 		var $bucketContainer = templates.makeBucketContainer();
@@ -14,10 +14,10 @@ var Queue = {
 
 		var $bucket = $bucketContainer.children(".bucket");
 
-		var isMine = myId === c.userId;
+		var isMine = myId === bucket.userId;
 
-		for (var i = 0; i < c.bucket.length; i++) {
-			var item = c.bucket[i];
+		for (var i = 0; i < bucket.length; i++) {
+			var item = bucket[i];
 
 			var $bucketItem = templates.makeBucketItem();
 			var $bucketNickname = $bucketItem.find(".nickname");
