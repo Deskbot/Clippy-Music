@@ -12,18 +12,6 @@ module.exports = {
 		assert(m.valuesQuick().length === 0);
 	},
 
-	constructor: () => {
-		const m = new Map();
-		m.set(1,1);
-		m.set(2,2);
-		m.set(3,3);
-
-		const qvm = new QuickValuesMap(m);
-		assert(qvm.get(1) === 1);
-		assert(qvm.get(2) === 2);
-		assert(qvm.get(3) === 3);
-	},
-
 	delete: () => {
 		const m = new QuickValuesMap();
 		m.set(1,1);
