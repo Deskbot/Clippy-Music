@@ -13,18 +13,16 @@ export class BarringerQueue {
 	}
 
 	add(item: ItemData) {
-		if (item.duration > this.maxTimePerBucket) return false;
+		if (item.duration > this.maxTimePerBucket) return;
 
 		for (const bucket of this.buckets.slice(1)) {
 			if (this.spaceForItemInBucket(item.duration, bucket, item.userId)) {
 				BarringerQueue.randomlyInsert(item, bucket);
-				return true;
+				return;
 			}
 		}
 
 		this.buckets.push([item]);
-
-		return false;
 	}
 
 	get(cid: number): ItemData | undefined {
