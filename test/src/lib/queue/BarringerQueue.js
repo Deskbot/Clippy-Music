@@ -63,6 +63,44 @@ module.exports = {
 			"The added items are in different buckets.");
 	},
 
+	purge: () => {
+		const q = new BarringerQueue(1000);
+
+		const item1a = {
+			contentId: 1,
+			userId: 1,
+			duration: 900,
+		};
+		const item1b = {
+			contentId: 2,
+			userId: 1,
+			duration: 900,
+		};
+		const item2 = {
+			contentId: 3,
+			userId: 2,
+			duration: 900,
+		};
+		q.add(item1a);
+		q.add(item1b);
+		q.add(item2);
+
+		q.purge(1);
+
+		const allItems = [...q.getBuckets()]
+			.reduce((allItems, bucket) => allItems.concat(bucket));
+
+		assert(!allItems.includes(item1a),
+			"The purged user's items are not in the queue."
+		);
+		assert(!allItems.includes(item1b),
+			"The purged user's items are not in the queue."
+		);
+		assert(allItems.includes(item2),
+			"Other items remain in the queue."
+		);
+	},
+
 	random_insert_does_insert: () => {
 		let bucket = [];
 
@@ -129,44 +167,6 @@ module.exports = {
 
 		assert(!allItems.find(item => item.contentId === 4),
 			"The removed item is not in the queue."
-		);
-	},
-
-	purge: () => {
-		const q = new BarringerQueue(1000);
-
-		const item1a = {
-			contentId: 1,
-			userId: 1,
-			duration: 900,
-		};
-		const item1b = {
-			contentId: 2,
-			userId: 1,
-			duration: 900,
-		};
-		const item2 = {
-			contentId: 3,
-			userId: 2,
-			duration: 900,
-		};
-		q.add(item1a);
-		q.add(item1b);
-		q.add(item2);
-
-		q.purge(1);
-
-		const allItems = [...q.getBuckets()]
-			.reduce((allItems, bucket) => allItems.concat(bucket));
-
-		assert(!allItems.includes(item1a),
-			"The purged user's items are not in the queue."
-		);
-		assert(!allItems.includes(item1b),
-			"The purged user's items are not in the queue."
-		);
-		assert(allItems.includes(item2),
-			"Other items remain in the queue."
 		);
 	},
 }
