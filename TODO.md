@@ -47,6 +47,7 @@ List
 
 * put user nickname in ItemData to remove need to refetch it
 * convert tests to TS
+* use pick, exclude etc to corretly type some of the utils
 * FileUploadError probably only needs to take file paths and not files
 * Make internal errors that aren't user errors get put in the terminal
 * Only attach user ids to items belonging to the user the queue is sent to

@@ -28,7 +28,7 @@ var DlList = (function() {
 
 		fillDlBar: function fillDlBar($bar, percent) {
 			var blocksAlready = $bar.find(".dl-block").length;
-			var targetBlockCount = Math.ceil(percent / blockPercent);
+			var targetBlockCount = Math.floor(percent / blockPercent);
 
 			for (var i = blocksAlready; i < targetBlockCount; i++) {
 				$bar.append(templates.makeDlBlock());
