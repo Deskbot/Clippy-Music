@@ -43,6 +43,12 @@ module.exports = {
 	exceeding_a_bucket_size_adds_a_new_bucket: () => {
 		const q = new BarringerQueue(1000);
 
+		// ensure the queue does not start empty
+		q.add({
+			userId: "someone",
+			duration: 100,
+		});
+
 		const item1 = {
 			userId: "1",
 			duration: 900
@@ -57,9 +63,55 @@ module.exports = {
 
 		const buckets = [...q.getBuckets()];
 
-		assert(buckets[0][0] === item1,
+		assert(buckets[1][0] === item1,
 			"The added items are in different buckets.");
-		assert(buckets[1][0] === item2,
+		assert(buckets[2][0] === item2,
+			"The added items are in different buckets.");
+	},
+
+	exceeding_a_bucket_size_adds_a_new_bucket_2: () => {
+		const q = new BarringerQueue(1000);
+
+		// ensure the queue does not start empty
+		q.add({
+			id: 1,
+			userId: "someone",
+			duration: 100,
+		});
+
+		const item1 = {
+			id: 2,
+			userId: "1",
+			duration: 300
+		};
+		const item2 = {
+			id: 3,
+			userId: "1",
+			duration: 300
+		};
+		const item3 = {
+			id: 4,
+			userId: "1",
+			duration: 300
+		};
+		const item4 = {
+			id: 5,
+			userId: "1",
+			duration: 300
+		};
+
+		q.add(item1);
+		q.add(item2);
+		q.add(item3);
+		q.add(item4);
+
+		const buckets = [...q.getBuckets()];
+
+		assert(buckets[1].includes(item1)
+			&& buckets[1].includes(item2)
+			&& buckets[1].includes(item3),
+			"The added items are in different buckets.");
+		assert(buckets[2].includes(item4),
 			"The added items are in different buckets.");
 	},
 
