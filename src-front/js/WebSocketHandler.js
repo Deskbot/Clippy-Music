@@ -237,6 +237,8 @@ var WebSocketHandler = (function() {
 					.addClass("wordart")
 					.addClass(wordartClass);
 			} else {
+				$currentlyPlaying.find(".duration").html("");
+				$currentlyPlaying.find(".nickname").html("");
 				$title.html("");
 				$title.attr("data-text", "");
 				$currentNickname.html("");
