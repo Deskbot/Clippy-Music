@@ -209,6 +209,7 @@ var WebSocketHandler = (function() {
 
 			var $currentlyPlaying = $("#currently-playing");
 			var $currentNickname = $currentlyPlaying.find(".nickname");
+			var $title = $currentlyPlaying.find(".title");
 			var isMine = !data.current ? false : myId === data.current.userId;
 
 			if (isMine) {
@@ -218,7 +219,6 @@ var WebSocketHandler = (function() {
 			}
 
 			if (data.current) {
-				var $title = $currentlyPlaying.find(".title");
 				$title.html(data.current.title);
 				$title.attr("data-text", utils.htmlEntityDecode(data.current.title));
 
