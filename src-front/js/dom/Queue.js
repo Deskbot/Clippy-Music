@@ -14,10 +14,9 @@ var Queue = {
 
 		var $bucket = $bucketContainer.children(".bucket");
 
-		var isMine = myId === bucket.userId;
-
 		for (var i = 0; i < bucket.length; i++) {
 			var item = bucket[i];
+			var isMine = myId === item.userId;
 
 			var $bucketItem = templates.makeBucketItem();
 			var $bucketNickname = $bucketItem.children(".nickname");
