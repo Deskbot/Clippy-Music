@@ -21,12 +21,12 @@ module.exports = {
 		const q = new BarringerQueue(1000);
 
 		q.add({
-			userId: 2,
+			userId: "2",
 			duration: 2
 		});
 
 		const item = {
-			userId: 1,
+			userId: "1",
 			duration: 10,
 		};
 		q.add(item);
@@ -44,11 +44,11 @@ module.exports = {
 		const q = new BarringerQueue(1000);
 
 		const item1 = {
-			userId: 1,
+			userId: "1",
 			duration: 900
 		};
 		const item2 = {
-			userId: 1,
+			userId: "1",
 			duration: 900
 		};
 
@@ -67,25 +67,25 @@ module.exports = {
 		const q = new BarringerQueue(1000);
 
 		const item1a = {
-			contentId: 1,
-			userId: 1,
+			id: 1,
+			userId: "1",
 			duration: 900,
 		};
 		const item1b = {
-			contentId: 2,
-			userId: 1,
+			id: 2,
+			userId: "1",
 			duration: 900,
 		};
 		const item2 = {
-			contentId: 3,
-			userId: 2,
+			id: 3,
+			userId: "2",
 			duration: 900,
 		};
 		q.add(item1a);
 		q.add(item1b);
 		q.add(item2);
 
-		q.purge(1);
+		q.purge("1");
 
 		const allItems = [...q.getBuckets()]
 			.reduce((allItems, bucket) => allItems.concat(bucket));
@@ -105,16 +105,16 @@ module.exports = {
 		let bucket = [];
 
 		const items = [{
-			userId: 1,
-			contentId: 1,
+			userId: "1",
+			id: 1,
 			duration: 200,
 		}, {
-			userId: 2,
-			contentId: 2,
+			userId: "2",
+			id: 2,
 			duration: 200,
 		}, {
-			userId: 3,
-			contentId: 3,
+			userId: "3",
+			id: 3,
 			duration: 200,
 		}];
 
@@ -137,22 +137,22 @@ module.exports = {
 
 		const items = [{
 			id: 1,
-			userId: 1,
+			userId: "1",
 			duration: 900,
 		},
 		{
 			id: 2,
-			userId: 1,
+			userId: "1",
 			duration: 900,
 		},
 		{
 			id: 3,
-			userId: 1,
+			userId: "1",
 			duration: 900,
 		},
 		{
 			id: 4,
-			userId: 1,
+			userId: "1",
 			duration: 900,
 		}];
 
@@ -165,7 +165,7 @@ module.exports = {
 		const allItems = [...q.getBuckets()]
 			.reduce((allItems, bucket) => allItems.concat(bucket));
 
-		assert(!allItems.find(item => item.contentId === 4),
+		assert(!allItems.find(item => item.id === 4),
 			"The removed item is not in the queue."
 		);
 	},
