@@ -170,8 +170,14 @@ module.exports = {
 			duration: 200,
 		}];
 
+		let expectedNumOfItemsInBucket = 0;
+
 		for (const item of items) {
 			BarringerQueue.randomlyInsert(item, bucket);
+			expectedNumOfItemsInBucket += 1;
+
+			assert(bucket.length === expectedNumOfItemsInBucket,
+				"The bucket has one more element than previously.")
 			assert(bucket.includes(item),
 				"The inserted item should be in the bucket."
 			);

@@ -89,7 +89,7 @@ export class BarringerQueue {
 
 	static randomlyInsert(newItem: ItemData, bucket: ItemData[]) {
 		const targetIndex = utils.randUpTo(bucket.length);
-		const itemsAfterNew = bucket.slice(targetIndex, bucket.length);
+		const itemsAfterNew = bucket.splice(targetIndex);
 		// bucket is modified to lose all items after new
 
 		bucket.push(newItem, ...itemsAfterNew);
