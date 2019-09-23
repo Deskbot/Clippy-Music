@@ -153,43 +153,6 @@ module.exports = {
 		);
 	},
 
-	random_insert_does_insert: () => {
-		let bucket = [];
-
-		const items = [{
-			userId: "1",
-			id: 1,
-			duration: 200,
-		}, {
-			userId: "2",
-			id: 2,
-			duration: 200,
-		}, {
-			userId: "3",
-			id: 3,
-			duration: 200,
-		}];
-
-		let expectedNumOfItemsInBucket = 0;
-
-		for (const item of items) {
-			BarringerQueue.randomlyInsert(item, bucket);
-			expectedNumOfItemsInBucket += 1;
-
-			assert(bucket.length === expectedNumOfItemsInBucket,
-				"The bucket has one more element than previously.")
-			assert(bucket.includes(item),
-				"The inserted item should be in the bucket."
-			);
-		}
-
-		for (const item of items) {
-			assert(bucket.includes(item),
-				"All previously inserted items should be in the bucket."
-			);
-		}
-	},
-
 	remove: () => {
 		const q = new BarringerQueue(1000);
 

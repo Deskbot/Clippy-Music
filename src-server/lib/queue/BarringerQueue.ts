@@ -1,5 +1,6 @@
 import * as utils from "../utils";
 import { ItemData } from "../../types/ItemData";
+import { randInsert } from "../utils";
 
 export class BarringerQueue {
 	private buckets: ItemData[][];
@@ -17,7 +18,7 @@ export class BarringerQueue {
 
 		for (const bucket of this.buckets.slice(1)) {
 			if (this.spaceForItemInBucket(item.duration, bucket, item.userId)) {
-				BarringerQueue.randomlyInsert(item, bucket);
+				randInsert(item, bucket);
 				return;
 			}
 		}
@@ -85,14 +86,6 @@ export class BarringerQueue {
 				}
 			}
 		}
-	}
-
-	static randomlyInsert(newItem: ItemData, bucket: ItemData[]) {
-		const targetIndex = utils.randUpTo(bucket.length);
-		const itemsAfterNew = bucket.splice(targetIndex);
-		// bucket is modified to lose all items after new
-
-		bucket.push(newItem, ...itemsAfterNew);
 	}
 
 	remove(cid: number): boolean {

@@ -119,6 +119,14 @@ export function randIntBetween(x: number, y: number): number { //can include x b
 	return x + Math.floor(Math.random() * (y-x));
 }
 
+export function randInsert<T>(newItem: T, list: T[]) {
+	const targetIndex = randUpTo(list.length);
+	const itemsAfterNew = list.splice(targetIndex);
+	// list is modified to lose all items after new
+
+	list.push(newItem, ...itemsAfterNew);
+}
+
 export function randUpTo(n: number) {
 	return Math.floor(Math.random() * n);
 }
