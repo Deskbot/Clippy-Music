@@ -66,9 +66,9 @@ var utils = {
 		var secs = s % 60;
 
 		var str;
-		str = hours > 0 ? hours + ":" : "";
-		str += mins > 0 ? mins + ":" : "";
-		str += secs > 0 ? secs : "";
+		str = hours > 0 ? hours + "h " : "";
+		str += mins > 0 ? mins + "m " : "";
+		str += secs > 0 ? secs + "s" : "";
 
 		return str.trim();
 	},

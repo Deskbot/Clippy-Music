@@ -10,7 +10,7 @@ var Queue = {
 
 		var $bucketContainer = templates.makeBucketContainer();
 		$bucketContainer.children(".timeAvailable")
-			.html(utils.formatSeconds(maxBucketTime - durationUsed) + " unused");
+			.html(utils.formatSeconds(maxBucketTime - durationUsed) + " available");
 
 		var $bucket = $bucketContainer.children(".bucket");
 

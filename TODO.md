@@ -7,7 +7,6 @@ List
 ----
 
 * Barringer's Bucketing system
-	* render new kind of bucketing on the front
 	* the remove button shoud still display
 	* after removing an item from a bucket, if the bucket is empty, remove it
 	* add tests to ensure no bucket is ever empty
