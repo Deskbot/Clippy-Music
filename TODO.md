@@ -6,7 +6,6 @@ This list is in a rough order of priority.
 List
 ----
 
-* duration in bucket counts per user
 * nothing gets suspended
 	* do ids continue after suspension?
 * does streamYtOverDur work still?
@@ -19,6 +18,8 @@ List
 	* youtube-dl does it
 	* mpv can stream it
 * Basically every other youtube-dl source including bandcamp and archive.org
+* make a user randomly insert items only after all of their other items
+* improve the layout of title, username, and duration
 * Improve the way clippy reconnects the websocket, maybe do it as soon as the tab regains focus and update the queue data at the same time.
 * Is the behaviour of forgetting an item when it is removed from the queue correct?
 * Change the "Progress" label to "Upload Progress"
