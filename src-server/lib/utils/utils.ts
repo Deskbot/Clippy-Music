@@ -5,28 +5,6 @@ import { URL } from "url";
 
 import * as opt from "../../options";
 
-export function arrFirstMatch<T>(arr: T[], predicate: (elem: T) => boolean): T | undefined {
-	for (let e of arr) {
-		if (predicate(e)) return e;
-	}
-
-	return undefined;
-}
-
-export function arrShuffle<T>(arr: T[]): T[] {
-	let tmpItem, randIndex;
-
-	for (let i = 0; i < arr.length; i++) {
-		randIndex = Math.floor(Math.random() * arr.length);
-
-		tmpItem = arr[i];
-		arr[i] = arr[randIndex];
-		arr[randIndex] = tmpItem;
-	}
-
-	return arr;
-}
-
 export function arrSum(a: number[]): number {
 	return a.reduce((n, p) => n + p);
 }
@@ -85,7 +63,7 @@ export function extractYtVideoId(s: string): string | undefined {
 
 	if (urlObj.hostname.includes("youtu.be")) { // shortened YouTube url
 		const pathParts = urlObj.pathname.split("/");
-		return arrFirstMatch(pathParts, (part) => part.length !== 0);
+		return pathParts.find(part => part.length !== 0);
 	} else {
 		const param = urlObj.searchParams.get("v");
 		if (param) return param;
@@ -211,12 +189,4 @@ export function ytTimeStrToSec(str: string): number {
 	else if (timeArr.length === 2) return parseInt(timeArr[0]) * 60 + parseInt(timeArr[1]);
 	else if (timeArr.length === 3) return parseInt(timeArr[0]) * 3600 + parseInt(timeArr[1]) * 60 + parseInt(timeArr[2]);
 	else throw `Unable to convert yt time, ${str}, to seconds.`;
-}
-
-export function zip<T,U>(a1: T[], a2: U[]): [T,U][] {
-	const a: [T,U][] = [];
-	for (let i = 0; i < Math.max(a1.length, a2.length); i++) {
-		a[i] = [a1[i], a2[i]];
-	}
-	return a;
 }
