@@ -140,28 +140,39 @@ module.exports = {
 		const item1b = {
 			id: 2,
 			userId: "1",
-			duration: 900,
+			duration: 450,
+		};
+		const item1c = {
+			id: 3,
+			userId: "1",
+			duration: 450,
 		};
 		const item2 = {
-			id: 3,
+			id: 4,
 			userId: "2",
 			duration: 900,
 		};
+		const item1d = {
+			id: 5,
+			userId: "1",
+			duration: 100,
+		};
 		q.add(item1a);
 		q.add(item1b);
+		q.add(item1c);
 		q.add(item2);
+		q.add(item1d);
 
 		q.purge("1");
 
 		const allItems = [...q.getBuckets()]
 			.reduce((allItems, bucket) => allItems.concat(bucket));
 
-		assert(!allItems.includes(item1a),
-			"The purged user's items are not in the queue."
-		);
-		assert(!allItems.includes(item1b),
-			"The purged user's items are not in the queue."
-		);
+		const failMessage = "The purged user's items are not in the queue.";
+		assert(!allItems.includes(item1a), failMessage);
+		assert(!allItems.includes(item1b), failMessage);
+		assert(!allItems.includes(item1c), failMessage);
+		assert(!allItems.includes(item1d), failMessage);
 		assert(allItems.includes(item2),
 			"Other items remain in the queue."
 		);
