@@ -4,7 +4,7 @@ import * as readline from "readline";
 import * as consts from "./lib/consts";
 import * as debug from "./lib/debug";
 import * as opt from "./options";
-import * as utils from "./lib/utils";
+import * as utils from "./lib/utils/utils";
 
 import * as ContentService from "./service/ContentService";
 import * as IdFactoryService from "./service/IdFactoryService";

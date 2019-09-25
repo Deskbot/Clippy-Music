@@ -12,7 +12,7 @@ import { WebSocketService } from "./WebSocketService";
 import * as consts from "../lib/consts";
 import * as debug from "../lib/debug";
 import * as opt from "../options";
-import * as utils from "../lib/utils";
+import * as utils from "../lib/utils/utils";
 
 import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingError } from "../lib/errors";
 import { UploadData, UrlPic, NoPic, FilePic, FileMusic, UrlMusic, UploadDataWithId } from "../types/UploadData";

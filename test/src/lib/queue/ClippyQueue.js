@@ -2,7 +2,7 @@ const baseDir = "../../../../build/";
 
 const { ClippyQueue } = require(baseDir + "lib/queue/ClippyQueue.js");
 
-const utils = require(baseDir + "lib/utils.js");
+const utils = require(baseDir + "lib/utils/utils.js");
 
 const assert = require("assert").strict;
 

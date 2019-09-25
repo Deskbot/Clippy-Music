@@ -3,7 +3,7 @@ import * as fs from "fs";
 import { Html5Entities } from "html-entities";
 import { URL } from "url";
 
-import * as opt from "../options";
+import * as opt from "../../options";
 
 export function arrFirstMatch<T>(arr: T[], predicate: (elem: T) => boolean): T | undefined {
 	for (let e of arr) {

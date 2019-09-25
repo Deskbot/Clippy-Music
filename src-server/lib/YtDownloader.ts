@@ -2,7 +2,7 @@ import * as cp from "child_process";
 import * as q from "q";
 
 import * as opt from "../options";
-import * as utils from "./utils";
+import * as utils from "./utils/utils";
 
 import { CancelError, UnknownDownloadError } from "./errors";
 import { ContentType } from "../types/ContentType";

@@ -6,7 +6,7 @@ import * as fs from "fs";
 
 import * as consts from "./consts";
 import * as debug from "./debug";
-import * as utils from "./utils";
+import * as utils from "./utils/utils";
 import * as opt from "../options";
 import * as time from "./time";
 

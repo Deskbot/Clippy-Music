@@ -1,6 +1,6 @@
 import * as opt from "../options";
 import * as path from "path";
-import * as utils from "./utils";
+import * as utils from "./utils/utils";
 
 export const biggestFileSizeLimit = opt.musicSizeLimit > opt.imageSizeLimit
 	? opt.musicSizeLimit
