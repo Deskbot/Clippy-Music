@@ -68,7 +68,7 @@ var utils = {
 		var str;
 		str = hours > 0 ? hours + "h " : "";
 		str += mins > 0 ? mins + "m " : "";
-		str += secs > 0 ? secs + "s" : "";
+		str += secs + "s";
 
 		return str.trim();
 	},
