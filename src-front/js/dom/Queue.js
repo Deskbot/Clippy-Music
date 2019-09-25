@@ -5,7 +5,9 @@ var Queue = {
 		var durationUsed = 0;
 
 		for (var i = 0; i < bucket.length; i++) {
-			durationUsed += bucket[i].duration;
+			if (bucket[i].userId === myId) {
+				durationUsed += bucket[i].duration;
+			}
 		}
 
 		var $bucketContainer = templates.makeBucketContainer();
@@ -22,7 +24,7 @@ var Queue = {
 			var $bucketNickname = $bucketItem.children(".nickname");
 			$bucketNickname.html(item.nickname);
 			$bucketItem.children(".duration").html("[" + utils.formatSeconds(item.duration) + "]");
-			$bucketItem.children(".title").html("(" + item.title + ")");
+			$bucketItem.children(".title").html(item.title);
 
 			if (isMine) {
 				$bucketContainer.attr("id", "my-bucket-container");

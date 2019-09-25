@@ -122,7 +122,7 @@ export class BarringerQueue {
 		return arrayUtils.removeFirst(bucket, item => item.id === cid);
 	}
 
-	spaceForItemInBucket(time: number, bucket: ItemData[], userId: string): boolean {
+	private spaceForItemInBucket(time: number, bucket: ItemData[], userId: string): boolean {
 		let totalTimeExisting = 0;
 
 		for (const item of bucket) {
@@ -131,6 +131,6 @@ export class BarringerQueue {
 			}
 		}
 
-		return totalTimeExisting + time < this.maxTimePerBucket;
+		return (totalTimeExisting + time) < this.maxTimePerBucket;
 	}
 }

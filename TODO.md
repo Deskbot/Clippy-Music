@@ -6,9 +6,9 @@ This list is in a rough order of priority.
 List
 ----
 
-* Barringer's Bucketing system
-	* show 0s available when that is so
-* do ids continue after suspension?
+* duration in bucket counts per user
+* nothing gets suspended
+	* do ids continue after suspension?
 * does streamYtOverDur work still?
 * add eog command to options and its arguments
 	* rename existing path options with "???command"
@@ -22,6 +22,7 @@ List
 * Improve the way clippy reconnects the websocket, maybe do it as soon as the tab regains focus and update the queue data at the same time.
 * Is the behaviour of forgetting an item when it is removed from the queue correct?
 * Change the "Progress" label to "Upload Progress"
+* increase the title character limit somewhat
 * Silent looping Video overlay
 	* Then rename image/pic variables to overlay everywhere
 	* These need making consistent anyway
