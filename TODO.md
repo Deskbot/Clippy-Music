@@ -7,8 +7,9 @@ List
 ----
 
 * Barringer's Bucketing system
-	* an item that is too big should be trimmed
-* new uploads spend a lot of time at 100%
+	* show 0s available when that is so
+* do ids continue after suspension?
+* does streamYtOverDur work still?
 * add eog command to options and its arguments
 	* rename existing path options with "???command"
 * Reddit support

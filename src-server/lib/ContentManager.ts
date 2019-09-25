@@ -13,7 +13,7 @@ import * as time from "./time";
 import { ContentType } from "../types/ContentType";
 import { downloadYtInfo, getFileDuration, YtData } from "./music";
 import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError } from "./errors";
-import { UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic, TitledMusic } from "../types/UploadData";
+import { UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic, TitledMusic, UploadData } from "../types/UploadData";
 import { IdFactory } from "./IdFactory";
 import { ItemData, CompleteMusic, CompletePicture } from "../types/ItemData";
 import { YtDownloader } from "./YtDownloader";
@@ -106,6 +106,24 @@ export class ContentManager extends EventEmitter {
 
 	addYtId(id: string) {
 		this.ytIds[id] = new Date().getTime();
+	}
+
+	private calcPlayableDuration(
+		actualFileDuration: number,
+		startTime: number | null | undefined,
+		endTime: number | null | undefined
+	): number {
+		const durationBasedOnStartAndFinish = time.clipTimeByStartAndEnd(
+			Math.floor(actualFileDuration),
+			startTime,
+			endTime
+		);
+
+		if (durationBasedOnStartAndFinish > opt.timeout) {
+			return opt.timeout;
+		}
+
+		return durationBasedOnStartAndFinish;
 	}
 
 	deleteContent(contentObj: ItemData) {
@@ -215,7 +233,7 @@ export class ContentManager extends EventEmitter {
 				pic: {
 					...uplData.pic,
 				},
-				duration: time.clipTimeByStartAndEnd(Math.floor(duration), uplData.startTime, uplData.endTime),
+				duration: this.calcPlayableDuration(duration, uplData.startTime, uplData.endTime),
 			};
 
 			return uplDataWithDuration;
@@ -243,7 +261,7 @@ export class ContentManager extends EventEmitter {
 			return {
 				...uplData,
 				music: musicData,
-				duration: time.clipTimeByStartAndEnd(Math.floor(info.duration), uplData.startTime, uplData.endTime),
+				duration: this.calcPlayableDuration(info.duration, uplData.startTime, uplData.endTime),
 			};
 
 		} else {
