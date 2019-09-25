@@ -7,8 +7,7 @@ List
 ----
 
 * Barringer's Bucketing system
-	* after removing an item from a bucket, if the bucket is empty, remove it
-	* add tests to ensure no bucket is ever empty
+	* an item that is too big should be trimmed
 * new uploads spend a lot of time at 100%
 * add eog command to options and its arguments
 	* rename existing path options with "???command"
