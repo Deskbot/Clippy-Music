@@ -204,4 +204,34 @@ module.exports = {
 			"The removed item is not in the queue."
 		);
 	},
+
+	removing_an_item_does_not_leave_an_empty_bucket() {
+		const q = new BarringerQueue(1000);
+
+		// top bucket
+		q.add({
+			duration: 500,
+			id: 1,
+			userId: "1",
+		});
+
+		// second bucket
+		q.add({
+			duration: 1000,
+			id: 2,
+			userId: "1",
+		});
+
+		q.add({
+			duration: 500,
+			id: 3,
+			userId: "1",
+		});
+
+		q.remove(2);
+
+		for (const bucket of q.getBuckets()) {
+			assert(bucket.length !== 0, "Each bucket has at least one item.")
+		}
+	},
 }
