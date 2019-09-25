@@ -28,7 +28,7 @@ export class BarringerQueue {
 	private enforceAllBucketsAreNotEmpty() {
 		// when an item is removed the indexes to the right will change
 		// so check whether to remove items from right to left
-		for (let bucketIndex = this.buckets.length; bucketIndex <= 0; bucketIndex++) {
+		for (let bucketIndex = this.buckets.length - 1; bucketIndex >= 0; bucketIndex--) {
 			this.enforceBucketIsNotEmpty(bucketIndex);
 		}
 	}
