@@ -25,6 +25,14 @@ export class BarringerQueue {
 		this.buckets.push([item]);
 	}
 
+	private enforceAllBucketsAreNotEmpty() {
+		// when an item is removed the indexes to the right will change
+		// so check whether to remove items from right to left
+		for (let bucketIndex = this.buckets.length; bucketIndex <= 0; bucketIndex++) {
+			this.enforceBucketIsNotEmpty(bucketIndex);
+		}
+	}
+
 	private enforceBucketIsNotEmpty(index: number) {
 		if (this.buckets[index].length === 0) {
 			this.buckets.splice(index, 1);
@@ -86,10 +94,10 @@ export class BarringerQueue {
 	purge(uid: string) {
 		for (let bucketIndex = 0; bucketIndex < this.buckets.length; bucketIndex++) {
 			const bucket = this.buckets[bucketIndex];
-			if (this.removeAllItemsOfUserFromBucket(uid, bucket)) {
-				this.enforceBucketIsNotEmpty(bucketIndex);
-			}
+			this.removeAllItemsOfUserFromBucket(uid, bucket);
 		}
+
+		this.enforceAllBucketsAreNotEmpty();
 	}
 
 	remove(cid: number): boolean {
@@ -104,17 +112,14 @@ export class BarringerQueue {
 		return false;
 	}
 
-	private removeAllItemsOfUserFromBucket(uid: string, bucket: ItemData[]): boolean {
-		let atLeastOneRemoved = false;
-
-		for (let i = 0; i < bucket.length; i++) {
+	private removeAllItemsOfUserFromBucket(uid: string, bucket: ItemData[]) {
+		// when an item is removed the indexes to the right will change
+		// so check whether to remove items from right to left
+		for (let i = bucket.length - 1; i >= 0; i--) {
 			if (bucket[i].userId === uid) {
 				bucket.splice(i, 1);
-				atLeastOneRemoved = true;
 			}
 		}
-
-		return atLeastOneRemoved;
 	}
 
 	private removeFromBucket(cid: number, bucket: ItemData[]): boolean {
