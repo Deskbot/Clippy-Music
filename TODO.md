@@ -7,7 +7,6 @@ List
 ----
 
 * Barringer's Bucketing system
-	* the remove button shoud still display
 	* after removing an item from a bucket, if the bucket is empty, remove it
 	* add tests to ensure no bucket is ever empty
 * new uploads spend a lot of time at 100%

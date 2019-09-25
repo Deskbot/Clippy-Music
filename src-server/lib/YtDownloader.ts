@@ -174,13 +174,12 @@ class PercentReader {
 	}
 
 	get(): number {
-		let data = this.proc.stdout.read();
+		const data = this.proc.stdout.read();
 
 		if (data === null) return this.lastPercent;
 
 		let pc = PercentReader.extractPercent(data.toString());
 
-		// console.log(data.toString());
 		if (isNaN(pc)) return this.lastPercent;
 
 		pc /= 100; //convert to fraction
