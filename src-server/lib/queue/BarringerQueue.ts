@@ -25,6 +25,12 @@ export class BarringerQueue {
 		this.buckets.push([item]);
 	}
 
+	private enforceBucketIsNotEmpty(index: number) {
+		if (this.buckets[index].length === 0) {
+			this.buckets.splice(index, 1);
+		}
+	}
+
 	get(cid: number): ItemData | undefined {
 		for (const bucket of this.buckets) {
 			for (const item of bucket) {
@@ -78,23 +84,37 @@ export class BarringerQueue {
 	}
 
 	purge(uid: string) {
-		for (const bucket of this.buckets) {
-			for (let i = 0; i < bucket.length; i++) {
-				if (bucket[i].userId === uid) {
-					bucket.splice(i, 1);
-				}
+		for (let bucketIndex = 0; bucketIndex < this.buckets.length; bucketIndex++) {
+			const bucket = this.buckets[bucketIndex];
+			if (this.removeAllItemsOfUserFromBucket(uid, bucket)) {
+				this.enforceBucketIsNotEmpty(bucketIndex);
 			}
 		}
 	}
 
 	remove(cid: number): boolean {
-		for (const bucket of this.buckets) {
+		for (let bucketIndex = 0; bucketIndex < this.buckets.length; bucketIndex++) {
+			const bucket = this.buckets[bucketIndex];
 			if (this.removeFromBucket(cid, bucket)) {
+				this.enforceBucketIsNotEmpty(bucketIndex);
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	private removeAllItemsOfUserFromBucket(uid: string, bucket: ItemData[]): boolean {
+		let atLeastOneRemoved = false;
+
+		for (let i = 0; i < bucket.length; i++) {
+			if (bucket[i].userId === uid) {
+				bucket.splice(i, 1);
+				atLeastOneRemoved = true;
+			}
+		}
+
+		return atLeastOneRemoved;
 	}
 
 	private removeFromBucket(cid: number, bucket: ItemData[]): boolean {
@@ -108,7 +128,7 @@ export class BarringerQueue {
 		return false;
 	}
 
-	spaceForItemInBucket(time: number, bucket: ItemData[], userId: string) {
+	spaceForItemInBucket(time: number, bucket: ItemData[], userId: string): boolean {
 		let totalTimeExisting = 0;
 
 		for (const item of bucket) {
