@@ -89,11 +89,19 @@ export class BarringerQueue {
 
 	remove(cid: number): boolean {
 		for (const bucket of this.buckets) {
-			for (let i = 0; i < bucket.length; i++) {
-				if (bucket[i].id === cid) {
-					bucket.splice(i, 1);
-					return true;
-				}
+			if (this.removeFromBucket(cid, bucket)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private removeFromBucket(cid: number, bucket: ItemData[]): boolean {
+		for (let i = 0; i < bucket.length; i++) {
+			if (bucket[i].id === cid) {
+				bucket.splice(i, 1);
+				return true;
 			}
 		}
 
