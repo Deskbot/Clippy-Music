@@ -176,6 +176,10 @@ module.exports = {
 		assert(allItems.includes(item2),
 			"Other items remain in the queue."
 		);
+
+		for (const bucket of q.getBuckets()) {
+			assert(bucket.length !== 0, "Each bucket has at least one item.")
+		}
 	},
 
 	remove: () => {
