@@ -115,6 +115,20 @@ module.exports = {
 			"The added items are in different buckets.");
 	},
 
+	items_can_equal_size_of_bucket() {
+		const q = new BarringerQueue(1000);
+
+		const item = {
+			id: 1,
+			userId: "1",
+			duraiton: 1000,
+		};
+
+		q.add(item);
+
+		assert([...q.getBuckets()][0][0] == item, "The item was successfully added.");
+	},
+
 	purge: () => {
 		const q = new BarringerQueue(1000);
 
