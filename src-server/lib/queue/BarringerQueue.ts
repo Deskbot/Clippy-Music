@@ -1,4 +1,6 @@
+import * as arrayUtils from "../utils/arrayUtils";
 import * as utils from "../utils/utils";
+
 import { ItemData } from "../../types/ItemData";
 
 export class BarringerQueue {
@@ -123,14 +125,7 @@ export class BarringerQueue {
 	}
 
 	private removeFromBucket(cid: number, bucket: ItemData[]): boolean {
-		for (let i = 0; i < bucket.length; i++) {
-			if (bucket[i].id === cid) {
-				bucket.splice(i, 1);
-				return true;
-			}
-		}
-
-		return false;
+		return arrayUtils.removeFirst(bucket, elem => elem.id === cid);
 	}
 
 	spaceForItemInBucket(time: number, bucket: ItemData[], userId: string): boolean {
