@@ -115,17 +115,11 @@ export class BarringerQueue {
 	}
 
 	private removeAllItemsOfUserFromBucket(uid: string, bucket: ItemData[]) {
-		// when an item is removed the indexes to the right will change
-		// so check whether to remove items from right to left
-		for (let i = bucket.length - 1; i >= 0; i--) {
-			if (bucket[i].userId === uid) {
-				bucket.splice(i, 1);
-			}
-		}
+		arrayUtils.removeAll(bucket, item => item.userId === uid);
 	}
 
 	private removeFromBucket(cid: number, bucket: ItemData[]): boolean {
-		return arrayUtils.removeFirst(bucket, elem => elem.id === cid);
+		return arrayUtils.removeFirst(bucket, item => item.id === cid);
 	}
 
 	spaceForItemInBucket(time: number, bucket: ItemData[], userId: string): boolean {

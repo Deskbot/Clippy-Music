@@ -12,3 +12,13 @@ export function removeFirst<T>(arr: T[], predicate: (elem: T) => boolean): boole
 
     return false;
 }
+
+export function removeAll<T>(arr: T[], predicate: (elem: T) => boolean) {
+    // when an item is removed the indices to the right will change
+    // so check whether to remove items from right to left
+    for (let i = arr.length - 1; i >= 0; i--) {
+        if (predicate(arr[i])) {
+            arr.splice(i, 1);
+        }
+    }
+}
