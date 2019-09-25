@@ -5,10 +5,6 @@ import { URL } from "url";
 
 import * as opt from "../../options";
 
-export function arrSum(a: number[]): number {
-	return a.reduce((n, p) => n + p);
-}
-
 export function asciiOnly(str: string): string {
 	return str.replace(/[^\x00-\x7F]/g, "");
 }

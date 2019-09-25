@@ -3,6 +3,7 @@ const baseDir = "../../../../build/";
 const { ClippyQueue } = require(baseDir + "lib/queue/ClippyQueue.js");
 
 const utils = require(baseDir + "lib/utils/utils.js");
+const arrayUtils = require(baseDir + "lib/utils/arrayUtils.js");
 
 const assert = require("assert").strict;
 
@@ -19,7 +20,7 @@ module.exports = {
 			q.boostPosteriority(userId, boost);
 		}
 
-		assert.strictEqual(q.userPosteriority[userId], utils.arrSum(boosts),
+		assert.strictEqual(q.userPosteriority[userId], arrayUtils.arrSum(boosts),
 			"A user's posteriority can be boosted.");
 	},
 
