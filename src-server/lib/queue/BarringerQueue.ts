@@ -1,6 +1,5 @@
 import * as utils from "../utils";
 import { ItemData } from "../../types/ItemData";
-import { randInsert } from "../utils";
 
 export class BarringerQueue {
 	private buckets: ItemData[][];
@@ -18,7 +17,7 @@ export class BarringerQueue {
 
 		for (const bucket of this.buckets.slice(1)) {
 			if (this.spaceForItemInBucket(item.duration, bucket, item.userId)) {
-				randInsert(item, bucket);
+				utils.randInsert(item, bucket);
 				return;
 			}
 		}
