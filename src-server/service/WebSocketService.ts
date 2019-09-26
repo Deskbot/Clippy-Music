@@ -8,22 +8,24 @@ import { ContentServiceGetter } from "./ContentService";
 import { ProgressQueueServiceGetter } from "./ProgressQueueService";
 import { UserRecordGetter } from "./UserRecordService";
 
-
 //really a namespace where all functions are hoisted
 class Api {
 	private wsh: WebSocketHandler;
 
 	constructor() {
+		const ContentService = ContentServiceGetter.get();
+		const UserRecordService = UserRecordGetter.get();
+
 		const onConnect = (soc: ws, id: string) => {
 			//save user
-			UserRecordGetter.get().add(id);
-			UserRecordGetter.get().setWS(id, soc);
+			UserRecordService.add(id);
+			UserRecordService.setWS(id, soc);
 
 			//notify if banned
-			if (UserRecordGetter.get().isBanned(id)) this.sendBanned(soc);
+			if (UserRecordService.isBanned(id)) this.sendBanned(soc);
 
 			//tell user their nickname
-			if (UserRecordGetter.get().isUser(id)) this.sendNickname(soc, UserRecordGetter.get().getNickname(id));
+			if (UserRecordService.isUser(id)) this.sendNickname(soc, UserRecordService.getNickname(id));
 
 			//send queue
 			this.sendQueue(soc);
@@ -34,7 +36,7 @@ class Api {
 			const dataObj = JSON.parse(data);
 
 			if (dataObj.type === "delete-content") {
-				if (!ContentServiceGetter.get().remove(dataObj.contentId)) {
+				if (!ContentService.remove(dataObj.contentId)) {
 					soc.send(JSON.stringify({
 						type: dataObj.type,
 						success: false,
@@ -52,7 +54,7 @@ class Api {
 		};
 
 		const onClose = (soc: ws, id: string) => {
-			UserRecordGetter.get().unsetWS(id, soc);
+			UserRecordService.unsetWS(id, soc);
 		};
 
 		this.wsh = new WebSocketHandler(
@@ -85,7 +87,9 @@ class Api {
 	}
 
 	sendNicknameToUser(userId: string, nickname: string) {
-		const socs = UserRecordGetter.get().getSockets(userId);
+		const UserRecordService = UserRecordGetter.get();
+
+		const socs = UserRecordService.getSockets(userId);
 		for (let soc of socs) this.sendNickname(soc, nickname);
 	}
 
@@ -106,7 +110,9 @@ class Api {
 	}
 
 	sendDlQueue(soc: ws, userId: string) {
-		const queue = ProgressQueueServiceGetter.get().getQueue(userId);
+		const ProgressQueueService = ProgressQueueServiceGetter.get();
+
+		const queue = ProgressQueueService.getQueue(userId);
 		if (queue) WebSocketService.sendMessage([soc], "dl-list", queue);
 	}
 
@@ -122,10 +128,12 @@ class Api {
 	//queue related
 
 	makeQueueMessage() {
+		const ContentService = ContentServiceGetter.get();
+
 		return {
-			current: ContentServiceGetter.get().getCurrentlyPlaying(),
+			current: ContentService.getCurrentlyPlaying(),
 			maxBucketTime: opt.timeout,
-			queue: ContentServiceGetter.get().getBucketsForPublic(),
+			queue: ContentService.getBucketsForPublic(),
 			type: "queue",
 		};
 	}
@@ -158,30 +166,34 @@ class Api {
 export const WebSocketService = new Api();
 
 export function startWebSocketService() {
+	const ProgressQueueService = ProgressQueueServiceGetter.get();
+	const ContentService = ContentServiceGetter.get();
+	const UserRecordService = UserRecordGetter.get();
+
 	let lastQueueWasEmpty = false;
-	ContentServiceGetter.get().on("queue-empty", () => {
+	ContentService.on("queue-empty", () => {
 		if (!lastQueueWasEmpty) {
 			WebSocketService.broadcastEmptyQueue();
 			lastQueueWasEmpty = true;
 		}
 	});
 
-	ContentServiceGetter.get().on("queue-update", () => {
+	ContentService.on("queue-update", () => {
 		lastQueueWasEmpty = false;
 		WebSocketService.broadcastQueue();
 	});
 
-	ProgressQueueServiceGetter.get().on("prepared", (userId, content) => {
-		WebSocketService.sendMessage(UserRecordGetter.get().getSockets(userId), "dl-prep", content);
+	ProgressQueueService.on("prepared", (userId, content) => {
+		WebSocketService.sendMessage(UserRecordService.getSockets(userId), "dl-prep", content);
 	});
 
-	ProgressQueueServiceGetter.get().on("delete", (userId, contentId) => {
-		const socs = UserRecordGetter.get().getSockets(userId);
+	ProgressQueueService.on("delete", (userId, contentId) => {
+		const socs = UserRecordService.getSockets(userId);
 		WebSocketService.sendMessage(socs, "dl-delete", contentId);
 	});
 
 	//extraInfo is an optional argument
-	ProgressQueueServiceGetter.get().on("error", (userId, contentId, error, extraInfo) => {
+	ProgressQueueService.on("error", (userId, contentId, error, extraInfo) => {
 		const data = {
 			contentId,
 			error,
@@ -189,10 +201,10 @@ export function startWebSocketService() {
 			errorType: error.constructor.name
 		};
 
-		WebSocketService.sendMessage(UserRecordGetter.get().getSockets(userId), "dl-error", data);
+		WebSocketService.sendMessage(UserRecordService.getSockets(userId), "dl-error", data);
 	});
 
-	ProgressQueueServiceGetter.get().on("list", (userId, list) => {
-		WebSocketService.sendMessage(UserRecordGetter.get().getSockets(userId), "dl-list", list);
+	ProgressQueueService.on("list", (userId, list) => {
+		WebSocketService.sendMessage(UserRecordService.getSockets(userId), "dl-list", list);
 	});
 }
