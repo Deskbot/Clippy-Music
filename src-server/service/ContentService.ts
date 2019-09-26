@@ -1,6 +1,7 @@
 import * as fs from "fs";
 
 import * as consts from "../lib/consts";
+import * as opt from "../options";
 
 import { IdFactoryGetter } from "./IdFactoryService";
 import { ProgressQueueServiceGetter } from "./ProgressQueueService";
@@ -12,6 +13,7 @@ import { MakeOnce } from "../lib/MakeOnce";
 export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> {
 	protected make(): ContentManager {
 		const cm = new ContentManager(
+			opt.timeout,
 			recover(),
 			IdFactoryGetter.get(),
 			ProgressQueueServiceGetter.get(),

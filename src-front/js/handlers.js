@@ -394,40 +394,6 @@ $("#skip-button").click(function() {
 	});
 });
 
-$("#skip-penalise-button").click(function() {
-	var adminPassword = $adminPasswordInput.val();
-
-	//no empty password
-	if (!adminPassword) {
-		main.clippyAgent.stop();
-		main.clippyAgent.speak("You need to give the admin password.");
-		main.clippyAgent.play("Searching");
-		return;
-	}
-
-	$.ajax({
-		url: "/api/skipAndPenalise",
-		type: "POST",
-		data: {
-			ajax: true,
-			password: adminPassword
-		}
-
-	}).done(function() {
-		main.clippyAgent.play("Congratulate");
-
-	}).fail(function(jqxhr, textStatus, err) {
-		main.clippyAgent.stop();
-
-		if (jqxhr.status >= 500 && jqxhr.status < 600) {
-			main.clippyAgent.speak("The server encountered an error trying to skip the current music. Check the console and contact the developer.");
-			console.error(jqxhr.responseText);
-		} else {
-			main.clippyAgent.speak(jqxhr.responseText);
-		}
-	});
-});
-
 $("#skip-ban-button").click(function() {
 	var adminPassword = $adminPasswordInput.val();
 

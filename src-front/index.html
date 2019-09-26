@@ -112,7 +112,10 @@
 							<p class="wordart">
 								<span class="title"></span>
 							</p>
-							<p class="nickname"></p>
+							<p>
+								<span class="nickname"></span>
+								<span class="duration"></span>
+							</p>
 						</div>
 					</div>
 				</div>
@@ -160,8 +163,6 @@
 							<fieldset>
 								<legend>Controls</legend>
 								<button id="skip-button" class="action">Skip Current Music</button>
-								<br>
-								<button id="skip-penalise-button" class="action">Skip Current Music + Put User to Back of Queue</button>
 								<br>
 								<button id="skip-ban-button" class="action">Skip Current Music + Ban User</button>
 							</fieldset>
@@ -211,7 +212,7 @@
 		<div id="templates">
 			<template id="bucket-container-template">
 				<fieldset class="bucket-container">
-					<legend class="nickname"></legend>
+					<legend class="timeAvailable" title="You can upload this much more music into this bucket."></legend>
 					<ol class="bucket"></ol>
 				</fieldset>
 			</template>
@@ -220,6 +221,9 @@
 				<li>
 					<span class="title"></span>
 					<button class="delete hidden" data-id="">Remove</button>
+					<br>
+					<span class="nickname"></span>
+					<span class="duration"></span>
 				</li>
 			</template>
 

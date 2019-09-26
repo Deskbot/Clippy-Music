@@ -3,33 +3,7 @@ import * as fs from "fs";
 import { Html5Entities } from "html-entities";
 import { URL } from "url";
 
-import * as opt from "../options";
-
-export function arrFirstMatch<T>(arr: T[], predicate: (elem: T) => boolean): T | undefined {
-	for (let e of arr) {
-		if (predicate(e)) return e;
-	}
-
-	return undefined;
-}
-
-export function arrShuffle<T>(arr: T[]): T[] {
-	let tmpItem, randIndex;
-
-	for (let i = 0; i < arr.length; i++) {
-		randIndex = Math.floor(Math.random() * arr.length);
-
-		tmpItem = arr[i];
-		arr[i] = arr[randIndex];
-		arr[randIndex] = tmpItem;
-	}
-
-	return arr;
-}
-
-export function arrSum(a: number[]): number {
-	return a.reduce((n, p) => n + p);
-}
+import * as opt from "../../options";
 
 export function asciiOnly(str: string): string {
 	return str.replace(/[^\x00-\x7F]/g, "");
@@ -48,7 +22,7 @@ export function cloneWithout<T extends object>(o: T, badAttrs: (keyof T)[]) {
 
 //based on alex030293's solution https://stackoverflow.com/questions/38485622/delete-folder-containing-files-node-js
 export function deleteDirRecursiveSync(path: string) {
-	if(fs.existsSync(path)) {
+	if (fs.existsSync(path)) {
 		fs.readdirSync(path).forEach(file => {
 			const curPath = path + "/" + file;
 
@@ -85,7 +59,7 @@ export function extractYtVideoId(s: string): string | undefined {
 
 	if (urlObj.hostname.includes("youtu.be")) { // shortened YouTube url
 		const pathParts = urlObj.pathname.split("/");
-		return arrFirstMatch(pathParts, (part) => part.length !== 0);
+		return pathParts.find(part => part.length !== 0);
 	} else {
 		const param = urlObj.searchParams.get("v");
 		if (param) return param;
@@ -117,6 +91,14 @@ export function mkdirSafelySync(path: string, mode: number) {
 
 export function randIntBetween(x: number, y: number): number { //can include x but not y. Integers only
 	return x + Math.floor(Math.random() * (y-x));
+}
+
+export function randInsert<T>(newItem: T, list: T[]) {
+	const targetIndex = randUpTo(list.length);
+	const itemsAfterNew = list.splice(targetIndex);
+	// list is modified to lose all items after new
+
+	list.push(newItem, ...itemsAfterNew);
 }
 
 export function randUpTo(n: number) {
@@ -203,12 +185,4 @@ export function ytTimeStrToSec(str: string): number {
 	else if (timeArr.length === 2) return parseInt(timeArr[0]) * 60 + parseInt(timeArr[1]);
 	else if (timeArr.length === 3) return parseInt(timeArr[0]) * 3600 + parseInt(timeArr[1]) * 60 + parseInt(timeArr[2]);
 	else throw `Unable to convert yt time, ${str}, to seconds.`;
-}
-
-export function zip<T,U>(a1: T[], a2: U[]): [T,U][] {
-	const a: [T,U][] = [];
-	for (let i = 0; i < Math.max(a1.length, a2.length); i++) {
-		a[i] = [a1[i], a2[i]];
-	}
-	return a;
 }

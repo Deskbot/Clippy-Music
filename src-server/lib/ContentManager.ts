@@ -6,29 +6,21 @@ import * as fs from "fs";
 
 import * as consts from "./consts";
 import * as debug from "./debug";
-import * as utils from "./utils";
+import * as utils from "./utils/utils";
 import * as opt from "../options";
 import * as time from "./time";
 
-import { ClippyQueue } from "./ClippyQueue";
 import { ContentType } from "../types/ContentType";
 import { downloadYtInfo, getFileDuration, YtData } from "./music";
 import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError } from "./errors";
-import { UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic, TitledMusic } from "../types/UploadData";
+import { UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic, TitledMusic, UploadData } from "../types/UploadData";
 import { IdFactory } from "./IdFactory";
 import { ItemData, CompleteMusic, CompletePicture } from "../types/ItemData";
 import { YtDownloader } from "./YtDownloader";
 import { UserRecord } from "./UserRecord";
 import { ProgressQueue } from "./ProgressQueue";
-
-interface BucketForPublic {
-	bucket: {
-		title: string,
-		id: number,
-	}[];
-	nickname: string;
-	userId: string;
-}
+import { BarringerQueue } from "./queue/BarringerQueue";
+import { PublicItemData } from "../types/PublicItemData";
 
 export interface SuspendedContentManager {
 	playQueue: any;
@@ -39,7 +31,7 @@ export interface SuspendedContentManager {
 
 export class ContentManager extends EventEmitter {
 	//data stores
-	private playQueue: ClippyQueue;
+	private playQueue: BarringerQueue;
 	private musicHashes: {
 		[hash: string]: number
 	} = {};
@@ -64,6 +56,7 @@ export class ContentManager extends EventEmitter {
 	private stop?: boolean;
 
 	constructor(
+		maxTimePerBucket: number,
 		startState: SuspendedContentManager | null,
 		idFactory: IdFactory,
 		progressQueue: ProgressQueue,
@@ -81,12 +74,12 @@ export class ContentManager extends EventEmitter {
 		if (startState) {
 			console.log("Using suspended content manager");
 
-			this.playQueue = new ClippyQueue(startState.playQueue);
+			this.playQueue = new BarringerQueue(maxTimePerBucket, startState.playQueue);
 			this.musicHashes = startState.hashes;
 			this.picHashes = startState.picHashes;
 			this.ytIds = startState.ytIds;
 		} else {
-			this.playQueue = new ClippyQueue();
+			this.playQueue = new BarringerQueue(maxTimePerBucket);
 		}
 	}
 
@@ -113,6 +106,24 @@ export class ContentManager extends EventEmitter {
 
 	addYtId(id: string) {
 		this.ytIds[id] = new Date().getTime();
+	}
+
+	private calcPlayableDuration(
+		actualFileDuration: number,
+		startTime: number | null | undefined,
+		endTime: number | null | undefined
+	): number {
+		const durationBasedOnStartAndFinish = time.clipTimeByStartAndEnd(
+			Math.floor(actualFileDuration),
+			startTime,
+			endTime
+		);
+
+		if (durationBasedOnStartAndFinish > opt.timeout) {
+			return opt.timeout;
+		}
+
+		return durationBasedOnStartAndFinish;
 	}
 
 	deleteContent(contentObj: ItemData) {
@@ -177,38 +188,37 @@ export class ContentManager extends EventEmitter {
 		if (itemData.pic.hash) delete this.picHashes[itemData.pic.hash];
 	}
 
-	getBucketsForPublic(): BucketForPublic[] {
-		let userId, bucketTitles;
-		let userIds = this.playQueue.getUsersByPosteriority();
-		let returnList: BucketForPublic[] = [];
+	getBucketsForPublic(): PublicItemData[][] {
+		const tooMuchDataInBuckets = this.playQueue.getBuckets();
+		const publicBuckets = [] as PublicItemData[][];
 
-		//map and filter
-		for (let i=0; i < userIds.length; i++) {
-			userId = userIds[i];
-			bucketTitles = this.playQueue.getTitlesFromUserBucket(userId);
+		for (const bucket of tooMuchDataInBuckets) {
+			const publicBucket = bucket.map(item => ({
+				duration: item.duration,
+				id: item.id,
+				nickname: this.userRecord.getNickname(item.userId),
+				title: item.music.title,
+				userId: item.userId,
+			}));
 
-			if (bucketTitles.length !== 0) {
-				returnList.push({
-					bucket: bucketTitles,
-					nickname: this.userRecord.getNickname(userId),
-					userId: userId,
-				});
-			}
+			publicBuckets.push(publicBucket);
 		}
 
-		return returnList;
+		return publicBuckets;
 	}
 
-	getCurrentlyPlaying() {
+	getCurrentlyPlaying(): PublicItemData | undefined {
 		if (this.currentlyPlaying) {
 			return {
+				duration: this.currentlyPlaying.duration,
+				id: this.currentlyPlaying.id,
 				nickname: this.userRecord.getNickname(this.currentlyPlaying.userId),
 				title: this.currentlyPlaying.music.title,
 				userId: this.currentlyPlaying.userId,
 			};
 		}
 
-		return null;
+		return undefined;
 	}
 
 	private async getDataToQueue(uplData: UploadDataWithId): Promise<UploadDataWithIdTitleDuration> {
@@ -223,7 +233,7 @@ export class ContentManager extends EventEmitter {
 				pic: {
 					...uplData.pic,
 				},
-				duration: time.clipTimeByStartAndEnd(Math.floor(duration), uplData.startTime, uplData.endTime),
+				duration: this.calcPlayableDuration(duration, uplData.startTime, uplData.endTime),
 			};
 
 			return uplDataWithDuration;
@@ -251,7 +261,7 @@ export class ContentManager extends EventEmitter {
 			return {
 				...uplData,
 				music: musicData,
-				duration: time.clipTimeByStartAndEnd(Math.floor(info.duration), uplData.startTime, uplData.endTime),
+				duration: this.calcPlayableDuration(info.duration, uplData.startTime, uplData.endTime),
 			};
 
 		} else {
@@ -323,10 +333,6 @@ export class ContentManager extends EventEmitter {
 		return consts.dirs.pic + this.idFactory.next();
 	}
 
-	penalise(id: string) {
-		this.playQueue.penalise(id);
-	}
-
 	picHashIsUnique(hash: number): boolean {
 		let lastPlayed = this.picHashes[hash];
 		return !lastPlayed || lastPlayed + opt.imageUniqueCoolOff * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
@@ -338,7 +344,7 @@ export class ContentManager extends EventEmitter {
 		const contentData = this.playQueue.next();
 		const that = this;
 
-		if (contentData === null) {
+		if (!contentData) {
 			this.currentlyPlaying = null;
 			this.emit("queue-empty");
 			return false;
@@ -360,8 +366,6 @@ export class ContentManager extends EventEmitter {
 
 		musicProc.on("close", (code, signal) => { // runs before next call to playNext
 			const secs = 1 + Math.ceil((Date.now() - timePlayedAt) / 1000); //seconds ran for, adds a little bit to prevent infinite <1 second content
-
-			that.playQueue.boostPosteriority(contentData.userId, secs);
 
 			that.stopPic();
 			that.deleteContent(contentData);
@@ -393,7 +397,7 @@ export class ContentManager extends EventEmitter {
 	}
 
 	purgeUser(uid: string) {
-		const itemList = this.playQueue.getUserBucket(uid);
+		const itemList = this.playQueue.getUserItems(uid);
 
 		if (itemList) itemList.forEach((itemData) => {
 			this.forget(itemData);
@@ -414,12 +418,12 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	remove(userId: string, contentId: number) {
-		const itemData = this.playQueue.getContent(userId, contentId);
+	remove(contentId: number) {
+		const itemData = this.playQueue.get(contentId);
 
 		if (itemData) {
 			this.deleteContent(itemData);
-			this.playQueue.remove(userId, itemData);
+			this.playQueue.remove(contentId);
 			this.forget(itemData);
 			this.emit("queue-update");
 

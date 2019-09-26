@@ -2,7 +2,7 @@ import * as cp from "child_process";
 import { Html5Entities } from "html-entities";
 import * as debug from "./debug";
 import * as opt from "../options";
-import * as utils from "./utils";
+import * as utils from "./utils/utils";
 import { DurationFindingError } from "./errors";
 
 export interface YtData {

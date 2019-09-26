@@ -209,6 +209,7 @@ var WebSocketHandler = (function() {
 
 			var $currentlyPlaying = $("#currently-playing");
 			var $currentNickname = $currentlyPlaying.find(".nickname");
+			var $title = $currentlyPlaying.find(".title");
 			var isMine = !data.current ? false : myId === data.current.userId;
 
 			if (isMine) {
@@ -217,18 +218,27 @@ var WebSocketHandler = (function() {
 				$currentNickname.removeClass("my-nickname");
 			}
 
-			var $title = $currentlyPlaying.find(".title");
-
 			if (data.current) {
 				$title.html(data.current.title);
 				$title.attr("data-text", utils.htmlEntityDecode(data.current.title));
+
+				$currentlyPlaying.find(".duration")
+					.html("[" + utils.formatSeconds(data.current.duration) + "]");
+
 				$currentNickname.html(data.current.nickname);
 
 				//get a random class, but always the same for the same title
-				var wordartClass = main.goodWordArt[digestString(data.current.title + data.current.nickname) % main.goodWordArt.length];
+				var wordartClass = main.goodWordArt[
+					digestString(data.current.title + data.current.nickname) % main.goodWordArt.length
+				];
 				//remove all classes because we don't know which word art it currently is, add back "wordart" then add the type of wordart
-				$currentlyPlaying.find(".wordart").removeClass().addClass("wordart").addClass(wordartClass);
+				$currentlyPlaying.find(".wordart")
+					.removeClass()
+					.addClass("wordart")
+					.addClass(wordartClass);
 			} else {
+				$currentlyPlaying.find(".duration").html("");
+				$currentlyPlaying.find(".nickname").html("");
 				$title.html("");
 				$title.attr("data-text", "");
 				$currentNickname.html("");
@@ -237,13 +247,13 @@ var WebSocketHandler = (function() {
 
 		var $queue = $("#queue");
 
-		utils.counterShiftResize($("#queue-section"), function () {
+		utils.counterShiftResize($("#queue-section"), function() {
 			//rest of queue
 			$queue.empty();
 
 			for (var i = 0; i < data.queue.length; i++) {
-				var item = data.queue[i]; //item contains a nickname and bucket
-				$queue.append(Queue.contentToBucketElem(item, myId));
+				var bucket = data.queue[i];
+				$queue.append(Queue.bucketToElem(bucket, myId, data.maxBucketTime));
 			}
 		});
 	};

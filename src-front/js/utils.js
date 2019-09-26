@@ -58,6 +58,21 @@ var utils = {
 		return parseInt(str);
 	},
 
+
+	formatSeconds: function(s) {
+		var hours = Math.floor(s / 3600);
+		var secsInHour = s % 3600;
+		var mins = Math.floor(secsInHour / 60);
+		var secs = s % 60;
+
+		var str;
+		str = hours > 0 ? hours + "h " : "";
+		str += mins > 0 ? mins + "m " : "";
+		str += secs + "s";
+
+		return str.trim();
+	},
+
 	shiftDownElemsBelow: function($elem, distance, condition) {
 		//only shift the later siblings of elem
 		var $laterSections = $elem.nextAll("section"); // don't include noscript tags

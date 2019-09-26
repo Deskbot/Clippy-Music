@@ -1,7 +1,9 @@
-import * as debug from "../lib/debug";
 import ws = require("ws");
-import { WebSocketHandler } from "../lib/WebSocketHandler";
 
+import * as debug from "../lib/debug";
+import * as opt from "../options";
+
+import { WebSocketHandler } from "../lib/WebSocketHandler";
 import { ContentServiceGetter } from "./ContentService";
 import { ProgressQueueServiceGetter } from "./ProgressQueueService";
 import { UserRecordGetter } from "./UserRecordService";
@@ -35,7 +37,7 @@ class Api {
 			const dataObj = JSON.parse(data);
 
 			if (dataObj.type === "delete-content") {
-				if (!ContentService.remove(id, dataObj.contentId)) {
+				if (!ContentService.remove(dataObj.contentId)) {
 					soc.send(JSON.stringify({
 						type: dataObj.type,
 						success: false,
@@ -124,9 +126,10 @@ class Api {
 
 	makeQueueMessage() {
 		return {
-			type: "queue",
 			current: ContentService.getCurrentlyPlaying(),
+			maxBucketTime: opt.timeout,
 			queue: ContentService.getBucketsForPublic(),
+			type: "queue",
 		};
 	}
 

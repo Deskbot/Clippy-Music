@@ -1,5 +1,5 @@
 const baseDir = "../../../build/";
-const utils = require(baseDir + "lib/utils.js");
+const utils = require(baseDir + "lib/utils/utils.js");
 
 const assert = require("assert").strict;
 
@@ -44,6 +44,36 @@ module.exports = {
 		assert(utils.looksLikeIpAddress("::127.0.0.1"));
 		assert(utils.looksLikeIpAddress(":ffff::127.0.0.1"));
 		assert(utils.looksLikeIpAddress(":ffff:1234:6564:45:127.0.0.1"));
+	},
+
+	random_insert_does_insert: () => {
+		let list = [];
+
+		const items = ["a", "b", "c"];
+
+		let expectedNumOfItemsInList = 0;
+
+		for (const item of items) {
+			utils.randInsert(item, list);
+			expectedNumOfItemsInList += 1;
+
+			assert(list.length === expectedNumOfItemsInList,
+				"The list has one more element than previously.");
+			assert(list.includes(item),
+				"The inserted item should be in the list."
+			);
+		}
+
+		// final sanity check
+
+		assert(list.length === items.length,
+			"The list has all of the correct number of elements.")
+
+		for (const item of items) {
+			assert(list.includes(item),
+				"All previously inserted items should be in the list."
+			);
+		}
 	},
 
 	timeCodeToSeconds: () => {

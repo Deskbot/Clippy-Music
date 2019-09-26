@@ -12,7 +12,7 @@ import { WebSocketService } from "./WebSocketService";
 import * as consts from "../lib/consts";
 import * as debug from "../lib/debug";
 import * as opt from "../options";
-import * as utils from "../lib/utils";
+import * as utils from "../lib/utils/utils";
 
 import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingError } from "../lib/errors";
 import { UploadData, UrlPic, NoPic, FilePic, FileMusic, UrlMusic, UploadDataWithId } from "../types/UploadData";
@@ -395,7 +395,7 @@ app.use(getFormMiddleware);
 
 //POST variable: content-id
 app.post("/api/queue/remove", (req: RequestWithFormData, res) => {
-	if (ContentService.remove(req.ip, parseInt(req.fields["content-id"] as string))) {
+	if (ContentService.remove(parseInt(req.fields["content-id"] as string))) {
 		if (noRedirect(req)) res.status(200).end("Success\n");
 		else				 res.redirect("/");
 	} else {
@@ -507,17 +507,6 @@ app.post("/api/ban/remove", adminCredentialsRequired, (req: RequestWithFormData,
 //POST variable: password
 app.post("/api/skip", adminCredentialsRequired, (req, res) => {
 	ContentService.killCurrent();
-	res.status(200).end("Success\n");
-});
-
-//POST variable: password
-app.post("/api/skipAndPenalise", adminCredentialsRequired, (req, res) => {
-	if (ContentService.currentlyPlaying) {
-		ContentService.penalise(ContentService.currentlyPlaying.userId);
-	}
-
-	ContentService.killCurrent();
-
 	res.status(200).end("Success\n");
 });
 

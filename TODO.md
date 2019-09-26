@@ -6,13 +6,9 @@ This list is in a rough order of priority.
 List
 ----
 
-* Barringer's Bucketing system
-	* add bucketing type to options
-	* integrate the new bucketing object in every location with an if to decide which queue
-	* send bucket type to front end
-	* render new kind of bucketing on the front
-	* refactor to not use ifs everywhere
-	* when using ClippyQueue see if we can avoid getting the duration before playing with or just don't count the seconds actually played
+* nothing gets suspended
+	* do ids continue after suspension?
+* does streamYtOverDur work still?
 * add eog command to options and its arguments
 	* rename existing path options with "???command"
 * Reddit support
@@ -22,9 +18,12 @@ List
 	* youtube-dl does it
 	* mpv can stream it
 * Basically every other youtube-dl source including bandcamp and archive.org
+* make a user randomly insert items only after all of their other items
+* improve the layout of title, username, and duration
 * Improve the way clippy reconnects the websocket, maybe do it as soon as the tab regains focus and update the queue data at the same time.
 * Is the behaviour of forgetting an item when it is removed from the queue correct?
 * Change the "Progress" label to "Upload Progress"
+* increase the title character limit somewhat
 * Silent looping Video overlay
 	* Then rename image/pic variables to overlay everywhere
 	* These need making consistent anyway
@@ -46,6 +45,9 @@ List
 
 ---
 
+* put user nickname in ItemData to remove need to refetch it
+* convert tests to TS
+* use pick, exclude etc to corretly type some of the utils
 * FileUploadError probably only needs to take file paths and not files
 * Make internal errors that aren't user errors get put in the terminal
 * Only attach user ids to items belonging to the user the queue is sent to
