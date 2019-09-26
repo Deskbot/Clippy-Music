@@ -2,6 +2,14 @@ export function arrSum(a: number[]): number {
     return a.reduce((n, p) => n + p);
 }
 
+export function allTrue(bools: boolean[]): boolean {
+    for (const bool of bools) {
+        if (bool === false) return false;
+    }
+
+    return true;
+}
+
 export function removeFirst<T>(arr: T[], predicate: (elem: T) => boolean): boolean {
     for (let i = 0; i < arr.length; i++) {
         if (predicate(arr[i])) {

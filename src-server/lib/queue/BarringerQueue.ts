@@ -3,14 +3,24 @@ import * as utils from "../utils/utils";
 
 import { ItemData } from "../../types/ItemData";
 
+export interface SuspendedBarringerQueue {
+	buckets: ItemData[][];
+}
+
+export function isSuspendedBarringerQueue(obj: any): obj is SuspendedBarringerQueue {
+	return "buckets" in obj
+		&& Array.isArray(obj.buckets)
+		&& arrayUtils.allTrue(
+			obj.buckets.map((bucket: any) => Array.isArray(bucket))
+		);
+}
+
 export class BarringerQueue {
 	private buckets: ItemData[][];
 	private maxTimePerBucket: number;
 
-	constructor(maxTimePerBucket: number, buckets?: {
-		queueObj: ItemData[][]
-	}) {
-		this.buckets = buckets && buckets.queueObj ? buckets.queueObj : [];
+	constructor(maxTimePerBucket: number, queueObj?: SuspendedBarringerQueue) {
+		this.buckets = queueObj && queueObj.buckets ? queueObj.buckets : [];
 		this.maxTimePerBucket = maxTimePerBucket;
 	}
 

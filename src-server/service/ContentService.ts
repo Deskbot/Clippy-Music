@@ -6,15 +6,21 @@ import * as opt from "../options";
 import { IdFactoryGetter } from "./IdFactoryService";
 import { ProgressQueueServiceGetter } from "./ProgressQueueService";
 import { UserRecordGetter } from "./UserRecordService";
-import { ContentManager, SuspendedContentManager } from "../lib/ContentManager";
+import { ContentManager, SuspendedContentManager, isSuspendedContentManager } from "../lib/ContentManager";
 import { YtDownloader } from "../lib/YtDownloader";
 import { MakeOnce } from "../lib/MakeOnce";
 
 export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> {
 	protected make(): ContentManager {
+		const recoveredContentManager = recover();
+
+		if (recoveredContentManager != null && !isSuspendedContentManager(recoveredContentManager)) {
+			throw new Error("The suspended content manager is not of a valid format. Consider restarting the program with the --clean option.");
+		}
+
 		const cm = new ContentManager(
 			opt.timeout,
-			recover(),
+			recoveredContentManager,
 			IdFactoryGetter.get(),
 			ProgressQueueServiceGetter.get(),
 			UserRecordGetter.get(),

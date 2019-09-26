@@ -19,7 +19,7 @@ import { ItemData, CompleteMusic, CompletePicture } from "../types/ItemData";
 import { YtDownloader } from "./YtDownloader";
 import { UserRecord } from "./UserRecord";
 import { ProgressQueue } from "./ProgressQueue";
-import { BarringerQueue } from "./queue/BarringerQueue";
+import { BarringerQueue, isSuspendedBarringerQueue } from "./queue/BarringerQueue";
 import { PublicItemData } from "../types/PublicItemData";
 
 export interface SuspendedContentManager {
@@ -27,6 +27,14 @@ export interface SuspendedContentManager {
 	hashes: any;
 	picHashes: any;
 	ytIds: any;
+}
+
+export function isSuspendedContentManager(obj: any): obj is SuspendedContentManager {
+	return "playQueue" in obj
+		&& isSuspendedBarringerQueue(obj.playQueue)
+		&& "hashes" in obj
+		&& "picHashes" in obj
+		&& "ytIds" in obj;
 }
 
 export class ContentManager extends EventEmitter {
@@ -65,7 +73,6 @@ export class ContentManager extends EventEmitter {
 	) {
 		super();
 
-		//injected objects
 		this.idFactory = idFactory;
 		this.progressQueue = progressQueue;
 		this.userRecord = userRecord;

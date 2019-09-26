@@ -6,8 +6,6 @@ This list is in a rough order of priority.
 List
 ----
 
-* nothing gets suspended
-	* do ids continue after suspension?
 * does streamYtOverDur work still?
 * add eog command to options and its arguments
 	* rename existing path options with "???command"
