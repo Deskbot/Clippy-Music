@@ -13,6 +13,7 @@ import * as UserRecordService from "./service/UserRecordService";
 import { PasswordService } from "./service/PasswordService";
 import { ContentServiceGetter, startPlayingContent } from "./service/ContentService";
 import { startHttpService } from "./service/HttpService";
+import { startWebSocketService } from "./service/WebSocketService";
 
 // prompt settings
 prompt.colors = false;
@@ -27,6 +28,7 @@ main();
 function main() {
 	handleArguments().then(() => {
 		setUpDirs();
+		startWebSocketService();
 		startHttpService();
 		setUpControls();
 		startPlayingContent();
@@ -72,7 +74,6 @@ function handleArguments(): Promise<void[]> {
 
 		if (arg === "-c" || arg === "--clean") {
 			console.log("Deleting any suspended user record, content manager, or log file.");
-
 			utils.deleteDirRecursiveSync(opt.storageDir);
 
 		} else if (arg === "-d" || arg === "--debug") {
@@ -90,16 +91,15 @@ function handleArguments(): Promise<void[]> {
 }
 
 //get admin password if needed
-function setUpAdmin(): Promise<void> {
-	return chooseAdminPassword()
-	.then(pass => {
+async function setUpAdmin(): Promise<void> {
+	try {
+		const pass = await chooseAdminPassword();
 		PasswordService.set(pass);
-	})
-	.catch(err => {
+	} catch (err) {
 		console.error("Unable to get admin password");
 		console.error(err);
 		process.exit(1);
-	});
+	}
 }
 
 //set up dirs, if they don't already exist

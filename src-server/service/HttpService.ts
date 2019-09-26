@@ -17,10 +17,6 @@ import * as utils from "../lib/utils/utils";
 import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingError } from "../lib/errors";
 import { UploadData, UrlPic, NoPic, FilePic, FileMusic, UrlMusic, UploadDataWithId } from "../types/UploadData";
 
-const ContentService = ContentServiceGetter.get();
-const ProgressQueueService = ProgressQueueServiceGetter.get();
-const UserRecordService = UserRecordGetter.get();
-
 type RequestWithFormData = express.Request & {
 	fields: formidable.Fields;
 	files: formidable.Files;
@@ -306,6 +302,7 @@ app.get("/api/wsport", (req, res) => {
 	* end-time
  */
 app.post("/api/queue/add", recordUserMiddleware, (req, res) => {
+	const ProgressQueueService = ProgressQueueServiceGetter.get();
 	const contentId = IdFactoryGetter.get().next();
 
 	handlePotentialBan(req.ip) //assumes ip address is userId
@@ -395,6 +392,8 @@ app.use(getFormMiddleware);
 
 //POST variable: content-id
 app.post("/api/queue/remove", (req: RequestWithFormData, res) => {
+	const ContentService = ContentServiceGetter.get();
+
 	if (ContentService.remove(parseInt(req.fields["content-id"] as string))) {
 		if (noRedirect(req)) res.status(200).end("Success\n");
 		else				 res.redirect("/");
@@ -405,6 +404,8 @@ app.post("/api/queue/remove", (req: RequestWithFormData, res) => {
 
 //POST variable: content-id
 app.post("/api/download/cancel", (req: RequestWithFormData, res) => {
+	const ProgressQueueService = ProgressQueueServiceGetter.get();
+
 	if (ProgressQueueService.cancel(req.ip, parseInt(req.fields["content-id"] as string))) {
 		if (noRedirect(req)) res.status(200).end("Success\n");
 		else				 res.redirect("/");
@@ -415,6 +416,8 @@ app.post("/api/download/cancel", (req: RequestWithFormData, res) => {
 
 //POST variable: nickname
 app.post("/api/nickname/set", recordUserMiddleware, (req: RequestWithFormData, res) => {
+	const UserRecordService = UserRecordGetter.get();
+
 	const nickname = utils.sanitiseNickname(req.fields.nickname as string);
 
 	if (nickname.length === 0) {
@@ -437,6 +440,9 @@ app.post("/api/nickname/set", recordUserMiddleware, (req: RequestWithFormData, r
 
 //POST variable: password, id, nickname
 app.post("/api/ban/add", adminCredentialsRequired, (req: RequestWithFormData, res) => {
+	const ContentService = ContentServiceGetter.get();
+	const UserRecordService = UserRecordGetter.get();
+
 	if (req.fields.id) {
 		if (!UserRecordService.isUser(req.fields.id as string)) {
 			res.status(400).end("That user doesn't exist.\n");
@@ -473,6 +479,8 @@ app.post("/api/ban/add", adminCredentialsRequired, (req: RequestWithFormData, re
 
 //POST variable: password, id
 app.post("/api/ban/remove", adminCredentialsRequired, (req: RequestWithFormData, res) => {
+	const UserRecordService = UserRecordGetter.get();
+
 	if (req.fields.id) {
 		if (!UserRecordService.isUser(req.fields.id as string)) {
 			res.status(400).end("That user doesn't exist.\n");
@@ -506,12 +514,17 @@ app.post("/api/ban/remove", adminCredentialsRequired, (req: RequestWithFormData,
 
 //POST variable: password
 app.post("/api/skip", adminCredentialsRequired, (req, res) => {
+	const ContentService = ContentServiceGetter.get();
+
 	ContentService.killCurrent();
 	res.status(200).end("Success\n");
 });
 
 //POST variable: password
 app.post("/api/skipAndBan", adminCredentialsRequired, (req, res) => {
+	const ContentService = ContentServiceGetter.get();
+	const UserRecordService = UserRecordGetter.get();
+
 	if (ContentService.currentlyPlaying) {
 		const id = ContentService.currentlyPlaying.userId;
 		UserRecordService.addBan(id);
