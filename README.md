@@ -27,6 +27,7 @@ All available from the links given. It's also likely you can get them from your 
 
 * [curl](https://curl.haxx.se/)
 * [eog](https://github.com/GNOME/eog)
+* [ffprobe](https://ffmpeg.org/download.html)
 * [mpv](https://mpv.io/)
 * mv
 * [youtube-dl](https://rg3.github.io/youtube-dl/) Especially important that you have the latest version.
