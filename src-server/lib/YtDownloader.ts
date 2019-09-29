@@ -45,7 +45,7 @@ export class YtDownloader {
 	}
 
 	download(vid: string, destination: string): [Promise<void>, cp.ChildProcess] {
-		let proc = cp.spawn(opt.youtubeDlPath, ["--no-playlist", vid, "-o", destination]);
+		let proc = cp.spawn(opt.youtubeDlCommand, ["--no-playlist", vid, "-o", destination]);
 
 		const prom = new Promise<void>((resolve, reject) => {
 			let errMessage = "";

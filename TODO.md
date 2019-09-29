@@ -6,8 +6,6 @@ This list is in a rough order of priority.
 List
 ----
 
-* add eog command to options and its arguments
-	* rename existing path options with "???command"
 * Reddit support
 	* youtube-dl does it
 	* mpv can stream it but it takes ages

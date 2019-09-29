@@ -441,7 +441,7 @@ export class ContentManager extends EventEmitter {
 	}
 
 	startMusic(path: string, duration: number, startTime: number | null | undefined, endTime: number | null | undefined) {
-		const args = [duration + "s", opt.mpvPath, ...opt.mpvArgs, "--quiet", path];
+		const args = [duration + "s", opt.mpvCommand, ...opt.mpvArgs, "--quiet", path];
 
 		if (startTime) {
 			args.push("--start");
@@ -465,7 +465,7 @@ export class ContentManager extends EventEmitter {
 	}
 
 	startPic(path: string, duration: number) {
-		this.runningPicProc = cp.spawn("timeout", [duration + "s", opt.imageProgramPath, path, ...opt.imageProgramArgs]);
+		this.runningPicProc = cp.spawn("timeout", [duration + "s", opt.showImageCommand, path, ...opt.showImageArgs]);
 	}
 
 	stopPic() {

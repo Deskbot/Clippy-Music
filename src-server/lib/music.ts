@@ -20,7 +20,7 @@ function getFFProbeFormatDataContainingDuration(filePath: string): Promise<strin
 	return new Promise((resolve, reject) => {
 		// -v error (high logging)
 		// -show_entries format=duration (get the duration data)
-		const proc = cp.spawn(opt.ffprobePath, ["-v", "error", "-show_entries", "format=duration", filePath]);
+		const proc = cp.spawn(opt.ffprobeCommand, ["-v", "error", "-show_entries", "format=duration", filePath]);
 
 		let processOutput = "";
 		let processErrorMessage = "";
@@ -63,7 +63,7 @@ export function getFileDuration(filePath: string) {
 
 export function downloadYtInfo(urlOrId: string): Promise<YtData> {
 	return new Promise(function (resolve, reject) {
-		let infoProc = cp.spawn(opt.youtubeDlPath, ["--no-playlist", "--get-title", "--get-duration", urlOrId]);
+		let infoProc = cp.spawn(opt.youtubeDlCommand, ["--no-playlist", "--get-title", "--get-duration", urlOrId]);
 		let rawData = "";
 		let rawError = "";
 
