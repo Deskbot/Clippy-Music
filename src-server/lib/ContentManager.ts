@@ -11,7 +11,7 @@ import * as opt from "../options";
 import * as time from "./time";
 
 import { ContentType } from "../types/ContentType";
-import { downloadYtInfo, getFileDuration, YtData } from "./music";
+import { getMusicInfoByUrl, getFileDuration, UrlMusicData } from "./music";
 import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError } from "./errors";
 import { UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic, TitledMusic, UploadData } from "../types/UploadData";
 import { IdFactory } from "./IdFactory";
@@ -247,10 +247,10 @@ export class ContentManager extends EventEmitter {
 		}
 
 		if (this.musicPathIsUnique(uplData.music.path)) {
-			let info: YtData;
+			let info: UrlMusicData;
 
 			try {
-				info = await downloadYtInfo(uplData.music.path);
+				info = await getMusicInfoByUrl(uplData.music.path);
 			} catch (err) {
 				debug.error(err);
 				throw new YTError(`I could not find the video requested (${uplData.music.path}). Is the URL correct?`);

@@ -5,7 +5,7 @@ import * as opt from "../options";
 import * as utils from "./utils/utils";
 import { DurationFindingError } from "./errors";
 
-export interface YtData {
+export interface UrlMusicData {
 	title: string,
 	duration: number,
 }
@@ -61,7 +61,7 @@ export function getFileDuration(filePath: string) {
 	});
 }
 
-export function downloadYtInfo(urlOrId: string): Promise<YtData> {
+export function getMusicInfoByUrl(urlOrId: string): Promise<UrlMusicData> {
 	return new Promise(function (resolve, reject) {
 		let infoProc = cp.spawn(opt.youtubeDlCommand, ["--no-playlist", "--get-title", "--get-duration", urlOrId]);
 		let rawData = "";
