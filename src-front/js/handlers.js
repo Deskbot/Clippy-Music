@@ -85,14 +85,7 @@ $uploadForm.submit(function(e) {
 
 	//no music file
 	if (!utils.inputHasFile(musicInputElem)) {
-		if (musicUrl) {
-			if (!utils.isYouTubeUrl(musicUrl)) {
-				main.clippyAgent.stop();
-				main.clippyAgent.speak("Music URL given is not a YouTube link.");
-				main.clippyAgent.play("CheckingSomething");
-				return false;
-			}
-		} else { //no music
+		if (!musicUrl) {
 			main.clippyAgent.stop();
 			main.clippyAgent.speak("No music chosen for upload.");
 			main.clippyAgent.play("Searching");

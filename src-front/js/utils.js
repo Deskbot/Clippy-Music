@@ -44,11 +44,6 @@ var utils = {
 		return dom.files && dom.files.length > 0;
 	},
 
-	isYouTubeUrl: function(url) {
-		return url.includes("youtube.com/watch")
-			|| url.includes("youtu.be");
-	},
-
 	myId: function() {
 		return cookie.read("id");
 	},
