@@ -155,8 +155,8 @@ export function timeCodeToSeconds(s: string): number {
 
 //altered version of https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable
 export function toShortSizeString(fileSizeInBytes: number): string {
-	var i = -1;
-	var byteUnits = ["k", "m", " g", " t", "p", "e", "z", "y"];
+	let i = -1;
+	const byteUnits = ["k", "m", " g", " t", "p", "e", "z", "y"];
 	do {
 		fileSizeInBytes = fileSizeInBytes / 1024;
 		i++;
@@ -165,11 +165,14 @@ export function toShortSizeString(fileSizeInBytes: number): string {
 	return Math.max(fileSizeInBytes, 0.1).toFixed(1) + byteUnits[i];
 }
 
-export function ytTimeStrToSec(str: string): number {
-	let timeArr = str.split(":");
+export function ytDlTimeStrToSec(str: string): number {
+	const timeArr = str.split(":");
 
-	if (timeArr.length === 1)	  return parseInt(str);
-	else if (timeArr.length === 2) return parseInt(timeArr[0]) * 60 + parseInt(timeArr[1]);
-	else if (timeArr.length === 3) return parseInt(timeArr[0]) * 3600 + parseInt(timeArr[1]) * 60 + parseInt(timeArr[2]);
-	else throw `Unable to convert yt time, ${str}, to seconds.`;
+	switch (timeArr.length) {
+		case 1: return parseInt(str);
+		case 2: return parseInt(timeArr[0]) * 60 + parseInt(timeArr[1]);
+		case 3: return parseInt(timeArr[0]) * 3600 + parseInt(timeArr[1]) * 60 + parseInt(timeArr[2]);
+	}
+
+	throw new Error(`Unable to convert yt-dl time, ${str}, to seconds.`);
 }

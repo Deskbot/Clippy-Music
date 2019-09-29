@@ -6,8 +6,10 @@ import * as utils from "./utils/utils";
 import { DurationFindingError } from "./errors";
 
 export interface UrlMusicData {
-	title: string,
 	duration: number,
+	id: string,
+	hostname: string,
+	title: string,
 }
 
 /**
@@ -61,9 +63,15 @@ export function getFileDuration(filePath: string) {
 	});
 }
 
-export function getMusicInfoByUrl(urlOrId: string): Promise<UrlMusicData> {
+export function getMusicInfoByUrl(url: string): Promise<UrlMusicData> {
 	return new Promise(function (resolve, reject) {
-		let infoProc = cp.spawn(opt.youtubeDlCommand, ["--no-playlist", "--get-title", "--get-duration", urlOrId]);
+		const infoProc = cp.spawn(opt.youtubeDlCommand, [
+			"--no-playlist",
+			"--get-title",
+			"--get-id",
+			"--get-duration",
+			url
+		]);
 		let rawData = "";
 		let rawError = "";
 
@@ -76,11 +84,17 @@ export function getMusicInfoByUrl(urlOrId: string): Promise<UrlMusicData> {
 		infoProc.on("close", function (code, signal) {
 			debug.error("yt-dl info getting error message:", rawError);
 
+			const { hostname } = new URL(url);
+
 			if (code === 0) {
-				let dataArr = rawData.split("\n");
+				// the order of data array is independent of the argument order to youtube-dl
+				const dataArr = rawData.split("\n");
+
 				return resolve({
+					duration: utils.ytDlTimeStrToSec(dataArr[2]),
+					id: dataArr[1],
+					hostname,
 					title: new Html5Entities().encode(dataArr[0]),
-					duration: utils.ytTimeStrToSec(dataArr[1]),
 				});
 			}
 

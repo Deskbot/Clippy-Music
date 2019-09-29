@@ -6,12 +6,8 @@ This list is in a rough order of priority.
 List
 ----
 
-* Reddit support
-	* youtube-dl does it
-	* mpv can stream it but it takes ages
-* Vimeo support
-	* youtube-dl does it
-	* mpv can stream it
+* support everything that youtube-dl does
+	* an invalid url kills the whole thing
 * Basically every other youtube-dl source including bandcamp and archive.org
 * make a user randomly insert items only after all of their other items
 * improve the layout of title, username, and duration
