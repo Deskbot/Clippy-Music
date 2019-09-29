@@ -80,7 +80,6 @@ List
 * Remove null from codebase
 * Truncate file names before sending the files to the server
 * Use exponential form for numbers in default_options
-* both cancel and dismiss show when there is a downlod error from youtube
 * Add unit tests
 	* Worth doing before refactors
 * Add integration tests

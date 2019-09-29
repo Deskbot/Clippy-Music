@@ -50,15 +50,12 @@ var DlList = (function() {
 			this.showHideContainer(main.dlMap);
 		},
 
-		showCancelButton: function showCancellable($elem) {
-			$elem.find(".cancel").removeClass("hidden");
-		},
-
 		showContainer: function showContainer() {
 			$dlListContainer.removeClass("hidden");
 		},
 
 		showError: function showError($li) {
+			$li.children(".cancel").addClass("hidden");
 			$li.children(".dismiss").removeClass("hidden");
 
 			// change block colour; it's the main error indicator

@@ -27,7 +27,7 @@ var WebSocketHandler = (function() {
 			console.log("WebSocket data received", data);
 
 			var responseMap = {
-				"banned":	(function() { return this.handleBanned(data); }.bind(this)),
+				"banned":	 (function() { return this.handleBanned(data); }.bind(this)),
 				"dl-delete": (function() { return this.handleDlDelete(data.message); }.bind(this)),
 				"dl-error":  (function() { return this.handleDlError(data); }.bind(this)),
 				"dl-list":   (function() { return this.handleDlList(data.message); }.bind(this)),
