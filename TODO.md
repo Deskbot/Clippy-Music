@@ -6,7 +6,6 @@ This list is in a rough order of priority.
 List
 ----
 
-* does streamYtOverDur work still?
 * add eog command to options and its arguments
 	* rename existing path options with "???command"
 * Reddit support
@@ -22,6 +21,7 @@ List
 * Is the behaviour of forgetting an item when it is removed from the queue correct?
 * Change the "Progress" label to "Upload Progress"
 * increase the title character limit somewhat
+* does streamYtOverDur work still?
 * Silent looping Video overlay
 	* Then rename image/pic variables to overlay everywhere
 	* These need making consistent anyway
