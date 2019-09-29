@@ -246,18 +246,14 @@ export class ContentManager extends EventEmitter {
 			return uplDataWithDuration;
 		}
 
-		const ytId = uplData.music.ytId = utils.extractYtVideoId(uplData.music.path);
-
-		if (ytId === undefined) throw new Error("youtube id is undefined");
-
-		if (this.ytIdIsUnique(ytId)) {
+		if (this.musicPathIsUnique(uplData.music.path)) {
 			let info: YtData;
 
 			try {
 				info = await downloadYtInfo(uplData.music.path);
 			} catch (err) {
 				debug.error(err);
-				throw new YTError(`I could not find the YouTube video requested (${ytId}). Is the URL correct?`);
+				throw new YTError(`I could not find the video requested (${uplData.music.path}). Is the URL correct?`);
 			}
 
 			const musicData = {
@@ -320,7 +316,7 @@ export class ContentManager extends EventEmitter {
 			return false;
 		}
 
-		if (music.ytId !== undefined && !this.ytIdIsUnique(music.ytId)) {
+		if (music.ytId !== undefined && !this.musicPathIsUnique(music.ytId)) {
 			return false;
 		}
 
@@ -613,7 +609,7 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	ytIdIsUnique(id: string): boolean {
+	musicPathIsUnique(id: string): boolean {
 		let lastPlayed = this.ytIds[id];
 		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff * 1000 < new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
 	}

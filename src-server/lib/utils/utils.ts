@@ -54,19 +54,6 @@ export function deleteFileIfExistsSync(dir: string) {
 
 export function doNothing() {}
 
-export function extractYtVideoId(s: string): string | undefined {
-	const urlObj = new URL(s);
-
-	if (urlObj.hostname.includes("youtu.be")) { // shortened YouTube url
-		const pathParts = urlObj.pathname.split("/");
-		return pathParts.find(part => part.length !== 0);
-	} else {
-		const param = urlObj.searchParams.get("v");
-		if (param) return param;
-		return undefined;
-	}
-}
-
 export function fileHash(path: string): Promise<number> {
 	return new Promise((resolve, reject) => {
 		fs.readFile(path, (err, data) => {
