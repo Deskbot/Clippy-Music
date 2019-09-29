@@ -13,7 +13,7 @@ import * as time from "./time";
 import { ContentType } from "../types/ContentType";
 import { getMusicInfoByUrl, getFileDuration, UrlMusicData } from "./music";
 import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError } from "./errors";
-import { UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic, TitledMusic, UploadData } from "../types/UploadData";
+import { UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic, TitledMusic } from "../types/UploadData";
 import { IdFactory } from "./IdFactory";
 import { ItemData, CompleteMusic, CompletePicture } from "../types/ItemData";
 import { YtDownloader } from "./YtDownloader";
@@ -46,8 +46,8 @@ export class ContentManager extends EventEmitter {
 	private picHashes: {
 		[hash: string]: number
 	} = {};
-	private ytIds: {
-		[hash: string]: number
+	private musicUrlRecord: {
+		[uniqueId: string]: number
 	} = {};
 
 	//injected objects
@@ -84,7 +84,7 @@ export class ContentManager extends EventEmitter {
 			this.playQueue = new BarringerQueue(maxTimePerBucket, startState.playQueue);
 			this.musicHashes = startState.hashes;
 			this.picHashes = startState.picHashes;
-			this.ytIds = startState.ytIds;
+			this.musicUrlRecord = startState.ytIds;
 		} else {
 			this.playQueue = new BarringerQueue(maxTimePerBucket);
 		}
@@ -112,7 +112,7 @@ export class ContentManager extends EventEmitter {
 	}
 
 	addYtId(id: string) {
-		this.ytIds[id] = new Date().getTime();
+		this.musicUrlRecord[id] = new Date().getTime();
 	}
 
 	private calcPlayableDuration(
@@ -190,7 +190,7 @@ export class ContentManager extends EventEmitter {
 	}
 
 	forget(itemData: ItemData) {
-		if (itemData.music.ytId) delete this.ytIds[itemData.music.ytId];
+		if (itemData.music.ytId) delete this.musicUrlRecord[itemData.music.ytId];
 		if (itemData.music.hash) delete this.musicHashes[itemData.music.hash];
 		if (itemData.pic.hash) delete this.picHashes[itemData.pic.hash];
 	}
@@ -246,19 +246,19 @@ export class ContentManager extends EventEmitter {
 			return uplDataWithDuration;
 		}
 
-		if (this.musicPathIsUnique(uplData.music.path)) {
-			let info: UrlMusicData;
+		let info: UrlMusicData;
 
-			try {
-				info = await getMusicInfoByUrl(uplData.music.path);
-			} catch (err) {
-				debug.error(err);
-				throw new YTError(`I could not find the video requested (${uplData.music.path}). Is the URL correct?`);
-			}
+		try {
+			info = await getMusicInfoByUrl(uplData.music.path);
+		} catch (err) {
+			debug.error(err);
+			throw new YTError(`I could not find the video requested (${uplData.music.path}). Is the URL correct?`);
+		}
 
+		if (this.musicUrlIsUnique(info.uniqueUrlId)) {
 			const musicData = {
 				...uplData.music,
-				title: info.title,
+				title: info.title
 			};
 
 			return {
@@ -316,7 +316,7 @@ export class ContentManager extends EventEmitter {
 			return false;
 		}
 
-		if (music.ytId !== undefined && !this.musicPathIsUnique(music.ytId)) {
+		if (music.ytId !== undefined && !this.musicUrlIsUnique(music.ytId)) {
 			return false;
 		}
 
@@ -476,7 +476,7 @@ export class ContentManager extends EventEmitter {
 			playQueue: this.playQueue, //luckily this is jsonable
 			hashes: this.musicHashes,
 			picHashes: this.picHashes,
-			ytIds: this.ytIds,
+			ytIds: this.musicUrlRecord,
 		});
 	}
 
@@ -609,8 +609,11 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	musicPathIsUnique(id: string): boolean {
-		let lastPlayed = this.ytIds[id];
-		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff * 1000 < new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
+	private musicUrlIsUnique(uniqueUrlId: string): boolean {
+		const lastPlayed = this.musicUrlRecord[uniqueUrlId];
+
+		// never played
+		// or the current time is after the cooloff period
+		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff * 1000 < new Date().getTime();
 	}
 }

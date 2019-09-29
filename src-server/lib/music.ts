@@ -7,8 +7,7 @@ import { DurationFindingError } from "./errors";
 
 export interface UrlMusicData {
 	duration: number,
-	id: string,
-	hostname: string,
+	uniqueUrlId: string,
 	title: string,
 }
 
@@ -64,7 +63,7 @@ export function getFileDuration(filePath: string) {
 }
 
 export function getMusicInfoByUrl(url: string): Promise<UrlMusicData> {
-	return new Promise(function (resolve, reject) {
+	return new Promise((resolve, reject) => {
 		const infoProc = cp.spawn(opt.youtubeDlCommand, [
 			"--no-playlist",
 			"--get-title",
@@ -75,13 +74,13 @@ export function getMusicInfoByUrl(url: string): Promise<UrlMusicData> {
 		let rawData = "";
 		let rawError = "";
 
-		infoProc.stdout.on("data", function (chunk) {
+		infoProc.stdout.on("data", (chunk) => {
 			rawData += chunk;
 		});
-		infoProc.on("error", function (message) {
+		infoProc.on("error", (message) => {
 			rawError += message;
 		});
-		infoProc.on("close", function (code, signal) {
+		infoProc.on("close", (code, signal) => {
 			debug.error("yt-dl info getting error message:", rawError);
 
 			const { hostname } = new URL(url);
@@ -92,13 +91,20 @@ export function getMusicInfoByUrl(url: string): Promise<UrlMusicData> {
 
 				return resolve({
 					duration: utils.ytDlTimeStrToSec(dataArr[2]),
-					id: dataArr[1],
-					hostname,
 					title: new Html5Entities().encode(dataArr[0]),
+					uniqueUrlId: uniqueUrlMusicIdentifier(hostname, dataArr[1]),
 				});
 			}
 
 			return reject(rawError);
 		});
 	});
+}
+
+/**
+ * Creates an identifier for music obtained by url that is unique within this program.
+ */
+function uniqueUrlMusicIdentifier(hostname: string, idAtTheSite: string) {
+	// hostname should not end with a space
+	return hostname + " " + idAtTheSite.trimLeft();
 }
