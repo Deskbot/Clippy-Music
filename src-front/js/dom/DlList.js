@@ -50,6 +50,10 @@ var DlList = (function() {
 			this.showHideContainer(main.dlMap);
 		},
 
+		showCancelButton: function showCancellable($elem) {
+			$elem.find(".cancel").removeClass("hidden");
+		},
+
 		showContainer: function showContainer() {
 			$dlListContainer.removeClass("hidden");
 		},
