@@ -6,7 +6,7 @@
 		"noImplicitReturns": true,
 		"outDir": "./build",
 		"sourceMap": true,
-		"sourceRoot": "../src-front",
+		"sourceRoot": "../src-server",
 		"strictNullChecks": true,
 		"strictPropertyInitialization": true,
 		"target": "ES2017",
