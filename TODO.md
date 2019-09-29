@@ -7,7 +7,7 @@ List
 ----
 
 * support everything that youtube-dl does
-	* an invalid url kills the whole thing
+	* test everything
 * make a user randomly insert items only after all of their other items
 * improve the layout of title, username, and duration
 * Improve the way clippy reconnects the websocket, maybe do it as soon as the tab regains focus and update the queue data at the same time.
@@ -15,19 +15,20 @@ List
 * Change the "Progress" label to "Upload Progress"
 * increase the title character limit somewhat
 * does streamYtOverDur work still?
+* Allow linking to video by url
 * Silent looping Video overlay
 	* Then rename image/pic variables to overlay everywhere
 	* These need making consistent anyway
 * Gifv support
-* update the state of the choose music file button when pasting into youtube url box
-* playlist upload
-* multiple file uploads at once
-* Allow admins to remove anything before it gets played
 * Allow downloading of content
 	* Must give a legal warning at the user's first attempt, which prompts the user to confirm their intent
 	* Only allow downloading of the currently playing content. I hate seeing people waste their time looking ahead. It ruins the fun.
 	* allow downloading of things that have just played
 	* image download
+* update the state of the choose music file button when pasting into youtube url box
+* playlist upload
+* multiple file uploads at once
+* Allow admins to remove anything before it gets played
 * Allow killing the thing you yourself are playing
 * Put development diagrams in repo
 * Sometimes unmoved windows move by a small amount when a window above is closed
