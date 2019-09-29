@@ -90,6 +90,17 @@ $uploadForm.submit(function(e) {
 			main.clippyAgent.speak("No music chosen for upload.");
 			main.clippyAgent.play("Searching");
 			return false;
+		} else {
+			try {
+				if (URL) {
+					new URL(musicUrl);
+				}
+			} catch (e) {
+				main.clippyAgent.stop();
+				main.clippyAgent.speak("An invalid URL was given.");
+				main.clippyAgent.play("CheckingSomething");
+				return false;
+			}
 		}
 	}
 
