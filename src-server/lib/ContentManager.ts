@@ -465,7 +465,7 @@ export class ContentManager extends EventEmitter {
 	}
 
 	startPic(path: string, duration: number) {
-		this.runningPicProc = cp.spawn("timeout", [duration + "s", "eog", path, "-f"]);
+		this.runningPicProc = cp.spawn("timeout", [duration + "s", opt.imageProgramPath, path, ...opt.imageProgramArgs]);
 	}
 
 	stopPic() {
