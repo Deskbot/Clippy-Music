@@ -83,7 +83,14 @@ export function getMusicInfoByUrl(url: string): Promise<UrlMusicData> {
 		infoProc.on("close", (code, signal) => {
 			debug.error("yt-dl info getting error message:", rawError);
 
-			const { hostname } = new URL(url);
+			let u: URL;
+			try {
+				u = new URL(url);
+			} catch (e) {
+				return reject(e);
+			}
+
+			const { hostname } = u;
 
 			if (code === 0) {
 				// the order of data array is independent of the argument order to youtube-dl

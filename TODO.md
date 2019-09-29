@@ -8,7 +8,6 @@ List
 
 * support everything that youtube-dl does
 	* an invalid url kills the whole thing
-* Basically every other youtube-dl source including bandcamp and archive.org
 * make a user randomly insert items only after all of their other items
 * improve the layout of title, username, and duration
 * Improve the way clippy reconnects the websocket, maybe do it as soon as the tab regains focus and update the queue data at the same time.
