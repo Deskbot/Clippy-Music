@@ -32,6 +32,7 @@ export const nicknameSizeLimit: number = config.nicknameSizeLimit;
 export const timeout: number = config.timeout;
 export const storageDir: string = config.storageDir;
 export const streamYtOverDur: number = config.streamYtOverDur;
+export const tooShortToCauseCoolOff: number = config.tooShortToCauseCoolOff;
 export const webSocketPort: number = config.webSocketPort;
 export const youtubeDlCommand: string = config.youtubeDlCommand;
 

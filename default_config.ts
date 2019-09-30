@@ -49,4 +49,8 @@ export const config = {
 
 	// number of file name characters shown on front end
 	fileNameSizeLimit: 57,
+
+	// if a video is under this duration, identical content can be played within the cool-off period
+	// used for debugging purposes
+	tooShortToCauseCoolOff: 0,
 };

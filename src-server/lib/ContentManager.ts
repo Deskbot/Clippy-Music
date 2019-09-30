@@ -375,7 +375,7 @@ export class ContentManager extends EventEmitter {
 			that.currentlyPlaying = null;
 
 			// save hashes if the music played for long enough
-			if (secs >= consts.minPlayTimeToPreventReplay) this.remember(contentData);
+			if (secs > opt.tooShortToCauseCoolOff) this.remember(contentData);
 
 			that.emit("end");
 		});

@@ -16,7 +16,6 @@ export const musicPlayedWithin = opt.musicUniqueCoolOff === Infinity
 	: "in the past " + utils.secToTimeStr(opt.musicUniqueCoolOff);
 
 export const maxPercentBeforeFinished = 0.99;
-export const minPlayTimeToPreventReplay = 5; //seconds
 
 export const dirs = {
 	httpUpload: opt.storageDir + "/httpUploads/",
