@@ -13,7 +13,7 @@ import * as time from "./time";
 import { ContentType } from "../types/ContentType";
 import { getMusicInfoByUrl, getFileDuration, UrlMusicData } from "./music";
 import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError } from "./errors";
-import { UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic, TitledMusic } from "../types/UploadData";
+import { UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic, MusicWithMetadata } from "../types/UploadData";
 import { IdFactory } from "./IdFactory";
 import { ItemData, CompleteMusic, CompletePicture } from "../types/ItemData";
 import { YtDownloader } from "./YtDownloader";
@@ -258,7 +258,8 @@ export class ContentManager extends EventEmitter {
 		if (this.musicUrlIsUnique(info.uniqueUrlId)) {
 			const musicData = {
 				...uplData.music,
-				title: info.title
+				title: info.title,
+				uniqueId: info.uniqueUrlId,
 			};
 
 			return {
@@ -514,7 +515,7 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	private async tryPrepMusic(music: TitledMusic, cid: number, uid: string, duration: number): Promise<CompleteMusic> {
+	private async tryPrepMusic(music: MusicWithMetadata, cid: number, uid: string, duration: number): Promise<CompleteMusic> {
 		if (music.isUrl) {
 			if (duration <= opt.streamYtOverDur) {
 				let nmp = this.nextMusicPath();
@@ -532,7 +533,7 @@ export class ContentManager extends EventEmitter {
 				music.path = nmp; //play from this path not url
 
 				//log the duration
-				console.log(`Yt vid (${music.ytId}) of length ${duration}s took ${dlTime}s to download, ratio: ${ratio}`);
+				console.log(`Yt vid (${music.uniqueId}) of length ${duration}s took ${dlTime}s to download, ratio: ${ratio}`);
 
 				//hash the music (async)
 				const musicHash = await utils.fileHash(nmp);

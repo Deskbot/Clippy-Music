@@ -12,7 +12,6 @@ export interface UrlMusic {
 	isUrl: true;
 	path: string;
 	title?: string;
-	ytId?: string;
 }
 
 export interface FileMusic {
@@ -49,9 +48,16 @@ export interface UploadDataWithId extends UploadData {
 
 export interface UploadDataWithIdTitleDuration extends UploadDataWithId {
 	duration: number;
-	music: TitledMusic;
+	music: MusicWithMetadata;
 }
 
-export type TitledMusic = (UrlMusic | FileMusic) & {
-	title: string,
-};
+export type MusicWithMetadata = (
+	UrlMusic & {
+		uniqueId: string;
+		title: string;
+	}
+) | (
+	FileMusic & {
+		title: string;
+	}
+);
