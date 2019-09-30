@@ -83,14 +83,11 @@ export function getMusicInfoByUrl(url: string): Promise<UrlMusicData> {
 		infoProc.on("close", (code, signal) => {
 			debug.error("yt-dl info getting error message:", rawError);
 
-			let u: URL;
 			try {
-				u = new URL(url);
+				var site = getShortSiteNameFromUrl(new URL(url));
 			} catch (e) {
 				return reject(e);
 			}
-
-			const { hostname } = u;
 
 			if (code === 0) {
 				// the order of data array is independent of the argument order to youtube-dl
@@ -99,7 +96,7 @@ export function getMusicInfoByUrl(url: string): Promise<UrlMusicData> {
 				return resolve({
 					duration: utils.ytDlTimeStrToSec(dataArr[2]),
 					title: new Html5Entities().encode(dataArr[0]),
-					uniqueUrlId: uniqueUrlMusicIdentifier(hostname, dataArr[1]),
+					uniqueUrlId: uniqueUrlMusicIdentifier(site, dataArr[1]),
 				});
 			}
 
@@ -109,9 +106,20 @@ export function getMusicInfoByUrl(url: string): Promise<UrlMusicData> {
 }
 
 /**
+ * Get a short name for a website from its url
+ * Get the top level and first subdomain
+ * i.e. www.youtube.com becomes youtube.com
+ * @param url
+ */
+function getShortSiteNameFromUrl(url: URL): string {
+	const hostnameParts = url.hostname.split(".");
+	return hostnameParts.slice(hostnameParts.length - 2).join(".");
+}
+
+/**
  * Creates an identifier for music obtained by url that is unique within this program.
  */
-function uniqueUrlMusicIdentifier(hostname: string, idAtTheSite: string) {
+function uniqueUrlMusicIdentifier(hostname: string, idAtTheSite: string): string {
 	// hostname should not end with a space
 	return hostname + " " + idAtTheSite.trimLeft();
 }

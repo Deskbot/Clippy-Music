@@ -2,18 +2,19 @@ import * as express from "express";
 import * as formidable from "formidable";
 import * as q from "q";
 
-import { ContentServiceGetter } from "./ContentService";
-import { IdFactoryGetter } from "./IdFactoryService";
-import { ProgressQueueServiceGetter } from "./ProgressQueueService";
-import { PasswordService } from "./PasswordService";
-import { UserRecordGetter } from "./UserRecordService";
-import { WebSocketService } from "./WebSocketService";
+import { URL } from "url";
 
 import * as consts from "../lib/consts";
 import * as debug from "../lib/debug";
 import * as opt from "../options";
 import * as utils from "../lib/utils/utils";
 
+import { ContentServiceGetter } from "./ContentService";
+import { IdFactoryGetter } from "./IdFactoryService";
+import { ProgressQueueServiceGetter } from "./ProgressQueueService";
+import { PasswordService } from "./PasswordService";
+import { UserRecordGetter } from "./UserRecordService";
+import { WebSocketService } from "./WebSocketService";
 import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingError } from "../lib/errors";
 import { UploadData, UrlPic, NoPic, FilePic, FileMusic, UrlMusic, UploadDataWithId } from "../types/UploadData";
 
@@ -316,6 +317,12 @@ app.post("/api/queue/add", recordUserMiddleware, (req, res) => {
 		};
 
 		if (uplData.music.isUrl) {
+			const { hostname } = new URL(uplData.music.path);
+			if (utils.looksLikeIpAddress(hostname)) {
+				// prevent cheesing the uniqueness cooloff by using the IP Address and site name
+				throw new Error("I can not download music from an IP address.");
+			}
+
 			ProgressQueueServiceGetter.get().setTitle(req.ip, contentId, uplData.music.path, true);
 			// the title and duration are set later by `ContentService.add(uplData)`
 		}
