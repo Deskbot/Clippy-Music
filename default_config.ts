@@ -25,7 +25,7 @@ export const config = {
 	// videos longer than this in seconds will be streamed from YouTube and not downloaded first
 	// (Long videos can take a while to download, regardless of what duration is played.)
 	// (Streaming a video causes a small delay before playback begins.)
-	streamYtOverDur: 1200,
+	streamOverDuration: 1200,
 
 	// how frequently the download bar progress is updated
 	dlPercentUpdateFreq: 250,

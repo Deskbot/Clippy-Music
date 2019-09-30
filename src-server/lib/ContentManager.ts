@@ -517,7 +517,7 @@ export class ContentManager extends EventEmitter {
 
 	private async tryPrepMusic(music: MusicWithMetadata, cid: number, uid: string, duration: number): Promise<CompleteMusic> {
 		if (music.isUrl) {
-			if (duration <= opt.streamYtOverDur) {
+			if (duration <= opt.streamOverDuration) {
 				let nmp = this.nextMusicPath();
 
 				let st = new Date().getTime();
