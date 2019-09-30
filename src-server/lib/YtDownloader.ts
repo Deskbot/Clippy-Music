@@ -63,7 +63,7 @@ export class YtDownloader {
 				}
 			});
 
-			proc.on("error", (part) => {
+			proc.stderr.on("data", (part) => {
 				errMessage += part;
 			});
 		});
