@@ -34,11 +34,11 @@ export const config = {
 	// A relative path will be relative to the working directory the server is ran from.
 	storageDir: "/tmp/Clippy-Music-Tmp",
 
-	showImageCommand: "eog",
-	showImageArgs: ["-f"],
 	ffprobeCommand: "ffprobe",
 	mpvCommand: "mpv",
 	mpvArgs: ["-fs", "--af=dynaudnorm"],
+	showImageCommand: "eog",
+	showImageArgs: ["-f"],
 	youtubeDlCommand: "youtube-dl",
 
 	// maximum image file size, in bytes
