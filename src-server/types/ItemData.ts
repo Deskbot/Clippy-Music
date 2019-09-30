@@ -12,19 +12,25 @@ export interface ItemData {
 };
 
 export type CompleteMusic = {
-	isUrl: boolean,
+	isUrl: false,
 	hash: number,
 	path: string,
 	stream: false,
 	title: string,
-	ytId?: string,
 } | {
-	isUrl: boolean,
+	isUrl: true,
 	hash: undefined,
 	path: string,
 	stream: true,
 	title: string,
-	ytId?: string,
+	uniqueId: string;
+} | {
+	isUrl: true,
+	hash: number,
+	path: string,
+	stream: false,
+	title: string,
+	uniqueId: string;
 }
 
 export interface CompleteUrlPic extends UrlPic {

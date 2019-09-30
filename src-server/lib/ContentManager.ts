@@ -111,7 +111,7 @@ export class ContentManager extends EventEmitter {
 		this.picHashes[hash] = new Date().getTime();
 	}
 
-	addYtId(id: string) {
+	addUrlId(id: string) {
 		this.musicUrlRecord[id] = new Date().getTime();
 	}
 
@@ -190,9 +190,17 @@ export class ContentManager extends EventEmitter {
 	}
 
 	forget(itemData: ItemData) {
-		if (itemData.music.ytId) delete this.musicUrlRecord[itemData.music.ytId];
-		if (itemData.music.hash) delete this.musicHashes[itemData.music.hash];
-		if (itemData.pic.hash) delete this.picHashes[itemData.pic.hash];
+		if (itemData.music.isUrl && itemData.music.uniqueId) {
+			delete this.musicUrlRecord[itemData.music.uniqueId];
+		}
+
+		if (itemData.music.hash) {
+			delete this.musicHashes[itemData.music.hash];
+		}
+
+		if (itemData.pic.hash) {
+			delete this.picHashes[itemData.pic.hash];
+		}
 	}
 
 	getBucketsForPublic(): PublicItemData[][] {
@@ -317,7 +325,7 @@ export class ContentManager extends EventEmitter {
 			return false;
 		}
 
-		if (music.ytId !== undefined && !this.musicUrlIsUnique(music.ytId)) {
+		if (music.isUrl && music.uniqueId !== undefined && !this.musicUrlIsUnique(music.uniqueId)) {
 			return false;
 		}
 
@@ -414,8 +422,13 @@ export class ContentManager extends EventEmitter {
 	}
 
 	remember(itemData: ItemData) {
-		if (itemData.music.ytId) this.addYtId(itemData.music.ytId);
-		if (itemData.music.hash) this.addHash(itemData.music.hash);
+		if (itemData.music.isUrl) {
+			this.addUrlId(itemData.music.uniqueId);
+		}
+
+		if (itemData.music.hash) {
+			this.addHash(itemData.music.hash);
+		}
 
 		if (itemData.pic.exists) {
 			this.addPicHash(itemData.pic.hash);
