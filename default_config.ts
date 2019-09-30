@@ -1,4 +1,6 @@
 // execute `npm run build` after altering this file
+// so that it can be used when the server is next started
+// this also validates your configuration
 
 export const config = {
 	httpPort: 8080,
@@ -22,6 +24,7 @@ export const config = {
 	streamYtOverDur: 1200,
 
 	// the maximum duration of a single queue item, in seconds
+	// and also the maximum amount of time a user can play for in a single bucket
 	timeout: 644,
 
 	// the location on disk where uploaded content is stored
