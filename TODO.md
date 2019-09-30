@@ -8,6 +8,8 @@ List
 
 * support everything that youtube-dl does
 	* test everything
+* cancel button reappears when a second download fails
+* Improve error message "the download item specified was not recognised"
 * make a user randomly insert items only after all of their other items
 * improve the layout of title, username, and duration
 * Improve the way clippy reconnects the websocket, maybe do it as soon as the tab regains focus and update the queue data at the same time.
@@ -70,6 +72,7 @@ List
 	* One for playing and one for queuing
 * Split up `main.css`
 * Remove duplicate code in `static/handlers.js`
+* Have a second type of error for things clippy should(n't) say
 * Make play queue DOM update more efficiently
 * Only try to delete empty files once
 * sort out the fact that the user sees "The admin controls can not be used because no admin password was set." for any unfound endpoint
