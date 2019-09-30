@@ -74,6 +74,7 @@ List
 * Remove duplicate code in `static/handlers.js`
 * Have a second type of error for things clippy should(n't) say
 * Make play queue DOM update more efficiently
+* clippy speaking a long url won't fit inside his bubble
 * Only try to delete empty files once
 * sort out the fact that the user sees "The admin controls can not be used because no admin password was set." for any unfound endpoint
 * Use a map of content id to item instead of a user queue
