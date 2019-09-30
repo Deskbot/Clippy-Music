@@ -316,6 +316,14 @@ app.post("/api/queue/add", recordUserMiddleware, (req, res) => {
 			userId: req.ip,
 		};
 
+		// ignore end time if it would make the play time less than 1 second
+		if (uplData.endTime !== null
+			&& uplData.startTime !== null
+			&& uplData.endTime - uplData.startTime < 1
+		) {
+			uplData.endTime = null;
+		}
+
 		if (uplData.music.isUrl) {
 			const { hostname } = new URL(uplData.music.path);
 			if (utils.looksLikeIpAddress(hostname)) {

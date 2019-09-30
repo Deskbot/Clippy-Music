@@ -48,18 +48,22 @@ function getFFProbeFormatDataContainingDuration(filePath: string): Promise<strin
 	});
 }
 
+/**
+ * @returns The duration of the given file in seconds. At least 1.
+ */
+export async function getFileDuration(filePath: string) {
+	const ffProbeData = await getFFProbeFormatDataContainingDuration(filePath);
+	const durationLine = ffProbeData.split("\n")[1];
 
-export function getFileDuration(filePath: string) {
-	return getFFProbeFormatDataContainingDuration(filePath)
-	.then((ffProbeData) => {
-		const durationLine = ffProbeData.split("\n")[1];
-		if (durationLine === undefined) throw new Error("");
+	if (durationLine === undefined) throw new DurationFindingError();
 
-		const secondsStr = durationLine.split("=")[1];
-		if (secondsStr === undefined) throw new Error("");
+	const secondsStr = durationLine.split("=")[1];
 
-		return parseFloat(secondsStr);
-	});
+	if (secondsStr === undefined) throw new DurationFindingError();
+
+	const seconds = parseFloat(secondsStr);
+
+	return seconds < 1 ? 1 : seconds;
 }
 
 export function getMusicInfoByUrl(url: string): Promise<UrlMusicData> {
