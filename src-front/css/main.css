@@ -334,7 +334,6 @@ button.action {
 }
 
 .x-button {
-	display: inline-block;
 	float: right;
 	margin: 2px;
 	width: 16px;
