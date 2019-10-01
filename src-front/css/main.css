@@ -272,6 +272,14 @@ legend {
 	padding: 0 2px;
 }
 
+#start-time-half {
+	padding-right: 6px;
+}
+
+#end-time-half {
+	padding-left: 6px;
+}
+
 #upload-media-button {
 	margin-top: -2px;
 }
@@ -393,6 +401,11 @@ button.action {
 
 .error .dl-bar {
 	cursor: help;
+}
+
+.half {
+    display: inline-block;
+    width: 50%
 }
 
 .hidden {
