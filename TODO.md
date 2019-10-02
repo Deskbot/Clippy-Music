@@ -7,7 +7,6 @@ List
 ----
 
 * test everything
-* make a user randomly insert items only after all of their other items
 * improve the layout of title, username, and duration
 * Improve the way clippy reconnects the websocket, maybe do it as soon as the tab regains focus and update the queue data at the same time.
 * Is the behaviour of forgetting an item when it is removed from the queue correct?
