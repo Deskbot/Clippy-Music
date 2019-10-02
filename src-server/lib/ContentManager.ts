@@ -364,7 +364,6 @@ export class ContentManager extends EventEmitter {
 
 		//double check the content is still unique, only checking music as it is the main feature
 		if (!this.musicIsUnique(contentData.music)) {
-			console.log("music not unique");
 			this.deleteContent(contentData);
 			return this.playNext();
 		}
