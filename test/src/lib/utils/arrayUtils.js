@@ -6,13 +6,13 @@ const assert = require("assert").strict;
 
 module.exports = {
     random_insert_after: () => {
-        let list = [];
+        const list = [];
 
-        const items = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
+        const itemsToInsert = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
 
         let expectedNumOfItemsInList = 0;
 
-        for (const item of items) {
+        for (const item of itemsToInsert) {
             const targetIndex = utils.randUpTo(list.length);
 
             arrayUtils.randInsertAfter(list, targetIndex, item);
@@ -27,10 +27,10 @@ module.exports = {
 
         // final sanity check
 
-        assert(list.length === items.length,
+        assert(list.length === itemsToInsert.length,
             "The list has all of the correct number of elements.")
 
-        for (const item of items) {
+        for (const item of itemsToInsert) {
             assert(list.includes(item),
                 "All previously inserted items should be in the list."
             );
