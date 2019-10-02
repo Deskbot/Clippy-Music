@@ -425,7 +425,7 @@ app.post("/api/download/cancel", (req: RequestWithFormData, res) => {
 		if (noRedirect(req)) res.status(200).end("Success\n");
 		else				 res.redirect("/");
 	} else {
-		res.status(400).end("The download item specified was not recognised.\n");
+		res.status(400).end("I could not cancel that.\n");
 	}
 });
 
