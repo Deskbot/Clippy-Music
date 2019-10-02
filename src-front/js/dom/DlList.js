@@ -19,9 +19,16 @@ var DlList = (function() {
 
 			$dlItem.find(".title").html(content.title);
 			$dlItem.attr("data-cid", content.contentId);
-			if (content.cancellable) $dlItem.find(".cancel").removeClass("hidden");
-			if (content.percent) this.fillDlBar($dlItem.find(".dl-bar"), content.percent);
-			if (content.error) this.showError($dlItem);
+
+			if (content.percent) {
+				this.fillDlBar($dlItem.find(".dl-bar"), content.percent);
+			}
+
+			if (content.error) {
+				this.showError($dlItem);
+			} else if (content.cancellable) {
+				this.showCancelButton($dlItem);
+			}
 
 			return $dlItem;
 		},
@@ -109,7 +116,7 @@ var DlList = (function() {
 						$elem.find(".title").html(item.title);
 					}
 
-					if (item.cancellable) {
+					if (!item.error && item.cancellable) {
 						this.showCancelButton($elem);
 					}
 				} else { // create dom fresh if not on record

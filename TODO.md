@@ -7,7 +7,6 @@ List
 ----
 
 * test everything
-* cancel button reappears when a second download fails
 * Improve error message "the download item specified was not recognised"
 * make a user randomly insert items only after all of their other items
 * improve the layout of title, username, and duration

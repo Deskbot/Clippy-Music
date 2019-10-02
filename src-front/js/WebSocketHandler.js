@@ -204,9 +204,9 @@ var WebSocketHandler = (function() {
 	WebSocketHandler.prototype.handleQueue = function(data) {
 		var myId = utils.myId();
 
-		utils.counterShiftResize($("#current-section"), function() {
-			//current
+		// currently playing
 
+		utils.counterShiftResize($("#current-section"), function() {
 			var $currentlyPlaying = $("#currently-playing");
 			var $currentNickname = $currentlyPlaying.find(".nickname");
 			var $title = $currentlyPlaying.find(".title");
@@ -245,10 +245,11 @@ var WebSocketHandler = (function() {
 			}
 		});
 
+		// reset of the queue
+
 		var $queue = $("#queue");
 
 		utils.counterShiftResize($("#queue-section"), function() {
-			//rest of queue
 			$queue.empty();
 
 			for (var i = 0; i < data.queue.length; i++) {
