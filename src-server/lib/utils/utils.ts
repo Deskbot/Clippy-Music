@@ -141,13 +141,15 @@ export function sizeToReadbleStr(s: number): string {
 }
 
 //assume at most 2 colons
-export function timeCodeToSeconds(s: string): number {
+export function timeCodeToSeconds(s: string): number | null {
 	const a = s.split(":");
 	let t = 0;
 
 	for (let i = 0; i < a.length; i++) {
 		t += parseInt(a[i]) * Math.pow(60, a.length - 1 - i);
 	}
+
+	if (t === NaN) return null;
 
 	return t;
 }
@@ -166,12 +168,23 @@ export function toShortSizeString(fileSizeInBytes: number): string {
 
 export function ytDlTimeStrToSec(str: string): number {
 	const timeArr = str.split(":");
+	let time = 0;
 
 	switch (timeArr.length) {
-		case 1: return parseInt(str);
-		case 2: return parseInt(timeArr[0]) * 60 + parseInt(timeArr[1]);
-		case 3: return parseInt(timeArr[0]) * 3600 + parseInt(timeArr[1]) * 60 + parseInt(timeArr[2]);
+		case 1:
+			time = parseInt(str);
+			break;
+		case 2:
+			time = parseInt(timeArr[0]) * 60 + parseInt(timeArr[1]);
+			break;
+		case 3:
+			time = parseInt(timeArr[0]) * 3600 + parseInt(timeArr[1]) * 60 + parseInt(timeArr[2]);
+			break;
 	}
 
-	throw new Error(`Unable to convert yt-dl time, ${str}, to seconds.`);
+	if (time === NaN) {
+		throw new Error(`Unable to convert yt-dl time, ${str}, to seconds.`);
+	}
+
+	return time;
 }

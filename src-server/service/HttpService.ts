@@ -310,7 +310,7 @@ app.post("/api/queue/add", recordUserMiddleware, (req, res) => {
 	.then(() => ProgressQueueServiceGetter.get().add(req.ip, contentId))
 	.then(() => handleFileUpload(req, contentId))
 	.then(async ([form, fields, files]) => { //nesting in order to get the scoping right
-		let uplData: UploadDataWithId = {
+		const uplData: UploadDataWithId = {
 			...await parseUploadForm(form, fields, files),
 			id: contentId,
 			userId: req.ip,
