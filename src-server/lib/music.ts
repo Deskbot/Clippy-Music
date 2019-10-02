@@ -106,7 +106,7 @@ export function getMusicInfoByUrl(url: string): Promise<UrlMusicData> {
 					uniqueUrlId: uniqueUrlMusicIdentifier(site, dataArr[1]),
 				};
 
-				debug.log(info);
+				debug.log("yt-dl info obtained from", url, info);
 
 				return resolve(info);
 			}
