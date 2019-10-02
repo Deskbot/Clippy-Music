@@ -97,18 +97,24 @@ export function getMusicInfoByUrl(url: string): Promise<UrlMusicData> {
 
 				// all the data needs to be here
 				if (dataArr.length !== 4) {
-					reject();
+					debug.log("raw data obtained from yt-dl", url, dataArr);
+					return reject();
 				}
 
-				const info = {
-					duration: utils.ytDlTimeStrToSec(dataArr[2]),
-					title: new Html5Entities().encode(dataArr[0]),
-					uniqueUrlId: uniqueUrlMusicIdentifier(site, dataArr[1]),
-				};
+				try {
+					const info = {
+						duration: utils.ytDlTimeStrToSec(dataArr[2]),
+						title: new Html5Entities().encode(dataArr[0]),
+						uniqueUrlId: uniqueUrlMusicIdentifier(site, dataArr[1]),
+					};
 
-				debug.log("yt-dl info obtained from", url, info);
+					debug.log("yt-dl info obtained from", url, info);
 
-				return resolve(info);
+					return resolve(info);
+
+				} catch (e) {
+					return reject(e);
+				}
 			}
 
 			debug.error("yt-dl info getting error message:", rawError);
