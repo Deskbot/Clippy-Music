@@ -30,3 +30,14 @@ export function removeAll<T>(arr: T[], predicate: (elem: T) => boolean) {
         }
     }
 }
+
+export function zip<T,U>(arr1: T[], arr2: U[]): [T,U][] {
+    const len = Math.min(arr1.length, arr2.length);
+    const result = [] as [T, U][];
+
+    for (let i = 0; i < len; i++) {
+        result.push([arr1[i], arr2[i]]);
+    }
+
+    return result;
+}

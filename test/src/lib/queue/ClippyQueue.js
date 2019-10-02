@@ -39,7 +39,7 @@ module.exports = {
 			q.boostPosteriority(userIds[i], userPosteriorities[i]);
 		}
 
-		const usersInPriorityOrder = utils
+		const usersInPriorityOrder = arrayUtils
 			.zip(userIds, userPosteriorities) // merge lists
 			.sort(([id1, pos1], [id2, pos2]) => pos1 - pos2) // sort small to big by posteriority
 			.map(([id, pos]) => id); // create an array of the ids
@@ -179,7 +179,7 @@ module.exports = {
 
 		// check they come back in the right order
 
-		const itemsInPriorityOrder = utils
+		const itemsInPriorityOrder = arrayUtils
 			.zip(items, posteriorities) // merge lists
 			.sort(([item1, pos1], [item2, pos2]) => pos1 - pos2) // sort small to big by posteriority
 			.map(([item, pos]) => item); // create an array of items
