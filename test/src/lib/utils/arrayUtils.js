@@ -13,7 +13,7 @@ module.exports = {
         let expectedNumOfItemsInList = 0;
 
         for (const item of itemsToInsert) {
-            const targetIndex = utils.randUpTo(list.length);
+            const targetIndex = utils.randIntBetween(-1, list.length);
 
             arrayUtils.randInsertAfter(list, targetIndex, item);
             expectedNumOfItemsInList += 1;

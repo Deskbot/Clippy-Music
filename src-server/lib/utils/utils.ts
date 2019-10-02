@@ -76,7 +76,13 @@ export function mkdirSafelySync(path: string, mode: number) {
 	try { fs.mkdirSync(path, mode); } catch(e) {}
 }
 
-export function randIntBetween(x: number, y: number): number { //can include x but not y. Integers only
+/**
+ * Make a random integer between two numbers
+ *
+ * @param x The lower-bound, inclusive
+ * @param y The upper-bound, exclusive
+ */
+export function randIntBetween(x: number, y: number): number {
 	return x + Math.floor(Math.random() * (y-x));
 }
 

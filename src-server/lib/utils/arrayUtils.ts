@@ -25,14 +25,6 @@ export function findLastIndex<T>(arr: T[], predicate: (item: T) => boolean): num
     return -1;
 }
 
-export function randInsert<T>(newItem: T, list: T[]) {
-    const targetIndex = utils.randUpTo(list.length);
-    const itemsAfterNew = list.splice(targetIndex);
-    // list is modified to lose all items after new
-
-    list.push(newItem, ...itemsAfterNew);
-}
-
 /**
  * Modify a list by inserting an item into it at a location randomly chosen after a given index.
  *
@@ -41,7 +33,7 @@ export function randInsert<T>(newItem: T, list: T[]) {
  * @param newItem The item to insert into the list
  */
 export function randInsertAfter<T>(arr: T[], index: number, newItem: T) {
-    const targetIndex = index + utils.randUpTo(arr.length - index);
+    const targetIndex = utils.randIntBetween(index + 1, arr.length);
     const itemsAfterNew = arr.splice(targetIndex);
     // arr is modified to lose all items after new
 
