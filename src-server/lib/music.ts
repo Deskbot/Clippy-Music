@@ -95,6 +95,11 @@ export function getMusicInfoByUrl(url: string): Promise<UrlMusicData> {
 				// the order of data array is independent of the argument order to youtube-dl
 				const dataArr = rawData.split("\n");
 
+				// all the data needs to be here
+				if (dataArr.length !== 4) {
+					reject();
+				}
+
 				const info = {
 					duration: utils.ytDlTimeStrToSec(dataArr[2]),
 					title: new Html5Entities().encode(dataArr[0]),
