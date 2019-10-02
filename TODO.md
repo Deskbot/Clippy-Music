@@ -6,8 +6,7 @@ This list is in a rough order of priority.
 List
 ----
 
-* support everything that youtube-dl does
-	* test everything
+* test everything
 * cancel button reappears when a second download fails
 * Improve error message "the download item specified was not recognised"
 * make a user randomly insert items only after all of their other items
