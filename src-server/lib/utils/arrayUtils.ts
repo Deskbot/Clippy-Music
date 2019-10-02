@@ -1,3 +1,5 @@
+import * as utils from "./utils";
+
 export function arrSum(a: number[]): number {
     return a.reduce((n, p) => n + p);
 }
@@ -11,6 +13,39 @@ export function allTrue(bools: boolean[]): boolean {
     }
 
     return true;
+}
+
+export function findLastIndex<T>(arr: T[], predicate: (item: T) => boolean): number {
+    for (let i = arr.length - 1; i >= 0; i--) {
+        if (predicate(arr[i])) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+export function randInsert<T>(newItem: T, list: T[]) {
+    const targetIndex = utils.randUpTo(list.length);
+    const itemsAfterNew = list.splice(targetIndex);
+    // list is modified to lose all items after new
+
+    list.push(newItem, ...itemsAfterNew);
+}
+
+/**
+ * Modify a list by inserting an item into it at a location randomly chosen after a given index.
+ *
+ * @param arr The array to modify
+ * @param index The location of the list to insert the new item after
+ * @param newItem The item to insert into the list
+ */
+export function randInsertAfter<T>(arr: T[], index: number, newItem: T) {
+    const targetIndex = index + utils.randUpTo(arr.length - index);
+    const itemsAfterNew = arr.splice(targetIndex);
+    // arr is modified to lose all items after new
+
+    arr.push(newItem, ...itemsAfterNew);
 }
 
 export function removeFirst<T>(arr: T[], predicate: (elem: T) => boolean): boolean {

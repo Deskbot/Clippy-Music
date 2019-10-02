@@ -1,5 +1,4 @@
 import * as arrayUtils from "../utils/arrayUtils";
-import * as utils from "../utils/utils";
 
 import { ItemData } from "../../types/ItemData";
 
@@ -29,7 +28,11 @@ export class BarringerQueue {
 
 		for (const bucket of this.buckets.slice(1)) {
 			if (this.spaceForItemInBucket(item.duration, bucket, item.userId)) {
-				utils.randInsert(item, bucket);
+				const index = arrayUtils.findLastIndex(
+					bucket,
+					itemInBucket => itemInBucket.userId === item.userId
+				);
+				arrayUtils.randInsertAfter(bucket, index + 1, item);
 				return;
 			}
 		}
