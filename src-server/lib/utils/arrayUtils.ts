@@ -2,6 +2,9 @@ export function arrSum(a: number[]): number {
     return a.reduce((n, p) => n + p);
 }
 
+/**
+ * @return True when the all the elements are true or when there are no elements.
+ */
 export function allTrue(bools: boolean[]): boolean {
     for (const bool of bools) {
         if (bool === false) return false;
