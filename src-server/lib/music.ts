@@ -85,24 +85,28 @@ export function getMusicInfoByUrl(url: string): Promise<UrlMusicData> {
 			rawError += message;
 		});
 		infoProc.on("close", (code, signal) => {
-			debug.error("yt-dl info getting error message:", rawError);
-
-			try {
-				var site = getShortSiteNameFromUrl(new URL(url));
-			} catch (e) {
-				return reject(e);
-			}
-
 			if (code === 0) {
+				try {
+					var site = getShortSiteNameFromUrl(new URL(url));
+				} catch (e) {
+					return reject(e);
+				}
+
 				// the order of data array is independent of the argument order to youtube-dl
 				const dataArr = rawData.split("\n");
 
-				return resolve({
+				const info = {
 					duration: utils.ytDlTimeStrToSec(dataArr[2]),
 					title: new Html5Entities().encode(dataArr[0]),
 					uniqueUrlId: uniqueUrlMusicIdentifier(site, dataArr[1]),
-				});
+				};
+
+				debug.log(info);
+
+				return resolve(info);
 			}
+
+			debug.error("yt-dl info getting error message:", rawError);
 
 			return reject(rawError);
 		});

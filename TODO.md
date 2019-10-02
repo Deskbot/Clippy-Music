@@ -6,6 +6,7 @@ This list is in a rough order of priority.
 List
 ----
 
+* youtube-dl doesn't always upload absolute links to videos properly
 * test everything
 * improve the layout of title, username, and duration
 * Improve the way clippy reconnects the websocket, maybe do it as soon as the tab regains focus and update the queue data at the same time.
