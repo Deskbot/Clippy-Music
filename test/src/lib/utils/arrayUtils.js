@@ -5,6 +5,13 @@ const utils = require(baseDir + "lib/utils/utils.js");
 const assert = require("assert").strict;
 
 module.exports = {
+    find_last_index: () => {
+        const list = ["a", "b", "c", "d", "a", "e"];
+
+        assert(arrayUtils.findLastIndex(list, item => item === "a") === 4);
+        assert(arrayUtils.findLastIndex(list, item => item === "b") === 1);
+    },
+
     random_insert_after: () => {
         const list = [];
 
