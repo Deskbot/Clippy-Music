@@ -546,7 +546,7 @@ export class ContentManager extends EventEmitter {
 				music.path = nmp; //play from this path not url
 
 				//log the duration
-				console.log(`Yt vid (${music.uniqueId}) of length ${duration}s took ${dlTime}s to download, ratio: ${ratio}`);
+				console.log(`yt-dl vid (${music.uniqueId}) of length ${duration}s took ${dlTime}s to download, ratio: ${ratio}`);
 
 				//hash the music (async)
 				const musicHash = await utils.fileHash(nmp);
