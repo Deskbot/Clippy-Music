@@ -94,6 +94,7 @@ export function randUpTo(n: number) {
 
 export function reportError(err: any) {
 	console.error(err);
+	console.trace();
 }
 
 export function roundDps(num: number, places: number): number {
