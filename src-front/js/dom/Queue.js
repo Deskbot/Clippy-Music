@@ -27,7 +27,6 @@ var Queue = {
 			$bucketItem.children(".title").html(item.title);
 
 			if (isMine) {
-				$bucketContainer.attr("id", "my-bucket-container");
 				$bucketNickname.addClass("my-nickname");
 
 				$bucketItem.children(".delete")
