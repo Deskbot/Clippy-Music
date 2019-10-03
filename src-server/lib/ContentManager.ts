@@ -187,20 +187,6 @@ export class ContentManager extends EventEmitter {
 		this.killCurrent();
 	}
 
-	forget(itemData: ItemData) {
-		if (itemData.music.isUrl && itemData.music.uniqueId) {
-			delete this.musicUrlRecord[itemData.music.uniqueId];
-		}
-
-		if (itemData.music.hash) {
-			delete this.musicHashes[itemData.music.hash];
-		}
-
-		if (itemData.pic.hash) {
-			delete this.picHashes[itemData.pic.hash];
-		}
-	}
-
 	getBucketsForPublic(): PublicItemData[][] {
 		const tooMuchDataInBuckets = this.playQueue.getBuckets();
 		const publicBuckets = [] as PublicItemData[][];
@@ -406,13 +392,8 @@ export class ContentManager extends EventEmitter {
 	}
 
 	purgeUser(uid: string) {
-		const itemList = this.playQueue.getUserItems(uid);
-
-		if (itemList) itemList.forEach((itemData) => {
-			this.forget(itemData);
-		});
-
 		this.playQueue.purge(uid);
+
 		if (this.currentlyPlaying && this.currentlyPlaying.userId === uid) {
 			this.killCurrent();
 		}
@@ -438,7 +419,6 @@ export class ContentManager extends EventEmitter {
 		if (itemData) {
 			this.deleteContent(itemData);
 			this.playQueue.remove(contentId);
-			this.forget(itemData);
 			this.emit("queue-update");
 
 			return true;
