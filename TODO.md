@@ -6,14 +6,13 @@ This list is in a rough order of priority.
 List
 ----
 
-* youtube-dl doesn't always upload absolute links to videos properly
 * test everything
-* improve the layout of title, username, and duration
-* Improve the way clippy reconnects the websocket, maybe do it as soon as the tab regains focus and update the queue data at the same time.
+* does streamYtOverDur work still?
 * Is the behaviour of forgetting an item when it is removed from the queue correct?
 * Change the "Progress" label to "Upload Progress"
+* improve the layout of title, username, and duration
 * increase the title character limit somewhat
-* does streamYtOverDur work still?
+* Recover admin password when restarting the server
 * Allow linking to video by url
 * Silent looping Video overlay
 	* Then rename image/pic variables to overlay everywhere
@@ -33,6 +32,7 @@ List
 * Sometimes unmoved windows move by a small amount when a window above is closed
 * Dragging a window when another window resizes, causes the one you're dragging to shift.
 	* maybe consider changing the way the layout is done. how often do people resize the browser window anyway? I don't think i need to be account for all that
+* Improve the way clippy reconnects the websocket, maybe do it as soon as the tab regains focus and update the queue data at the same time.
 
 ---
 
