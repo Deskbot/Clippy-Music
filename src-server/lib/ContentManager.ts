@@ -526,7 +526,15 @@ export class ContentManager extends EventEmitter {
 
 	private async tryPrepMusic(music: MusicWithMetadata, cid: number, uid: string): Promise<CompleteMusic> {
 		if (music.isUrl) {
-			if (music.totalFileDuration <= opt.streamOverDuration) {
+			// Is it so big it should just be streamed?
+			if (music.totalFileDuration > opt.streamOverDuration) {
+				return {
+					...music,
+					hash: undefined,
+					stream: true,
+				};
+
+			} else {
 				const nmp = this.nextMusicPath();
 
 				const st = new Date().getTime();
@@ -559,13 +567,6 @@ export class ContentManager extends EventEmitter {
 				} else {
 					throw new UniqueError(ContentType.Music);
 				}
-
-			} else { //just stream it because it's so big
-				return {
-					...music,
-					hash: undefined,
-					stream: true,
-				};
 			}
 		} else {
 			//validate by music hash
