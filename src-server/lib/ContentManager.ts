@@ -406,13 +406,8 @@ export class ContentManager extends EventEmitter {
 	}
 
 	purgeUser(uid: string) {
-		const itemList = this.playQueue.getUserItems(uid);
-
-		if (itemList) itemList.forEach((itemData) => {
-			this.forget(itemData);
-		});
-
 		this.playQueue.purge(uid);
+
 		if (this.currentlyPlaying && this.currentlyPlaying.userId === uid) {
 			this.killCurrent();
 		}
