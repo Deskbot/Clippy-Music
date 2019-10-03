@@ -8,7 +8,7 @@ import { CancelError, UnknownDownloadError } from "./errors";
 import { ContentType } from "../types/ContentType";
 import { ProgressQueue } from "./ProgressQueue";
 
-interface YtQueueItem {
+interface YtDlQueueItem {
 	cancelled: boolean,
 	cid: number,
 	defer: q.Deferred<void>,
@@ -20,10 +20,10 @@ interface YtQueueItem {
 	vid: string,
 }
 
-export class YtDownloader {
+export class YtDlDownloader {
 	private progressQueue: ProgressQueue;
 	private userQueues: {
-		[userId: string]: (YtQueueItem)[]
+		[userId: string]: (YtDlQueueItem)[]
 	};
 
 	constructor(progressQueue: ProgressQueue) {
@@ -31,7 +31,7 @@ export class YtDownloader {
 		this.userQueues = {};
 	}
 
-	private cancel(queue: YtQueueItem[], index: number) {
+	private cancel(queue: YtDlQueueItem[], index: number) {
 		const item = queue[index];
 
 		// head of the queue can be looked at

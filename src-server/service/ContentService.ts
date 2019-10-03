@@ -7,7 +7,7 @@ import { IdFactoryGetter } from "./IdFactoryService";
 import { ProgressQueueServiceGetter } from "./ProgressQueueService";
 import { UserRecordGetter } from "./UserRecordService";
 import { ContentManager, SuspendedContentManager, isSuspendedContentManager } from "../lib/ContentManager";
-import { YtDownloader } from "../lib/YtDownloader";
+import { YtDlDownloader } from "../lib/YtDownloader";
 import { MakeOnce } from "../lib/MakeOnce";
 
 export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> {
@@ -24,7 +24,7 @@ export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> 
 			IdFactoryGetter.get(),
 			ProgressQueueServiceGetter.get(),
 			UserRecordGetter.get(),
-			new YtDownloader(ProgressQueueServiceGetter.get())
+			new YtDlDownloader(ProgressQueueServiceGetter.get())
 		);
 
 		cm.on("end", () => play(cm));

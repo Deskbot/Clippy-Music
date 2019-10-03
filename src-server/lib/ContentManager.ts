@@ -15,7 +15,7 @@ import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError
 import { UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic, MusicWithMetadata } from "../types/UploadData";
 import { IdFactory } from "./IdFactory";
 import { ItemData, CompleteMusic, CompletePicture } from "../types/ItemData";
-import { YtDownloader } from "./YtDownloader";
+import { YtDlDownloader } from "./YtDownloader";
 import { UserRecord } from "./UserRecord";
 import { ProgressQueue } from "./ProgressQueue";
 import { BarringerQueue, isSuspendedBarringerQueue } from "./queue/BarringerQueue";
@@ -53,7 +53,7 @@ export class ContentManager extends EventEmitter {
 	private idFactory: IdFactory;
 	private progressQueue: ProgressQueue;
 	private userRecord: UserRecord;
-	private ytDownloader: YtDownloader;
+	private ytDownloader: YtDlDownloader;
 
 	//processes
 	private runningMusicProc: cp.ChildProcess | null = null;
@@ -68,7 +68,7 @@ export class ContentManager extends EventEmitter {
 		idFactory: IdFactory,
 		progressQueue: ProgressQueue,
 		userRecord: UserRecord,
-		ytDownloader: YtDownloader
+		ytDownloader: YtDlDownloader
 	) {
 		super();
 
