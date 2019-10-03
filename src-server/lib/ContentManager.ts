@@ -192,15 +192,7 @@ export class ContentManager extends EventEmitter {
 		const publicBuckets = [] as PublicItemData[][];
 
 		for (const bucket of tooMuchDataInBuckets) {
-			const publicBucket = bucket.map(item => ({
-				downloadLink: item.music.isUrl ? item.music.path : undefined,
-				duration: item.duration,
-				id: item.id,
-				nickname: this.userRecord.getNickname(item.userId),
-				title: item.music.title,
-				userId: item.userId,
-			}));
-
+			const publicBucket = bucket.map(item => this.publicify(item));
 			publicBuckets.push(publicBucket);
 		}
 
@@ -209,14 +201,7 @@ export class ContentManager extends EventEmitter {
 
 	getCurrentlyPlaying(): PublicItemData | undefined {
 		if (this.currentlyPlaying) {
-			return {
-				downloadLink: this.currentlyPlaying.music.isUrl ? this.currentlyPlaying.music.path : undefined,
-				duration: this.currentlyPlaying.duration,
-				id: this.currentlyPlaying.id,
-				nickname: this.userRecord.getNickname(this.currentlyPlaying.userId),
-				title: this.currentlyPlaying.music.title,
-				userId: this.currentlyPlaying.userId,
-			};
+			return this.publicify(this.currentlyPlaying);
 		}
 
 		return undefined;
@@ -391,6 +376,17 @@ export class ContentManager extends EventEmitter {
 		this.emit("queue-update");
 
 		return true;
+	}
+
+	private publicify(item: ItemData): PublicItemData {
+		return {
+			downloadLink: item.music.isUrl ? item.music.path : undefined,
+			duration: item.duration,
+			id: item.id,
+			nickname: this.userRecord.getNickname(item.userId),
+			title: item.music.title,
+			userId: item.userId,
+		};
 	}
 
 	purgeUser(uid: string) {
