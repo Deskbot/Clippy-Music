@@ -5,7 +5,7 @@ import * as q from "q";
 import { URL } from "url";
 
 import * as consts from "../lib/consts";
-import * as debug from "../lib/debug";
+import * as debug from "../lib/utils/debug";
 import * as opt from "../options";
 import * as utils from "../lib/utils/utils";
 

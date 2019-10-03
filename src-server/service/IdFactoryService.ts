@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as consts from "../lib/consts";
 
 import { IdFactory } from "../lib/IdFactory";
-import { MakeOnce } from "../lib/MakeOnce";
+import { MakeOnce } from "../lib/utils/MakeOnce";
 
 export const IdFactoryGetter = new (class extends MakeOnce<IdFactory> {
 	protected make(): IdFactory {

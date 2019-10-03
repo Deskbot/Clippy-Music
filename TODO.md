@@ -7,9 +7,8 @@ List
 ----
 
 * test everything
-* increase the title character limit somewhat
-* Recover admin password when restarting the server
 * Allow linking to video by url
+* Recover admin password when restarting the server
 * Silent looping Video overlay
 	* Then rename image/pic variables to overlay everywhere
 	* These need making consistent anyway

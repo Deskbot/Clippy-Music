@@ -8,7 +8,7 @@ import * as consts from "./consts";
 import * as opt from "../options";
 import * as utils from "./utils/utils";
 
-import { QuickValuesMap } from "./QuickValuesMap";
+import { QuickValuesMap } from "./utils/QuickValuesMap";
 
 interface ProgressItem {
 	autoUpdate?: Function;
