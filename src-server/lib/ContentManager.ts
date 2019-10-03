@@ -228,9 +228,9 @@ export class ContentManager extends EventEmitter {
 		let info: UrlMusicData;
 
 		try {
-			info = await getMusicInfoByUrl(uplData.music.path);
+			info = await getMusicInfoByUrl(uplData.music.url);
 		} catch (err) {
-			throw new YTError(`I was unable to download (${uplData.music.title ? uplData.music.title : uplData.music.path}). Is the URL correct? The video might not be compatible.`);
+			throw new YTError(`I was unable to download (${uplData.music.title ? uplData.music.title : uplData.music.url}). Is the URL correct? The video might not be compatible.`);
 		}
 
 		if (this.musicUrlIsUnique(info.uniqueUrlId)) {
@@ -344,7 +344,9 @@ export class ContentManager extends EventEmitter {
 		this.currentlyPlaying = contentData;
 
 		const timePlayedAt = Date.now();
-		const musicProc = this.startMusic(contentData.music.path, opt.timeout, contentData.startTime, contentData.endTime);
+
+		const musicLocation = contentData.music.stream ? contentData.music.url : contentData.music.path;
+		const musicProc = this.startMusic(musicLocation, opt.timeout, contentData.startTime, contentData.endTime);
 
 		musicProc.on("close", (code, signal) => { // runs before next call to playNext
 			const secs = 1 + Math.ceil((Date.now() - timePlayedAt) / 1000); //seconds ran for, adds a little bit to prevent infinite <1 second content
@@ -372,7 +374,6 @@ export class ContentManager extends EventEmitter {
 		}
 
 		this.logPlay(contentData);
-
 		this.emit("queue-update");
 
 		return true;
@@ -380,7 +381,7 @@ export class ContentManager extends EventEmitter {
 
 	private publicify(item: ItemData): PublicItemData {
 		return {
-			downloadLink: item.music.isUrl ? item.music.path : undefined,
+			downloadLink: item.music.isUrl ? item.music.url : undefined,
 			duration: item.duration,
 			id: item.id,
 			nickname: this.userRecord.getNickname(item.userId),
@@ -514,18 +515,15 @@ export class ContentManager extends EventEmitter {
 
 			} else {
 				const nmp = this.nextMusicPath();
-
 				const st = new Date().getTime();
 
-				await this.ytDownloader.new(cid, uid, music.title, music.path, nmp);
+				await this.ytDownloader.new(cid, uid, music.title, music.url, nmp);
 
 				// when download is completed, then
 				// count how long it took
 				const et = new Date().getTime();
 				const dlTime = utils.roundDps((et - st) / 1000, 2);
 				const ratio = utils.roundDps(music.totalFileDuration / dlTime, 2);
-
-				music.path = nmp; //play from this path not url
 
 				//log the time taken to download
 				console.log(`yt-dl vid (${music.uniqueId}) of length ${music.totalFileDuration}s took ${dlTime}s to download, ratio: ${ratio}`);
@@ -538,7 +536,10 @@ export class ContentManager extends EventEmitter {
 				//or being downloaded twice in quick succession
 				if (this.musicHashIsUnique(musicHash)) {
 					return {
-						...music,
+						...{
+							...music,
+							path: nmp,
+						},
 						hash: musicHash,
 						stream: false,
 					};
