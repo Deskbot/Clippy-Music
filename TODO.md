@@ -7,7 +7,6 @@ List
 ----
 
 * test everything
-* improve failure message when a video "cant be found"
 * Is the behaviour of forgetting an item when it is removed from the queue correct?
 * Change the "Progress" label to "Upload Progress"
 * improve the layout of title, username, and duration
