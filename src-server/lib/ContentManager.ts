@@ -5,7 +5,6 @@ import * as request from "request";
 import * as fs from "fs";
 
 import * as consts from "./consts";
-import * as debug from "./debug";
 import * as utils from "./utils/utils";
 import * as opt from "../options";
 import * as time from "./time";
@@ -98,7 +97,6 @@ export class ContentManager extends EventEmitter {
 			return dataToQueue;
 		} catch (err) {
 			// errors here are sent by websocket
-			debug.error(err);
 			throw err;
 		}
 	}
@@ -259,7 +257,6 @@ export class ContentManager extends EventEmitter {
 		try {
 			info = await getMusicInfoByUrl(uplData.music.path);
 		} catch (err) {
-			debug.error(err);
 			throw new YTError(`I could not find the video requested (${uplData.music.path}). Is the URL correct?`);
 		}
 

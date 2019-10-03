@@ -74,7 +74,7 @@ class Api {
 		}
 
 		const message = JSON.stringify({
-			type: type,
+			type,
 			success: true,
 			message: mes,
 		});
