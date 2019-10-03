@@ -7,9 +7,6 @@ List
 ----
 
 * test everything
-* Is the behaviour of forgetting an item when it is removed from the queue correct?
-* Change the "Progress" label to "Upload Progress"
-* improve the layout of title, username, and duration
 * increase the title character limit somewhat
 * Recover admin password when restarting the server
 * Allow linking to video by url
@@ -25,13 +22,14 @@ List
 * update the state of the choose music file button when pasting into youtube url box
 * playlist upload
 * multiple file uploads at once
+* empty queue of duplicate files after each thing is remembered
 * Allow admins to remove anything before it gets played
 * Allow killing the thing you yourself are playing
-* Put development diagrams in repo
 * Sometimes unmoved windows move by a small amount when a window above is closed
 * Dragging a window when another window resizes, causes the one you're dragging to shift.
 	* maybe consider changing the way the layout is done. how often do people resize the browser window anyway? I don't think i need to be account for all that
 * Improve the way clippy reconnects the websocket, maybe do it as soon as the tab regains focus and update the queue data at the same time.
+* Put development diagrams in repo
 
 ---
 
