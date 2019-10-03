@@ -325,7 +325,6 @@ export class ContentManager extends EventEmitter {
 		if (this.stop) return false;
 
 		const contentData = this.playQueue.next();
-		const that = this;
 
 		if (!contentData) {
 			this.currentlyPlaying = null;
@@ -351,26 +350,28 @@ export class ContentManager extends EventEmitter {
 		musicProc.on("close", (code, signal) => { // runs before next call to playNext
 			const secs = 1 + Math.ceil((Date.now() - timePlayedAt) / 1000); //seconds ran for, adds a little bit to prevent infinite <1 second content
 
-			that.stopPic();
-			that.deleteContent(contentData);
-			that.currentlyPlaying = null;
+			this.stopPic();
+			this.deleteContent(contentData);
+			this.currentlyPlaying = null;
 
 			// save hashes if the music played for long enough
 			if (secs > opt.tooShortToCauseCoolOff) this.remember(contentData);
 
-			that.emit("end");
+			this.emit("end");
 		});
 
 		if (contentData.pic.exists) {
 			const picPath = contentData.pic.path;
-			musicProc.stdout.on("data", function showPicture(buf) {
+			const showPicture = (buf: any) => {
 				//we want to play the picture after the video has appeared, which takes a long time when doing it remotely
 				//so we have to check the output of mpv, for signs it's not just started up, but also playing :/
 				if (buf.includes("(+)") || buf.includes("Audio") || buf.includes("Video")) {
-					that.startPic(picPath, opt.timeout);
+					this.startPic(picPath, opt.timeout);
 					musicProc.stdout.removeListener("data", showPicture); //make sure we only check for this once, for efficiency
 				}
-			});
+			};
+
+			musicProc.stdout.on("data", showPicture);
 		}
 
 		this.logPlay(contentData);
