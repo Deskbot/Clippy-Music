@@ -193,6 +193,7 @@ export class ContentManager extends EventEmitter {
 
 		for (const bucket of tooMuchDataInBuckets) {
 			const publicBucket = bucket.map(item => ({
+				downloadLink: item.music.isUrl ? item.music.path : undefined,
 				duration: item.duration,
 				id: item.id,
 				nickname: this.userRecord.getNickname(item.userId),
@@ -209,6 +210,7 @@ export class ContentManager extends EventEmitter {
 	getCurrentlyPlaying(): PublicItemData | undefined {
 		if (this.currentlyPlaying) {
 			return {
+				downloadLink: this.currentlyPlaying.music.isUrl ? this.currentlyPlaying.music.path : undefined,
 				duration: this.currentlyPlaying.duration,
 				id: this.currentlyPlaying.id,
 				nickname: this.userRecord.getNickname(this.currentlyPlaying.userId),
