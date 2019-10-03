@@ -55,6 +55,7 @@ export type MusicWithMetadata = (
 	UrlMusic & {
 		uniqueId: string;
 		title: string;
+		totalFileDuration: number;
 	}
 ) | (
 	FileMusic & {

@@ -237,7 +237,7 @@ export class ContentManager extends EventEmitter {
 	private async getDataToQueue(uplData: UploadDataWithId): Promise<UploadDataWithIdTitleDuration> {
 		if (!uplData.music.isUrl) {
 			// read the music file to determine its duration
-			const duration = await getFileDuration(uplData.music.path);
+			const fileDuration = await getFileDuration(uplData.music.path);
 			const uplDataWithDuration = {
 				...uplData,
 				music: {
@@ -246,7 +246,7 @@ export class ContentManager extends EventEmitter {
 				pic: {
 					...uplData.pic,
 				},
-				duration: this.calcPlayableDuration(duration, uplData.startTime, uplData.endTime),
+				duration: this.calcPlayableDuration(fileDuration, uplData.startTime, uplData.endTime),
 			};
 
 			return uplDataWithDuration;
@@ -263,6 +263,7 @@ export class ContentManager extends EventEmitter {
 		if (this.musicUrlIsUnique(info.uniqueUrlId)) {
 			const musicData = {
 				...uplData.music,
+				totalFileDuration: info.duration,
 				title: info.title,
 				uniqueId: info.uniqueUrlId,
 			};
@@ -496,7 +497,6 @@ export class ContentManager extends EventEmitter {
 				someItemData.music,
 				someItemData.id,
 				someItemData.userId,
-				someItemData.duration,
 			);
 
 			// if the picture fails, make sure any yt download is stopped
@@ -524,25 +524,25 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	private async tryPrepMusic(music: MusicWithMetadata, cid: number, uid: string, duration: number): Promise<CompleteMusic> {
+	private async tryPrepMusic(music: MusicWithMetadata, cid: number, uid: string): Promise<CompleteMusic> {
 		if (music.isUrl) {
-			if (duration <= opt.streamOverDuration) {
-				let nmp = this.nextMusicPath();
+			if (music.totalFileDuration <= opt.streamOverDuration) {
+				const nmp = this.nextMusicPath();
 
-				let st = new Date().getTime();
+				const st = new Date().getTime();
 
 				await this.ytDownloader.new(cid, uid, music.title, music.path, nmp);
 
 				// when download is completed, then
 				// count how long it took
-				let et = new Date().getTime();
-				let dlTime = utils.roundDps((et - st) / 1000, 2);
-				let ratio = utils.roundDps(duration / dlTime, 2);
+				const et = new Date().getTime();
+				const dlTime = utils.roundDps((et - st) / 1000, 2);
+				const ratio = utils.roundDps(music.totalFileDuration / dlTime, 2);
 
 				music.path = nmp; //play from this path not url
 
-				//log the duration
-				console.log(`yt-dl vid (${music.uniqueId}) of length ${duration}s took ${dlTime}s to download, ratio: ${ratio}`);
+				//log the time taken to download
+				console.log(`yt-dl vid (${music.uniqueId}) of length ${music.totalFileDuration}s took ${dlTime}s to download, ratio: ${ratio}`);
 
 				//hash the music (async)
 				const musicHash = await utils.fileHash(nmp);
