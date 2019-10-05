@@ -17,6 +17,7 @@ import { UserRecordGetter } from "./UserRecordService";
 import { WebSocketService } from "./WebSocketService";
 import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingError } from "../lib/errors";
 import { UploadData, UrlPic, NoPic, FilePic, FileMusic, UrlMusic, UploadDataWithId } from "../types/UploadData";
+import { verifyPassword } from "../lib/PasswordContainer";
 
 type RequestWithFormData = express.Request & {
 	fields: formidable.Fields;
@@ -24,10 +25,10 @@ type RequestWithFormData = express.Request & {
 };
 
 function adminCredentialsRequired(req: RequestWithFormData, res: express.Response, next: () => void) {
-	const passwordService = PasswordService.get();
-	if (passwordService == null) {
+	const passwordContainer = PasswordService.getContainer();
+	if (passwordContainer == null) {
 		res.status(400).end("The admin controls can not be used because no admin password was set.\n");
-	} else if (passwordService.verify(req.fields.password as string)) {
+	} else if (verifyPassword(req.fields.password as string, passwordContainer)) {
 		next();
 	} else {
 		res.status(400).end("Admin password incorrect.\n");

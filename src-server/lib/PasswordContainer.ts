@@ -20,6 +20,6 @@ function makeSalt(): Buffer {
 	return crypto.randomBytes(64);
 }
 
-export function verify(inputPass: string, passwordContainer: PasswordContainer): boolean {
+export function verifyPassword(inputPass: string, passwordContainer: PasswordContainer): boolean {
 	return hash(inputPass, passwordContainer.salt) === passwordContainer.hashedPassword;
 }
