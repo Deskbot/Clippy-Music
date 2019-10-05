@@ -10,7 +10,7 @@ export interface UploadData {
 
 export interface UrlMusic {
 	isUrl: true;
-	path: string;
+	url: string;
 	title?: string;
 }
 

@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as consts from "../lib/consts";
 
 import { UserRecord } from "../lib/UserRecord";
-import { MakeOnce } from "../lib/MakeOnce";
+import { MakeOnce } from "../lib/utils/MakeOnce";
 
 export const UserRecordGetter = new (class extends MakeOnce<UserRecord> {
 	protected make(): UserRecord {

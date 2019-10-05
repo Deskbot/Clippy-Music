@@ -192,14 +192,7 @@ export class ContentManager extends EventEmitter {
 		const publicBuckets = [] as PublicItemData[][];
 
 		for (const bucket of tooMuchDataInBuckets) {
-			const publicBucket = bucket.map(item => ({
-				duration: item.duration,
-				id: item.id,
-				nickname: this.userRecord.getNickname(item.userId),
-				title: item.music.title,
-				userId: item.userId,
-			}));
-
+			const publicBucket = bucket.map(item => this.publicify(item));
 			publicBuckets.push(publicBucket);
 		}
 
@@ -208,13 +201,7 @@ export class ContentManager extends EventEmitter {
 
 	getCurrentlyPlaying(): PublicItemData | undefined {
 		if (this.currentlyPlaying) {
-			return {
-				duration: this.currentlyPlaying.duration,
-				id: this.currentlyPlaying.id,
-				nickname: this.userRecord.getNickname(this.currentlyPlaying.userId),
-				title: this.currentlyPlaying.music.title,
-				userId: this.currentlyPlaying.userId,
-			};
+			return this.publicify(this.currentlyPlaying);
 		}
 
 		return undefined;
@@ -241,9 +228,9 @@ export class ContentManager extends EventEmitter {
 		let info: UrlMusicData;
 
 		try {
-			info = await getMusicInfoByUrl(uplData.music.path);
+			info = await getMusicInfoByUrl(uplData.music.url);
 		} catch (err) {
-			throw new YTError(`I was unable to download (${uplData.music.title ? uplData.music.title : uplData.music.path}). Is the URL correct? The video might not be compatible.`);
+			throw new YTError(`I was unable to download (${uplData.music.title ? uplData.music.title : uplData.music.url}). Is the URL correct? The video might not be compatible.`);
 		}
 
 		if (this.musicUrlIsUnique(info.uniqueUrlId)) {
@@ -338,7 +325,6 @@ export class ContentManager extends EventEmitter {
 		if (this.stop) return false;
 
 		const contentData = this.playQueue.next();
-		const that = this;
 
 		if (!contentData) {
 			this.currentlyPlaying = null;
@@ -357,38 +343,52 @@ export class ContentManager extends EventEmitter {
 		this.currentlyPlaying = contentData;
 
 		const timePlayedAt = Date.now();
-		const musicProc = this.startMusic(contentData.music.path, opt.timeout, contentData.startTime, contentData.endTime);
+
+		const musicLocation = contentData.music.stream ? contentData.music.url : contentData.music.path;
+		const musicProc = this.startMusic(musicLocation, opt.timeout, contentData.startTime, contentData.endTime);
 
 		musicProc.on("close", (code, signal) => { // runs before next call to playNext
 			const secs = 1 + Math.ceil((Date.now() - timePlayedAt) / 1000); //seconds ran for, adds a little bit to prevent infinite <1 second content
 
-			that.stopPic();
-			that.deleteContent(contentData);
-			that.currentlyPlaying = null;
+			this.stopPic();
+			this.deleteContent(contentData);
+			this.currentlyPlaying = null;
 
 			// save hashes if the music played for long enough
 			if (secs > opt.tooShortToCauseCoolOff) this.remember(contentData);
 
-			that.emit("end");
+			this.emit("end");
 		});
 
 		if (contentData.pic.exists) {
 			const picPath = contentData.pic.path;
-			musicProc.stdout.on("data", function showPicture(buf) {
+			const showPicture = (buf: any) => {
 				//we want to play the picture after the video has appeared, which takes a long time when doing it remotely
 				//so we have to check the output of mpv, for signs it's not just started up, but also playing :/
 				if (buf.includes("(+)") || buf.includes("Audio") || buf.includes("Video")) {
-					that.startPic(picPath, opt.timeout);
+					this.startPic(picPath, opt.timeout);
 					musicProc.stdout.removeListener("data", showPicture); //make sure we only check for this once, for efficiency
 				}
-			});
+			};
+
+			musicProc.stdout.on("data", showPicture);
 		}
 
 		this.logPlay(contentData);
-
 		this.emit("queue-update");
 
 		return true;
+	}
+
+	private publicify(item: ItemData): PublicItemData {
+		return {
+			downloadLink: item.music.isUrl ? item.music.url : undefined,
+			duration: item.duration,
+			id: item.id,
+			nickname: this.userRecord.getNickname(item.userId),
+			title: item.music.title,
+			userId: item.userId,
+		};
 	}
 
 	purgeUser(uid: string) {
@@ -516,18 +516,15 @@ export class ContentManager extends EventEmitter {
 
 			} else {
 				const nmp = this.nextMusicPath();
-
 				const st = new Date().getTime();
 
-				await this.ytDownloader.new(cid, uid, music.title, music.path, nmp);
+				await this.ytDownloader.new(cid, uid, music.title, music.url, nmp);
 
 				// when download is completed, then
 				// count how long it took
 				const et = new Date().getTime();
 				const dlTime = utils.roundDps((et - st) / 1000, 2);
 				const ratio = utils.roundDps(music.totalFileDuration / dlTime, 2);
-
-				music.path = nmp; //play from this path not url
 
 				//log the time taken to download
 				console.log(`yt-dl vid (${music.uniqueId}) of length ${music.totalFileDuration}s took ${dlTime}s to download, ratio: ${ratio}`);
@@ -540,7 +537,10 @@ export class ContentManager extends EventEmitter {
 				//or being downloaded twice in quick succession
 				if (this.musicHashIsUnique(musicHash)) {
 					return {
-						...music,
+						...{
+							...music,
+							path: nmp,
+						},
 						hash: musicHash,
 						stream: false,
 					};

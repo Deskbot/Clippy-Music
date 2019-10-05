@@ -22,9 +22,13 @@ var Queue = {
 
 			var $bucketItem = templates.makeBucketItem();
 			var $bucketNickname = $bucketItem.children(".nickname");
+			var title = item.downloadLink
+				? templates.makeLinkToContent(item.title, item.downloadLink)
+				: item.title;
+
 			$bucketNickname.html(item.nickname);
 			$bucketItem.children(".duration").html("[" + utils.formatSeconds(item.duration) + "]");
-			$bucketItem.children(".title").html(item.title);
+			$bucketItem.children(".title").html(title);
 
 			if (isMine) {
 				$bucketNickname.addClass("my-nickname");

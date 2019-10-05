@@ -2,7 +2,7 @@ import prompt = require("prompt");
 import * as readline from "readline";
 
 import * as consts from "./lib/consts";
-import * as debug from "./lib/debug";
+import * as debug from "./lib/utils/debug";
 import * as opt from "./options";
 import * as utils from "./lib/utils/utils";
 

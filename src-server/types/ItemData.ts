@@ -20,10 +20,10 @@ export type CompleteMusic = {
 } | {
 	isUrl: true,
 	hash: undefined,
-	path: string,
 	stream: true,
 	title: string,
 	uniqueId: string;
+	url: string;
 } | {
 	isUrl: true,
 	hash: number,
@@ -31,6 +31,7 @@ export type CompleteMusic = {
 	stream: false,
 	title: string,
 	uniqueId: string;
+	url: string;
 }
 
 export interface CompleteUrlPic extends UrlPic {

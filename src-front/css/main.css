@@ -411,6 +411,16 @@ button.action {
 	display: none;
 }
 
+.link-to-content {
+	color: inherit;
+	font-family: inherit;
+	text-decoration: inherit;
+}
+
+#queue-section .link-to-content:hover {
+	text-decoration: underline;
+}
+
 /* special cases */
 
 #party-mode-canvas {

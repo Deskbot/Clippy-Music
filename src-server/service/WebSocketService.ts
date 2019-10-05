@@ -1,6 +1,6 @@
 import ws = require("ws");
 
-import * as debug from "../lib/debug";
+import * as debug from "../lib/utils/debug";
 import * as opt from "../options";
 
 import { WebSocketHandler } from "../lib/WebSocketHandler";

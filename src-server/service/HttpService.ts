@@ -5,7 +5,7 @@ import * as q from "q";
 import { URL } from "url";
 
 import * as consts from "../lib/consts";
-import * as debug from "../lib/debug";
+import * as debug from "../lib/utils/debug";
 import * as opt from "../options";
 import * as utils from "../lib/utils/utils";
 
@@ -163,7 +163,7 @@ function parseUploadForm(
 		if (fields["music-url"]) {
 			music = {
 				isUrl: true,
-				path: fields["music-url"] as string,
+				url: fields["music-url"] as string,
 			};
 
 			if (musicFile) utils.deleteFile(musicFile.path);
@@ -325,23 +325,21 @@ app.post("/api/queue/add", recordUserMiddleware, (req, res) => {
 		}
 
 		if (uplData.music.isUrl) {
-			const { hostname } = new URL(uplData.music.path);
+			const { hostname } = new URL(uplData.music.url);
 			if (utils.looksLikeIpAddress(hostname)) {
 				// prevent cheesing the uniqueness cooloff by using the IP Address and site name
 				throw new Error("I can not download music from an IP address.");
 			}
 
-			ProgressQueueServiceGetter.get().setTitle(req.ip, contentId, uplData.music.path, true);
+			ProgressQueueServiceGetter.get().setTitle(req.ip, contentId, uplData.music.url, true);
 			// the title and duration are set later by `ContentService.add(uplData)`
 		}
 
-		let itemData;
-
 		try {
-			itemData = await ContentServiceGetter.get().add(uplData);
+			var itemData = await ContentServiceGetter.get().add(uplData);
 		} catch (err) {
 			if (err instanceof DurationFindingError) {
-				console.error("Error discerning the duration of a music file.", err, uplData.music.path);
+				console.error("Error discerning the duration of a music file.", err, uplData.music);
 				throw new FileUploadError(
 					`I could not count the duration of the music file you uploaded (${uplData.music.title}).`,
 					Object.values(files)
