@@ -1,23 +1,25 @@
 import * as crypto from "crypto";
 
-export class PasswordContainer {
-	private salt: Buffer;
-	private hashedPassword: Buffer;
-
-	constructor(inputPass: string) {
-		this.salt = newSalt();
-		this.hashedPassword = hash(inputPass, this.salt);
-	}
-
-	verify(inputPass: string) {
-		return hash(inputPass, this.salt) === this.hashedPassword;
-	}
+export interface PasswordContainer {
+	hashedPassword: Buffer;
+	salt: Buffer;
 }
 
 function hash(password: string, salt: Buffer): Buffer {
 	return crypto.scryptSync(password, salt, 64);
 }
 
-function newSalt(): Buffer {
+export function newContainer(inputPass: string): PasswordContainer {
+	return {
+		hashedPassword: hash(inputPass, this.salt),
+		salt: makeSalt(),
+	};
+}
+
+function makeSalt(): Buffer {
 	return crypto.randomBytes(64);
+}
+
+export function verify(inputPass: string, passwordContainer: PasswordContainer): boolean {
+	return hash(inputPass, passwordContainer.salt) === passwordContainer.hashedPassword;
 }

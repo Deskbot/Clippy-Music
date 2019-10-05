@@ -1,4 +1,4 @@
-import { PasswordContainer } from "../lib/PasswordContainer";
+import { newContainer, PasswordContainer } from "../lib/PasswordContainer";
 
 class Api {
 	private container: PasswordContainer | null = null;
@@ -8,7 +8,7 @@ class Api {
 	}
 
 	set(pw: string) {
-		this.container = new PasswordContainer(pw);
+		this.container = newContainer(pw);
 	}
 }
 
