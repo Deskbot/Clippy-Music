@@ -121,6 +121,7 @@ function setUpControls() {
 		ContentService.store();
 		IdFactoryService.store();
 		UserRecordService.store();
+		PasswordService.store();
 
 		if (contentManager.isPlaying()) {
 			console.log("Waiting for content being played to get deleted.");

@@ -10,9 +10,10 @@ function hash(password: string, salt: Buffer): Buffer {
 }
 
 export function newContainer(inputPass: string): PasswordContainer {
+	const salt = makeSalt();
 	return {
-		hashedPassword: hash(inputPass, this.salt),
-		salt: makeSalt(),
+		salt,
+		hashedPassword: hash(inputPass, salt),
 	};
 }
 
