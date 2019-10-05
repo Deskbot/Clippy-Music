@@ -11,5 +11,7 @@ Upload music file          | File wrong type; File too big; User is banned; not 
 YouTube upload             | Video doesn't exist; not unique
 Cancel YouTube upload      |
 Remove item from the queue |
+Can link to music by URL   |
+Can not link to file music |
 
 All tests need to be done by the web interface and by `curl`.

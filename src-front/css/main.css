@@ -417,7 +417,7 @@ button.action {
 	text-decoration: inherit;
 }
 
-.link-to-content:hover {
+#queue-section .link-to-content:hover {
 	text-decoration: underline;
 }
 

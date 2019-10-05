@@ -7,8 +7,6 @@ List
 ----
 
 * test everything
-* Allow linking to video by url
-	* render url on front end
 * Recover admin password when restarting the server
 * Silent looping Video overlay
 	* Then rename image/pic variables to overlay everywhere

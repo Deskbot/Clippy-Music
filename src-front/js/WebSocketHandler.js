@@ -219,7 +219,10 @@ var WebSocketHandler = (function() {
 			}
 
 			if (data.current) {
-				$title.html(data.current.title);
+				var title = data.current.downloadLink
+					? templates.makeLinkToContent(data.current.title, data.current.downloadLink)
+					: data.current.title;
+				$title.html(title);
 				$title.attr("data-text", utils.htmlEntityDecode(data.current.title));
 
 				$currentlyPlaying.find(".duration")
