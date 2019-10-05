@@ -1,6 +1,6 @@
 import * as fs from "fs";
 
-import * as consts from "../lib/consts";
+import * as consts from "../consts";
 import * as opt from "../options";
 
 import { IdFactoryGetter } from "./IdFactoryService";

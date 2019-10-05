@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import * as consts from "../lib/consts";
+import * as consts from "../consts";
 import { newContainer, PasswordContainer } from "../lib/PasswordContainer";
 
 class Api {

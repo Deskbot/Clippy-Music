@@ -4,7 +4,7 @@
 
 import { EventEmitter } from "events";
 
-import * as consts from "./consts";
+import * as consts from "../consts";
 import * as opt from "../options";
 import * as utils from "./utils/utils";
 
