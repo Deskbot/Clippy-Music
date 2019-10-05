@@ -350,20 +350,6 @@ $("#dl-list-container").on("click", "button.cancel", function(e) {
 	});
 });
 
-var $currentlyPlaying = $("#currently-playing");
-
-$currentlyPlaying.on("dblclick", ".wordart", function() {
-	utils.counterShiftResize($("#current-section"), function() {
-		$(this).removeClass("wordart").addClass("no-wordart");
-	}.bind(this));
-});
-
-$currentlyPlaying.on("dblclick", ".no-wordart", function() {
-	utils.counterShiftResize($("#current-section"), function() {
-		$(this).removeClass("no-wordart").addClass("wordart");
-	}.bind(this));
-});
-
 $("#skip-button").click(function() {
 	var adminPassword = $adminPasswordInput.val();
 
