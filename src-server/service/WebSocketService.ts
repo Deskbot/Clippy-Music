@@ -13,7 +13,7 @@ import { UserRecord } from "../lib/UserRecord";
 
 //really a namespace where all functions are hoisted
 class WebSocketService {
-	private wsh: WebSocketHandler;
+	private readonly wsh: WebSocketHandler;
 
 	private readonly contentService: ContentManager;
 	private readonly userRecordService: UserRecord;
@@ -130,27 +130,7 @@ class WebSocketService {
 		}
 	}
 
-	broadcastMessage(type: string, mes: string) {
-		const message = JSON.stringify({
-			type: type,
-			message: mes,
-		});
-
-		this.wsh.broadcast(message);
-	}
-
 	//queue related
-
-	makeQueueMessage() {
-		const ContentService = ContentServiceGetter.get();
-
-		return {
-			current: ContentService.getCurrentlyPlaying(),
-			maxBucketTime: opt.timeout,
-			queue: ContentService.getBucketsForPublic(),
-			type: "queue",
-		};
-	}
 
 	sendQueue(socs: ws | ws[]) {
 		if (!socs) {
@@ -159,7 +139,7 @@ class WebSocketService {
 			return;
 		}
 
-		const message = JSON.stringify(this.makeQueueMessage());
+		const message = JSON.stringify(makeQueueMessage());
 
 		this.wsh.sendToMany(socs, message);
 	}
@@ -173,7 +153,7 @@ class WebSocketService {
 	}
 
 	broadcastQueue() {
-		this.wsh.broadcast(JSON.stringify(this.makeQueueMessage()));
+		this.wsh.broadcast(JSON.stringify(makeQueueMessage()));
 	}
 }
 
@@ -183,11 +163,22 @@ export const WebSocketServiceGetter = new (class extends MakeOnce<WebSocketServi
 	}
 })();
 
+function makeQueueMessage() {
+	const ContentService = ContentServiceGetter.get();
+
+	return {
+		current: ContentService.getCurrentlyPlaying(),
+		maxBucketTime: opt.timeout,
+		queue: ContentService.getBucketsForPublic(),
+		type: "queue",
+	};
+}
+
 export function startWebSocketService() {
 	const ContentService = ContentServiceGetter.get();
 	const ProgressQueueService = ProgressQueueServiceGetter.get();
-	const WebSocketService = WebSocketServiceGetter.get();
 	const UserRecordService = UserRecordGetter.get();
+	const WebSocketService = WebSocketServiceGetter.get();
 
 	let lastQueueWasEmpty = false;
 	ContentService.on("queue-empty", () => {
