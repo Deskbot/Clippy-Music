@@ -12,7 +12,7 @@ function isPasswordContainer(val: any): val is SuspendedPasswordContainer {
 	return "hashedPassword" in val
 		&& arrayUtils.isNumberArray(val.hashedPassword)
 		&& "salt" in val
-		&& arrayUtils.isNumberArray(val.salt)
+		&& arrayUtils.isNumberArray(val.salt);
 }
 
 class Api {
@@ -23,16 +23,15 @@ class Api {
 	}
 
 	recover(): boolean {
+		console.log("Reading suspended password container");
+
 		try {
 			var file = fs.readFileSync(consts.files.password).toString();
-			console.log("Reading suspended password container");
 
 		} catch (e) {
 			console.log("No suspended password container found. This is ok.");
 			return false;
 		}
-
-		console.log("Reading suspended password container");
 
 		try {
 			var recoveredObj = JSON.parse(file);

@@ -9,7 +9,6 @@ List
 * test everything
 * Recover admin password when restarting the server
 	* password recovery
-	* Deleting any suspended user record, content manager, or log file... should come before recoveries
 * add tests for / and /admin loading
 * no suspended id factory implies content manager recovery should be ignored
 * no suspended user record found implies content manager should be ignored
