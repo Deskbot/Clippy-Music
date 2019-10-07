@@ -1,19 +1,20 @@
 import * as crypto from "crypto";
+import { promisify } from "util";
 
 export interface PasswordContainer {
 	hashedPassword: Buffer;
 	salt: Buffer;
 }
 
-function hash(password: string, salt: Buffer): Buffer {
-	return crypto.scryptSync(password, salt, 64);
-}
+const hash = promisify<string, Buffer, Buffer>((password, salt, callback) => {
+	crypto.scrypt(password, salt, 64, callback);
+});
 
-export function newContainer(inputPass: string): PasswordContainer {
+export async function newContainer(inputPass: string): Promise<PasswordContainer> {
 	const salt = makeSalt();
 	return {
 		salt,
-		hashedPassword: hash(inputPass, salt),
+		hashedPassword: await hash(inputPass, salt),
 	};
 }
 
@@ -21,6 +22,6 @@ function makeSalt(): Buffer {
 	return crypto.randomBytes(64);
 }
 
-export function verifyPassword(inputPass: string, passwordContainer: PasswordContainer): boolean {
-	return hash(inputPass, passwordContainer.salt) === passwordContainer.hashedPassword;
+export async function verifyPassword(input: string, container: PasswordContainer): Promise<boolean> {
+	return await hash(input, container.salt) === container.hashedPassword;
 }

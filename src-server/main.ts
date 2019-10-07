@@ -95,7 +95,7 @@ async function setUpAdmin(): Promise<void> {
 
 		if (!suspendedPasswordExists) {
 			const pass = await chooseAdminPassword();
-			PasswordService.setNew(pass);
+			await PasswordService.setNew(pass);
 		}
 
 	} catch (err) {

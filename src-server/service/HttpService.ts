@@ -24,11 +24,14 @@ type RequestWithFormData = express.Request & {
 	files: formidable.Files;
 };
 
-function adminCredentialsRequired(req: RequestWithFormData, res: express.Response, next: () => void) {
+async function adminCredentialsRequired(req: RequestWithFormData, res: express.Response, next: () => void) {
 	const passwordContainer = PasswordService.getContainer();
 	if (passwordContainer == null) {
 		res.status(400).end("The admin controls can not be used because no admin password was set.\n");
-	} else if (verifyPassword(req.fields.password as string, passwordContainer)) {
+		return;
+	}
+
+	if (await verifyPassword(req.fields.password as string, passwordContainer)) {
 		next();
 	} else {
 		res.status(400).end("Admin password incorrect.\n");

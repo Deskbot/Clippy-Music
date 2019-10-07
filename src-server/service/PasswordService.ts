@@ -51,14 +51,15 @@ class Api {
 				hashedPassword: Buffer.from(recoveredObj.hashedPassword),
 				salt: Buffer.from(recoveredObj.salt),
 			};
+
 			return true;
 		}
 
 		return false;
 	}
 
-	setNew(pw: string) {
-		this.container = newContainer(pw);
+	async setNew(pw: string) {
+		this.container = await newContainer(pw);
 	}
 
 	store() {
