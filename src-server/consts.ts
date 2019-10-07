@@ -33,4 +33,4 @@ export const files = {
 
 export const queueUpdateMaxFreq = 2000;
 
-export const staticDirPath = path.normalize(__dirname + "/../../src-front");
+export const staticDirPath = path.normalize(__dirname + "/../src-front");
