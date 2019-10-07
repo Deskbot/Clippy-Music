@@ -7,8 +7,6 @@ List
 ----
 
 * test everything
-* Recover admin password when restarting the server
-	* password recovery
 * add tests for / and /admin loading
 * no suspended id factory implies content manager recovery should be ignored
 * no suspended user record found implies content manager should be ignored
@@ -21,7 +19,7 @@ List
 	* Only allow downloading of the currently playing content. I hate seeing people waste their time looking ahead. It ruins the fun.
 	* allow downloading of things that have just played
 	* image download
-* update the state of the choose music file button when pasting into youtube url box
+* update the state of the choose music file button when dragging into url box
 * playlist upload
 * multiple file uploads at once
 * empty queue of duplicate files after each thing is remembered
