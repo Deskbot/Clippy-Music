@@ -7,25 +7,35 @@ import { WebSocketHandler } from "../lib/WebSocketHandler";
 import { ContentServiceGetter } from "./ContentService";
 import { ProgressQueueServiceGetter } from "./ProgressQueueService";
 import { UserRecordGetter } from "./UserRecordService";
+import { MakeOnce } from "../lib/utils/MakeOnce";
+import { ContentManager } from "../lib/ContentManager";
+import { UserRecord } from "../lib/UserRecord";
 
 //really a namespace where all functions are hoisted
-class Api {
+class WebSocketService {
 	private wsh: WebSocketHandler;
 
+	private readonly contentService: ContentManager;
+	private readonly userRecordService: UserRecord;
+
 	constructor() {
-		const ContentService = ContentServiceGetter.get();
-		const UserRecordService = UserRecordGetter.get();
+		this.contentService = ContentServiceGetter.get();
+		this.userRecordService = UserRecordGetter.get();
 
 		const onConnect = (soc: ws, id: string) => {
 			//save user
-			UserRecordService.add(id);
-			UserRecordService.setWS(id, soc);
+			this.userRecordService.add(id);
+			this.userRecordService.setWS(id, soc);
 
 			//notify if banned
-			if (UserRecordService.isBanned(id)) this.sendBanned(soc);
+			if (this.userRecordService.isBanned(id)) {
+				this.sendBanned(soc);
+			}
 
 			//tell user their nickname
-			if (UserRecordService.isUser(id)) this.sendNickname(soc, UserRecordService.getNickname(id));
+			if (this.userRecordService.isUser(id)) {
+				this.sendNickname(soc, this.userRecordService.getNickname(id));
+			}
 
 			//send queue
 			this.sendQueue(soc);
@@ -36,7 +46,7 @@ class Api {
 			const dataObj = JSON.parse(data);
 
 			if (dataObj.type === "delete-content") {
-				if (!ContentService.remove(dataObj.contentId)) {
+				if (!this.contentService.remove(dataObj.contentId)) {
 					soc.send(JSON.stringify({
 						type: dataObj.type,
 						success: false,
@@ -54,7 +64,7 @@ class Api {
 		};
 
 		const onClose = (soc: ws, id: string) => {
-			UserRecordService.unsetWS(id, soc);
+			this.userRecordService.unsetWS(id, soc);
 		};
 
 		this.wsh = new WebSocketHandler(
@@ -113,7 +123,9 @@ class Api {
 		const ProgressQueueService = ProgressQueueServiceGetter.get();
 
 		const queue = ProgressQueueService.getQueue(userId);
-		if (queue) WebSocketService.sendMessage([soc], "dl-list", queue);
+		if (queue) {
+			WebSocketService.sendMessage([soc], "dl-list", queue);
+		}
 	}
 
 	broadcastMessage(type: string, mes: string) {
@@ -163,7 +175,11 @@ class Api {
 	}
 }
 
-export const WebSocketService = new Api();
+export const WebSocketServiceGetter = new (class extends MakeOnce<WebSocketService> {
+	make() {
+		return new WebSocketService();
+	}
+})();
 
 export function startWebSocketService() {
 	const ProgressQueueService = ProgressQueueServiceGetter.get();

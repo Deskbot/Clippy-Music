@@ -14,7 +14,7 @@ import { IdFactoryGetter } from "./IdFactoryService";
 import { ProgressQueueServiceGetter } from "./ProgressQueueService";
 import { PasswordService } from "./PasswordService";
 import { UserRecordGetter } from "./UserRecordService";
-import { WebSocketService } from "./WebSocketService";
+import { WebSocketServiceGetter } from "./WebSocketService";
 import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingError } from "../lib/errors";
 import { UploadData, UrlPic, NoPic, FilePic, FileMusic, UrlMusic, UploadDataWithId } from "../types/UploadData";
 import { verifyPassword } from "../lib/PasswordContainer";
@@ -125,7 +125,7 @@ function handleFileUpload(req: express.Request, contentId: number): q.Promise<[f
 function handlePotentialBan(userId: string) {
 	return new Promise((resolve, reject) => {
 		if (UserRecordGetter.get().isBanned(userId)) {
-			WebSocketService.sendBanned(UserRecordGetter.get().getSockets(userId));
+			WebSocketServiceGetter.get().sendBanned(UserRecordGetter.get().getSockets(userId));
 			return reject(new BannedError());
 		}
 
@@ -431,6 +431,7 @@ app.post("/api/download/cancel", (req: RequestWithFormData, res) => {
 //POST variable: nickname
 app.post("/api/nickname/set", recordUserMiddleware, (req: RequestWithFormData, res) => {
 	const UserRecordService = UserRecordGetter.get();
+	const WebSocketService = WebSocketServiceGetter.get()
 
 	const nickname = utils.sanitiseNickname(req.fields.nickname as string);
 
