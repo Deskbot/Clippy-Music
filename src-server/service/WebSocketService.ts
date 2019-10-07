@@ -22,57 +22,59 @@ class WebSocketService {
 		this.contentService = ContentServiceGetter.get();
 		this.userRecordService = UserRecordGetter.get();
 
-		const onConnect = (soc: ws, id: string) => {
-			//save user
-			this.userRecordService.add(id);
-			this.userRecordService.setWS(id, soc);
+		this.wsh = new WebSocketHandler(
+			this.onConnect.bind(this),
+			this.onMessage.bind(this),
+			this.onClose.bind(this),
+		);
+	}
 
-			//notify if banned
-			if (this.userRecordService.isBanned(id)) {
-				this.sendBanned(soc);
-			}
+	// handlers
 
-			//tell user their nickname
-			if (this.userRecordService.isUser(id)) {
-				this.sendNickname(soc, this.userRecordService.getNickname(id));
-			}
+	private onClose(soc: ws, id: string) {
+		this.userRecordService.unsetWS(id, soc);
+	};
 
-			//send queue
-			this.sendQueue(soc);
-			this.sendDlQueue(soc, id);
-		};
+	private onConnect(soc: ws, id: string) {
+		//save user
+		this.userRecordService.add(id);
+		this.userRecordService.setWS(id, soc);
 
-		const onMessage = (soc: ws, id: string, data: any) => {
-			const dataObj = JSON.parse(data);
+		//notify if banned
+		if (this.userRecordService.isBanned(id)) {
+			this.sendBanned(soc);
+		}
 
-			if (dataObj.type === "delete-content") {
-				if (!this.contentService.remove(dataObj.contentId)) {
-					soc.send(JSON.stringify({
-						type: dataObj.type,
-						success: false,
-						reason: "The queue item you tried to remove was not chosen by you.",
-					}));
-				}
+		//tell user their nickname
+		if (this.userRecordService.isUser(id)) {
+			this.sendNickname(soc, this.userRecordService.getNickname(id));
+		}
 
-			} else {
+		//send queue
+		this.sendQueue(soc);
+		this.sendDlQueue(soc, id);
+	};
+
+	private onMessage(soc: ws, id: string, data: any) {
+		const dataObj = JSON.parse(data);
+
+		if (dataObj.type === "delete-content") {
+			if (!this.contentService.remove(dataObj.contentId)) {
 				soc.send(JSON.stringify({
 					type: dataObj.type,
 					success: false,
-					reason: "The server did not recognise the type of message you were trying to send.",
+					reason: "The queue item you tried to remove was not chosen by you.",
 				}));
 			}
-		};
 
-		const onClose = (soc: ws, id: string) => {
-			this.userRecordService.unsetWS(id, soc);
-		};
-
-		this.wsh = new WebSocketHandler(
-			onConnect,
-			onMessage,
-			onClose,
-		);
-	}
+		} else {
+			soc.send(JSON.stringify({
+				type: dataObj.type,
+				success: false,
+				reason: "The server did not recognise the type of message you were trying to send.",
+			}));
+		}
+	};
 
 	//message related
 
