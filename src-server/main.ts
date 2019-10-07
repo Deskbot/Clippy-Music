@@ -1,7 +1,7 @@
 import prompt = require("prompt");
 import * as readline from "readline";
 
-import * as consts from "./lib/consts";
+import * as consts from "./consts";
 import * as debug from "./lib/utils/debug";
 import * as opt from "./options";
 import * as utils from "./lib/utils/utils";
@@ -25,15 +25,14 @@ const promptOpts = {
 
 main();
 
-function main() {
-	handleArguments().then(() => {
-		setUpDirs();
-		startWebSocketService();
-		startHttpService();
-		setUpControls();
-		startPlayingContent();
+async function main() {
+	await handleArguments();
 
-	}).catch(utils.reportError);
+	setUpDirs();
+	startWebSocketService();
+	startHttpService();
+	setUpControls();
+	startPlayingContent();
 }
 
 function chooseAdminPassword(): Promise<string> {
@@ -64,13 +63,12 @@ function chooseAdminPassword(): Promise<string> {
 	});
 }
 
-function handleArguments(): Promise<void[]> {
-	const promises: Promise<void>[] = [];
+async function handleArguments(): Promise<void> {
 	let admin = true;
 	opt.mute.set(false);
 
 	for (let i = 2; i < process.argv.length; i++) { //skip the 2 initial arguments which are the path to node and the file path
-		let arg = process.argv[i];
+		const arg = process.argv[i];
 
 		if (arg === "-c" || arg === "--clean") {
 			console.log("Deleting any suspended user record, content manager, or log file.");
@@ -85,16 +83,21 @@ function handleArguments(): Promise<void[]> {
 		}
 	}
 
-	if (admin) promises.push(setUpAdmin());
-
-	return Promise.all(promises);
+	if (admin) {
+		await setUpAdmin();
+	}
 }
 
 //get admin password if needed
 async function setUpAdmin(): Promise<void> {
 	try {
-		const pass = await chooseAdminPassword();
-		PasswordService.set(pass);
+		const suspendedPasswordExists = PasswordService.recover();
+
+		if (!suspendedPasswordExists) {
+			const pass = await chooseAdminPassword();
+			await PasswordService.setNew(pass);
+		}
+
 	} catch (err) {
 		console.error("Unable to get admin password");
 		console.error(err);
@@ -121,6 +124,7 @@ function setUpControls() {
 		ContentService.store();
 		IdFactoryService.store();
 		UserRecordService.store();
+		PasswordService.store();
 
 		if (contentManager.isPlaying()) {
 			console.log("Waiting for content being played to get deleted.");

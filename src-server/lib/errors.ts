@@ -1,6 +1,6 @@
 import * as formidable from "formidable";
 
-import * as consts from "./consts";
+import * as consts from "../consts";
 
 import { ContentType } from "../types/ContentType";
 

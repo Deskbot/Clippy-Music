@@ -1,6 +1,6 @@
 import * as fs from "fs";
 
-import * as consts from "../lib/consts";
+import * as consts from "../consts";
 
 import { UserRecord } from "../lib/UserRecord";
 import { MakeOnce } from "../lib/utils/MakeOnce";

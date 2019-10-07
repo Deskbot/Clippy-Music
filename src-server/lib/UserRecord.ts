@@ -1,7 +1,4 @@
-import * as fs from "fs";
 import ws = require("ws");
-
-import * as consts from "../lib/consts";
 
 interface User {
 	nickname: string,

@@ -4,7 +4,7 @@ import { Html5Entities } from "html-entities";
 import * as request from "request";
 import * as fs from "fs";
 
-import * as consts from "./consts";
+import * as consts from "../consts";
 import * as utils from "./utils/utils";
 import * as opt from "../options";
 import * as time from "./time";

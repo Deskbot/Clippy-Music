@@ -7,62 +7,74 @@ import { WebSocketHandler } from "../lib/WebSocketHandler";
 import { ContentServiceGetter } from "./ContentService";
 import { ProgressQueueServiceGetter } from "./ProgressQueueService";
 import { UserRecordGetter } from "./UserRecordService";
+import { MakeOnce } from "../lib/utils/MakeOnce";
+import { ContentManager } from "../lib/ContentManager";
+import { UserRecord } from "../lib/UserRecord";
 
 //really a namespace where all functions are hoisted
-class Api {
-	private wsh: WebSocketHandler;
+class WebSocketService {
+	private readonly wsh: WebSocketHandler;
+
+	private readonly contentService: ContentManager;
+	private readonly userRecordService: UserRecord;
 
 	constructor() {
-		const ContentService = ContentServiceGetter.get();
-		const UserRecordService = UserRecordGetter.get();
+		this.contentService = ContentServiceGetter.get();
+		this.userRecordService = UserRecordGetter.get();
 
-		const onConnect = (soc: ws, id: string) => {
-			//save user
-			UserRecordService.add(id);
-			UserRecordService.setWS(id, soc);
+		this.wsh = new WebSocketHandler(
+			this.onConnect.bind(this),
+			this.onMessage.bind(this),
+			this.onClose.bind(this),
+		);
+	}
 
-			//notify if banned
-			if (UserRecordService.isBanned(id)) this.sendBanned(soc);
+	// handlers
 
-			//tell user their nickname
-			if (UserRecordService.isUser(id)) this.sendNickname(soc, UserRecordService.getNickname(id));
+	private onClose(soc: ws, id: string) {
+		this.userRecordService.unsetWS(id, soc);
+	};
 
-			//send queue
-			this.sendQueue(soc);
-			this.sendDlQueue(soc, id);
-		};
+	private onConnect(soc: ws, id: string) {
+		//save user
+		this.userRecordService.add(id);
+		this.userRecordService.setWS(id, soc);
 
-		const onMessage = (soc: ws, id: string, data: any) => {
-			const dataObj = JSON.parse(data);
+		//notify if banned
+		if (this.userRecordService.isBanned(id)) {
+			this.sendBanned(soc);
+		}
 
-			if (dataObj.type === "delete-content") {
-				if (!ContentService.remove(dataObj.contentId)) {
-					soc.send(JSON.stringify({
-						type: dataObj.type,
-						success: false,
-						reason: "The queue item you tried to remove was not chosen by you.",
-					}));
-				}
+		//tell user their nickname
+		if (this.userRecordService.isUser(id)) {
+			this.sendNickname(soc, this.userRecordService.getNickname(id));
+		}
 
-			} else {
+		//send queue
+		this.sendQueue(soc);
+		this.sendDlQueue(soc, id);
+	};
+
+	private onMessage(soc: ws, id: string, data: any) {
+		const dataObj = JSON.parse(data);
+
+		if (dataObj.type === "delete-content") {
+			if (!this.contentService.remove(dataObj.contentId)) {
 				soc.send(JSON.stringify({
 					type: dataObj.type,
 					success: false,
-					reason: "The server did not recognise the type of message you were trying to send.",
+					reason: "The queue item you tried to remove was not chosen by you.",
 				}));
 			}
-		};
 
-		const onClose = (soc: ws, id: string) => {
-			UserRecordService.unsetWS(id, soc);
-		};
-
-		this.wsh = new WebSocketHandler(
-			onConnect,
-			onMessage,
-			onClose,
-		);
-	}
+		} else {
+			soc.send(JSON.stringify({
+				type: dataObj.type,
+				success: false,
+				reason: "The server did not recognise the type of message you were trying to send.",
+			}));
+		}
+	};
 
 	//message related
 
@@ -113,30 +125,12 @@ class Api {
 		const ProgressQueueService = ProgressQueueServiceGetter.get();
 
 		const queue = ProgressQueueService.getQueue(userId);
-		if (queue) WebSocketService.sendMessage([soc], "dl-list", queue);
-	}
-
-	broadcastMessage(type: string, mes: string) {
-		const message = JSON.stringify({
-			type: type,
-			message: mes,
-		});
-
-		this.wsh.broadcast(message);
+		if (queue) {
+			this.sendMessage([soc], "dl-list", queue);
+		}
 	}
 
 	//queue related
-
-	makeQueueMessage() {
-		const ContentService = ContentServiceGetter.get();
-
-		return {
-			current: ContentService.getCurrentlyPlaying(),
-			maxBucketTime: opt.timeout,
-			queue: ContentService.getBucketsForPublic(),
-			type: "queue",
-		};
-	}
 
 	sendQueue(socs: ws | ws[]) {
 		if (!socs) {
@@ -145,7 +139,7 @@ class Api {
 			return;
 		}
 
-		const message = JSON.stringify(this.makeQueueMessage());
+		const message = JSON.stringify(makeQueueMessage());
 
 		this.wsh.sendToMany(socs, message);
 	}
@@ -159,16 +153,32 @@ class Api {
 	}
 
 	broadcastQueue() {
-		this.wsh.broadcast(JSON.stringify(this.makeQueueMessage()));
+		this.wsh.broadcast(JSON.stringify(makeQueueMessage()));
 	}
 }
 
-export const WebSocketService = new Api();
+export const WebSocketServiceGetter = new (class extends MakeOnce<WebSocketService> {
+	make() {
+		return new WebSocketService();
+	}
+})();
+
+function makeQueueMessage() {
+	const ContentService = ContentServiceGetter.get();
+
+	return {
+		current: ContentService.getCurrentlyPlaying(),
+		maxBucketTime: opt.timeout,
+		queue: ContentService.getBucketsForPublic(),
+		type: "queue",
+	};
+}
 
 export function startWebSocketService() {
-	const ProgressQueueService = ProgressQueueServiceGetter.get();
 	const ContentService = ContentServiceGetter.get();
+	const ProgressQueueService = ProgressQueueServiceGetter.get();
 	const UserRecordService = UserRecordGetter.get();
+	const WebSocketService = WebSocketServiceGetter.get();
 
 	let lastQueueWasEmpty = false;
 	ContentService.on("queue-empty", () => {

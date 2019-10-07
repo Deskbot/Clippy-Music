@@ -4,7 +4,7 @@ import * as q from "q";
 
 import { URL } from "url";
 
-import * as consts from "../lib/consts";
+import * as consts from "../consts";
 import * as debug from "../lib/utils/debug";
 import * as opt from "../options";
 import * as utils from "../lib/utils/utils";
@@ -14,20 +14,24 @@ import { IdFactoryGetter } from "./IdFactoryService";
 import { ProgressQueueServiceGetter } from "./ProgressQueueService";
 import { PasswordService } from "./PasswordService";
 import { UserRecordGetter } from "./UserRecordService";
-import { WebSocketService } from "./WebSocketService";
+import { WebSocketServiceGetter } from "./WebSocketService";
 import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingError } from "../lib/errors";
 import { UploadData, UrlPic, NoPic, FilePic, FileMusic, UrlMusic, UploadDataWithId } from "../types/UploadData";
+import { verifyPassword } from "../lib/PasswordContainer";
 
 type RequestWithFormData = express.Request & {
 	fields: formidable.Fields;
 	files: formidable.Files;
 };
 
-function adminCredentialsRequired(req: RequestWithFormData, res: express.Response, next: () => void) {
-	const passwordService = PasswordService.get();
-	if (passwordService == null) {
+async function adminCredentialsRequired(req: RequestWithFormData, res: express.Response, next: () => void) {
+	const passwordContainer = PasswordService.getContainer();
+	if (passwordContainer == null) {
 		res.status(400).end("The admin controls can not be used because no admin password was set.\n");
-	} else if (passwordService.verify(req.fields.password as string)) {
+		return;
+	}
+
+	if (await verifyPassword(req.fields.password as string, passwordContainer)) {
 		next();
 	} else {
 		res.status(400).end("Admin password incorrect.\n");
@@ -124,7 +128,7 @@ function handleFileUpload(req: express.Request, contentId: number): q.Promise<[f
 function handlePotentialBan(userId: string) {
 	return new Promise((resolve, reject) => {
 		if (UserRecordGetter.get().isBanned(userId)) {
-			WebSocketService.sendBanned(UserRecordGetter.get().getSockets(userId));
+			WebSocketServiceGetter.get().sendBanned(UserRecordGetter.get().getSockets(userId));
 			return reject(new BannedError());
 		}
 
@@ -430,6 +434,7 @@ app.post("/api/download/cancel", (req: RequestWithFormData, res) => {
 //POST variable: nickname
 app.post("/api/nickname/set", recordUserMiddleware, (req: RequestWithFormData, res) => {
 	const UserRecordService = UserRecordGetter.get();
+	const WebSocketService = WebSocketServiceGetter.get()
 
 	const nickname = utils.sanitiseNickname(req.fields.nickname as string);
 

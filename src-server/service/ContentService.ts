@@ -1,6 +1,6 @@
 import * as fs from "fs";
 
-import * as consts from "../lib/consts";
+import * as consts from "../consts";
 import * as opt from "../options";
 
 import { IdFactoryGetter } from "./IdFactoryService";
@@ -43,12 +43,10 @@ function play(cm: ContentManager) {
 
 // retreive suspended ContentManger
 function recover(): SuspendedContentManager | null {
-	let obj;
-	let pqContent: Buffer;
 	let success = true;
 
 	try {
-		pqContent = fs.readFileSync(consts.files.content);
+		var pqContent = fs.readFileSync(consts.files.content);
 
 	} catch (e) {
 		console.log("No suspended content manager found. This is ok.");
@@ -59,7 +57,7 @@ function recover(): SuspendedContentManager | null {
 
 	try {
 		success = true;
-		obj = JSON.parse(pqContent.toString());
+		var obj = JSON.parse(pqContent.toString());
 
 	} catch (e) {
 		success = false;
