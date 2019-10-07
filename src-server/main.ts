@@ -93,8 +93,13 @@ function handleArguments(): Promise<void[]> {
 //get admin password if needed
 async function setUpAdmin(): Promise<void> {
 	try {
-		const pass = await chooseAdminPassword();
-		PasswordService.set(pass);
+		const suspendedPasswordExists = PasswordService.recover();
+
+		if (!suspendedPasswordExists) {
+			const pass = await chooseAdminPassword();
+			PasswordService.setNew(pass);
+		}
+
 	} catch (err) {
 		console.error("Unable to get admin password");
 		console.error(err);

@@ -25,6 +25,13 @@ export function findLastIndex<T>(arr: T[], predicate: (item: T) => boolean): num
     return -1;
 }
 
+export function isNumberArray(val: any): val is number[] {
+    return Array.isArray(val)
+        && allTrue(
+            val.map((item: any) => typeof item === "number")
+        );
+}
+
 /**
  * Modify a list by inserting an item into it at a location randomly chosen after a given index.
  *

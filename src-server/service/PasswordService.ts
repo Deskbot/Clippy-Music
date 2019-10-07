@@ -1,6 +1,19 @@
 import * as fs from "fs";
+import * as arrayUtils from "../lib/utils/arrayUtils";
 import * as consts from "../consts";
 import { newContainer, PasswordContainer } from "../lib/PasswordContainer";
+
+interface SuspendedPasswordContainer {
+	hashedPassword: number[],
+	salt: number[],
+}
+
+function isPasswordContainer(val: any): val is SuspendedPasswordContainer {
+	return "hashedPassword" in val
+		&& arrayUtils.isNumberArray(val.hashedPassword)
+		&& "salt" in val
+		&& arrayUtils.isNumberArray(val.salt)
+}
 
 class Api {
 	private container: PasswordContainer | null = null;
@@ -9,7 +22,43 @@ class Api {
 		return this.container;
 	}
 
-	set(pw: string) {
+	recover(): boolean {
+		try {
+			var file = fs.readFileSync(consts.files.password).toString();
+			console.log("Reading suspended password container");
+
+		} catch (e) {
+			console.log("No suspended password container found. This is ok.");
+			return false;
+		}
+
+		console.log("Reading suspended password container");
+
+		try {
+			var recoveredObj = JSON.parse(file);
+		} catch (e) {
+			if (e instanceof SyntaxError) {
+				console.error("Syntax error in suspendedPasswordContainer.json file.");
+				console.error(e);
+				console.log("Ignoring suspended password container");
+				return false;
+			}
+
+			throw e;
+		}
+
+		if (isPasswordContainer(recoveredObj)) {
+			this.container = {
+				hashedPassword: Buffer.from(recoveredObj.hashedPassword),
+				salt: Buffer.from(recoveredObj.salt),
+			};
+			return true;
+		}
+
+		return false;
+	}
+
+	setNew(pw: string) {
 		this.container = newContainer(pw);
 	}
 

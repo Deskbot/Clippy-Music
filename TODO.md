@@ -8,6 +8,10 @@ List
 
 * test everything
 * Recover admin password when restarting the server
+	* password recovery
+	* Deleting any suspended user record, content manager, or log file... should come before recoveries
+* no suspended id factory implies content manager recovery should be ignored
+* no suspended user record found implies content manager should be ignored
 * Silent looping Video overlay
 	* Then rename image/pic variables to overlay everywhere
 	* These need making consistent anyway
