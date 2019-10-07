@@ -25,15 +25,14 @@ const promptOpts = {
 
 main();
 
-function main() {
-	handleArguments().then(() => {
-		setUpDirs();
-		startWebSocketService();
-		startHttpService();
-		setUpControls();
-		startPlayingContent();
+async function main() {
+	await handleArguments();
 
-	}).catch(utils.reportError);
+	setUpDirs();
+	startWebSocketService();
+	startHttpService();
+	setUpControls();
+	startPlayingContent();
 }
 
 function chooseAdminPassword(): Promise<string> {
@@ -64,13 +63,12 @@ function chooseAdminPassword(): Promise<string> {
 	});
 }
 
-function handleArguments(): Promise<void[]> {
-	const promises: Promise<void>[] = [];
+async function handleArguments(): Promise<void> {
 	let admin = true;
 	opt.mute.set(false);
 
 	for (let i = 2; i < process.argv.length; i++) { //skip the 2 initial arguments which are the path to node and the file path
-		let arg = process.argv[i];
+		const arg = process.argv[i];
 
 		if (arg === "-c" || arg === "--clean") {
 			console.log("Deleting any suspended user record, content manager, or log file.");
@@ -85,9 +83,9 @@ function handleArguments(): Promise<void[]> {
 		}
 	}
 
-	if (admin) promises.push(setUpAdmin());
-
-	return Promise.all(promises);
+	if (admin) {
+		await setUpAdmin();
+	}
 }
 
 //get admin password if needed
