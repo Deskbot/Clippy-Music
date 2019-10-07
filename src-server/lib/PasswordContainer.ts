@@ -23,5 +23,7 @@ function makeSalt(): Buffer {
 }
 
 export async function verifyPassword(input: string, container: PasswordContainer): Promise<boolean> {
-	return await hash(input, container.salt) === container.hashedPassword;
+	return container.hashedPassword.equals(
+		await hash(input, container.salt)
+	);
 }
