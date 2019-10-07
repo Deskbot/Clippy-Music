@@ -126,7 +126,7 @@ class WebSocketService {
 
 		const queue = ProgressQueueService.getQueue(userId);
 		if (queue) {
-			WebSocketService.sendMessage([soc], "dl-list", queue);
+			this.sendMessage([soc], "dl-list", queue);
 		}
 	}
 
@@ -184,8 +184,9 @@ export const WebSocketServiceGetter = new (class extends MakeOnce<WebSocketServi
 })();
 
 export function startWebSocketService() {
-	const ProgressQueueService = ProgressQueueServiceGetter.get();
 	const ContentService = ContentServiceGetter.get();
+	const ProgressQueueService = ProgressQueueServiceGetter.get();
+	const WebSocketService = WebSocketServiceGetter.get();
 	const UserRecordService = UserRecordGetter.get();
 
 	let lastQueueWasEmpty = false;
