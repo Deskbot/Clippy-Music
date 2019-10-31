@@ -64,7 +64,7 @@ $(document).ready(function() {
 	.then(function(clippy) {
 		clippy.moveTo(window.innerWidth * 4 / 5, window.innerHeight * 4 / 5);
 		clippy.play("Greeting");
-		clippy.speak("Hi I'm Clippit, your music server assistant.");
+		clippy.speak("Hi. I'm Clippy, your music server assistant.");
 		clippy.play("Alert");
 		main.clippyAgent = clippy;
 		main.webSocketHandler = new WebSocketHandler();
