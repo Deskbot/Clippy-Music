@@ -1,7 +1,7 @@
 var Queue = {
 	$sectionWithin: $("#queue-section"),
 
-	bucketToElem: function bucketToElem(bucket, myId, maxBucketTime) {
+	bucketToElem: function bucketToElem(bucket, bucketIsTopBucket, myId, maxBucketTime) {
 		var durationUsed = 0;
 
 		for (var i = 0; i < bucket.length; i++) {
@@ -11,8 +11,14 @@ var Queue = {
 		}
 
 		var $bucketContainer = templates.makeBucketContainer();
-		$bucketContainer.children(".timeAvailable")
-			.html(utils.formatSeconds(maxBucketTime - durationUsed) + " available");
+
+		// no need to give time remaining for the top bucket, which you can't add to
+		if (bucketIsTopBucket) {
+			$bucketContainer.children(".timeAvailable").remove();
+		} else {
+			$bucketContainer.children(".timeAvailable")
+				.html(utils.formatSeconds(maxBucketTime - durationUsed) + " available");
+		}
 
 		var $bucket = $bucketContainer.children(".bucket");
 

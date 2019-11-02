@@ -257,7 +257,7 @@ var WebSocketHandler = (function() {
 
 			for (var i = 0; i < data.queue.length; i++) {
 				var bucket = data.queue[i];
-				$queue.append(Queue.bucketToElem(bucket, myId, data.maxBucketTime));
+				$queue.append(Queue.bucketToElem(bucket, i === 0, myId, data.maxBucketTime));
 			}
 		});
 	};
