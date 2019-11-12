@@ -6,8 +6,6 @@ This list is in a rough order of priority.
 List
 ----
 
-* test everything
-* add tests for / and /admin loading
 * no suspended id factory implies content manager recovery should be ignored
 * no suspended user record found implies content manager should be ignored
 * Silent looping Video overlay
@@ -36,6 +34,7 @@ List
 * put user nickname in ItemData to remove need to refetch it
 * convert tests to TS
 	* need to ensure old tests don't remain in the build folder
+* add tests for / and /admin loading
 * use pick, exclude etc to corretly type some of the utils
 * FileUploadError probably only needs to take file paths and not files
 * Make internal errors that aren't user errors get put in the terminal
