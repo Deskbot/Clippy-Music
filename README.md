@@ -6,17 +6,12 @@ A music server written in NodeJS. Applicable for LAN parties.
 Features
 --------
 
-* A priority queue is used to give a lower priority to users who've played more content recently.
+* A queuing system that makes the amount of time each user can play for more evenly distributed.
 * Pictures can be displayed over music or video.
 * Uniqueness of music and pictures is enforced until after a chosen length of time has passed since it was last played/shown.
-* A time range within the music file can be chosen for playing
+* A fragment of a music or video file can be specified to get played
 * A nickname can be chosen by each user, which can be changed at any time.
 * The server will continue playing the queue from where it was stopped the last time it was closed down.
-
-Other Features
---------------
-
-* A detailed log file of each item played, containing the IP address, file names, and the time at which the content was played.
 
 Installation
 ------------
@@ -68,6 +63,7 @@ If you have a web server installed such as Apache2 and intend to expose the web 
 * `-c --clean`: deletes all stored data that would otherwise be reloaded between runs
 * `-m --mute`: all media is played muted
 * `--no-admin`: removes need for admin password, however users can't be banned
+* `-d --debug`: increases the amount of information logged in the terminal
 
 Update
 ------
@@ -113,23 +109,22 @@ curl --form "field1=@/my/file/path;field2=value2" [url]/api/content/upload
 
 Please note the difference in term separator: `&` vs `;`.
 
-Method | Path				 | Variables														  | Effect |
+Method | Path                 | Variables                                                          | Effect |
 -------|----------------------|--------------------------------------------------------------------|--------|
-GET	| /api/wsport		  |																	| Gives the web socket port being used for front end communication
-POST   | /api/queue/add	   | music-file, music-url, image-file, image-url, start-time, end-time | Add an item to the queue
-POST   | /api/queue/remove	| content-id														 | Removes an item from the queue
-POST   | /api/download/cancel | dl-index														   | Cancel a download
-POST   | /api/nickname/set	| nickname														   | Set your nickname
-POST   | /api/ban/add		 | password, id, nickname											 | Ban a specific player by name or id
-POST   | /api/ban/remove	  | password, id													   | Un-Ban a specific player by id
-POST   | /api/skip			| password														   | Skip the current track
-POST   | /api/skipAndPenalise | password														   | Skip the current track and add a send the uploader to the back of the queue
-POST   | /api/skipAndBan	  | password														   | Skip the current track and ban the uploader
+GET    | /api/wsport          |                                                                    | Gives the web socket port being used for front end communication
+POST   | /api/queue/add       | music-file, music-url, image-file, image-url, start-time, end-time | Add an item to the queue
+POST   | /api/queue/remove    | content-id                                                         | Removes an item from the queue
+POST   | /api/download/cancel | dl-index                                                           | Cancel a download
+POST   | /api/nickname/set    | nickname                                                           | Set your nickname
+POST   | /api/ban/add         | password, id, nickname                                             | Ban a specific player by name or id
+POST   | /api/ban/remove      | password, id                                                       | Un-Ban a specific player by id
+POST   | /api/skip            | password                                                           | Skip the current track
+POST   | /api/skipAndBan      | password                                                           | Skip the current track and ban the uploader
 
 Contributions
 -------------
 
-Please contribute, preferably with code, issues on GitHub is fine.
+Contributions are welcome :)
 
 Check out the [todo list](./TODO.md) to see what changes would be good to make.
 
@@ -138,8 +133,10 @@ Language
 
 Initially Clippy-Music was written in JavaScript. I switched to TypeScript long after I thought the project to be finished because I got a new feature request that required very siginificant alterations to the code and I thought type safety would make these changes easier to make. There's a lot of room to improve the TypeScript and use the language to its fullest, but it's not worth the time it would take to update the entire codebase.
 
+The front end code was written to be very compatible with older browsers, however I went over-board with this because Clippy uses websockets which are not compatible with many older browsers anyway. At some point the front end may be converted to TypeScript, or possibly svelte, or both.
+
 License
 -------
 
 * You must use this music server
-* You may not try or succeed in using any of this software to make any person or entity any money
+* You must not try or succeed in using any of this software to make any person or entity any money
