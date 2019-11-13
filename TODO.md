@@ -6,6 +6,14 @@ This list is in a rough order of priority.
 List
 ----
 
+* Fix eog sometimes not coming out on top
+	* show images with the mpv instance
+		* music + static image
+		* music + animated image
+		* (music + silent looping video) // future story, investigate whether possible
+		* video + static image
+		* video + animated image
+		* (video + silent looping video) // future story, investigate whether possible
 * no suspended id factory implies content manager recovery should be ignored
 * no suspended user record found implies content manager should be ignored
 * Silent looping Video overlay
@@ -17,6 +25,8 @@ List
 	* Only allow downloading of the currently playing content. I hate seeing people waste their time looking ahead. It ruins the fun.
 	* allow downloading of things that have just played
 	* image download
+* Make Clippy installable as a Progressive Web App
+* Clippy should state when the user is not connected to the internet at all
 * update the state of the choose music file button when dragging into url box
 * playlist upload
 * multiple file uploads at once
@@ -32,6 +42,9 @@ List
 ---
 
 * put user nickname in ItemData to remove need to refetch it
+* Admins can ban specific songs (even if uniqueness cooloff is disabled) hash checking needs to be applied
+* Admins can see a list of all users and can ban directly
+* add checkbox to enable instant upload on form input change (for quick pasting and file selecting)
 * convert tests to TS
 	* need to ensure old tests don't remain in the build folder
 * add tests for / and /admin loading
