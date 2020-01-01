@@ -138,5 +138,4 @@ The front end code was written to be very compatible with older browsers, howeve
 License
 -------
 
-* You must use this music server
-* You must not try or succeed in using any of this software to make any person or entity any money
+You must not try or succeed in using any of this software to make any person or entity any money
