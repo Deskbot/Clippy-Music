@@ -25,6 +25,7 @@ List
 	* Only allow downloading of the currently playing content. I hate seeing people waste their time looking ahead. It ruins the fun.
 	* allow downloading of things that have just played
 	* image download
+* Can reorder my uploads
 * Make Clippy installable as a Progressive Web App
 * Clippy should state when the user is not connected to the internet at all
 * update the state of the choose music file button when dragging into url box
@@ -72,6 +73,11 @@ List
 * Prevent Firefox getting urls that are POST only
 	* use 405 Method Not Allowed responses
 * Split up HttpService into sub files based on common middleware
+* Svelte front end
+	* compile time / server side rendering
+	* compare bundle size before and after
+	* update TODO to remove obsolete ideas after doing this
+* keep all windows scroll-to-able when resizing the browser window
 * Make it so Clippy can't be dropped in a place that covers the scroll bar partially
 * Use consistent "id", "cid", "contentId" / "uid", "userId" properties
 * "use strict"
@@ -91,8 +97,6 @@ List
 * Remove null from codebase
 * Truncate file names before sending the files to the server
 * Use exponential form for numbers in default_options
-* Add unit tests
-	* Worth doing before refactors
 * Add integration tests
 	* Worth doing before refactors
 * Check what method is used for each HTTP endpoint, is there a better one?
@@ -103,6 +107,7 @@ List
 * Default nickname is "Anonymous" or configurable
 * Windows 2000 cursors (http://telcontar.net/Misc/screeniecursors/)
 * Play the Windows 2000 start up sound when visiting the page
+* Alternative stylesheet
 * Drag windows by their outline, which is more authentic
 * Find a unicode remover only for problematic characters
 * Admins can toggle a user's ban state from a list of all users
