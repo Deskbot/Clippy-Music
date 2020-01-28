@@ -1,9 +1,10 @@
+import * as cookie from "cookie";
 import * as express from "express";
+import * as http from "http";
 import * as formidable from "formidable";
 import * as q from "q";
 import { Quelaag } from "quelaag";
 import * as send from "send";
-import { serveStatic } from "serve-static";
 
 import { URL } from "url";
 
@@ -42,7 +43,7 @@ async function adminCredentialsRequired(req: RequestWithFormData, res: express.R
 }
 
 function getFileForm(
-	req: express.Request,
+	req: http.IncomingMessage,
 	generateProgressHandler: (file: formidable.File) => ((soFar: number, total: number) => void)
 ): q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]> {
 	const defer = q.defer<[formidable.IncomingForm, formidable.Fields, formidable.Files]>();
@@ -113,11 +114,13 @@ function getFormMiddleware(req: express.Request, res: express.Response, next: ()
 	});
 }
 
-function handleFileUpload(req: express.Request, contentId: number): q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]> {
-	const generateProgressHandler = (file: formidable.File) => {
-		ProgressQueueServiceGetter.get().setTitle(req.ip, contentId, file.name);
+function handleFileUpload(req: http.IncomingMessage, contentId: number): q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]> {
+	const ipAddress = req.connection.remoteAddress!;
 
-		const updater = ProgressQueueServiceGetter.get().createUpdater(req.ip, contentId);
+	const generateProgressHandler = (file: formidable.File) => {
+		ProgressQueueServiceGetter.get().setTitle(ipAddress, contentId, file.name);
+
+		const updater = ProgressQueueServiceGetter.get().createUpdater(ipAddress, contentId);
 
 		return (sofar: number, total: number) => {
 			updater(sofar / total);
@@ -269,33 +272,38 @@ function parseUploadForm(
 	});
 }
 
-function recordUserMiddleware(req: express.Request, res: express.Response, next: () => void) {
-	if (!UserRecordGetter.get().isUser(req.ip)) UserRecordGetter.get().add(req.ip);
+function recordUser(req: http.IncomingMessage, res: http.ServerResponse) {
+	const ipAddress = req.connection.remoteAddress!;
+
+	if (!UserRecordGetter.get().isUser(ipAddress)) {
+		UserRecordGetter.get().add(ipAddress);
+	}
 
 	const expiryDate = new Date();
 	expiryDate.setFullYear(expiryDate.getFullYear() + 1);
 
 	//store user id in cookie
-	res.cookie("id", req.ip, {
-		encode: a => a,
-		expires: expiryDate,
-	});
-
-	next();
+	res.setHeader('Set-Cookie', cookie.serialize("id", ipAddress, {
+		maxAge: expiryDate.getTime(),
+	}));
 }
 
 //creation of express instance and attaching handlers
 
-const app = express();
 const quelaag = new Quelaag({});
 
-app.use("/", (req, res, next) => {
-	res.type("text/plain");
-	next();
-});
+// TODO do I need this?
+// app.use("/", (req, res, next) => {
+// 	res.type("text/plain");
+// 	next();
+// });
 
-app.get("/api/wsport", (req, res) => {
-	res.status(200).end(opt.webSocketPort.toString());
+quelaag.addEndpoint({
+	when: req => req.url === "/api/wsport",
+	do(req, res) {
+		res.statusCode = 200;
+		res.end(opt.webSocketPort.toString());
+	}
 });
 
 /* Post variables:
@@ -306,104 +314,114 @@ app.get("/api/wsport", (req, res) => {
 	* start-time
 	* end-time
  */
-app.post("/api/queue/add", recordUserMiddleware, (req, res) => {
-	const ProgressQueueService = ProgressQueueServiceGetter.get();
-	const contentId = IdFactoryGetter.get().next();
+quelaag.addEndpoint({
+	when: req => req.method === "POST" && req.url! === "/api/queue/add",
+	do(req, res) {
+		const ipAddress = req.connection.remoteAddress!;
 
-	handlePotentialBan(req.ip) //assumes ip address is userId
-	.then(() => ProgressQueueServiceGetter.get().add(req.ip, contentId))
-	.then(() => handleFileUpload(req, contentId))
-	.then(async ([form, fields, files]) => { //nesting in order to get the scoping right
-		const uplData: UploadDataWithId = {
-			...await parseUploadForm(form, fields, files),
-			id: contentId,
-			userId: req.ip,
-		};
+		recordUser(req, res);
+		const ProgressQueueService = ProgressQueueServiceGetter.get();
+		const contentId = IdFactoryGetter.get().next();
 
-		// ignore end time if it would make the play time less than 1 second
-		if (uplData.endTime !== null
-			&& uplData.startTime !== null
-			&& uplData.endTime - uplData.startTime < 1
-		) {
-			uplData.endTime = null;
-		}
+		handlePotentialBan(ipAddress) //assumes ip address is userId
+			.then(() => ProgressQueueServiceGetter.get().add(ipAddress, contentId))
+			.then(() => handleFileUpload(req, contentId))
+			.then(async ([form, fields, files]) => { //nesting in order to get the scoping right
+				const uplData: UploadDataWithId = {
+					...await parseUploadForm(form, fields, files),
+					id: contentId,
+					userId: ipAddress,
+				};
 
-		if (uplData.music.isUrl) {
-			const { hostname } = new URL(uplData.music.url);
-			if (utils.looksLikeIpAddress(hostname)) {
-				// prevent cheesing the uniqueness cooloff by using the IP Address and site name
-				throw new Error("I can not download music from an IP address.");
-			}
-
-			ProgressQueueServiceGetter.get().setTitle(req.ip, contentId, uplData.music.url, true);
-			// the title and duration are set later by `ContentService.add(uplData)`
-		}
-
-		try {
-			var itemData = await ContentServiceGetter.get().add(uplData);
-		} catch (err) {
-			if (err instanceof DurationFindingError) {
-				console.error("Error discerning the duration of a music file.", err, uplData.music);
-				throw new FileUploadError(
-					`I could not count the duration of the music file you uploaded (${uplData.music.title}).`,
-					Object.values(files)
-				);
-			} else {
-				throw err;
-			}
-		}
-
-		if (itemData.music.isUrl) {
-			ProgressQueueServiceGetter.get().setTitle(req.ip, contentId, itemData.music.title);
-		}
-
-		debug.log("successful upload: ", uplData);
-
-		if (fields.ajax || (req.headers["user-agent"] && req.headers["user-agent"].includes("curl"))) {
-			res.status(200).end("Success\n");
-		} else {
-			res.redirect("/");
-		}
-	})
-	.catch(err => {
-		if (err instanceof FileUploadError) {
-			debug.log("deleting these bad uploads: ", err.files);
-
-			if (err.files) {
-				for (let file of err.files) {
-					if (file) utils.deleteFileIfExists(file.path); // might already have been deleted if url upload
+				// ignore end time if it would make the play time less than 1 second
+				if (uplData.endTime !== null
+					&& uplData.startTime !== null
+					&& uplData.endTime - uplData.startTime < 1
+				) {
+					uplData.endTime = null;
 				}
 
-				delete err.files; // so they aren't sent to the user
-			}
+				if (uplData.music.isUrl) {
+					const { hostname } = new URL(uplData.music.url);
+					if (utils.looksLikeIpAddress(hostname)) {
+						// prevent cheesing the uniqueness cooloff by using the IP Address and site name
+						throw new Error("I can not download music from an IP address.");
+					}
 
-			res.status(400);
-			ProgressQueueService.finishedWithError(req.ip, contentId, err);
+					ProgressQueueServiceGetter.get().setTitle(ipAddress, contentId, uplData.music.url, true);
+					// the title and duration are set later by `ContentService.add(uplData)`
+				}
 
-		} else if (err instanceof BannedError) {
-			res.status(400);
+				try {
+					var itemData = await ContentServiceGetter.get().add(uplData);
+				} catch (err) {
+					if (err instanceof DurationFindingError) {
+						console.error("Error discerning the duration of a music file.", err, uplData.music);
+						throw new FileUploadError(
+							`I could not count the duration of the music file you uploaded (${uplData.music.title}).`,
+							Object.values(files)
+						);
+					} else {
+						throw err;
+					}
+				}
 
-		} else if (err instanceof UniqueError) {
-			res.status(400);
-			ProgressQueueService.finishedWithError(req.ip, contentId, err);
+				if (itemData.music.isUrl) {
+					ProgressQueueServiceGetter.get().setTitle(ipAddress, contentId, itemData.music.title);
+				}
 
-		} else if (err instanceof YTError) {
-			res.status(400);
-			ProgressQueueService.finishedWithError(req.ip, contentId, err);
+				debug.log("successful upload: ", uplData);
 
-		} else {
-			console.error("Unknown upload error: ", err);
-			res.status(500);
-			ProgressQueueService.finishedWithError(req.ip, contentId, err);
+				if (fields.ajax || (req.headers["user-agent"] && req.headers["user-agent"].includes("curl"))) {
+					res.statusCode = 200;
+					res.end("Success\n");
+				} else {
+					res.writeHead(303, {
+						Location: "/"
+					});
+				}
+			})
+			.catch(err => {
+				if (err instanceof FileUploadError) {
+					debug.log("deleting these bad uploads: ", err.files);
+
+					if (err.files) {
+						for (let file of err.files) {
+							if (file) utils.deleteFileIfExists(file.path); // might already have been deleted if url upload
+						}
+
+						delete err.files; // so they aren't sent to the user
+					}
+
+					res.statusCode = 400;
+					ProgressQueueService.finishedWithError(ipAddress, contentId, err);
+
+				} else if (err instanceof BannedError) {
+					res.statusCode = 400;
+
+				} else if (err instanceof UniqueError) {
+					res.statusCode = 400;
+					ProgressQueueService.finishedWithError(ipAddress, contentId, err);
+
+				} else if (err instanceof YTError) {
+					res.statusCode = 400;
+					ProgressQueueService.finishedWithError(ipAddress, contentId, err);
+
+				} else {
+					console.error("Unknown upload error: ", err);
+					res.statusCode = 500;
+					ProgressQueueService.finishedWithError(ipAddress, contentId, err);
+				}
+
+				res.end(JSON.stringify({
+					contentId,
+					errorType: err.constructor.name,
+					message: err.message,
+				}));
+			});
 		}
-
-		res.end(JSON.stringify({
-			contentId,
-			errorType: err.constructor.name,
-			message: err.message,
-		}));
-	});
-});
+	}
+);
 
 app.use(getFormMiddleware);
 
@@ -573,9 +591,8 @@ quelaag.addEndpoint({
 });
 
 export function startHttpService() {
-	app.listen(opt.httpPort, (err) => {
-		if (err) throw err;
-
+	const server = http.createServer((req, res) => quelaag.handle(req, res));
+	server.listen(8080, () => {
 		console.log("Web server started");
 	});
 }
