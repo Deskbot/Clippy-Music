@@ -6,7 +6,8 @@
 	"scripts": {
 		"build": "node build.js",
 		"start": "node -r source-map-support/register build/main.js",
-		"test": "node -r source-map-support/register test/index.js"
+		"test": "node -r source-map-support/register test/index.js",
+		"update": "./update.sh"
 	},
 	"repository": {
 		"type": "git",

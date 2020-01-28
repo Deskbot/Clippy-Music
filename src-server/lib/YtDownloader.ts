@@ -44,7 +44,7 @@ export class YtDlDownloader {
 		}
 	}
 
-	download(vid: string, destination: string): [Promise<void>, cp.ChildProcess] {
+	download(vid: string, destination: string): [Promise<void>, cp.ChildProcessWithoutNullStreams] {
 		let proc = cp.spawn(opt.youtubeDlCommand, ["--no-playlist", vid, "-o", destination]);
 
 		const prom = new Promise<void>((resolve, reject) => {
@@ -166,9 +166,9 @@ export class YtDlDownloader {
 class PercentReader {
 	private lastPercent: number;
 	private phase: 1 | 2;
-	private proc: cp.ChildProcess;
+	private proc: cp.ChildProcessWithoutNullStreams;
 
-	constructor(dlProc: cp.ChildProcess) {
+	constructor(dlProc: cp.ChildProcessWithoutNullStreams) {
 		this.lastPercent = 0;
 		this.phase = 1;
 		this.proc = dlProc;
