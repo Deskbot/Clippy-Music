@@ -1,6 +1,9 @@
 import * as express from "express";
 import * as formidable from "formidable";
 import * as q from "q";
+import { Quelaag } from "quelaag";
+import * as send from "send";
+import { serveStatic } from "serve-static";
 
 import { URL } from "url";
 
@@ -284,10 +287,7 @@ function recordUserMiddleware(req: express.Request, res: express.Response, next:
 //creation of express instance and attaching handlers
 
 const app = express();
-
-app.use("/", express.static(consts.staticDirPath));
-
-app.use("/admin", express.static(consts.staticDirPath + "/index.html"));
+const quelaag = new Quelaag({});
 
 app.use("/", (req, res, next) => {
 	res.type("text/plain");
@@ -552,6 +552,24 @@ app.post("/api/skipAndBan", adminCredentialsRequired, (req, res) => {
 	ContentService.killCurrent();
 
 	res.status(200).end("Success\n");
+});
+
+quelaag.addEndpoint({
+	when: req => req!.url === "/admin",
+	do(req, res) {
+		send(req, consts.staticDirPath + "/index.html")
+			.pipe(res)
+	}
+});
+
+quelaag.addEndpoint({
+	when: req => req.url!.startsWith("/"),
+	do(req, res) {
+		send(req, new URL(req.url!).pathname, {
+			root: consts.staticDirPath
+		})
+			.pipe(res);
+	},
 });
 
 export function startHttpService() {
