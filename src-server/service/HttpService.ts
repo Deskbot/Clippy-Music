@@ -50,9 +50,7 @@ function handlePotentialBan(userId: string) {
 	});
 }
 
-function recordUser(req: http.IncomingMessage, res: http.ServerResponse) {
-	const ipAddress = req.connection.remoteAddress!;
-
+function recordUser(ipAddress: string, res: http.ServerResponse) {
 	if (!UserRecordGetter.get().isUser(ipAddress)) {
 		UserRecordGetter.get().add(ipAddress);
 	}
@@ -137,7 +135,7 @@ quelaag.addEndpoint({
 	do(req, res, middleware) {
 		const ipAddress = middleware.ip();
 
-		recordUser(req, res);
+		recordUser(ipAddress, res);
 		const ProgressQueueService = ProgressQueueServiceGetter.get();
 		const contentId = IdFactoryGetter.get().next();
 
@@ -301,7 +299,7 @@ quelaag.addEndpoint({
 quelaag.addEndpoint({
 	when: req => req.url === "/api/nickname/set",
 	async do(req, res, middleware) {
-		recordUser(req, res);
+		recordUser(middleware.ip(), res);
 
 		try {
 			var { fields } = await middleware.form();
