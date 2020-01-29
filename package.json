@@ -33,8 +33,9 @@
 		"q": "^1.5.1",
 		"quelaag": "0.0.2",
 		"request": "^2.88.0",
+		"send": "^0.17.1",
 		"source-map-support": "^0.5.13",
-		"typescript": "^3.5.3",
+		"typescript": "^3.7.5",
 		"ws": "^5.2.2"
 	},
 	"devDependencies": {
