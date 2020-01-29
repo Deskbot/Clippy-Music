@@ -34,7 +34,7 @@ async function isPassword(password: string) {
 		throw new Error("The admin controls can not be used because no admin password was set.\n");
 	}
 
-	if (await verifyPassword(password as string, passwordContainer)) {
+	if (await verifyPassword(password, passwordContainer)) {
 		return;
 	} else {
 		throw new Error("Admin password incorrect.\n");
@@ -727,14 +727,14 @@ quelaag.addEndpoint({
 	when: req => req!.url === "/admin",
 	do(req, res) {
 		send(req, consts.staticDirPath + "/index.html")
-			.pipe(res)
+			.pipe(res);
 	}
 });
 
 quelaag.addEndpoint({
 	when: req => req.url!.startsWith("/"),
 	do(req, res) {
-		send(req, new URL(req.url!).pathname, {
+		send(req, req.url! ?? "/", {
 			root: consts.staticDirPath
 		})
 			.pipe(res);
