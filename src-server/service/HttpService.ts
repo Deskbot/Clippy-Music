@@ -129,10 +129,6 @@ function makeMusicTooBigError(files: formidable.File[]) {
 	return new FileUploadError(`The music file you gave was too large. The maximum size is ${consts.musicSizeLimStr}.`, files);
 }
 
-function noRedirect(req: http.IncomingMessage, ajax: boolean) {
-	return ajax || (req.headers["user-agent"] as string).includes("curl");
-}
-
 function parseUploadForm(
 	form: formidable.IncomingForm,
 	fields: formidable.Fields,
@@ -306,6 +302,10 @@ const quelaag = new Quelaag({
 		}
 
 		throw new Error("Expected field 'password' in form.");
+	},
+
+	noRedirect(req?) {
+		return this.ajax() || (req!.headers["user-agent"] as string).includes("curl");
 	}
 });
 
@@ -454,7 +454,7 @@ quelaag.addEndpoint({
 		}
 
 		if (ContentService.remove(parseInt(fields["content-id"] as string))) {
-			if (noRedirect(req, middleware.ajax())) {
+			if (middleware.noRedirect()) {
 				res.statusCode = 200;
 				res.end("Success\n");
 			} else {
@@ -483,7 +483,7 @@ quelaag.addEndpoint({
 		const ProgressQueueService = ProgressQueueServiceGetter.get();
 
 		if (ProgressQueueService.cancel(middleware.ip(), parseInt(fields["content-id"] as string))) {
-			if (noRedirect(req, middleware.ajax())) {
+			if (middleware.noRedirect()) {
 				res.statusCode = 200;
 				res.end("Success\n");
 			} else {
@@ -530,7 +530,7 @@ quelaag.addEndpoint({
 		UserRecordService.setNickname(middleware.ip(), nickname);
 		WebSocketService.sendNicknameToUser(middleware.ip(), nickname);
 
-		if (noRedirect(req, middleware.ajax())) {
+		if (middleware.noRedirect()) {
 			res.statusCode = 200;
 			res.end("Success\n");
 		} else {
@@ -571,7 +571,7 @@ quelaag.addEndpoint({
 			} else {
 				UserRecordService.addBan(fields.id as string);
 				ContentService.purgeUser(fields.id as string);
-				if (noRedirect(req, middleware.ajax())) {
+				if (middleware.noRedirect()) {
 					res.statusCode = 200;
 					res.end("Success\n");
 				} else {
@@ -593,7 +593,7 @@ quelaag.addEndpoint({
 					ContentService.purgeUser(id);
 				});
 
-				if (noRedirect(req, middleware.ajax())) {
+				if (middleware.noRedirect()) {
 					res.statusCode = 200;
 					res.end("Success\n");
 				} else {
@@ -638,7 +638,7 @@ quelaag.addEndpoint({
 
 			} else {
 				UserRecordService.removeBan(fields.id as string);
-				if (noRedirect(req, middleware.ajax())) {
+				if (middleware.noRedirect()) {
 					res.statusCode = 200;
 					res.end("Success\n");
 				} else {
@@ -659,7 +659,7 @@ quelaag.addEndpoint({
 					UserRecordService.removeBan(id);
 				});
 
-				if (noRedirect(req, middleware.ajax())) {
+				if (middleware.noRedirect()) {
 					res.statusCode = 200;
 					res.end("Success\n");
 				} else {
