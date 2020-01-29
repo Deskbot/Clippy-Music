@@ -66,11 +66,9 @@ function recordUser(req: http.IncomingMessage, res: http.ServerResponse) {
 	}));
 }
 
-//creation of express instance and attaching handlers
-
 const quelaag = new Quelaag({
 	ajax() {
-		return !!this.form().ajax;
+		return this.form().ajax ?? false;
 	},
 
 	form(req?) {
@@ -303,6 +301,8 @@ quelaag.addEndpoint({
 quelaag.addEndpoint({
 	when: req => req.url === "/api/nickname/set",
 	async do(req, res, middleware) {
+		recordUser(req, res);
+
 		try {
 			var { fields } = await middleware.form();
 		} catch (err) {
