@@ -13,6 +13,7 @@ abstract class DeferredContentError extends Error {
 	}
 }
 
+export class AuthError extends Error {}
 
 export class BadUrlError extends DeferredContentError {
 	constructor(contentType: ContentType) {
@@ -66,11 +67,14 @@ export class FileUploadError extends Error {
 	}
 }
 
-// export class FormParseError extends Error {
-// 	constructor() {
+export class FormParseError extends Error {
+	private cause: any;
 
-// 	}
-// }
+	constructor(message: string, cause: any) {
+		super(message);
+		this.cause = cause;
+	}
+}
 
 export class UniqueError extends DeferredContentError {
 	public readonly playedWithin: string;

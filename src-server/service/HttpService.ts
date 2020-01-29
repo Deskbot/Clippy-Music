@@ -15,7 +15,7 @@ import { ProgressQueueServiceGetter } from "./ProgressQueueService";
 import { PasswordService } from "./PasswordService";
 import { UserRecordGetter } from "./UserRecordService";
 import { WebSocketServiceGetter } from "./WebSocketService";
-import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingError } from "../lib/errors";
+import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingError, AuthError } from "../lib/errors";
 import { UploadDataWithId } from "../types/UploadData";
 import { verifyPassword } from "../lib/PasswordContainer";
 import { redirectSuccessfulPost } from "./httpUtils";
@@ -29,13 +29,21 @@ type FormData = {
 async function isPassword(password: string) {
 	const passwordContainer = PasswordService.getContainer();
 	if (passwordContainer == null) {
-		throw new Error("The admin controls can not be used because no admin password was set.\n");
+		throw new AuthError("The admin controls can not be used because no admin password was set.\n");
 	}
 
 	if (await verifyPassword(password, passwordContainer)) {
 		return;
 	} else {
-		throw new Error("Admin password incorrect.\n");
+		throw new AuthError("Admin password incorrect.\n");
+	}
+}
+
+function handleErrors(err: Error, res: http.ServerResponse) {
+	if (err instanceof AuthError) {
+		res.statusCode = 400;
+		res.end();
+		return;
 	}
 }
 
@@ -346,65 +354,63 @@ quelaag.addEndpoint({
 	async do(req, res, middleware) {
 		try {
 			await isPassword(middleware.password());
+
+			const ContentService = ContentServiceGetter.get();
+			const UserRecordService = UserRecordGetter.get();
+
+			try {
+				var { fields } = await middleware.form();
+			} catch (err) {
+				console.error("Unknown data submission error: ", err);
+				res.statusCode = 500;
+				res.end(err.message);
+			}
+
+			if (fields.id) {
+				if (!UserRecordService.isUser(fields.id as string)) {
+					res.statusCode = 400;
+					res.end("That user doesn't exist.\n");
+					return;
+
+				} else {
+					UserRecordService.addBan(fields.id as string);
+					ContentService.purgeUser(fields.id as string);
+					if (middleware.noRedirect()) {
+						res.statusCode = 200;
+						res.end("Success\n");
+					} else {
+						redirectSuccessfulPost(res, "/");
+					}
+				}
+
+			} else if (fields.nickname) {
+				const uids = UserRecordService.whoHasNickname(utils.sanitiseNickname(fields.nickname as string));
+
+				if (uids.length === 0) {
+					res.statusCode = 400;
+					res.end("That user doesn't exist.\n");
+					return;
+
+				} else {
+					uids.forEach((id) => {
+						UserRecordService.addBan(id);
+						ContentService.purgeUser(id);
+					});
+
+					if (middleware.noRedirect()) {
+						res.statusCode = 200;
+						res.end("Success\n");
+					} else {
+						redirectSuccessfulPost(res, "/");
+					}
+				}
+
+			} else {
+				res.statusCode = 400;
+				res.end("User not specified.\n");
+			}
 		} catch (e) {
-			res.statusCode = 400;
-			res.end();
-			return;
-		}
-
-		const ContentService = ContentServiceGetter.get();
-		const UserRecordService = UserRecordGetter.get();
-
-		try {
-			var { fields } = await middleware.form();
-		} catch (err) {
-			console.error("Unknown data submission error: ", err);
-			res.statusCode = 500;
-			res.end(err.message);
-		}
-
-		if (fields.id) {
-			if (!UserRecordService.isUser(fields.id as string)) {
-				res.statusCode = 400;
-				res.end("That user doesn't exist.\n");
-				return;
-
-			} else {
-				UserRecordService.addBan(fields.id as string);
-				ContentService.purgeUser(fields.id as string);
-				if (middleware.noRedirect()) {
-					res.statusCode = 200;
-					res.end("Success\n");
-				} else {
-					redirectSuccessfulPost(res, "/");
-				}
-			}
-
-		} else if (fields.nickname) {
-			const uids = UserRecordService.whoHasNickname(utils.sanitiseNickname(fields.nickname as string));
-
-			if (uids.length === 0) {
-				res.statusCode = 400;
-				res.end("That user doesn't exist.\n");
-				return;
-
-			} else {
-				uids.forEach((id) => {
-					UserRecordService.addBan(id);
-					ContentService.purgeUser(id);
-				});
-
-				if (middleware.noRedirect()) {
-					res.statusCode = 200;
-					res.end("Success\n");
-				} else {
-					redirectSuccessfulPost(res, "/");
-				}
-			}
-
-		} else {
-			res.statusCode = 400;
-			res.end("User not specified.\n");
+			handleErrors(e, res);
 		}
 	}
 });
@@ -415,63 +421,61 @@ quelaag.addEndpoint({
 	async do(req, res, middleware) {
 		try {
 			await isPassword(middleware.password());
+
+			const UserRecordService = UserRecordGetter.get();
+
+			try {
+				var { fields } = await middleware.form();
+			} catch (err) {
+				console.error("Unknown data submission error: ", err);
+				res.statusCode = 500;
+				res.end(err.message);
+			}
+
+			if (fields.id) {
+				if (!UserRecordService.isUser(fields.id as string)) {
+					res.statusCode = 400;
+					res.end("That user doesn't exist.\n");
+					return;
+
+				} else {
+					UserRecordService.removeBan(fields.id as string);
+					if (middleware.noRedirect()) {
+						res.statusCode = 200;
+						res.end("Success\n");
+					} else {
+						redirectSuccessfulPost(res, "/");
+					}
+					return;
+				}
+
+			} else if (fields.nickname) {
+				const uids = UserRecordService.whoHasNickname(utils.sanitiseNickname(fields.nickname as string));
+				if (uids.length === 0) {
+					res.statusCode = 400;
+					res.end("That user doesn't exist.\n");
+					return;
+
+				} else {
+					uids.forEach((id) => {
+						UserRecordService.removeBan(id);
+					});
+
+					if (middleware.noRedirect()) {
+						res.statusCode = 200;
+						res.end("Success\n");
+					} else {
+						redirectSuccessfulPost(res, "/");
+					}
+					return;
+				}
+
+			} else {
+				res.statusCode = 400;
+				res.end("User not specified.\n");
+			}
 		} catch (e) {
-			res.statusCode = 400;
-			res.end();
-			return;
-		}
-
-		const UserRecordService = UserRecordGetter.get();
-
-		try {
-			var { fields } = await middleware.form();
-		} catch (err) {
-			console.error("Unknown data submission error: ", err);
-			res.statusCode = 500;
-			res.end(err.message);
-		}
-
-		if (fields.id) {
-			if (!UserRecordService.isUser(fields.id as string)) {
-				res.statusCode = 400;
-				res.end("That user doesn't exist.\n");
-				return;
-
-			} else {
-				UserRecordService.removeBan(fields.id as string);
-				if (middleware.noRedirect()) {
-					res.statusCode = 200;
-					res.end("Success\n");
-				} else {
-					redirectSuccessfulPost(res, "/");
-				}
-				return;
-			}
-
-		} else if (fields.nickname) {
-			const uids = UserRecordService.whoHasNickname(utils.sanitiseNickname(fields.nickname as string));
-			if (uids.length === 0) {
-				res.statusCode = 400;
-				res.end("That user doesn't exist.\n");
-				return;
-
-			} else {
-				uids.forEach((id) => {
-					UserRecordService.removeBan(id);
-				});
-
-				if (middleware.noRedirect()) {
-					res.statusCode = 200;
-					res.end("Success\n");
-				} else {
-					redirectSuccessfulPost(res, "/");
-				}
-				return;
-			}
-
-		} else {
-			res.statusCode = 400;
-			res.end("User not specified.\n");
+			handleErrors(e, res);
 		}
 	}
 });
@@ -482,17 +486,16 @@ quelaag.addEndpoint({
 	async do(req, res, middleware) {
 		try {
 			await isPassword(middleware.password());
+
+			const ContentService = ContentServiceGetter.get();
+
+			ContentService.killCurrent();
+			res.statusCode = 200;
+			res.end("Success\n");
+
 		} catch (e) {
-			res.statusCode = 400;
-			res.end();
-			return;
+			handleErrors(e, res);
 		}
-
-		const ContentService = ContentServiceGetter.get();
-
-		ContentService.killCurrent();
-		res.statusCode = 200;
-		res.end("Success\n");
 	}
 });
 
@@ -502,25 +505,24 @@ quelaag.addEndpoint({
 	async do(req, res, middleware) {
 		try {
 			await isPassword(middleware.password());
+
+			const ContentService = ContentServiceGetter.get();
+			const UserRecordService = UserRecordGetter.get();
+
+			if (ContentService.currentlyPlaying) {
+				const id = ContentService.currentlyPlaying.userId;
+				UserRecordService.addBan(id);
+				ContentService.purgeUser(id);
+			}
+
+			ContentService.killCurrent();
+
+			res.statusCode = 200;
+			res.end("Success\n");
+
 		} catch (e) {
-			res.statusCode = 400;
-			res.end();
-			return;
+			handleErrors(e, res);
 		}
-
-		const ContentService = ContentServiceGetter.get();
-		const UserRecordService = UserRecordGetter.get();
-
-		if (ContentService.currentlyPlaying) {
-			const id = ContentService.currentlyPlaying.userId;
-			UserRecordService.addBan(id);
-			ContentService.purgeUser(id);
-		}
-
-		ContentService.killCurrent();
-
-		res.statusCode = 200;
-		res.end("Success\n");
 	}
 });
 
