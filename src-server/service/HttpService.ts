@@ -1,5 +1,4 @@
 import * as cookie from "cookie";
-import * as express from "express";
 import * as http from "http";
 import * as formidable from "formidable";
 import * as q from "q";
@@ -22,23 +21,23 @@ import { WebSocketServiceGetter } from "./WebSocketService";
 import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingError } from "../lib/errors";
 import { UploadData, UrlPic, NoPic, FilePic, FileMusic, UrlMusic, UploadDataWithId } from "../types/UploadData";
 import { verifyPassword } from "../lib/PasswordContainer";
+import { redirectSuccessfulPost } from "./httpUtils";
 
-type RequestWithFormData = express.Request & {
+type FormData = {
 	fields: formidable.Fields;
 	files: formidable.Files;
 };
 
-async function adminCredentialsRequired(req: RequestWithFormData, res: express.Response, next: () => void) {
+async function isPassword(password: string) {
 	const passwordContainer = PasswordService.getContainer();
 	if (passwordContainer == null) {
-		res.status(400).end("The admin controls can not be used because no admin password was set.\n");
-		return;
+		throw new Error("The admin controls can not be used because no admin password was set.\n");
 	}
 
-	if (await verifyPassword(req.fields.password as string, passwordContainer)) {
-		next();
+	if (await verifyPassword(password as string, passwordContainer)) {
+		return;
 	} else {
-		res.status(400).end("Admin password incorrect.\n");
+		throw new Error("Admin password incorrect.\n");
 	}
 }
 
@@ -94,26 +93,6 @@ function getFileForm(
 	return defer.promise;
 }
 
-function getFormMiddleware(req: express.Request, res: express.Response, next: () => void) {
-	const form = new formidable.IncomingForm();
-
-	form.parse(req, (err, fields, files) => {
-		if (err) {
-			console.error("Unknown data submission error: ", err);
-			res.status(500).end(err.message);
-
-		} else {
-			const modifiedReq = req as RequestWithFormData;
-			modifiedReq.fields = fields;
-			modifiedReq.files = files;
-
-			debug.log("fields", fields);
-
-			next();
-		}
-	});
-}
-
 function handleFileUpload(req: http.IncomingMessage, contentId: number): q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]> {
 	const ipAddress = req.connection.remoteAddress!;
 
@@ -150,8 +129,8 @@ function makeMusicTooBigError(files: formidable.File[]) {
 	return new FileUploadError(`The music file you gave was too large. The maximum size is ${consts.musicSizeLimStr}.`, files);
 }
 
-function noRedirect(req: RequestWithFormData) {
-	return req.fields.ajax || (req.headers["user-agent"] as string).includes("curl");
+function noRedirect(req: http.IncomingMessage, ajax: boolean) {
+	return ajax || (req.headers["user-agent"] as string).includes("curl");
 }
 
 function parseUploadForm(
@@ -290,7 +269,45 @@ function recordUser(req: http.IncomingMessage, res: http.ServerResponse) {
 
 //creation of express instance and attaching handlers
 
-const quelaag = new Quelaag({});
+const quelaag = new Quelaag({
+	ajax() {
+		return !!this.form().ajax;
+	},
+
+	form(req?) {
+		return new Promise<FormData>((resolve, reject) => {
+			const form = new formidable.IncomingForm();
+
+			form.parse(req!, (err, fields, files) => {
+				if (err) {
+					return reject(err);
+
+				} else {
+					debug.log("fields", fields);
+
+					resolve({
+						fields,
+						files,
+					});
+				}
+			});
+		});
+	},
+
+	ip(req?) {
+		return req!.connection.remoteAddress!;
+	},
+
+	password() {
+		const { password } = this.form();
+
+		if (typeof password !== "undefined") {
+			return password;
+		}
+
+		throw new Error("Expected field 'password' in form.");
+	}
+});
 
 // TODO do I need this?
 // app.use("/", (req, res, next) => {
@@ -316,8 +333,8 @@ quelaag.addEndpoint({
  */
 quelaag.addEndpoint({
 	when: req => req.method === "POST" && req.url! === "/api/queue/add",
-	do(req, res) {
-		const ipAddress = req.connection.remoteAddress!;
+	do(req, res, middleware) {
+		const ipAddress = middleware.ip();
 
 		recordUser(req, res);
 		const ProgressQueueService = ProgressQueueServiceGetter.get();
@@ -376,9 +393,7 @@ quelaag.addEndpoint({
 					res.statusCode = 200;
 					res.end("Success\n");
 				} else {
-					res.writeHead(303, {
-						Location: "/"
-					});
+					redirectSuccessfulPost(res, "/");
 				}
 			})
 			.catch(err => {
@@ -423,153 +438,289 @@ quelaag.addEndpoint({
 	}
 );
 
-app.use(getFormMiddleware);
-
 //POST variable: content-id
-app.post("/api/queue/remove", (req: RequestWithFormData, res) => {
-	const ContentService = ContentServiceGetter.get();
+quelaag.addEndpoint({
+	when: req => req.url === "/api/queue/remove" && req.method === "POST",
+	async do(req, res, middleware) {
+		const ContentService = ContentServiceGetter.get();
 
-	if (ContentService.remove(parseInt(req.fields["content-id"] as string))) {
-		if (noRedirect(req)) res.status(200).end("Success\n");
-		else				 res.redirect("/");
-	} else {
-		res.status(400).end("OwnershipError");
+		try {
+			var { fields } = await middleware.form();
+		} catch (err) {
+			console.error("Unknown data submission error: ", err);
+			res.statusCode = 500;
+			res.end(err.message);
+			return;
+		}
+
+		if (ContentService.remove(parseInt(fields["content-id"] as string))) {
+			if (noRedirect(req, middleware.ajax())) {
+				res.statusCode = 200;
+				res.end("Success\n");
+			} else {
+				redirectSuccessfulPost(res, "/");
+			}
+		} else {
+			res.statusCode = 400;
+			res.end("OwnershipError");
+		}
 	}
 });
 
 //POST variable: content-id
-app.post("/api/download/cancel", (req: RequestWithFormData, res) => {
-	const ProgressQueueService = ProgressQueueServiceGetter.get();
+quelaag.addEndpoint({
+	when: req => req.url === "/api/download/cancel" && req.method === "POST",
+	async do(req, res, middleware) {
+		try {
+			var { fields } = await middleware.form();
+		} catch (err) {
+			console.error("Unknown data submission error: ", err);
+			res.statusCode = 500;
+			res.end(err.message);
+			return;
+		}
 
-	if (ProgressQueueService.cancel(req.ip, parseInt(req.fields["content-id"] as string))) {
-		if (noRedirect(req)) res.status(200).end("Success\n");
-		else				 res.redirect("/");
-	} else {
-		res.status(400).end("I could not cancel that.\n");
+		const ProgressQueueService = ProgressQueueServiceGetter.get();
+
+		if (ProgressQueueService.cancel(middleware.ip(), parseInt(fields["content-id"] as string))) {
+			if (noRedirect(req, middleware.ajax())) {
+				res.statusCode = 200;
+				res.end("Success\n");
+			} else {
+				redirectSuccessfulPost(res, "/");
+			}
+		} else {
+			res.statusCode = 400;
+			res.end("I could not cancel that.\n");
+		}
 	}
 });
 
 //POST variable: nickname
-app.post("/api/nickname/set", recordUserMiddleware, (req: RequestWithFormData, res) => {
-	const UserRecordService = UserRecordGetter.get();
-	const WebSocketService = WebSocketServiceGetter.get()
+quelaag.addEndpoint({
+	when: req => req.url === "/api/nickname/set",
+	async do(req, res, middleware) {
+		try {
+			var { fields } = await middleware.form();
+		} catch (err) {
+			console.error("Unknown data submission error: ", err);
+			res.statusCode = 500;
+			res.end(err.message);
+			return;
+		}
 
-	const nickname = utils.sanitiseNickname(req.fields.nickname as string);
+		const UserRecordService = UserRecordGetter.get();
+		const WebSocketService = WebSocketServiceGetter.get()
 
-	if (nickname.length === 0) {
-		res.status(400).end("Empty nicknames are not allowed.");
-		return;
+		const nickname = utils.sanitiseNickname(fields.nickname as string);
+
+		if (nickname.length === 0) {
+			res.statusCode = 400;
+			res.end("Empty nicknames are not allowed.");
+			return;
+		}
+
+		// check sanitised version because that's what admins will see
+		if (utils.looksLikeIpAddress(nickname)) {
+			res.statusCode = 400;
+			res.end("Your nickname can not look like an IP address.");
+			return;
+		}
+
+		UserRecordService.setNickname(middleware.ip(), nickname);
+		WebSocketService.sendNicknameToUser(middleware.ip(), nickname);
+
+		if (noRedirect(req, middleware.ajax())) {
+			res.statusCode = 200;
+			res.end("Success\n");
+		} else {
+			redirectSuccessfulPost(res, "/");
+		}
 	}
-
-	// check sanitised version because that's what admins will see
-	if (utils.looksLikeIpAddress(nickname)) {
-		res.status(400).end("Your nickname can not look like an IP address.");
-		return;
-	}
-
-	UserRecordService.setNickname(req.ip, nickname);
-	WebSocketService.sendNicknameToUser(req.ip, nickname);
-
-	if (noRedirect(req)) res.status(200).end("Success\n");
-	else				 res.redirect("/");
 });
 
 //POST variable: password, id, nickname
-app.post("/api/ban/add", adminCredentialsRequired, (req: RequestWithFormData, res) => {
-	const ContentService = ContentServiceGetter.get();
-	const UserRecordService = UserRecordGetter.get();
-
-	if (req.fields.id) {
-		if (!UserRecordService.isUser(req.fields.id as string)) {
-			res.status(400).end("That user doesn't exist.\n");
+quelaag.addEndpoint({
+	when: req => req.url === "/api/ban/add" && req.method === "POST",
+	async do(req, res, middleware) {
+		try {
+			await isPassword(middleware.password());
+		} catch (e) {
+			res.statusCode = 400;
+			res.end();
 			return;
-
-		} else {
-			UserRecordService.addBan(req.fields.id as string);
-			ContentService.purgeUser(req.fields.id as string);
-			if (noRedirect(req)) res.status(200).end("Success\n");
-			else				 res.redirect("/");
 		}
 
-	} else if (req.fields.nickname) {
-		const uids = UserRecordService.whoHasNickname(utils.sanitiseNickname(req.fields.nickname as string));
+		const ContentService = ContentServiceGetter.get();
+		const UserRecordService = UserRecordGetter.get();
 
-		if (uids.length === 0) {
-			res.status(400).end("That user doesn't exist.\n");
-			return;
-
-		} else {
-			uids.forEach((id) => {
-				UserRecordService.addBan(id);
-				ContentService.purgeUser(id);
-			});
-
-			if (noRedirect(req)) res.status(200).end("Success\n");
-			else				 res.redirect("/");
+		try {
+			var { fields } = await middleware.form();
+		} catch (err) {
+			console.error("Unknown data submission error: ", err);
+			res.statusCode = 500;
+			res.end(err.message);
 		}
 
-	} else {
-		res.status(400).end("User not specified.\n");
+		if (fields.id) {
+			if (!UserRecordService.isUser(fields.id as string)) {
+				res.statusCode = 400;
+				res.end("That user doesn't exist.\n");
+				return;
+
+			} else {
+				UserRecordService.addBan(fields.id as string);
+				ContentService.purgeUser(fields.id as string);
+				if (noRedirect(req, middleware.ajax())) {
+					res.statusCode = 200;
+					res.end("Success\n");
+				} else {
+					redirectSuccessfulPost(res, "/");
+				}
+			}
+
+		} else if (fields.nickname) {
+			const uids = UserRecordService.whoHasNickname(utils.sanitiseNickname(fields.nickname as string));
+
+			if (uids.length === 0) {
+				res.statusCode = 400;
+				res.end("That user doesn't exist.\n");
+				return;
+
+			} else {
+				uids.forEach((id) => {
+					UserRecordService.addBan(id);
+					ContentService.purgeUser(id);
+				});
+
+				if (noRedirect(req, middleware.ajax())) {
+					res.statusCode = 200;
+					res.end("Success\n");
+				} else {
+					redirectSuccessfulPost(res, "/");
+				}
+			}
+
+		} else {
+			res.statusCode = 400;
+			res.end("User not specified.\n");
+		}
 	}
 });
 
 //POST variable: password, id
-app.post("/api/ban/remove", adminCredentialsRequired, (req: RequestWithFormData, res) => {
-	const UserRecordService = UserRecordGetter.get();
-
-	if (req.fields.id) {
-		if (!UserRecordService.isUser(req.fields.id as string)) {
-			res.status(400).end("That user doesn't exist.\n");
+quelaag.addEndpoint({
+	when: req => req.url === "/api/ban/remove" && req.method === "POST",
+	async do(req, res, middleware) {
+		try {
+			await isPassword(middleware.password());
+		} catch (e) {
+			res.statusCode = 400;
+			res.end();
 			return;
-
-		} else {
-			UserRecordService.removeBan(req.fields.id as string);
-			if (noRedirect(req)) res.status(200).end("Success\n");
-			else				 res.redirect("/");
 		}
 
-	} else if (req.fields.nickname) {
-		const uids = UserRecordService.whoHasNickname(utils.sanitiseNickname(req.fields.nickname as string));
-		if (uids.length === 0) {
-			res.status(400).end("That user doesn't exist.\n");
-			return;
+		const UserRecordService = UserRecordGetter.get();
 
-		} else {
-			uids.forEach((id) => {
-				UserRecordService.removeBan(id);
-			});
-
-			if (noRedirect(req)) res.status(200).end("Success\n");
-			else				 res.redirect("/");
+		try {
+			var { fields } = await middleware.form();
+		} catch (err) {
+			console.error("Unknown data submission error: ", err);
+			res.statusCode = 500;
+			res.end(err.message);
 		}
 
-	} else {
-		res.status(400).end("User not specified.\n");
+		if (fields.id) {
+			if (!UserRecordService.isUser(fields.id as string)) {
+				res.statusCode = 400;
+				res.end("That user doesn't exist.\n");
+				return;
+
+			} else {
+				UserRecordService.removeBan(fields.id as string);
+				if (noRedirect(req, middleware.ajax())) {
+					res.statusCode = 200;
+					res.end("Success\n");
+				} else {
+					redirectSuccessfulPost(res, "/");
+				}
+				return;
+			}
+
+		} else if (fields.nickname) {
+			const uids = UserRecordService.whoHasNickname(utils.sanitiseNickname(fields.nickname as string));
+			if (uids.length === 0) {
+				res.statusCode = 400;
+				res.end("That user doesn't exist.\n");
+				return;
+
+			} else {
+				uids.forEach((id) => {
+					UserRecordService.removeBan(id);
+				});
+
+				if (noRedirect(req, middleware.ajax())) {
+					res.statusCode = 200;
+					res.end("Success\n");
+				} else {
+					redirectSuccessfulPost(res, "/");
+				}
+				return;
+			}
+
+		} else {
+			res.statusCode = 400;
+			res.end("User not specified.\n");
+		}
 	}
 });
 
 //POST variable: password
-app.post("/api/skip", adminCredentialsRequired, (req, res) => {
-	const ContentService = ContentServiceGetter.get();
+quelaag.addEndpoint({
+	when: req => req.url === "/api/skip" && req.method === "POST",
+	async do(req, res, middleware) {
+		try {
+			await isPassword(middleware.password());
+		} catch (e) {
+			res.statusCode = 400;
+			res.end();
+			return;
+		}
 
-	ContentService.killCurrent();
-	res.status(200).end("Success\n");
+		const ContentService = ContentServiceGetter.get();
+
+		ContentService.killCurrent();
+		res.statusCode = 200;
+		res.end("Success\n");
+	}
 });
 
 //POST variable: password
-app.post("/api/skipAndBan", adminCredentialsRequired, (req, res) => {
-	const ContentService = ContentServiceGetter.get();
-	const UserRecordService = UserRecordGetter.get();
+quelaag.addEndpoint({
+	when: req => req.url === "/api/skipAndBan" && req.method === "POST",
+	async do(req, res, middleware) {
+		try {
+			await isPassword(middleware.password());
+		} catch (e) {
+			res.statusCode = 400;
+			res.end();
+			return;
+		}
 
-	if (ContentService.currentlyPlaying) {
-		const id = ContentService.currentlyPlaying.userId;
-		UserRecordService.addBan(id);
-		ContentService.purgeUser(id);
+		const ContentService = ContentServiceGetter.get();
+		const UserRecordService = UserRecordGetter.get();
+
+		if (ContentService.currentlyPlaying) {
+			const id = ContentService.currentlyPlaying.userId;
+			UserRecordService.addBan(id);
+			ContentService.purgeUser(id);
+		}
+
+		ContentService.killCurrent();
+
+		res.statusCode = 200;
+		res.end("Success\n");
 	}
-
-	ContentService.killCurrent();
-
-	res.status(200).end("Success\n");
 });
 
 quelaag.addEndpoint({

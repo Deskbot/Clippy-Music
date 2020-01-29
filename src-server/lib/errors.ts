@@ -66,6 +66,12 @@ export class FileUploadError extends Error {
 	}
 }
 
+// export class FormParseError extends Error {
+// 	constructor() {
+
+// 	}
+// }
+
 export class UniqueError extends DeferredContentError {
 	public readonly playedWithin: string;
 
