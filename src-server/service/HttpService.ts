@@ -15,7 +15,7 @@ import { ProgressQueueServiceGetter } from "./ProgressQueueService";
 import { PasswordService } from "./PasswordService";
 import { UserRecordGetter } from "./UserRecordService";
 import { WebSocketServiceGetter } from "./WebSocketService";
-import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingError, AuthError } from "../lib/errors";
+import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingError, AuthError, FormParseError } from "../lib/errors";
 import { UploadDataWithId } from "../types/UploadData";
 import { verifyPassword } from "../lib/PasswordContainer";
 import { redirectSuccessfulPost } from "./httpUtils";
@@ -39,12 +39,26 @@ async function isPassword(password: string) {
 	}
 }
 
-function handleErrors(err: Error, res: http.ServerResponse) {
+function handleErrors(err: any, res: http.ServerResponse) {
 	if (err instanceof AuthError) {
 		res.statusCode = 400;
 		res.end();
 		return;
+
+	} else if (err instanceof FormParseError) {
+		console.error("Unknown data submission error: ", err);
+		res.statusCode = 500;
+		res.end("I could not understand the request made.");
+		return;
 	}
+
+	res.statusCode = 500;
+
+	if (err instanceof Error) {
+		res.write(err.message);
+	}
+
+	res.end();
 }
 
 function handlePotentialBan(userId: string) {
@@ -73,8 +87,8 @@ function recordUser(ipAddress: string, res: http.ServerResponse) {
 }
 
 const quelaag = new Quelaag({
-	ajax() {
-		return this.form().ajax ?? false;
+	async ajax() {
+		return (await this.form()).fields.ajax ?? false;
 	},
 
 	form(req?) {
@@ -83,7 +97,7 @@ const quelaag = new Quelaag({
 
 			form.parse(req!, (err, fields, files) => {
 				if (err) {
-					return reject(err);
+					return reject(new FormParseError(err));
 
 				} else {
 					debug.log("fields", fields);
@@ -111,8 +125,8 @@ const quelaag = new Quelaag({
 		throw new Error("Expected field 'password' in form.");
 	},
 
-	noRedirect(req?) {
-		return this.ajax() || (req!.headers["user-agent"] as string).includes("curl");
+	async noRedirect(req?) {
+		return (await this.ajax()) || (req!.headers["user-agent"] as string).includes("curl");
 	}
 });
 
@@ -150,7 +164,7 @@ quelaag.addEndpoint({
 		handlePotentialBan(ipAddress) //assumes ip address is userId
 			.then(() => ProgressQueueServiceGetter.get().add(ipAddress, contentId))
 			.then(() => handleFileUpload(req, contentId))
-			.then(async ([form, fields, files]) => { //nesting in order to get the scoping right
+			.then(async ([form, fields, files]) => {
 				const uplData: UploadDataWithId = {
 					...await parseUploadForm(form, fields, files),
 					id: contentId,
@@ -249,27 +263,25 @@ quelaag.addEndpoint({
 quelaag.addEndpoint({
 	when: req => req.url === "/api/queue/remove" && req.method === "POST",
 	async do(req, res, middleware) {
-		const ContentService = ContentServiceGetter.get();
-
 		try {
-			var { fields } = await middleware.form();
-		} catch (err) {
-			console.error("Unknown data submission error: ", err);
-			res.statusCode = 500;
-			res.end(err.message);
-			return;
-		}
+			const ContentService = ContentServiceGetter.get();
 
-		if (ContentService.remove(parseInt(fields["content-id"] as string))) {
-			if (middleware.noRedirect()) {
-				res.statusCode = 200;
-				res.end("Success\n");
+			const { fields } = await middleware.form();
+
+			if (ContentService.remove(parseInt(fields["content-id"] as string))) {
+				if (await middleware.noRedirect()) {
+					res.statusCode = 200;
+					res.end("Success\n");
+				} else {
+					redirectSuccessfulPost(res, "/");
+				}
 			} else {
-				redirectSuccessfulPost(res, "/");
+				res.statusCode = 400;
+				res.end("OwnershipError");
 			}
-		} else {
-			res.statusCode = 400;
-			res.end("OwnershipError");
+
+		} catch (e) {
+			handleErrors(e, res);
 		}
 	}
 });
@@ -279,26 +291,23 @@ quelaag.addEndpoint({
 	when: req => req.url === "/api/download/cancel" && req.method === "POST",
 	async do(req, res, middleware) {
 		try {
-			var { fields } = await middleware.form();
-		} catch (err) {
-			console.error("Unknown data submission error: ", err);
-			res.statusCode = 500;
-			res.end(err.message);
-			return;
-		}
+			const ProgressQueueService = ProgressQueueServiceGetter.get();
 
-		const ProgressQueueService = ProgressQueueServiceGetter.get();
+			const { fields } = await middleware.form();
 
-		if (ProgressQueueService.cancel(middleware.ip(), parseInt(fields["content-id"] as string))) {
-			if (middleware.noRedirect()) {
-				res.statusCode = 200;
-				res.end("Success\n");
+			if (ProgressQueueService.cancel(middleware.ip(), parseInt(fields["content-id"] as string))) {
+				if (await middleware.noRedirect()) {
+					res.statusCode = 200;
+					res.end("Success\n");
+				} else {
+					redirectSuccessfulPost(res, "/");
+				}
 			} else {
-				redirectSuccessfulPost(res, "/");
+				res.statusCode = 400;
+				res.end("I could not cancel that.\n");
 			}
-		} else {
-			res.statusCode = 400;
-			res.end("I could not cancel that.\n");
+		} catch (e) {
+			handleErrors(e, res);
 		}
 	}
 });
@@ -307,43 +316,40 @@ quelaag.addEndpoint({
 quelaag.addEndpoint({
 	when: req => req.url === "/api/nickname/set",
 	async do(req, res, middleware) {
-		recordUser(middleware.ip(), res);
-
 		try {
-			var { fields } = await middleware.form();
-		} catch (err) {
-			console.error("Unknown data submission error: ", err);
-			res.statusCode = 500;
-			res.end(err.message);
-			return;
-		}
+			recordUser(middleware.ip(), res);
 
-		const UserRecordService = UserRecordGetter.get();
-		const WebSocketService = WebSocketServiceGetter.get()
+			const UserRecordService = UserRecordGetter.get();
+			const WebSocketService = WebSocketServiceGetter.get()
 
-		const nickname = utils.sanitiseNickname(fields.nickname as string);
+			const { fields } = await middleware.form();
 
-		if (nickname.length === 0) {
-			res.statusCode = 400;
-			res.end("Empty nicknames are not allowed.");
-			return;
-		}
+			const nickname = utils.sanitiseNickname(fields.nickname as string);
 
-		// check sanitised version because that's what admins will see
-		if (utils.looksLikeIpAddress(nickname)) {
-			res.statusCode = 400;
-			res.end("Your nickname can not look like an IP address.");
-			return;
-		}
+			if (nickname.length === 0) {
+				res.statusCode = 400;
+				res.end("Empty nicknames are not allowed.");
+				return;
+			}
 
-		UserRecordService.setNickname(middleware.ip(), nickname);
-		WebSocketService.sendNicknameToUser(middleware.ip(), nickname);
+			// check sanitised version because that's what admins will see
+			if (utils.looksLikeIpAddress(nickname)) {
+				res.statusCode = 400;
+				res.end("Your nickname can not look like an IP address.");
+				return;
+			}
 
-		if (middleware.noRedirect()) {
-			res.statusCode = 200;
-			res.end("Success\n");
-		} else {
-			redirectSuccessfulPost(res, "/");
+			UserRecordService.setNickname(middleware.ip(), nickname);
+			WebSocketService.sendNicknameToUser(middleware.ip(), nickname);
+
+			if (await middleware.noRedirect()) {
+				res.statusCode = 200;
+				res.end("Success\n");
+			} else {
+				redirectSuccessfulPost(res, "/");
+			}
+		} catch (e) {
+			handleErrors(e, res);
 		}
 	}
 });
@@ -358,13 +364,7 @@ quelaag.addEndpoint({
 			const ContentService = ContentServiceGetter.get();
 			const UserRecordService = UserRecordGetter.get();
 
-			try {
-				var { fields } = await middleware.form();
-			} catch (err) {
-				console.error("Unknown data submission error: ", err);
-				res.statusCode = 500;
-				res.end(err.message);
-			}
+			const { fields } = await middleware.form();
 
 			if (fields.id) {
 				if (!UserRecordService.isUser(fields.id as string)) {
@@ -375,7 +375,7 @@ quelaag.addEndpoint({
 				} else {
 					UserRecordService.addBan(fields.id as string);
 					ContentService.purgeUser(fields.id as string);
-					if (middleware.noRedirect()) {
+					if (await middleware.noRedirect()) {
 						res.statusCode = 200;
 						res.end("Success\n");
 					} else {
@@ -397,7 +397,7 @@ quelaag.addEndpoint({
 						ContentService.purgeUser(id);
 					});
 
-					if (middleware.noRedirect()) {
+					if (await middleware.noRedirect()) {
 						res.statusCode = 200;
 						res.end("Success\n");
 					} else {
@@ -424,13 +424,7 @@ quelaag.addEndpoint({
 
 			const UserRecordService = UserRecordGetter.get();
 
-			try {
-				var { fields } = await middleware.form();
-			} catch (err) {
-				console.error("Unknown data submission error: ", err);
-				res.statusCode = 500;
-				res.end(err.message);
-			}
+			const { fields } = await middleware.form();
 
 			if (fields.id) {
 				if (!UserRecordService.isUser(fields.id as string)) {
@@ -440,7 +434,7 @@ quelaag.addEndpoint({
 
 				} else {
 					UserRecordService.removeBan(fields.id as string);
-					if (middleware.noRedirect()) {
+					if (await middleware.noRedirect()) {
 						res.statusCode = 200;
 						res.end("Success\n");
 					} else {
@@ -461,7 +455,7 @@ quelaag.addEndpoint({
 						UserRecordService.removeBan(id);
 					});
 
-					if (middleware.noRedirect()) {
+					if (await middleware.noRedirect()) {
 						res.statusCode = 200;
 						res.end("Success\n");
 					} else {

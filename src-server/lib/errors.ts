@@ -68,11 +68,9 @@ export class FileUploadError extends Error {
 }
 
 export class FormParseError extends Error {
-	private cause: any;
 
-	constructor(message: string, cause: any) {
+	constructor(message: any) {
 		super(message);
-		this.cause = cause;
 	}
 }
 
