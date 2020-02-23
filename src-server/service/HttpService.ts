@@ -88,15 +88,16 @@ function recordUser(ipAddress: string, res: http.ServerResponse) {
 }
 
 const quelaag = new Quelaag({
-	async ajax(req?): Promise<boolean> {
+	async ajax(req: http.IncomingMessage): Promise<boolean> {
 		return (await this.form(req)).fields.ajax ?? false;
 	},
 
-	form(req?): Promise<FormData> {
+	form(req: http.IncomingMessage): Promise<FormData> {
 		return new Promise<FormData>((resolve, reject) => {
 			const form = new formidable.IncomingForm();
 
-			form.parse(req!, (err, fields, files) => {
+			form.parse(req, (err, fields, files) => {
+				debug.log(err, fields, files);
 				if (err) {
 					return reject(new FormParseError(err));
 
@@ -112,12 +113,12 @@ const quelaag = new Quelaag({
 		});
 	},
 
-	ip(req?): string {
-		return req!.connection.remoteAddress!;
+	ip(req: http.IncomingMessage): string {
+		return req.connection.remoteAddress!;
 	},
 
-	password(req?): string {
-		const { password } = this.form(req);
+	async password(req: http.IncomingMessage): Promise<string> {
+		const { password } = (await this.form(req)).fields;
 
 		if (typeof password !== "undefined") {
 			return password;
@@ -126,7 +127,7 @@ const quelaag = new Quelaag({
 		throw new Error("Expected field 'password' in form.");
 	},
 
-	async noRedirect(req?): Promise<boolean> {
+	async noRedirect(req: http.IncomingMessage): Promise<boolean> {
 		return (await this.ajax(req)) || (req!.headers["user-agent"] as string).includes("curl");
 	}
 });
@@ -354,7 +355,7 @@ quelaag.addEndpoint({
 	when: req => req.url === "/api/ban/add" && req.method === "POST",
 	async do(req, res, middleware) {
 		try {
-			await isPassword(middleware.password());
+			await isPassword(await middleware.password());
 
 			const ContentService = ContentServiceGetter.get();
 			const UserRecordService = UserRecordGetter.get();
@@ -415,7 +416,7 @@ quelaag.addEndpoint({
 	when: req => req.url === "/api/ban/remove" && req.method === "POST",
 	async do(req, res, middleware) {
 		try {
-			await isPassword(middleware.password());
+			await isPassword(await middleware.password());
 
 			const UserRecordService = UserRecordGetter.get();
 
@@ -474,7 +475,7 @@ quelaag.addEndpoint({
 	when: req => req.url === "/api/skip" && req.method === "POST",
 	async do(req, res, middleware) {
 		try {
-			await isPassword(middleware.password());
+			await isPassword(await middleware.password());
 
 			const ContentService = ContentServiceGetter.get();
 
@@ -493,7 +494,7 @@ quelaag.addEndpoint({
 	when: req => req.url === "/api/skipAndBan" && req.method === "POST",
 	async do(req, res, middleware) {
 		try {
-			await isPassword(middleware.password());
+			await isPassword(await middleware.password());
 
 			const ContentService = ContentServiceGetter.get();
 			const UserRecordService = UserRecordGetter.get();
