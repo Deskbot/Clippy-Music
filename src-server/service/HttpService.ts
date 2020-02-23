@@ -88,11 +88,11 @@ function recordUser(ipAddress: string, res: http.ServerResponse) {
 }
 
 const quelaag = new Quelaag({
-	async ajax(req: http.IncomingMessage): Promise<boolean> {
+	async ajax(req): Promise<boolean> {
 		return !!(await this.form(req)).fields.ajax;
 	},
 
-	form(req: http.IncomingMessage): Promise<FormData> {
+	form(req): Promise<FormData> {
 		return new Promise<FormData>((resolve, reject) => {
 			const form = new formidable.IncomingForm();
 
@@ -101,8 +101,6 @@ const quelaag = new Quelaag({
 				if (err) {
 					reject(new FormParseError(err));
 				} else {
-					debug.log("fields", fields);
-
 					resolve({
 						fields,
 						files,
@@ -112,11 +110,11 @@ const quelaag = new Quelaag({
 		});
 	},
 
-	ip(req: http.IncomingMessage): string {
+	ip(req): string {
 		return req.connection.remoteAddress!;
 	},
 
-	async password(req: http.IncomingMessage): Promise<string> {
+	async password(req): Promise<string> {
 		const { password } = (await this.form(req)).fields;
 
 		if (typeof password !== "undefined") {
@@ -126,7 +124,7 @@ const quelaag = new Quelaag({
 		throw new Error("Expected field 'password' in form.");
 	},
 
-	async noRedirect(req: http.IncomingMessage): Promise<boolean> {
+	async noRedirect(req): Promise<boolean> {
 		return (await this.ajax(req)) || (req!.headers["user-agent"] as string).includes("curl");
 	}
 });
