@@ -14,8 +14,10 @@ List
 		* video + static image
 		* video + animated image
 		* (video + silent looping video) // future story, investigate whether possible
+* when banning the current content, the current content id should be sent up to ensure the correct track is killed
 * no suspended id factory implies content manager recovery should be ignored
 * no suspended user record found implies content manager should be ignored
+* within a single bucket, user content should be round robin
 * Silent looping Video overlay
 	* Then rename image/pic variables to overlay everywhere
 	* These need making consistent anyway
@@ -25,6 +27,8 @@ List
 	* Only allow downloading of the currently playing content. I hate seeing people waste their time looking ahead. It ruins the fun.
 	* allow downloading of things that have just played
 	* image download
+		* use old windows 2000 placeholder icon next to the music name to indicate there is something to download
+		* give the image file name on hover
 * Can reorder my uploads
 * Make Clippy installable as a Progressive Web App
 * Clippy should state when the user is not connected to the internet at all
@@ -38,10 +42,12 @@ List
 * Dragging a window when another window resizes, causes the one you're dragging to shift.
 	* maybe consider changing the way the layout is done. how often do people resize the browser window anyway? I don't think i need to be account for all that
 * Improve the way clippy reconnects the websocket, maybe do it as soon as the tab regains focus and update the queue data at the same time.
+* dragging and dropping a file/url into anywhere in the upload window should stage the upload
 * Put development diagrams in repo
 
 ---
 
+* allow admins to kill clippy at the end of the next song
 * put user nickname in ItemData to remove need to refetch it
 * Admins can ban specific songs (even if uniqueness cooloff is disabled) hash checking needs to be applied
 * Admins can see a list of all users and can ban directly
