@@ -47,6 +47,7 @@ List
 
 ---
 
+* put admin control buttons on the same line
 * allow admins to kill clippy at the end of the next song
 * put user nickname in ItemData to remove need to refetch it
 * Admins can ban specific songs (even if uniqueness cooloff is disabled) hash checking needs to be applied
