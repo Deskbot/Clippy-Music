@@ -52,6 +52,7 @@ function handleErrors(err: any, res: http.ServerResponse) {
 		return;
 	}
 
+	console.error(err);
 	res.statusCode = 500;
 
 	if (err instanceof Error) {
@@ -87,8 +88,8 @@ function recordUser(ipAddress: string, res: http.ServerResponse) {
 }
 
 const quelaag = new Quelaag({
-	async ajax(): Promise<boolean> {
-		return (await this.form()).fields.ajax ?? false;
+	async ajax(req?): Promise<boolean> {
+		return (await this.form(req)).fields.ajax ?? false;
 	},
 
 	form(req?): Promise<FormData> {
@@ -115,8 +116,8 @@ const quelaag = new Quelaag({
 		return req!.connection.remoteAddress!;
 	},
 
-	password(): string {
-		const { password } = this.form();
+	password(req?): string {
+		const { password } = this.form(req);
 
 		if (typeof password !== "undefined") {
 			return password;
@@ -126,7 +127,7 @@ const quelaag = new Quelaag({
 	},
 
 	async noRedirect(req?): Promise<boolean> {
-		return (await this.ajax()) || (req!.headers["user-agent"] as string).includes("curl");
+		return (await this.ajax(req)) || (req!.headers["user-agent"] as string).includes("curl");
 	}
 });
 
