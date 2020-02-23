@@ -130,12 +130,6 @@ const quelaag = new Quelaag({
 	}
 });
 
-// TODO do I need this?
-// app.use("/", (req, res, next) => {
-// 	res.type("text/plain");
-// 	next();
-// });
-
 quelaag.addEndpoint({
 	when: req => req.url === "/api/wsport",
 	do(req, res) {
