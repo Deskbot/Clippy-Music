@@ -21,7 +21,7 @@
 		"LAN"
 	],
 	"author": "Thomas Richards",
-	"license": "ISC",
+	"license": "UNLICENSED",
 	"dependencies": {
 		"crc-32": "^1.2.0",
 		"express": "^4.17.1",
