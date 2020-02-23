@@ -89,7 +89,7 @@ function recordUser(ipAddress: string, res: http.ServerResponse) {
 
 const quelaag = new Quelaag({
 	async ajax(req: http.IncomingMessage): Promise<boolean> {
-		return (await this.form(req)).fields.ajax ?? false;
+		return !!(await this.form(req)).fields.ajax;
 	},
 
 	form(req: http.IncomingMessage): Promise<FormData> {
@@ -99,8 +99,7 @@ const quelaag = new Quelaag({
 			form.parse(req, (err, fields, files) => {
 				debug.log(err, fields, files);
 				if (err) {
-					return reject(new FormParseError(err));
-
+					reject(new FormParseError(err));
 				} else {
 					debug.log("fields", fields);
 
@@ -121,7 +120,7 @@ const quelaag = new Quelaag({
 		const { password } = (await this.form(req)).fields;
 
 		if (typeof password !== "undefined") {
-			return password;
+			return password as string;
 		}
 
 		throw new Error("Expected field 'password' in form.");

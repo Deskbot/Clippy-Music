@@ -4,6 +4,7 @@
 		"module": "commonjs",
 		"noImplicitAny": true,
 		"noImplicitReturns": true,
+		"noImplicitThis": true,
 		"outDir": "./build",
 		"sourceMap": true,
 		"sourceRoot": "../src-server",
