@@ -264,12 +264,12 @@ quelaag.addEndpoint({
 		if (content) {
 			// download
 			if (content.music.isUrl) {
-				endWithFailureText(res, "Can't download this because it was submitted with a url");
+				endWithFailureText(res, "I couldn't download that music for you because it was submitted as a URL.");
 			} else {
 				endWithSuccessText(res, content.music.path);
 			}
 		} else {
-			endWithFailureText(res, "non matching id");
+			endWithFailureText(res, "I could not find the music you requested to download.");
 		}
 	}
 });
