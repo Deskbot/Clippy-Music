@@ -59,7 +59,6 @@ export class YtDlDownloader {
 					});
 				} else {
 					console.error(errMessage);
-					console.trace();
 					return reject(new UnknownDownloadError(`A non-zero exit code (${code}) downloading a YouTube video.`, ContentType.Music));
 				}
 			});

@@ -40,6 +40,7 @@ async function isPassword(password: string) {
 }
 
 function handleErrors(err: any, res: http.ServerResponse) {
+	res.setHeader('Content-Type', 'text/plain');
 	if (err instanceof AuthError) {
 		res.statusCode = 400;
 		res.end();
@@ -132,6 +133,7 @@ const quelaag = new Quelaag({
 quelaag.addEndpoint({
 	when: req => req.url === "/api/wsport",
 	do(req, res) {
+		res.setHeader('Content-Type', 'text/plain');
 		res.statusCode = 200;
 		res.end(opt.webSocketPort.toString());
 	}
@@ -205,6 +207,7 @@ quelaag.addEndpoint({
 
 				if (fields.ajax || (req.headers["user-agent"] && req.headers["user-agent"].includes("curl"))) {
 					res.statusCode = 200;
+					res.setHeader('Content-Type', 'text/plain');
 					res.end("Success\n");
 				} else {
 					redirectSuccessfulPost(res, "/");
@@ -242,6 +245,7 @@ quelaag.addEndpoint({
 					ProgressQueueService.finishedWithError(ipAddress, contentId, err);
 				}
 
+				res.setHeader('Content-Type', 'application/json');
 				res.end(JSON.stringify({
 					contentId,
 					errorType: err.constructor.name,
@@ -264,12 +268,14 @@ quelaag.addEndpoint({
 			if (ContentService.remove(parseInt(fields["content-id"] as string))) {
 				if (await middleware.noRedirect()) {
 					res.statusCode = 200;
+					res.setHeader('Content-Type', 'text/plain');
 					res.end("Success\n");
 				} else {
 					redirectSuccessfulPost(res, "/");
 				}
 			} else {
 				res.statusCode = 400;
+				res.setHeader('Content-Type', 'text/plain');
 				res.end("OwnershipError");
 			}
 
@@ -291,12 +297,14 @@ quelaag.addEndpoint({
 			if (ProgressQueueService.cancel(middleware.ip(), parseInt(fields["content-id"] as string))) {
 				if (await middleware.noRedirect()) {
 					res.statusCode = 200;
+					res.setHeader('Content-Type', 'text/plain');
 					res.end("Success\n");
 				} else {
 					redirectSuccessfulPost(res, "/");
 				}
 			} else {
 				res.statusCode = 400;
+				res.setHeader('Content-Type', 'text/plain');
 				res.end("I could not cancel that.\n");
 			}
 		} catch (e) {
@@ -321,6 +329,7 @@ quelaag.addEndpoint({
 
 			if (nickname.length === 0) {
 				res.statusCode = 400;
+				res.setHeader('Content-Type', 'text/plain');
 				res.end("Empty nicknames are not allowed.");
 				return;
 			}
@@ -328,6 +337,7 @@ quelaag.addEndpoint({
 			// check sanitised version because that's what admins will see
 			if (utils.looksLikeIpAddress(nickname)) {
 				res.statusCode = 400;
+				res.setHeader('Content-Type', 'text/plain');
 				res.end("Your nickname can not look like an IP address.");
 				return;
 			}
@@ -337,6 +347,7 @@ quelaag.addEndpoint({
 
 			if (await middleware.noRedirect()) {
 				res.statusCode = 200;
+				res.setHeader('Content-Type', 'text/plain');
 				res.end("Success\n");
 			} else {
 				redirectSuccessfulPost(res, "/");
@@ -362,6 +373,7 @@ quelaag.addEndpoint({
 			if (fields.id) {
 				if (!UserRecordService.isUser(fields.id as string)) {
 					res.statusCode = 400;
+					res.setHeader('Content-Type', 'text/plain');
 					res.end("That user doesn't exist.\n");
 					return;
 
@@ -370,6 +382,7 @@ quelaag.addEndpoint({
 					ContentService.purgeUser(fields.id as string);
 					if (await middleware.noRedirect()) {
 						res.statusCode = 200;
+						res.setHeader('Content-Type', 'text/plain');
 						res.end("Success\n");
 					} else {
 						redirectSuccessfulPost(res, "/");
@@ -381,6 +394,7 @@ quelaag.addEndpoint({
 
 				if (uids.length === 0) {
 					res.statusCode = 400;
+					res.setHeader('Content-Type', 'text/plain');
 					res.end("That user doesn't exist.\n");
 					return;
 
@@ -392,6 +406,7 @@ quelaag.addEndpoint({
 
 					if (await middleware.noRedirect()) {
 						res.statusCode = 200;
+						res.setHeader('Content-Type', 'text/plain');
 						res.end("Success\n");
 					} else {
 						redirectSuccessfulPost(res, "/");
@@ -400,6 +415,7 @@ quelaag.addEndpoint({
 
 			} else {
 				res.statusCode = 400;
+				res.setHeader('Content-Type', 'text/plain');
 				res.end("User not specified.\n");
 			}
 		} catch (e) {
@@ -422,6 +438,7 @@ quelaag.addEndpoint({
 			if (fields.id) {
 				if (!UserRecordService.isUser(fields.id as string)) {
 					res.statusCode = 400;
+					res.setHeader('Content-Type', 'text/plain');
 					res.end("That user doesn't exist.\n");
 					return;
 
@@ -429,6 +446,7 @@ quelaag.addEndpoint({
 					UserRecordService.removeBan(fields.id as string);
 					if (await middleware.noRedirect()) {
 						res.statusCode = 200;
+						res.setHeader('Content-Type', 'text/plain');
 						res.end("Success\n");
 					} else {
 						redirectSuccessfulPost(res, "/");
@@ -440,6 +458,7 @@ quelaag.addEndpoint({
 				const uids = UserRecordService.whoHasNickname(utils.sanitiseNickname(fields.nickname as string));
 				if (uids.length === 0) {
 					res.statusCode = 400;
+					res.setHeader('Content-Type', 'text/plain');
 					res.end("That user doesn't exist.\n");
 					return;
 
@@ -450,6 +469,7 @@ quelaag.addEndpoint({
 
 					if (await middleware.noRedirect()) {
 						res.statusCode = 200;
+						res.setHeader('Content-Type', 'text/plain');
 						res.end("Success\n");
 					} else {
 						redirectSuccessfulPost(res, "/");
@@ -459,6 +479,7 @@ quelaag.addEndpoint({
 
 			} else {
 				res.statusCode = 400;
+				res.setHeader('Content-Type', 'text/plain');
 				res.end("User not specified.\n");
 			}
 		} catch (e) {
@@ -478,6 +499,7 @@ quelaag.addEndpoint({
 
 			ContentService.killCurrent();
 			res.statusCode = 200;
+			res.setHeader('Content-Type', 'text/plain');
 			res.end("Success\n");
 
 		} catch (e) {
@@ -505,6 +527,7 @@ quelaag.addEndpoint({
 			ContentService.killCurrent();
 
 			res.statusCode = 200;
+			res.setHeader('Content-Type', 'text/plain');
 			res.end("Success\n");
 
 		} catch (e) {
