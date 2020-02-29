@@ -18,9 +18,8 @@ import { WebSocketServiceGetter } from "./WebSocketService";
 import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingError, AuthError, FormParseError } from "../lib/errors";
 import { UploadDataWithId } from "../types/UploadData";
 import { verifyPassword } from "../lib/PasswordContainer";
-import { redirectSuccessfulPost } from "./httpUtils";
 import { handleFileUpload, parseUploadForm } from "./request-utils/formUtils";
-import { endWithSuccessText, endWithFailureText } from "./response-utils/end";
+import { endWithSuccessText, endWithFailureText, redirectSuccessfulPost } from "./response-utils/end";
 
 type FormData = {
 	fields: formidable.Fields;
