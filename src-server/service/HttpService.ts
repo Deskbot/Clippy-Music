@@ -303,7 +303,7 @@ quelaag.addEndpoint({
 
 //POST variable: nickname
 quelaag.addEndpoint({
-	when: req => req.url === "/api/nickname/set",
+	when: req => req.url === "/api/nickname/set" && req.method === "POST",
 	async do(req, res, middleware) {
 		try {
 			recordUser(middleware.ip(), res);
