@@ -7,6 +7,7 @@ List
 ----
 
 * Fix eog sometimes not coming out on top
+	* preliminary add option to add delay before showing image
 	* show images with the mpv instance
 		* music + static image
 		* music + animated image
