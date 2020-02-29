@@ -13,6 +13,7 @@ abstract class DeferredContentError extends Error {
 	}
 }
 
+export class AuthError extends Error {}
 
 export class BadUrlError extends DeferredContentError {
 	constructor(contentType: ContentType) {
@@ -63,6 +64,13 @@ export class FileUploadError extends Error {
 	constructor(message: string, files: formidable.File[]) {
 		super(message);
 		this.files = files;
+	}
+}
+
+export class FormParseError extends Error {
+
+	constructor(message: any) {
+		super(message);
 	}
 }
 
