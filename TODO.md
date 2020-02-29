@@ -6,6 +6,13 @@ This list is in a rough order of priority.
 List
 ----
 
+* Allow downloading of content
+	* Must give a legal warning at the user's first attempt, which prompts the user to confirm their intent
+	* Only allow downloading of the currently playing content. I hate seeing people waste their time looking ahead. It ruins the fun.
+	* allow downloading of things that have just played
+	* image download
+		* use old windows 2000 placeholder icon next to the music name to indicate there is something to download
+		* give the image file name on hover
 * Fix eog sometimes not coming out on top
 	* preliminary add option to add delay before showing image
 	* show images with the mpv instance
@@ -23,13 +30,6 @@ List
 	* Then rename image/pic variables to overlay everywhere
 	* These need making consistent anyway
 * Gifv support
-* Allow downloading of content
-	* Must give a legal warning at the user's first attempt, which prompts the user to confirm their intent
-	* Only allow downloading of the currently playing content. I hate seeing people waste their time looking ahead. It ruins the fun.
-	* allow downloading of things that have just played
-	* image download
-		* use old windows 2000 placeholder icon next to the music name to indicate there is something to download
-		* give the image file name on hover
 * Can reorder my uploads
 * Make Clippy installable as a Progressive Web App
 * Clippy should state when the user is not connected to the internet at all
