@@ -279,7 +279,7 @@ quelaag.addEndpoint({
 
 //POST variable: content-id
 quelaag.addEndpoint({
-	when: req => req.url === "/api/download/cancel" && req.method === "POST",
+	when: req => req.url === "/api/upload/cancel" && req.method === "POST",
 	async do(req, res, middleware) {
 		try {
 			const ProgressQueueService = ProgressQueueServiceGetter.get();
