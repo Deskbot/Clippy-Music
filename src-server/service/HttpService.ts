@@ -20,6 +20,7 @@ import { UploadDataWithId } from "../types/UploadData";
 import { verifyPassword } from "../lib/PasswordContainer";
 import { redirectSuccessfulPost } from "./httpUtils";
 import { handleFileUpload, parseUploadForm } from "./request-utils/formUtils";
+import { endWithSuccessText, endWithFailureText } from "./response-utils/end";
 
 type FormData = {
 	fields: formidable.Fields;
@@ -133,9 +134,7 @@ const quelaag = new Quelaag({
 quelaag.addEndpoint({
 	when: req => req.url === "/api/wsport",
 	do(req, res) {
-		res.setHeader('Content-Type', 'text/plain');
-		res.statusCode = 200;
-		res.end(opt.webSocketPort.toString());
+		endWithSuccessText(res, opt.webSocketPort.toString());
 	}
 });
 
@@ -206,9 +205,7 @@ quelaag.addEndpoint({
 				debug.log("successful upload: ", uplData);
 
 				if (fields.ajax || (req.headers["user-agent"] && req.headers["user-agent"].includes("curl"))) {
-					res.statusCode = 200;
-					res.setHeader('Content-Type', 'text/plain');
-					res.end("Success\n");
+					endWithSuccessText(res, "Success\n");
 				} else {
 					redirectSuccessfulPost(res, "/");
 				}
@@ -267,16 +264,12 @@ quelaag.addEndpoint({
 
 			if (ContentService.remove(parseInt(fields["content-id"] as string))) {
 				if (await middleware.noRedirect()) {
-					res.statusCode = 200;
-					res.setHeader('Content-Type', 'text/plain');
-					res.end("Success\n");
+					endWithSuccessText(res, "Success\n");
 				} else {
 					redirectSuccessfulPost(res, "/");
 				}
 			} else {
-				res.statusCode = 400;
-				res.setHeader('Content-Type', 'text/plain');
-				res.end("OwnershipError");
+				endWithFailureText(res, "OwnershipError");
 			}
 
 		} catch (e) {
@@ -296,16 +289,12 @@ quelaag.addEndpoint({
 
 			if (ProgressQueueService.cancel(middleware.ip(), parseInt(fields["content-id"] as string))) {
 				if (await middleware.noRedirect()) {
-					res.statusCode = 200;
-					res.setHeader('Content-Type', 'text/plain');
-					res.end("Success\n");
+					endWithSuccessText(res, "Success\n");
 				} else {
 					redirectSuccessfulPost(res, "/");
 				}
 			} else {
-				res.statusCode = 400;
-				res.setHeader('Content-Type', 'text/plain');
-				res.end("I could not cancel that.\n");
+				endWithFailureText(res, "I could not cancel that.\n");
 			}
 		} catch (e) {
 			handleErrors(e, res);
@@ -328,17 +317,13 @@ quelaag.addEndpoint({
 			const nickname = utils.sanitiseNickname(fields.nickname as string);
 
 			if (nickname.length === 0) {
-				res.statusCode = 400;
-				res.setHeader('Content-Type', 'text/plain');
-				res.end("Empty nicknames are not allowed.");
+				endWithFailureText(res, "Empty nicknames are not allowed.");
 				return;
 			}
 
 			// check sanitised version because that's what admins will see
 			if (utils.looksLikeIpAddress(nickname)) {
-				res.statusCode = 400;
-				res.setHeader('Content-Type', 'text/plain');
-				res.end("Your nickname can not look like an IP address.");
+				endWithFailureText(res, "Your nickname can not look like an IP address.");
 				return;
 			}
 
@@ -346,9 +331,7 @@ quelaag.addEndpoint({
 			WebSocketService.sendNicknameToUser(middleware.ip(), nickname);
 
 			if (await middleware.noRedirect()) {
-				res.statusCode = 200;
-				res.setHeader('Content-Type', 'text/plain');
-				res.end("Success\n");
+				endWithSuccessText(res, "Success\n");
 			} else {
 				redirectSuccessfulPost(res, "/");
 			}
@@ -372,18 +355,14 @@ quelaag.addEndpoint({
 
 			if (fields.id) {
 				if (!UserRecordService.isUser(fields.id as string)) {
-					res.statusCode = 400;
-					res.setHeader('Content-Type', 'text/plain');
-					res.end("That user doesn't exist.\n");
+					endWithFailureText(res, "That user doesn't exist.\n");
 					return;
 
 				} else {
 					UserRecordService.addBan(fields.id as string);
 					ContentService.purgeUser(fields.id as string);
 					if (await middleware.noRedirect()) {
-						res.statusCode = 200;
-						res.setHeader('Content-Type', 'text/plain');
-						res.end("Success\n");
+						endWithSuccessText(res, "Success\n");
 					} else {
 						redirectSuccessfulPost(res, "/");
 					}
@@ -393,9 +372,7 @@ quelaag.addEndpoint({
 				const uids = UserRecordService.whoHasNickname(utils.sanitiseNickname(fields.nickname as string));
 
 				if (uids.length === 0) {
-					res.statusCode = 400;
-					res.setHeader('Content-Type', 'text/plain');
-					res.end("That user doesn't exist.\n");
+					endWithFailureText(res, "That user doesn't exist.\n");
 					return;
 
 				} else {
@@ -405,18 +382,14 @@ quelaag.addEndpoint({
 					});
 
 					if (await middleware.noRedirect()) {
-						res.statusCode = 200;
-						res.setHeader('Content-Type', 'text/plain');
-						res.end("Success\n");
+						endWithSuccessText(res, "Success\n");
 					} else {
 						redirectSuccessfulPost(res, "/");
 					}
 				}
 
 			} else {
-				res.statusCode = 400;
-				res.setHeader('Content-Type', 'text/plain');
-				res.end("User not specified.\n");
+				endWithFailureText(res, "User not specified.\n");
 			}
 		} catch (e) {
 			handleErrors(e, res);
@@ -437,17 +410,13 @@ quelaag.addEndpoint({
 
 			if (fields.id) {
 				if (!UserRecordService.isUser(fields.id as string)) {
-					res.statusCode = 400;
-					res.setHeader('Content-Type', 'text/plain');
-					res.end("That user doesn't exist.\n");
+					endWithFailureText(res, "That user doesn't exist.\n");
 					return;
 
 				} else {
 					UserRecordService.removeBan(fields.id as string);
 					if (await middleware.noRedirect()) {
-						res.statusCode = 200;
-						res.setHeader('Content-Type', 'text/plain');
-						res.end("Success\n");
+						endWithSuccessText(res, "Success\n");
 					} else {
 						redirectSuccessfulPost(res, "/");
 					}
@@ -457,9 +426,7 @@ quelaag.addEndpoint({
 			} else if (fields.nickname) {
 				const uids = UserRecordService.whoHasNickname(utils.sanitiseNickname(fields.nickname as string));
 				if (uids.length === 0) {
-					res.statusCode = 400;
-					res.setHeader('Content-Type', 'text/plain');
-					res.end("That user doesn't exist.\n");
+					endWithFailureText(res, "That user doesn't exist.\n");
 					return;
 
 				} else {
@@ -468,9 +435,7 @@ quelaag.addEndpoint({
 					});
 
 					if (await middleware.noRedirect()) {
-						res.statusCode = 200;
-						res.setHeader('Content-Type', 'text/plain');
-						res.end("Success\n");
+						endWithSuccessText(res, "Success\n");
 					} else {
 						redirectSuccessfulPost(res, "/");
 					}
@@ -478,9 +443,7 @@ quelaag.addEndpoint({
 				}
 
 			} else {
-				res.statusCode = 400;
-				res.setHeader('Content-Type', 'text/plain');
-				res.end("User not specified.\n");
+				endWithFailureText(res, "User not specified.\n");
 			}
 		} catch (e) {
 			handleErrors(e, res);
@@ -498,9 +461,7 @@ quelaag.addEndpoint({
 			const ContentService = ContentServiceGetter.get();
 
 			ContentService.killCurrent();
-			res.statusCode = 200;
-			res.setHeader('Content-Type', 'text/plain');
-			res.end("Success\n");
+			endWithSuccessText(res, "Success\n");
 
 		} catch (e) {
 			handleErrors(e, res);
@@ -526,9 +487,7 @@ quelaag.addEndpoint({
 
 			ContentService.killCurrent();
 
-			res.statusCode = 200;
-			res.setHeader('Content-Type', 'text/plain');
-			res.end("Success\n");
+			endWithSuccessText(res, "Success\n");
 
 		} catch (e) {
 			handleErrors(e, res);
