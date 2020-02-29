@@ -30,7 +30,7 @@ var Queue = {
 			var $bucketNickname = $bucketItem.children(".nickname");
 			var title = item.downloadLink
 				? templates.makeLinkToContent(item.title, item.downloadLink)
-				: item.title;
+				: templates.makeDownloadLink(item.title, item.id);
 
 			$bucketNickname.html(item.nickname);
 			$bucketItem.children(".duration").html("[" + utils.formatSeconds(item.duration) + "]");

@@ -29,6 +29,12 @@ var templates = (function() {
 		makeDlQueue: function() {
 			return dlQueueTemplate.clone();
 		},
+		makeDownloadLink: function(text, id) {
+			var anchor = linkToContentTemplate.clone();
+			anchor.html(text);
+			anchor.attr("href", "/api/download/" + id);
+			return anchor;
+		},
 		makeLinkToContent: function(text, url) {
 			var anchor = linkToContentTemplate.clone();
 			anchor.html(text);

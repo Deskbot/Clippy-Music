@@ -265,7 +265,7 @@ quelaag.addEndpoint({
 			if (content.music.isUrl) {
 				endWithFailureText(res, "I couldn't download that music for you because it was submitted as a URL.");
 			} else {
-				res.setHeader("Content-Disposition", `filename="${content.music.title}"`);
+				res.setHeader("Content-Disposition", `attachment; filename="${content.music.title}"`);
 				send(req, content.music.path)
 					.pipe(res);
 			}
