@@ -1,6 +1,7 @@
 import * as cookie from "cookie";
-import * as http from "http";
 import * as formidable from "formidable";
+import * as fs from "fs";
+import * as http from "http";
 import { Quelaag } from "quelaag";
 import * as send from "send";
 
@@ -254,19 +255,19 @@ quelaag.addEndpoint({
 
 quelaag.addEndpoint({
 	when: req => req.url!.startsWith("/api/download/") && req.method === "GET",
-	do(req, res, middleware) {
+	do(req, res) {
 		const ContentService = ContentServiceGetter.get();
 
 		const contentIdStr = req.url!.replace("/api/download/", "");
-		console.log(contentIdStr);
 		const content = ContentService.getContent(parseInt(contentIdStr));
 
 		if (content) {
-			// download
 			if (content.music.isUrl) {
 				endWithFailureText(res, "I couldn't download that music for you because it was submitted as a URL.");
 			} else {
-				endWithSuccessText(res, content.music.path);
+				res.setHeader("Content-Disposition", `filename="${content.music.title}"`);
+				send(req, content.music.path)
+					.pipe(res);
 			}
 		} else {
 			endWithFailureText(res, "I could not find the music you requested to download.");
@@ -527,7 +528,7 @@ quelaag.addEndpoint({
 quelaag.addEndpoint({
 	when: req => req.url!.startsWith("/"),
 	do(req, res) {
-		send(req, req.url! ?? "/", {
+		send(req, req.url ?? "/", {
 			root: consts.staticDirPath
 		})
 			.pipe(res);
