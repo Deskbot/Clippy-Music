@@ -252,6 +252,28 @@ quelaag.addEndpoint({
 	}
 );
 
+quelaag.addEndpoint({
+	when: req => req.url!.startsWith("/api/download/") && req.method === "GET",
+	do(req, res, middleware) {
+		const ContentService = ContentServiceGetter.get();
+
+		const contentIdStr = req.url!.replace("/api/download/", "");
+		console.log(contentIdStr);
+		const content = ContentService.getContent(parseInt(contentIdStr));
+
+		if (content) {
+			// download
+			if (content.music.isUrl) {
+				endWithFailureText(res, "Can't download this because it was submitted with a url");
+			} else {
+				endWithSuccessText(res, content.music.path);
+			}
+		} else {
+			endWithFailureText(res, "non matching id");
+		}
+	}
+});
+
 //POST variable: content-id
 quelaag.addEndpoint({
 	when: req => req.url === "/api/queue/remove" && req.method === "POST",

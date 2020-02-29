@@ -7,9 +7,10 @@ List
 ----
 
 * Allow downloading of content
+	* work for current
+	* work queued
 	* Must give a legal warning at the user's first attempt, which prompts the user to confirm their intent
-	* Only allow downloading of the currently playing content. I hate seeing people waste their time looking ahead. It ruins the fun.
-	* allow downloading of things that have just played
+	* allow downloading of things that have previously played
 	* image download
 		* use old windows 2000 placeholder icon next to the music name to indicate there is something to download
 		* give the image file name on hover

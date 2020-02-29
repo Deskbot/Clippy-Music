@@ -199,6 +199,10 @@ export class ContentManager extends EventEmitter {
 		return publicBuckets;
 	}
 
+	getContent(contentId: number): ItemData | undefined {
+		return this.playQueue.get(contentId);
+	}
+
 	getCurrentlyPlaying(): PublicItemData | undefined {
 		if (this.currentlyPlaying) {
 			return this.publicify(this.currentlyPlaying);
