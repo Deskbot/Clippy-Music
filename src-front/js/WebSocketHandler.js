@@ -221,7 +221,7 @@ var WebSocketHandler = (function() {
 			if (data.current) {
 				var title = data.current.downloadLink
 					? templates.makeLinkToContent(data.current.title, data.current.downloadLink)
-					: data.current.title;
+					: templates.makeDownloadLink(data.current.title, data.current.id);
 				$title.html(title);
 				$title.attr("data-text", utils.htmlEntityDecode(data.current.title));
 

@@ -58,7 +58,7 @@ export class ContentManager extends EventEmitter {
 	//processes
 	private runningMusicProc: cp.ChildProcess | null = null;
 	private runningPicProc: cp.ChildProcess | null = null;
-	public currentlyPlaying: ItemData | null = null;
+	private currentlyPlaying: ItemData | null = null;
 
 	private stop?: boolean;
 
@@ -201,6 +201,10 @@ export class ContentManager extends EventEmitter {
 
 	getContent(contentId: number): ItemData | undefined {
 		return this.playQueue.get(contentId);
+	}
+
+	getCurrentlyPlaying(): ItemData | null {
+		return this.currentlyPlaying;
 	}
 
 	private async getDataToQueue(uplData: UploadDataWithId): Promise<UploadDataWithIdTitleDuration> {

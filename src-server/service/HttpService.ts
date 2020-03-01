@@ -22,6 +22,7 @@ import { verifyPassword } from "../lib/PasswordContainer";
 import { handleFileUpload, parseUploadForm } from "./request-utils/formUtils";
 import { endWithSuccessText, endWithFailureText, redirectSuccessfulPost } from "./response-utils/end";
 import { URL, UrlWithParsedQuery } from "url";
+import { ItemData } from "../types/ItemData";
 
 type FormData = {
 	fields: formidable.Fields;
@@ -280,7 +281,14 @@ quelaag.addEndpoint({
 			return;
 		}
 
-		const content = ContentService.getContent(contentId);
+		const current = ContentService.getCurrentlyPlaying();
+
+		let content: ItemData | undefined;
+		if (current?.id === contentId) {
+			content = current;
+		} else {
+			content = ContentService.getContent(contentId);
+		}
 
 		if (content) {
 			if (content.music.isUrl) {
@@ -525,10 +533,12 @@ quelaag.addEndpoint({
 			const ContentService = ContentServiceGetter.get();
 			const UserRecordService = UserRecordGetter.get();
 
-			if (ContentService.currentlyPlaying) {
-				const id = ContentService.currentlyPlaying.userId;
-				UserRecordService.addBan(id);
-				ContentService.purgeUser(id);
+			const current = ContentService.getCurrentlyPlaying();
+
+			if (current) {
+				const userId = current.userId;
+				UserRecordService.addBan(userId);
+				ContentService.purgeUser(userId);
 			}
 
 			ContentService.killCurrent();

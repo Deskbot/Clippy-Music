@@ -7,7 +7,6 @@ List
 ----
 
 * Allow downloading of content
-	* work for current
 	* Must give a legal warning at the user's first attempt, which prompts the user to confirm their intent
 	* allow downloading of things that have previously played
 	* image download
