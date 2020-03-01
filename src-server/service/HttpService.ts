@@ -285,12 +285,9 @@ quelaag.addEndpoint({
 
 		const current = ContentService.getCurrentlyPlaying();
 
-		let content: ItemData | undefined;
-		if (current?.id === contentId) {
-			content = current;
-		} else {
-			content = ContentService.getContent(contentId);
-		}
+		const content = current?.id === contentId
+			? current
+			: ContentService.getContent(contentId);
 
 		if (content) {
 			if (query.type === "picture") {
