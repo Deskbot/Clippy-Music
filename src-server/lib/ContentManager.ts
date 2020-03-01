@@ -203,14 +203,6 @@ export class ContentManager extends EventEmitter {
 		return this.playQueue.get(contentId);
 	}
 
-	getCurrentlyPlaying(): PublicItemData | undefined {
-		if (this.currentlyPlaying) {
-			return this.publicify(this.currentlyPlaying);
-		}
-
-		return undefined;
-	}
-
 	private async getDataToQueue(uplData: UploadDataWithId): Promise<UploadDataWithIdTitleDuration> {
 		if (!uplData.music.isUrl) {
 			// read the music file to determine its duration
@@ -255,6 +247,15 @@ export class ContentManager extends EventEmitter {
 			throw new UniqueError(ContentType.Music);
 		}
 	}
+
+	getPublicCurrentlyPlaying(): PublicItemData | undefined {
+		if (this.currentlyPlaying) {
+			return this.publicify(this.currentlyPlaying);
+		}
+
+		return undefined;
+	}
+
 
 	isPlaying() {
 		return this.currentlyPlaying !== null;
