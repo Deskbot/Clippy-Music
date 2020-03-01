@@ -262,12 +262,14 @@ quelaag.addEndpoint({
 	}
 );
 
-// GET variable: contentId
+// GET variables: contentId, type
 quelaag.addEndpoint({
 	when: req => req.url!.startsWith("/api/download") && req.method === "GET",
 	do(req, res, middleware) {
 		const ContentService = ContentServiceGetter.get();
-		const contentIdStr = middleware.urlWithQuery().query.contentId;
+
+		const query = middleware.urlWithQuery().query
+		const contentIdStr = query.contentId;
 
 		if (typeof contentIdStr !== "string") {
 			endWithFailureText(res, "You did not specify what music to download.");
@@ -291,13 +293,28 @@ quelaag.addEndpoint({
 		}
 
 		if (content) {
-			if (content.music.isUrl) {
-				endWithFailureText(res, "I couldn't download that music for you because it was submitted as a URL.");
+			if (query.type === "picture") {
+				if (!content.pic.isUrl && content.pic.path) {
+					res.setHeader("Content-Disposition", `attachment; filename="${content.pic.title}"`);
+					send(req, content.pic.path)
+						.pipe(res);
+				} else {
+					if (content.pic.isUrl) {
+						endWithFailureText(res, "I couldn't download that music for you because it was submitted as a URL.");
+					} else {
+						endWithFailureText(res, "The upload with that id doesn't have have a picture.");
+					}
+				}
 			} else {
-				res.setHeader("Content-Disposition", `attachment; filename="${content.music.title}"`);
-				send(req, content.music.path)
-					.pipe(res);
+				if (content.music.isUrl) {
+					endWithFailureText(res, "I couldn't download that music for you because it was submitted as a URL.");
+				} else {
+					res.setHeader("Content-Disposition", `attachment; filename="${content.music.title}"`);
+					send(req, content.music.path)
+						.pipe(res);
+				}
 			}
+
 		} else {
 			endWithFailureText(res, "I could not find the music you requested to download.");
 		}
