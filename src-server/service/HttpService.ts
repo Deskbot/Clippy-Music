@@ -292,29 +292,41 @@ function validateDownload(res: ServerResponse, contentIdStr: string | string[], 
 	}
 }
 
-// GET variables: contentId, type
+// GET variables: id
 quelaag.addEndpoint({
-	when: req => req.url!.startsWith("/api/download") && req.method === "GET",
+	when: req => req.url!.startsWith("/api/download/music") && req.method === "GET",
 	do(req, res, middleware) {
 		const query = middleware.urlWithQuery().query;
 
-		validateDownload(res, query.contentId, (content) => {
-			if (query.type === "picture") {
-				if (!content.pic.isUrl && content.pic.path) {
-					downloadFile(req, res, content.pic.title, content.pic.path);
-				} else {
-					if (content.pic.isUrl) {
-						endWithFailureText(res, "I couldn't download that music for you because it was submitted as a URL.");
-					} else {
-						endWithFailureText(res, "The upload with that id doesn't have have a picture.");
-					}
-				}
+		validateDownload(res, query.id, (content) => {
+			if (content.music.isUrl) {
+				endWithFailureText(res, "I couldn't download that music for you because it was submitted as a URL.");
 			} else {
-				if (content.music.isUrl) {
-					endWithFailureText(res, "I couldn't download that music for you because it was submitted as a URL.");
-				} else {
-					downloadFile(req, res, content.music.title, content.music.path);
-				}
+				downloadFile(req, res, content.music.title, content.music.path);
+			}
+		});
+	},
+	catch(err, req, res) {
+		handleErrors(err, res);
+	}
+});
+
+// GET variables: id
+quelaag.addEndpoint({
+	when: req => req.url!.startsWith("/api/download/picture") && req.method === "GET",
+	do(req, res, middleware) {
+		const query = middleware.urlWithQuery().query;
+
+		validateDownload(res, query.id, (content) => {
+			if (content.pic.isUrl) {
+				endWithFailureText(res, "I couldn't download that music for you because it was submitted as a URL.");
+				return;
+			}
+
+			if (content.pic.path) {
+				downloadFile(req, res, content.pic.title, content.pic.path);
+			} else {
+				endWithFailureText(res, "The upload with that id doesn't have have a picture.");
 			}
 		});
 	},
