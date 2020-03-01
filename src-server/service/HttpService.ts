@@ -266,14 +266,21 @@ quelaag.addEndpoint({
 	when: req => req.url!.startsWith("/api/download") && req.method === "GET",
 	do(req, res, middleware) {
 		const ContentService = ContentServiceGetter.get();
-		const { contentId } = middleware.urlWithQuery().query;
+		const contentIdStr = middleware.urlWithQuery().query.contentId;
 
-		if (typeof contentId !== "string") {
+		if (typeof contentIdStr !== "string") {
 			endWithFailureText(res, "You did not specify what music to download.");
 			return;
 		}
 
-		const content = ContentService.getContent(parseInt(contentId));
+		const contentId = parseInt(contentIdStr);
+
+		if (Number.isNaN(contentId)) {
+			endWithFailureText(res, "The contentId should be a number.");
+			return;
+		}
+
+		const content = ContentService.getContent(contentId);
 
 		if (content) {
 			if (content.music.isUrl) {
@@ -286,6 +293,9 @@ quelaag.addEndpoint({
 		} else {
 			endWithFailureText(res, "I could not find the music you requested to download.");
 		}
+	},
+	catch(err, req, res) {
+		handleErrors(err, res);
 	}
 });
 

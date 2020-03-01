@@ -30,7 +30,7 @@
 		"html-entities": "^1.2.1",
 		"prompt": "^1.0.0",
 		"q": "^1.5.1",
-		"quelaag": "0.0.7",
+		"quelaag": "0.0.8",
 		"request": "^2.88.0",
 		"send": "^0.17.1",
 		"source-map-support": "^0.5.13",
