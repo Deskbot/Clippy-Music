@@ -308,7 +308,7 @@ quelaag.addEndpoint({
 			}
 
 		} else {
-			endWithFailureText(res, "I could not find the music you requested to download.");
+			endWithFailureText(res, "You did not give a valid id for what to donwload.");
 		}
 	},
 	catch(err, req, res) {
