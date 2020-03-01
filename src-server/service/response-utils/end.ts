@@ -1,4 +1,12 @@
 import * as http from "http";
+import { IncomingMessage, ServerResponse } from "http";
+import send = require("send");
+
+export function downloadFile(req: IncomingMessage, res: ServerResponse, title: string, path: string) {
+    res.setHeader("Content-Disposition", `attachment; filename="${title}"`);
+    send(req, path)
+        .pipe(res);
+}
 
 export function endWithSuccessText(res: http.ServerResponse, text: string) {
     res.setHeader('Content-Type', 'text/plain');

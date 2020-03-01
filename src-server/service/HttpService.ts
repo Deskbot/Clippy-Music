@@ -20,9 +20,8 @@ import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingErro
 import { UploadDataWithId } from "../types/UploadData";
 import { verifyPassword } from "../lib/PasswordContainer";
 import { handleFileUpload, parseUploadForm } from "./request-utils/formUtils";
-import { endWithSuccessText, endWithFailureText, redirectSuccessfulPost } from "./response-utils/end";
+import { endWithSuccessText, endWithFailureText, redirectSuccessfulPost, downloadFile } from "./response-utils/end";
 import { URL, UrlWithParsedQuery } from "url";
-import { ItemData } from "../types/ItemData";
 
 type FormData = {
 	fields: formidable.Fields;
@@ -292,9 +291,7 @@ quelaag.addEndpoint({
 		if (content) {
 			if (query.type === "picture") {
 				if (!content.pic.isUrl && content.pic.path) {
-					res.setHeader("Content-Disposition", `attachment; filename="${content.pic.title}"`);
-					send(req, content.pic.path)
-						.pipe(res);
+					downloadFile(req, res, content.pic.title, content.pic.path);
 				} else {
 					if (content.pic.isUrl) {
 						endWithFailureText(res, "I couldn't download that music for you because it was submitted as a URL.");
@@ -306,9 +303,7 @@ quelaag.addEndpoint({
 				if (content.music.isUrl) {
 					endWithFailureText(res, "I couldn't download that music for you because it was submitted as a URL.");
 				} else {
-					res.setHeader("Content-Disposition", `attachment; filename="${content.music.title}"`);
-					send(req, content.music.path)
-						.pipe(res);
+					downloadFile(req, res, content.music.title, content.music.path);
 				}
 			}
 
