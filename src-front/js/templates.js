@@ -32,7 +32,7 @@ var templates = (function() {
 		makeDownloadLink: function(text, id) {
 			var anchor = linkToContentTemplate.clone();
 			anchor.html(text);
-			anchor.attr("href", "/api/download/" + id);
+			anchor.attr("href", "/api/download?contentId=" + id);
 			return anchor;
 		},
 		makeLinkToContent: function(text, url) {

@@ -1,9 +1,9 @@
 import * as cookie from "cookie";
 import * as formidable from "formidable";
-import * as fs from "fs";
 import * as http from "http";
 import { Quelaag } from "quelaag";
 import * as send from "send";
+import * as url from "url";
 
 import * as consts from "../consts";
 import * as debug from "../lib/utils/debug";
@@ -21,6 +21,7 @@ import { UploadDataWithId } from "../types/UploadData";
 import { verifyPassword } from "../lib/PasswordContainer";
 import { handleFileUpload, parseUploadForm } from "./request-utils/formUtils";
 import { endWithSuccessText, endWithFailureText, redirectSuccessfulPost } from "./response-utils/end";
+import { URL, UrlWithParsedQuery } from "url";
 
 type FormData = {
 	fields: formidable.Fields;
@@ -128,7 +129,14 @@ const quelaag = new Quelaag({
 
 	async noRedirect(req): Promise<boolean> {
 		return (await this.ajax(req)) || (req!.headers["user-agent"] as string).includes("curl");
-	}
+	},
+
+	urlWithQuery(req): UrlWithParsedQuery {
+		return url.parse(req.url!, true);
+	},
+}, (err) => {
+	console.error(err);
+	console.trace();
 });
 
 quelaag.addEndpoint({
@@ -253,13 +261,19 @@ quelaag.addEndpoint({
 	}
 );
 
+// GET variable: contentId
 quelaag.addEndpoint({
-	when: req => req.url!.startsWith("/api/download/") && req.method === "GET",
-	do(req, res) {
+	when: req => req.url!.startsWith("/api/download") && req.method === "GET",
+	do(req, res, middleware) {
 		const ContentService = ContentServiceGetter.get();
+		const { contentId } = middleware.urlWithQuery().query;
 
-		const contentIdStr = req.url!.replace("/api/download/", "");
-		const content = ContentService.getContent(parseInt(contentIdStr));
+		if (typeof contentId !== "string") {
+			endWithFailureText(res, "You did not specify what music to download.");
+			return;
+		}
+
+		const content = ContentService.getContent(parseInt(contentId));
 
 		if (content) {
 			if (content.music.isUrl) {
@@ -526,7 +540,7 @@ quelaag.addEndpoint({
 });
 
 quelaag.addEndpoint({
-	when: req => req.url!.startsWith("/"),
+	when: req => req.url!.startsWith("/") && req.method === "GET",
 	do(req, res) {
 		send(req, req.url ?? "/", {
 			root: consts.staticDirPath
