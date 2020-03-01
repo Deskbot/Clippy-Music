@@ -22,6 +22,9 @@ import { verifyPassword } from "../lib/PasswordContainer";
 import { handleFileUpload, parseUploadForm } from "./request-utils/formUtils";
 import { endWithSuccessText, endWithFailureText, redirectSuccessfulPost, downloadFile } from "./response-utils/end";
 import { URL, UrlWithParsedQuery } from "url";
+import { IncomingMessage, ServerResponse } from "http";
+import { ParsedUrlQuery } from "querystring";
+import { ItemData } from "../types/ItemData";
 
 type FormData = {
 	fields: formidable.Fields;
@@ -261,34 +264,41 @@ quelaag.addEndpoint({
 	}
 );
 
+function validateDownload(res: ServerResponse, contentIdStr: string | string[], success: (content: ItemData) => void) {
+	if (typeof contentIdStr !== "string") {
+		endWithFailureText(res, "You did not specify what music to download.");
+		return;
+	}
+
+	const contentId = parseInt(contentIdStr);
+
+	if (Number.isNaN(contentId)) {
+		endWithFailureText(res, "The contentId should be a number.");
+		return;
+	}
+
+	const ContentService = ContentServiceGetter.get();
+	const current = ContentService.getCurrentlyPlaying();
+
+	const content = current?.id === contentId
+		? current
+		: ContentService.getContent(contentId);
+
+	if (content) {
+		success(content);
+
+	} else {
+		endWithFailureText(res, "You did not give a valid id for what to donwload.");
+	}
+}
+
 // GET variables: contentId, type
 quelaag.addEndpoint({
 	when: req => req.url!.startsWith("/api/download") && req.method === "GET",
 	do(req, res, middleware) {
-		const ContentService = ContentServiceGetter.get();
+		const query = middleware.urlWithQuery().query;
 
-		const query = middleware.urlWithQuery().query
-		const contentIdStr = query.contentId;
-
-		if (typeof contentIdStr !== "string") {
-			endWithFailureText(res, "You did not specify what music to download.");
-			return;
-		}
-
-		const contentId = parseInt(contentIdStr);
-
-		if (Number.isNaN(contentId)) {
-			endWithFailureText(res, "The contentId should be a number.");
-			return;
-		}
-
-		const current = ContentService.getCurrentlyPlaying();
-
-		const content = current?.id === contentId
-			? current
-			: ContentService.getContent(contentId);
-
-		if (content) {
+		validateDownload(res, query.contentId, (content) => {
 			if (query.type === "picture") {
 				if (!content.pic.isUrl && content.pic.path) {
 					downloadFile(req, res, content.pic.title, content.pic.path);
@@ -306,10 +316,7 @@ quelaag.addEndpoint({
 					downloadFile(req, res, content.music.title, content.music.path);
 				}
 			}
-
-		} else {
-			endWithFailureText(res, "You did not give a valid id for what to donwload.");
-		}
+		});
 	},
 	catch(err, req, res) {
 		handleErrors(err, res);
