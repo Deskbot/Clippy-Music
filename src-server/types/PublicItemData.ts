@@ -7,7 +7,7 @@ export interface PublicItemData {
     title: string;
     userId: string;
     image?: {
-        link: string | undefined;
+        url: string | undefined;
         title: string;
     }
 }

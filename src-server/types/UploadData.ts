@@ -23,7 +23,7 @@ export interface FileMusic {
 export interface UrlPic {
 	exists: true;
 	isUrl: true;
-	path: string;
+	url: string;
 	title?: string;
 }
 

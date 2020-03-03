@@ -401,8 +401,8 @@ export class ContentManager extends EventEmitter {
 
 		if (item.pic.exists) {
 			data.image = {
-				link: item.pic.isUrl ? item.pic.path : undefined,
 				title: item.pic.title,
+				url: item.pic.isUrl ? item.pic.url : undefined,
 			};
 		}
 
@@ -596,7 +596,7 @@ export class ContentManager extends EventEmitter {
 
 		if (pic.isUrl) {
 			pathOnDisk = this.nextPicPath();
-			title = await this.downloadPic(pic.path, pathOnDisk);
+			title = await this.downloadPic(pic.url, pathOnDisk);
 
 		} else {
 			pathOnDisk = pic.path;

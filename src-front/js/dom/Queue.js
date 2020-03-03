@@ -37,8 +37,8 @@ var Queue = {
 			$bucketItem.children(".title").html(title);
 
 			if (item.image) {
-				var imageLink = item.image.link
-					? templates.makeLinkToImage(item.image.title, item.image.link)
+				var imageLink = item.image.url
+					? templates.makeLinkToImage(item.image.title, item.image.url)
 					: templates.makeImageDownloadLink(item.image.title, item.id)
 
 				$bucketItem.children(".image").append(imageLink);

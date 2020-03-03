@@ -154,7 +154,7 @@ export function parseUploadForm(
             pic = {
                 exists: true,
                 isUrl: true,
-                path: fields["image-url"] as string,
+                url: fields["image-url"] as string,
             };
 
             if (picFile) utils.deleteFile(picFile.path);
