@@ -12,6 +12,7 @@ var templates = (function() {
 	var dlQueueTemplate = toTempl($templates.children("#dl-queue-template"));
 	var dlItemTemplate = toTempl($templates.children("#dl-item-template"));
 	var linkToMusicTemplate = toTempl($templates.children("#link-to-music-template"));
+	var linkToImageTemplate = toTempl($templates.children("#link-to-image-template"));
 
 	return {
 		makeBucketContainer: function() {
@@ -29,9 +30,9 @@ var templates = (function() {
 		makeDlQueue: function() {
 			return dlQueueTemplate.clone();
 		},
-		makeDownloadMusicLink: function(text, id) {
+		makeMusicDownloadLink: function(name, id) {
 			var anchor = linkToMusicTemplate.clone();
-			anchor.html(text);
+			anchor.html(name);
 			anchor.attr("href", "/api/download/music?id=" + id);
 			return anchor;
 		},
@@ -39,6 +40,18 @@ var templates = (function() {
 			var anchor = linkToMusicTemplate.clone();
 			anchor.html(text);
 			anchor.attr("href", url);
+			return anchor;
+		},
+		makeImageDownloadLink: function(name, id) {
+			var anchor = linkToImageTemplate.clone();
+			anchor.attr("href", "/api/download/image?id=" + id);
+			anchor.attr("title", name);
+			return anchor;
+		},
+		makeLinkToImage: function (name, url) {
+			var anchor = linkToImageTemplate.clone();
+			anchor.attr("href", url);
+			anchor.attr("title", name);
 			return anchor;
 		}
 	};

@@ -390,7 +390,7 @@ export class ContentManager extends EventEmitter {
 	}
 
 	private publicify(item: ItemData): PublicItemData {
-		return {
+		const data: PublicItemData = {
 			musicDownloadLink: item.music.isUrl ? item.music.url : undefined,
 			duration: item.duration,
 			id: item.id,
@@ -398,6 +398,15 @@ export class ContentManager extends EventEmitter {
 			title: item.music.title,
 			userId: item.userId,
 		};
+
+		if (item.pic.exists) {
+			data.image = {
+				link: item.pic.isUrl ? item.pic.path : undefined,
+				title: item.pic.title,
+			};
+		}
+
+		return data;
 	}
 
 	purgeUser(uid: string) {

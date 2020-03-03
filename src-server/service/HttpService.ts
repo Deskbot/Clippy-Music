@@ -313,7 +313,7 @@ quelaag.addEndpoint({
 
 // GET variables: id
 quelaag.addEndpoint({
-	when: req => req.url!.startsWith("/api/download/picture") && req.method === "GET",
+	when: req => req.url!.startsWith("/api/download/image") && req.method === "GET",
 	do(req, res, middleware) {
 		const query = middleware.urlWithQuery().query;
 

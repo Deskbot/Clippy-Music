@@ -29,12 +29,20 @@ var Queue = {
 			var $bucketItem = templates.makeBucketItem();
 			var $bucketNickname = $bucketItem.children(".nickname");
 			var title = item.musicDownloadLink
-				? templates.makeLinkToContent(item.title, item.musicDownloadLink)
-				: templates.makeDownloadLink(item.title, item.id);
+				? templates.makeLinkToMusic(item.title, item.musicDownloadLink)
+				: templates.makeMusicDownloadLink(item.title, item.id);
 
-			$bucketNickname.html(item.nickname);
+			$bucketNickname.append(item.nickname);
 			$bucketItem.children(".duration").html("[" + utils.formatSeconds(item.duration) + "]");
 			$bucketItem.children(".title").html(title);
+
+			if (item.image) {
+				var imageLink = item.image.link
+					? templates.makeLinkToImage(item.image.title, item.image.link)
+					: templates.makeImageDownloadLink(item.image.title, item.id)
+
+				$bucketItem.children(".image").append(imageLink);
+			}
 
 			if (isMine) {
 				$bucketNickname.addClass("my-nickname");

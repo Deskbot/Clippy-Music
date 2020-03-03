@@ -221,7 +221,7 @@ var WebSocketHandler = (function() {
 			if (data.current) {
 				var title = data.current.musicDownloadLink
 					? templates.makeLinkToMusic(data.current.title, data.current.musicDownloadLink)
-					: templates.makeDownloadMusicLink(data.current.title, data.current.id);
+					: templates.makeMusicDownloadLink(data.current.title, data.current.id);
 				$title.html(title);
 				$title.attr("data-text", utils.htmlEntityDecode(data.current.title));
 
