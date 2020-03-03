@@ -391,7 +391,7 @@ export class ContentManager extends EventEmitter {
 
 	private publicify(item: ItemData): PublicItemData {
 		const data: PublicItemData = {
-			musicDownloadLink: item.music.isUrl ? item.music.url : undefined,
+			musicDownloadUrl: item.music.isUrl ? item.music.url : undefined,
 			duration: item.duration,
 			id: item.id,
 			nickname: this.userRecord.getNickname(item.userId),
