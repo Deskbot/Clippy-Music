@@ -365,7 +365,9 @@ button.action {
 
 .bucket li .image img {
 	display: block;
+	height: 16px;
 	margin-bottom: -2px;
+	width: 16px;
 }
 
 .dl-bar {
