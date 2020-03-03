@@ -411,13 +411,13 @@ button.action {
 	display: none;
 }
 
-.link-to-content {
+.link-to-music {
 	color: inherit;
 	font-family: inherit;
 	text-decoration: inherit;
 }
 
-#queue-section .link-to-content:hover {
+#queue-section .link-to-music:hover {
 	text-decoration: underline;
 }
 
