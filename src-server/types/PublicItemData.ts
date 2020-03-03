@@ -1,5 +1,5 @@
 export interface PublicItemData {
-    downloadLink?: string;
+    musicDownloadLink?: string;
     duration: number;
     id: number;
     nickname: string;
