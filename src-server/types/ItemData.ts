@@ -36,6 +36,7 @@ export type CompleteMusic = {
 
 export interface CompleteUrlPic extends UrlPic {
 	hash: number;
+	path: string;
 	title: string;
 };
 

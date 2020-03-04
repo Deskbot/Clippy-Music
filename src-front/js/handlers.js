@@ -313,7 +313,7 @@ $("#dl-list-container").on("click", "button.cancel", function(e) {
 	var contentName = $this.siblings(".title").text();
 
 	$.ajax({
-		url: "/api/download/cancel",
+		url: "/api/upload/cancel",
 		type: "POST",
 		data: {
 			ajax: true,

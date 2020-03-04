@@ -284,14 +284,23 @@ legend {
 	margin-top: -2px;
 }
 
+#currently-playing {
+	text-align: center;
+}
+
 #currently-playing p {
 	margin: 6px 0;
-	text-align: center;
 }
 
 #currently-playing .wordart {
 	font-size: 50px;
 	margin: 50px 0;
+}
+
+#currently-playing .current-info {
+	display: inline-block;
+	position: relative; /* this is exists to make its z-index work */
+	z-index: 1;	/* this ensures the information will appear above the currently music name */
 }
 
 #nickname-form {
@@ -359,17 +368,15 @@ button.action {
 	line-height: 21px;
 }
 
-.queue-item {
-	display: table-row;
-	width: 100%;
-	padding: 5px;
+.image {
+	display: inline-block;
 }
 
-.queue-item > span {
-	display: table-cell;
-	width: 100px;
-	height: 20px;
-	padding: 5px;
+.image img {
+	display: block;
+	height: 16px;
+	margin-bottom: -2px;
+	width: 16px;
 }
 
 .dl-bar {
@@ -411,13 +418,13 @@ button.action {
 	display: none;
 }
 
-.link-to-content {
+.link-to-music {
 	color: inherit;
 	font-family: inherit;
 	text-decoration: inherit;
 }
 
-#queue-section .link-to-content:hover {
+#queue-section .link-to-music:hover {
 	text-decoration: underline;
 }
 

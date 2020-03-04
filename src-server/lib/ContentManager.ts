@@ -58,7 +58,7 @@ export class ContentManager extends EventEmitter {
 	//processes
 	private runningMusicProc: cp.ChildProcess | null = null;
 	private runningPicProc: cp.ChildProcess | null = null;
-	public currentlyPlaying: ItemData | null = null;
+	private currentlyPlaying: ItemData | null = null;
 
 	private stop?: boolean;
 
@@ -199,12 +199,12 @@ export class ContentManager extends EventEmitter {
 		return publicBuckets;
 	}
 
-	getCurrentlyPlaying(): PublicItemData | undefined {
-		if (this.currentlyPlaying) {
-			return this.publicify(this.currentlyPlaying);
-		}
+	getContent(contentId: number): ItemData | undefined {
+		return this.playQueue.get(contentId);
+	}
 
-		return undefined;
+	getCurrentlyPlaying(): ItemData | null {
+		return this.currentlyPlaying;
 	}
 
 	private async getDataToQueue(uplData: UploadDataWithId): Promise<UploadDataWithIdTitleDuration> {
@@ -251,6 +251,15 @@ export class ContentManager extends EventEmitter {
 			throw new UniqueError(ContentType.Music);
 		}
 	}
+
+	getPublicCurrentlyPlaying(): PublicItemData | undefined {
+		if (this.currentlyPlaying) {
+			return this.publicify(this.currentlyPlaying);
+		}
+
+		return undefined;
+	}
+
 
 	isPlaying() {
 		return this.currentlyPlaying !== null;
@@ -381,14 +390,23 @@ export class ContentManager extends EventEmitter {
 	}
 
 	private publicify(item: ItemData): PublicItemData {
-		return {
-			downloadLink: item.music.isUrl ? item.music.url : undefined,
+		const data: PublicItemData = {
+			musicDownloadUrl: item.music.isUrl ? item.music.url : undefined,
 			duration: item.duration,
 			id: item.id,
 			nickname: this.userRecord.getNickname(item.userId),
 			title: item.music.title,
 			userId: item.userId,
 		};
+
+		if (item.pic.exists) {
+			data.image = {
+				title: item.pic.title,
+				url: item.pic.isUrl ? item.pic.url : undefined,
+			};
+		}
+
+		return data;
 	}
 
 	purgeUser(uid: string) {
@@ -578,7 +596,7 @@ export class ContentManager extends EventEmitter {
 
 		if (pic.isUrl) {
 			pathOnDisk = this.nextPicPath();
-			title = await this.downloadPic(pic.path, pathOnDisk);
+			title = await this.downloadPic(pic.url, pathOnDisk);
 
 		} else {
 			pathOnDisk = pic.path;

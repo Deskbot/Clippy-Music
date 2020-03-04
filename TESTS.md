@@ -11,6 +11,10 @@ Image url upload                       | File wrong type; File too big; User is 
 Upload image file                      | File wrong type; File too big; User is banned; not unique
 Upload music file                      | File wrong type; File too big; User is banned; not unique
 Music url upload                       | Video doesn't exist; not unique
+Download current music                 |
+Download current picture               |
+Download queued music                  |
+Download queued picture                |
 Cancel in progresss music url download |
 Cancel not started music url download  |
 Remove item from the queue             |

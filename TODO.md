@@ -23,13 +23,6 @@ List
 	* Then rename image/pic variables to overlay everywhere
 	* These need making consistent anyway
 * Gifv support
-* Allow downloading of content
-	* Must give a legal warning at the user's first attempt, which prompts the user to confirm their intent
-	* Only allow downloading of the currently playing content. I hate seeing people waste their time looking ahead. It ruins the fun.
-	* allow downloading of things that have just played
-	* image download
-		* use old windows 2000 placeholder icon next to the music name to indicate there is something to download
-		* give the image file name on hover
 * Can reorder my uploads
 * Make Clippy installable as a Progressive Web App
 * Clippy should state when the user is not connected to the internet at all
@@ -43,6 +36,7 @@ List
 * Dragging a window when another window resizes, causes the one you're dragging to shift.
 	* maybe consider changing the way the layout is done. how often do people resize the browser window anyway? I don't think i need to be account for all that
 * Improve the way clippy reconnects the websocket, maybe do it as soon as the tab regains focus and update the queue data at the same time.
+* allow downloading of things that have previously played
 * dragging and dropping a file/url into anywhere in the upload window should stage the upload
 * Put development diagrams in repo
 
@@ -115,7 +109,6 @@ List
 * Windows 2000 cursors (http://telcontar.net/Misc/screeniecursors/)
 * Play the Windows 2000 start up sound when visiting the page
 * Alternative stylesheet
-* Drag windows by their outline, which is more authentic
 * Find a unicode remover only for problematic characters
 * Admins can toggle a user's ban state from a list of all users
 * Continue downloading after the server is suspended
@@ -150,6 +143,6 @@ List
 * Safe Increment i.e. ids start at min safe integer and loop back round if they reach max safe integer
 * Command line overrides for options
 * Can stream content to the browser for users to watch
-* Convert to TypeScript
+* Must give a legal warning at the user's first attempt to download, which prompts the user to confirm their intent
 * Works without JavaScript
 * Use CSS Preprocessor

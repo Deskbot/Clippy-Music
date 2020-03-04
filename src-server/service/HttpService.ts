@@ -1,8 +1,9 @@
 import * as cookie from "cookie";
-import * as http from "http";
 import * as formidable from "formidable";
+import * as http from "http";
 import { Quelaag } from "quelaag";
 import * as send from "send";
+import * as url from "url";
 
 import * as consts from "../consts";
 import * as debug from "../lib/utils/debug";
@@ -19,7 +20,11 @@ import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingErro
 import { UploadDataWithId } from "../types/UploadData";
 import { verifyPassword } from "../lib/PasswordContainer";
 import { handleFileUpload, parseUploadForm } from "./request-utils/formUtils";
-import { endWithSuccessText, endWithFailureText, redirectSuccessfulPost } from "./response-utils/end";
+import { endWithSuccessText, endWithFailureText, redirectSuccessfulPost, downloadFile } from "./response-utils/end";
+import { URL, UrlWithParsedQuery } from "url";
+import { IncomingMessage, ServerResponse } from "http";
+import { ParsedUrlQuery } from "querystring";
+import { ItemData } from "../types/ItemData";
 
 type FormData = {
 	fields: formidable.Fields;
@@ -127,7 +132,14 @@ const quelaag = new Quelaag({
 
 	async noRedirect(req): Promise<boolean> {
 		return (await this.ajax(req)) || (req!.headers["user-agent"] as string).includes("curl");
-	}
+	},
+
+	urlWithQuery(req): UrlWithParsedQuery {
+		return url.parse(req.url!, true);
+	},
+}, (err) => {
+	console.error(err);
+	console.trace();
 });
 
 quelaag.addEndpoint({
@@ -252,6 +264,77 @@ quelaag.addEndpoint({
 	}
 );
 
+function validateDownload(res: ServerResponse, contentIdStr: string | string[], success: (content: ItemData) => void) {
+	if (typeof contentIdStr !== "string") {
+		endWithFailureText(res, "You did not specify what music to download.");
+		return;
+	}
+
+	const contentId = parseInt(contentIdStr);
+
+	if (Number.isNaN(contentId)) {
+		endWithFailureText(res, "The contentId should be a number.");
+		return;
+	}
+
+	const ContentService = ContentServiceGetter.get();
+	const current = ContentService.getCurrentlyPlaying();
+
+	const content = current?.id === contentId
+		? current
+		: ContentService.getContent(contentId);
+
+	if (content) {
+		success(content);
+
+	} else {
+		endWithFailureText(res, "You did not give a valid id for what to donwload.");
+	}
+}
+
+// GET variables: id
+quelaag.addEndpoint({
+	when: req => req.url!.startsWith("/api/download/music") && req.method === "GET",
+	do(req, res, middleware) {
+		const query = middleware.urlWithQuery().query;
+
+		validateDownload(res, query.id, (content) => {
+			if (content.music.isUrl) {
+				endWithFailureText(res, "I couldn't download that music for you because it was submitted as a URL.");
+			} else {
+				downloadFile(req, res, content.music.title, content.music.path);
+			}
+		});
+	},
+	catch(err, req, res) {
+		handleErrors(err, res);
+	}
+});
+
+// GET variables: id
+quelaag.addEndpoint({
+	when: req => req.url!.startsWith("/api/download/image") && req.method === "GET",
+	do(req, res, middleware) {
+		const query = middleware.urlWithQuery().query;
+
+		validateDownload(res, query.id, (content) => {
+			if (content.pic.isUrl) {
+				endWithFailureText(res, "I couldn't download that music for you because it was submitted as a URL.");
+				return;
+			}
+
+			if (content.pic.path) {
+				downloadFile(req, res, content.pic.title, content.pic.path);
+			} else {
+				endWithFailureText(res, "The upload with that id doesn't have have a picture.");
+			}
+		});
+	},
+	catch(err, req, res) {
+		handleErrors(err, res);
+	}
+});
+
 //POST variable: content-id
 quelaag.addEndpoint({
 	when: req => req.url === "/api/queue/remove" && req.method === "POST",
@@ -279,7 +362,7 @@ quelaag.addEndpoint({
 
 //POST variable: content-id
 quelaag.addEndpoint({
-	when: req => req.url === "/api/download/cancel" && req.method === "POST",
+	when: req => req.url === "/api/upload/cancel" && req.method === "POST",
 	async do(req, res, middleware) {
 		try {
 			const ProgressQueueService = ProgressQueueServiceGetter.get();
@@ -303,7 +386,7 @@ quelaag.addEndpoint({
 
 //POST variable: nickname
 quelaag.addEndpoint({
-	when: req => req.url === "/api/nickname/set",
+	when: req => req.url === "/api/nickname/set" && req.method === "POST",
 	async do(req, res, middleware) {
 		try {
 			recordUser(middleware.ip(), res);
@@ -478,10 +561,12 @@ quelaag.addEndpoint({
 			const ContentService = ContentServiceGetter.get();
 			const UserRecordService = UserRecordGetter.get();
 
-			if (ContentService.currentlyPlaying) {
-				const id = ContentService.currentlyPlaying.userId;
-				UserRecordService.addBan(id);
-				ContentService.purgeUser(id);
+			const current = ContentService.getCurrentlyPlaying();
+
+			if (current) {
+				const userId = current.userId;
+				UserRecordService.addBan(userId);
+				ContentService.purgeUser(userId);
 			}
 
 			ContentService.killCurrent();
@@ -503,9 +588,9 @@ quelaag.addEndpoint({
 });
 
 quelaag.addEndpoint({
-	when: req => req.url!.startsWith("/"),
+	when: req => req.url!.startsWith("/") && req.method === "GET",
 	do(req, res) {
-		send(req, req.url! ?? "/", {
+		send(req, req.url ?? "/", {
 			root: consts.staticDirPath
 		})
 			.pipe(res);

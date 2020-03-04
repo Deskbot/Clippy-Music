@@ -1,6 +1,7 @@
 {
 	"compilerOptions": {
 		"alwaysStrict": true,
+		"lib": ["ES2019"],
 		"module": "commonjs",
 		"noImplicitAny": true,
 		"noImplicitReturns": true,
@@ -10,7 +11,7 @@
 		"sourceRoot": "../src-server",
 		"strictNullChecks": true,
 		"strictPropertyInitialization": true,
-		"target": "ES2017"
+		"target": "ES2019"
 	},
 
 	"exclude": [
