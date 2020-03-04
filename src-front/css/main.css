@@ -284,9 +284,12 @@ legend {
 	margin-top: -2px;
 }
 
+#currently-playing {
+	text-align: center;
+}
+
 #currently-playing p {
 	margin: 6px 0;
-	text-align: center;
 }
 
 #currently-playing .wordart {
@@ -295,6 +298,7 @@ legend {
 }
 
 #currently-playing .current-info {
+	display: inline-block;
 	position: relative; /* this is exists to make its z-index work */
 	z-index: 1;	/* this ensures the information will appear above the currently music name */
 }
