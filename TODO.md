@@ -6,6 +6,9 @@ This list is in a rough order of priority.
 List
 ----
 
+* Allow killing the thing you yourself are playing
+* when banning the current content, the current content id should be sent up to ensure the correct track is killed
+* within a single bucket, user content should be round robin
 * Fix eog sometimes not coming out on top
 	* preliminary add option to add delay before showing image
 	* show images with the mpv instance
@@ -15,10 +18,6 @@ List
 		* video + static image
 		* video + animated image
 		* (video + silent looping video) // future story, investigate whether possible
-* when banning the current content, the current content id should be sent up to ensure the correct track is killed
-* no suspended id factory implies content manager recovery should be ignored
-* no suspended user record found implies content manager should be ignored
-* within a single bucket, user content should be round robin
 * Silent looping Video overlay
 	* Then rename image/pic variables to overlay everywhere
 	* These need making consistent anyway
@@ -31,7 +30,6 @@ List
 * multiple file uploads at once
 * empty queue of duplicate files after each thing is remembered
 * Allow admins to remove anything before it gets played
-* Allow killing the thing you yourself are playing
 * Sometimes unmoved windows move by a small amount when a window above is closed
 * Dragging a window when another window resizes, causes the one you're dragging to shift.
 	* maybe consider changing the way the layout is done. how often do people resize the browser window anyway? I don't think i need to be account for all that
@@ -39,6 +37,8 @@ List
 * allow downloading of things that have previously played
 * dragging and dropping a file/url into anywhere in the upload window should stage the upload
 * Put development diagrams in repo
+* no suspended id factory implies content manager recovery should be ignored
+* no suspended user record found implies content manager should be ignored
 
 ---
 
