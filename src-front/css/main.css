@@ -359,11 +359,11 @@ button.action {
 	line-height: 21px;
 }
 
-.bucket li .image {
+.image {
 	display: inline-block;
 }
 
-.bucket li .image img {
+.image img {
 	display: block;
 	height: 16px;
 	margin-bottom: -2px;

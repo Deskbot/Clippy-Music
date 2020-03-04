@@ -219,20 +219,34 @@ var WebSocketHandler = (function() {
 			}
 
 			if (data.current) {
-				var title = data.current.musicDownloadUrl
-					? templates.makeLinkToMusic(data.current.title, data.current.musicDownloadUrl)
-					: templates.makeMusicDownloadLink(data.current.title, data.current.id);
+				var current = data.current;
+
+				var title = current.musicDownloadUrl
+					? templates.makeLinkToMusic(current.title, current.musicDownloadUrl)
+					: templates.makeMusicDownloadLink(current.title, current.id);
 				$title.html(title);
-				$title.attr("data-text", utils.htmlEntityDecode(data.current.title));
+				$title.attr("data-text", utils.htmlEntityDecode(current.title));
+
+				if (current.image) {
+					var imageLink = current.image.url
+						? templates.makeLinkToImage(current.image.title, current.image.url)
+						: templates.makeImageDownloadLink(current.image.title, current.id)
+
+					$currentlyPlaying.find(".image")
+						.html(imageLink);
+				} else {
+					$currentlyPlaying.find(".image")
+						.html("");
+				}
 
 				$currentlyPlaying.find(".duration")
-					.html("[" + utils.formatSeconds(data.current.duration) + "]");
+					.html("[" + utils.formatSeconds(current.duration) + "]");
 
-				$currentNickname.html(data.current.nickname);
+				$currentNickname.html(current.nickname);
 
 				//get a random class, but always the same for the same title
 				var wordartClass = main.goodWordArt[
-					digestString(data.current.title + data.current.nickname) % main.goodWordArt.length
+					digestString(current.title + current.nickname) % main.goodWordArt.length
 				];
 				//remove all classes because we don't know which word art it currently is, add back "wordart" then add the type of wordart
 				$currentlyPlaying.find(".wordart")
@@ -241,6 +255,7 @@ var WebSocketHandler = (function() {
 					.addClass(wordartClass);
 			} else {
 				$currentlyPlaying.find(".duration").html("");
+				$currentlyPlaying.find(".image").html("");
 				$currentlyPlaying.find(".nickname").html("");
 				$title.html("");
 				$title.attr("data-text", "");

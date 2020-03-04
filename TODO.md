@@ -6,8 +6,6 @@ This list is in a rough order of priority.
 List
 ----
 
-* Allow downloading of content
-	* for the currently playing item
 * Fix eog sometimes not coming out on top
 	* preliminary add option to add delay before showing image
 	* show images with the mpv instance
