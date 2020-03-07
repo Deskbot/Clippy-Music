@@ -24,6 +24,7 @@ import { endWithSuccessText, endWithFailureText, redirectSuccessfulPost, downloa
 import { URL, UrlWithParsedQuery } from "url";
 import { ServerResponse } from "http";
 import { ItemData } from "../types/ItemData";
+import { toNumber } from "../lib/utils/stringUtils";
 
 type FormData = {
 	fields: formidable.Fields;
@@ -524,14 +525,34 @@ quelaag.addEndpoint({
 	}
 });
 
-//POST variable: password
+function handleInvalidSkipParams(res: ServerResponse, password: string, fields: formidable.Fields): boolean {
+	const ContentService = ContentServiceGetter.get();
+
+	const targetId = toNumber(fields.contentId);
+	if (targetId === undefined) {
+		endWithFailureText(res, "Bad content id specified.\n")
+		return false;
+	}
+
+	if (ContentService.getCurrentlyPlaying()?.id !== targetId) {
+		endWithFailureText(res, "The requested content to skip was not playing when the request was issued.");
+		return false;
+	}
+
+	return true;
+}
+
+//POST variable: password, contentId
 quelaag.addEndpoint({
 	when: req => req.url === "/api/skip" && req.method === "POST",
 	async do(req, res, middleware) {
-		await assertIsAdmin(await middleware.password());
+		const [password, form] = await Promise.all([middleware.password(), middleware.form()]);
+		await assertIsAdmin(password);
+		if (!handleInvalidSkipParams(res, password, form.fields)) {
+			return;
+		}
 
 		const ContentService = ContentServiceGetter.get();
-
 		ContentService.killCurrent();
 		endWithSuccessText(res, "Success\n");
 	},
@@ -540,15 +561,18 @@ quelaag.addEndpoint({
 	}
 });
 
-//POST variable: password
+//POST variable: password, contentId
 quelaag.addEndpoint({
 	when: req => req.url === "/api/skipAndBan" && req.method === "POST",
 	async do(req, res, middleware) {
-		await assertIsAdmin(await middleware.password());
+		const [password, form] = await Promise.all([middleware.password(), middleware.form()]);
+		await assertIsAdmin(password);
+		if (!handleInvalidSkipParams(res, password, form.fields)) {
+			return;
+		}
 
 		const ContentService = ContentServiceGetter.get();
 		const UserRecordService = UserRecordGetter.get();
-
 		const current = ContentService.getCurrentlyPlaying();
 
 		if (current) {

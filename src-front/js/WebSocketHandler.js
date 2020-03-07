@@ -218,9 +218,9 @@ var WebSocketHandler = (function() {
 				$currentNickname.removeClass("my-nickname");
 			}
 
-			if (data.current) {
-				var current = data.current;
+			var current = main.current = data.current;
 
+			if (data.current) {
 				var title = current.musicDownloadUrl
 					? templates.makeLinkToMusic(current.title, current.musicDownloadUrl)
 					: templates.makeMusicDownloadLink(current.title, current.id);

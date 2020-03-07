@@ -356,12 +356,21 @@ $("#skip-button").click(function() {
 		return;
 	}
 
+	if (!main.current) {
+		main.clippyAgent.stop();
+		main.clippyAgent.speak("There is nothing playing right now.");
+		main.clippyAgent.play("Searching");
+		return;
+	}
+
+
 	$.ajax({
 		url: "/api/skip",
 		type: "POST",
 		data: {
 			ajax: true,
-			password: adminPassword
+			password: adminPassword,
+			contentId: main.current.id,
 		}
 
 	}).done(function() {
@@ -390,12 +399,20 @@ $("#skip-ban-button").click(function() {
 		return;
 	}
 
+	if (!main.current) {
+		main.clippyAgent.stop();
+		main.clippyAgent.speak("There is nothing playing right now.");
+		main.clippyAgent.play("Searching");
+		return;
+	}
+
 	$.ajax({
 		url: "/api/skipAndBan",
 		type: "POST",
 		data: {
 			ajax: true,
-			password: adminPassword
+			password: adminPassword,
+			contentId: main.current.id,
 		}
 
 	}).done(function() {
