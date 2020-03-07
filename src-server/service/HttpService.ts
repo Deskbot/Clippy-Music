@@ -31,7 +31,7 @@ type FormData = {
 	files: formidable.Files;
 };
 
-async function assertIsAdmin(password: string) {
+async function assertIsAdmin(password: string): Promise<void> {
 	const passwordContainer = PasswordService.getContainer();
 	if (passwordContainer == null) {
 		throw new AuthError("The admin controls can not be used because no admin password was set.\n");
@@ -525,7 +525,7 @@ quelaag.addEndpoint({
 	}
 });
 
-function handleInvalidSkipParams(res: ServerResponse, password: string, fields: formidable.Fields): boolean {
+function handleInvalidSkipParams(res: ServerResponse, fields: formidable.Fields): boolean {
 	const ContentService = ContentServiceGetter.get();
 
 	const targetId = toNumber(fields.contentId);
@@ -542,21 +542,47 @@ function handleInvalidSkipParams(res: ServerResponse, password: string, fields: 
 	return true;
 }
 
+//POST variable: contentId
+quelaag.addEndpoint({
+	when: req => req.url === "/api/skipMine" && req.method === "POST",
+	async do(req, res, middleware) {
+		if (!handleInvalidSkipParams(res, (await middleware.form()).fields)) {
+			return;
+		}
+
+		const ContentService = ContentServiceGetter.get();
+
+		if (middleware.ip() !== ContentService.getCurrentlyPlaying()?.userId) {
+			endWithFailureText(res, "You can only end your own music.");
+		}
+
+		ContentService.killCurrent();
+		endWithSuccessText(res, "Success\n");
+	},
+	catch(e, req, res) {
+		handleErrors(e, res);
+	}
+});
+
 //POST variable: password, contentId
 quelaag.addEndpoint({
 	when: req => req.url === "/api/skip" && req.method === "POST",
 	async do(req, res, middleware) {
 		const [password, form] = await Promise.all([middleware.password(), middleware.form()]);
-		await assertIsAdmin(password);
-		if (!handleInvalidSkipParams(res, password, form.fields)) {
+		if (!handleInvalidSkipParams(res, form.fields)) {
 			return;
 		}
 
 		const ContentService = ContentServiceGetter.get();
+
+		if (middleware.ip() !== ContentService.getCurrentlyPlaying()?.userId) {
+			await assertIsAdmin(password);
+		}
+
 		ContentService.killCurrent();
 		endWithSuccessText(res, "Success\n");
 	},
-	catch (e, req, res) {
+	catch(e, req, res) {
 		handleErrors(e, res);
 	}
 });
@@ -566,10 +592,11 @@ quelaag.addEndpoint({
 	when: req => req.url === "/api/skipAndBan" && req.method === "POST",
 	async do(req, res, middleware) {
 		const [password, form] = await Promise.all([middleware.password(), middleware.form()]);
-		await assertIsAdmin(password);
-		if (!handleInvalidSkipParams(res, password, form.fields)) {
+		if (!handleInvalidSkipParams(res, form.fields)) {
 			return;
 		}
+
+		await assertIsAdmin(password);
 
 		const ContentService = ContentServiceGetter.get();
 		const UserRecordService = UserRecordGetter.get();
