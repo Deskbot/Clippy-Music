@@ -208,14 +208,17 @@ var WebSocketHandler = (function() {
 
 		utils.counterShiftResize($("#current-section"), function() {
 			var $currentlyPlaying = $("#currently-playing");
+			var $skipMineButton = $("#skip-mine-button");
 			var $currentNickname = $currentlyPlaying.find(".nickname");
 			var $title = $currentlyPlaying.find(".title");
 			var isMine = !data.current ? false : myId === data.current.userId;
 
 			if (isMine) {
 				$currentNickname.addClass("my-nickname");
+				$skipMineButton.removeClass("hidden");
 			} else {
 				$currentNickname.removeClass("my-nickname");
+				$skipMineButton.addClass("hidden");
 			}
 
 			var current = main.current = data.current;
