@@ -47,7 +47,7 @@ function handleErrors(err: any, res: http.ServerResponse) {
 	res.setHeader('Content-Type', 'text/plain');
 	if (err instanceof AuthError) {
 		res.statusCode = 400;
-		res.end("The admin password was incorrect.");
+		res.end(err.message);
 		return;
 
 	} else if (err instanceof FormParseError) {
