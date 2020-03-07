@@ -22,8 +22,7 @@ import { verifyPassword } from "../lib/PasswordContainer";
 import { handleFileUpload, parseUploadForm } from "./request-utils/formUtils";
 import { endWithSuccessText, endWithFailureText, redirectSuccessfulPost, downloadFile } from "./response-utils/end";
 import { URL, UrlWithParsedQuery } from "url";
-import { IncomingMessage, ServerResponse } from "http";
-import { ParsedUrlQuery } from "querystring";
+import { ServerResponse } from "http";
 import { ItemData } from "../types/ItemData";
 
 type FormData = {
@@ -48,7 +47,7 @@ function handleErrors(err: any, res: http.ServerResponse) {
 	res.setHeader('Content-Type', 'text/plain');
 	if (err instanceof AuthError) {
 		res.statusCode = 400;
-		res.end();
+		res.end("The admin password was incorrect.");
 		return;
 
 	} else if (err instanceof FormParseError) {
@@ -339,24 +338,21 @@ quelaag.addEndpoint({
 quelaag.addEndpoint({
 	when: req => req.url === "/api/queue/remove" && req.method === "POST",
 	async do(req, res, middleware) {
-		try {
-			const ContentService = ContentServiceGetter.get();
+		const ContentService = ContentServiceGetter.get();
+		const { fields } = await middleware.form();
 
-			const { fields } = await middleware.form();
-
-			if (ContentService.remove(parseInt(fields["content-id"] as string))) {
-				if (await middleware.noRedirect()) {
-					endWithSuccessText(res, "Success\n");
-				} else {
-					redirectSuccessfulPost(res, "/");
-				}
+		if (ContentService.remove(parseInt(fields["content-id"] as string))) {
+			if (await middleware.noRedirect()) {
+				endWithSuccessText(res, "Success\n");
 			} else {
-				endWithFailureText(res, "OwnershipError");
+				redirectSuccessfulPost(res, "/");
 			}
-
-		} catch (e) {
-			handleErrors(e, res);
+		} else {
+			endWithFailureText(res, "OwnershipError");
 		}
+	},
+	catch(e, req, res) {
+		handleErrors(e, res);
 	}
 });
 
@@ -364,23 +360,21 @@ quelaag.addEndpoint({
 quelaag.addEndpoint({
 	when: req => req.url === "/api/upload/cancel" && req.method === "POST",
 	async do(req, res, middleware) {
-		try {
-			const ProgressQueueService = ProgressQueueServiceGetter.get();
+		const ProgressQueueService = ProgressQueueServiceGetter.get();
+		const { fields } = await middleware.form();
 
-			const { fields } = await middleware.form();
-
-			if (ProgressQueueService.cancel(middleware.ip(), parseInt(fields["content-id"] as string))) {
-				if (await middleware.noRedirect()) {
-					endWithSuccessText(res, "Success\n");
-				} else {
-					redirectSuccessfulPost(res, "/");
-				}
+		if (ProgressQueueService.cancel(middleware.ip(), parseInt(fields["content-id"] as string))) {
+			if (await middleware.noRedirect()) {
+				endWithSuccessText(res, "Success\n");
 			} else {
-				endWithFailureText(res, "I could not cancel that.\n");
+				redirectSuccessfulPost(res, "/");
 			}
-		} catch (e) {
-			handleErrors(e, res);
+		} else {
+			endWithFailureText(res, "I could not cancel that.\n");
 		}
+	},
+	catch(e, req, res) {
+		handleErrors(e, res);
 	}
 });
 
@@ -388,38 +382,36 @@ quelaag.addEndpoint({
 quelaag.addEndpoint({
 	when: req => req.url === "/api/nickname/set" && req.method === "POST",
 	async do(req, res, middleware) {
-		try {
-			recordUser(middleware.ip(), res);
+		recordUser(middleware.ip(), res);
 
-			const UserRecordService = UserRecordGetter.get();
-			const WebSocketService = WebSocketServiceGetter.get()
+		const UserRecordService = UserRecordGetter.get();
+		const WebSocketService = WebSocketServiceGetter.get()
 
-			const { fields } = await middleware.form();
+		const { fields } = await middleware.form();
+		const nickname = utils.sanitiseNickname(fields.nickname as string);
 
-			const nickname = utils.sanitiseNickname(fields.nickname as string);
-
-			if (nickname.length === 0) {
-				endWithFailureText(res, "Empty nicknames are not allowed.");
-				return;
-			}
-
-			// check sanitised version because that's what admins will see
-			if (utils.looksLikeIpAddress(nickname)) {
-				endWithFailureText(res, "Your nickname can not look like an IP address.");
-				return;
-			}
-
-			UserRecordService.setNickname(middleware.ip(), nickname);
-			WebSocketService.sendNicknameToUser(middleware.ip(), nickname);
-
-			if (await middleware.noRedirect()) {
-				endWithSuccessText(res, "Success\n");
-			} else {
-				redirectSuccessfulPost(res, "/");
-			}
-		} catch (e) {
-			handleErrors(e, res);
+		if (nickname.length === 0) {
+			endWithFailureText(res, "Empty nicknames are not allowed.");
+			return;
 		}
+
+		// check sanitised version because that's what admins will see
+		if (utils.looksLikeIpAddress(nickname)) {
+			endWithFailureText(res, "Your nickname can not look like an IP address.");
+			return;
+		}
+
+		UserRecordService.setNickname(middleware.ip(), nickname);
+		WebSocketService.sendNicknameToUser(middleware.ip(), nickname);
+
+		if (await middleware.noRedirect()) {
+			endWithSuccessText(res, "Success\n");
+		} else {
+			redirectSuccessfulPost(res, "/");
+		}
+	},
+	catch(e, req, res) {
+		handleErrors(e, res);
 	}
 });
 
@@ -427,55 +419,54 @@ quelaag.addEndpoint({
 quelaag.addEndpoint({
 	when: req => req.url === "/api/ban/add" && req.method === "POST",
 	async do(req, res, middleware) {
-		try {
-			await isPassword(await middleware.password());
+		await isPassword(await middleware.password());
 
-			const ContentService = ContentServiceGetter.get();
-			const UserRecordService = UserRecordGetter.get();
+		const ContentService = ContentServiceGetter.get();
+		const UserRecordService = UserRecordGetter.get();
 
-			const { fields } = await middleware.form();
+		const { fields } = await middleware.form();
 
-			if (fields.id) {
-				if (!UserRecordService.isUser(fields.id as string)) {
-					endWithFailureText(res, "That user doesn't exist.\n");
-					return;
-
-				} else {
-					UserRecordService.addBan(fields.id as string);
-					ContentService.purgeUser(fields.id as string);
-					if (await middleware.noRedirect()) {
-						endWithSuccessText(res, "Success\n");
-					} else {
-						redirectSuccessfulPost(res, "/");
-					}
-				}
-
-			} else if (fields.nickname) {
-				const uids = UserRecordService.whoHasNickname(utils.sanitiseNickname(fields.nickname as string));
-
-				if (uids.length === 0) {
-					endWithFailureText(res, "That user doesn't exist.\n");
-					return;
-
-				} else {
-					uids.forEach((id) => {
-						UserRecordService.addBan(id);
-						ContentService.purgeUser(id);
-					});
-
-					if (await middleware.noRedirect()) {
-						endWithSuccessText(res, "Success\n");
-					} else {
-						redirectSuccessfulPost(res, "/");
-					}
-				}
+		if (fields.id) {
+			if (!UserRecordService.isUser(fields.id as string)) {
+				endWithFailureText(res, "That user doesn't exist.\n");
+				return;
 
 			} else {
-				endWithFailureText(res, "User not specified.\n");
+				UserRecordService.addBan(fields.id as string);
+				ContentService.purgeUser(fields.id as string);
+				if (await middleware.noRedirect()) {
+					endWithSuccessText(res, "Success\n");
+				} else {
+					redirectSuccessfulPost(res, "/");
+				}
 			}
-		} catch (e) {
-			handleErrors(e, res);
+
+		} else if (fields.nickname) {
+			const uids = UserRecordService.whoHasNickname(utils.sanitiseNickname(fields.nickname as string));
+
+			if (uids.length === 0) {
+				endWithFailureText(res, "That user doesn't exist.\n");
+				return;
+
+			} else {
+				uids.forEach((id) => {
+					UserRecordService.addBan(id);
+					ContentService.purgeUser(id);
+				});
+
+				if (await middleware.noRedirect()) {
+					endWithSuccessText(res, "Success\n");
+				} else {
+					redirectSuccessfulPost(res, "/");
+				}
+			}
+
+		} else {
+			endWithFailureText(res, "User not specified.\n");
 		}
+	},
+	catch(e, req, res) {
+		handleErrors(e, res);
 	}
 });
 
@@ -537,17 +528,15 @@ quelaag.addEndpoint({
 quelaag.addEndpoint({
 	when: req => req.url === "/api/skip" && req.method === "POST",
 	async do(req, res, middleware) {
-		try {
-			await isPassword(await middleware.password());
+		await isPassword(await middleware.password());
 
-			const ContentService = ContentServiceGetter.get();
+		const ContentService = ContentServiceGetter.get();
 
-			ContentService.killCurrent();
-			endWithSuccessText(res, "Success\n");
-
-		} catch (e) {
-			handleErrors(e, res);
-		}
+		ContentService.killCurrent();
+		endWithSuccessText(res, "Success\n");
+	},
+	catch (e, req, res) {
+		handleErrors(e, res);
 	}
 });
 
@@ -555,27 +544,25 @@ quelaag.addEndpoint({
 quelaag.addEndpoint({
 	when: req => req.url === "/api/skipAndBan" && req.method === "POST",
 	async do(req, res, middleware) {
-		try {
-			await isPassword(await middleware.password());
+		await isPassword(await middleware.password());
 
-			const ContentService = ContentServiceGetter.get();
-			const UserRecordService = UserRecordGetter.get();
+		const ContentService = ContentServiceGetter.get();
+		const UserRecordService = UserRecordGetter.get();
 
-			const current = ContentService.getCurrentlyPlaying();
+		const current = ContentService.getCurrentlyPlaying();
 
-			if (current) {
-				const userId = current.userId;
-				UserRecordService.addBan(userId);
-				ContentService.purgeUser(userId);
-			}
-
-			ContentService.killCurrent();
-
-			endWithSuccessText(res, "Success\n");
-
-		} catch (e) {
-			handleErrors(e, res);
+		if (current) {
+			const userId = current.userId;
+			UserRecordService.addBan(userId);
+			ContentService.purgeUser(userId);
 		}
+
+		ContentService.killCurrent();
+
+		endWithSuccessText(res, "Success\n");
+	},
+	catch(e, req, res) {
+		handleErrors(e, res);
 	}
 });
 
