@@ -6,8 +6,6 @@ This list is in a rough order of priority.
 List
 ----
 
-* Allow killing the thing you yourself are playing
-* when banning the current content, the current content id should be sent up to ensure the correct track is killed
 * within a single bucket, user content should be round robin
 * Fix eog sometimes not coming out on top
 	* preliminary add option to add delay before showing image
