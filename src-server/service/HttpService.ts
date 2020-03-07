@@ -554,6 +554,7 @@ quelaag.addEndpoint({
 
 		if (middleware.ip() !== ContentService.getCurrentlyPlaying()?.userId) {
 			endWithFailureText(res, "You can only end your own music.");
+			return;
 		}
 
 		ContentService.killCurrent();
