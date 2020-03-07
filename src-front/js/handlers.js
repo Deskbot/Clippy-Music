@@ -324,7 +324,7 @@ $("#dl-list-container").on("click", "button.cancel", function(e) {
 	}).done(function() {
 		main.clippyAgent.speak("The download of " + utils.entitle(contentName) + " was cancelled.");
 
-		utils.counterShiftResize($uploadSection, function () {
+		utils.counterShiftResize($uploadSection, function() {
 			$li.remove();
 
 			main.dlMap.delete(contentId);
@@ -345,6 +345,30 @@ $("#dl-list-container").on("click", "button.cancel", function(e) {
 	});
 });
 
+$("#skip-mine-button").click(function() {
+	$.ajax({
+		url: "/api/skipMine",
+		type: "POST",
+		data: {
+			ajax: true,
+			contentId: main.current.id,
+		}
+
+	}).done(function() {
+		main.clippyAgent.play("Congratulate");
+
+	}).fail(function(jqxhr, textStatus, err) {
+		main.clippyAgent.stop();
+
+		if (jqxhr.status >= 500 && jqxhr.status < 600) {
+			main.clippyAgent.speak("The server encountered an error trying to end the current music. Check the console and contact the developer.");
+			console.error(jqxhr.responseText);
+		} else {
+			main.clippyAgent.speak(jqxhr.responseText);
+		}
+	});
+});
+
 $("#skip-button").click(function() {
 	var adminPassword = $adminPasswordInput.val();
 
@@ -356,12 +380,20 @@ $("#skip-button").click(function() {
 		return;
 	}
 
+	if (!main.current) {
+		main.clippyAgent.stop();
+		main.clippyAgent.speak("There is nothing playing right now.");
+		main.clippyAgent.play("Searching");
+		return;
+	}
+
 	$.ajax({
 		url: "/api/skip",
 		type: "POST",
 		data: {
 			ajax: true,
-			password: adminPassword
+			password: adminPassword,
+			contentId: main.current.id,
 		}
 
 	}).done(function() {
@@ -390,12 +422,20 @@ $("#skip-ban-button").click(function() {
 		return;
 	}
 
+	if (!main.current) {
+		main.clippyAgent.stop();
+		main.clippyAgent.speak("There is nothing playing right now.");
+		main.clippyAgent.play("Searching");
+		return;
+	}
+
 	$.ajax({
 		url: "/api/skipAndBan",
 		type: "POST",
 		data: {
 			ajax: true,
-			password: adminPassword
+			password: adminPassword,
+			contentId: main.current.id,
 		}
 
 	}).done(function() {

@@ -4,8 +4,9 @@ Ban user by IP                         | User doesn't exist; No admin password s
 Un-ban user by IP                      | User doesn't exist; No admin password set
 Ban user by nickname                   | User doesn't exist; No admin password set
 Un-ban user by nickname                | User doesn't exist; No admin password set
-Skip current music                     | User doesn't exist; No admin password set
-Skip current music and ban             | User doesn't exist; No admin password set
+Skip my current music                  | Not actually me whose music is playing
+Skip current music as admin            | User doesn't exist; No admin password set
+Skip current music and ban as admin    | User doesn't exist; No admin password set
 Change nickname                        | Empty string given; string looks like an IP address
 Image url upload                       | File wrong type; File too big; User is banned; not unique
 Upload image file                      | File wrong type; File too big; User is banned; not unique
