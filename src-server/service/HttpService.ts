@@ -30,7 +30,7 @@ type FormData = {
 	files: formidable.Files;
 };
 
-async function isPassword(password: string) {
+async function assertIsAdmin(password: string) {
 	const passwordContainer = PasswordService.getContainer();
 	if (passwordContainer == null) {
 		throw new AuthError("The admin controls can not be used because no admin password was set.\n");
@@ -419,7 +419,7 @@ quelaag.addEndpoint({
 quelaag.addEndpoint({
 	when: req => req.url === "/api/ban/add" && req.method === "POST",
 	async do(req, res, middleware) {
-		await isPassword(await middleware.password());
+		await assertIsAdmin(await middleware.password());
 
 		const ContentService = ContentServiceGetter.get();
 		const UserRecordService = UserRecordGetter.get();
@@ -475,7 +475,7 @@ quelaag.addEndpoint({
 	when: req => req.url === "/api/ban/remove" && req.method === "POST",
 	async do(req, res, middleware) {
 		try {
-			await isPassword(await middleware.password());
+			await assertIsAdmin(await middleware.password());
 
 			const UserRecordService = UserRecordGetter.get();
 
@@ -528,7 +528,7 @@ quelaag.addEndpoint({
 quelaag.addEndpoint({
 	when: req => req.url === "/api/skip" && req.method === "POST",
 	async do(req, res, middleware) {
-		await isPassword(await middleware.password());
+		await assertIsAdmin(await middleware.password());
 
 		const ContentService = ContentServiceGetter.get();
 
@@ -544,7 +544,7 @@ quelaag.addEndpoint({
 quelaag.addEndpoint({
 	when: req => req.url === "/api/skipAndBan" && req.method === "POST",
 	async do(req, res, middleware) {
-		await isPassword(await middleware.password());
+		await assertIsAdmin(await middleware.password());
 
 		const ContentService = ContentServiceGetter.get();
 		const UserRecordService = UserRecordGetter.get();
