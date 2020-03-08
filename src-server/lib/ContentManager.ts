@@ -1,7 +1,6 @@
 import * as cp from "child_process";
 import { EventEmitter } from "events";
 import { Html5Entities } from "html-entities";
-import * as request from "request";
 import * as fs from "fs";
 
 import * as consts from "../consts";
@@ -11,7 +10,7 @@ import * as time from "./time";
 
 import { ContentType } from "../types/ContentType";
 import { getMusicInfoByUrl, getFileDuration, UrlMusicData } from "./music";
-import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError } from "./errors";
+import { CancelError, UniqueError, YTError } from "./errors";
 import { UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic, MusicWithMetadata } from "../types/UploadData";
 import { IdFactory } from "./IdFactory";
 import { ItemData, CompleteMusic, CompletePicture } from "../types/ItemData";
@@ -20,6 +19,7 @@ import { UserRecord } from "./UserRecord";
 import { ProgressQueue } from "./ProgressQueue";
 import { BarringerQueue, isSuspendedBarringerQueue } from "./queue/BarringerQueue";
 import { PublicItemData } from "../types/PublicItemData";
+import { downloadPic } from "./download";
 
 export interface SuspendedContentManager {
 	playQueue: any;
@@ -134,52 +134,6 @@ export class ContentManager extends EventEmitter {
 	deleteContent(contentObj: ItemData) {
 		if (!contentObj.music.stream) utils.deleteFile(contentObj.music.path);
 		if (contentObj.pic.exists) utils.deleteFile(contentObj.pic.path); //empty picture files can be uploaded and will persist
-	}
-
-	downloadPic(url: string, destination: string): Promise<string> {
-		return new Promise((resolve, reject) => {
-			request.head(url, (err, res, body) => {
-				if (err) {
-					err.contentType = ContentType.Picture;
-					if (err.code === "ENOTFOUND" || err.code === "ETIMEDOUT") {
-						return reject(new BadUrlError(ContentType.Picture));
-					}
-					return reject(err);
-				}
-
-				if (!res) {
-					return reject(new UnknownDownloadError("Could not get a response for the request.", ContentType.Picture));
-				}
-
-				const typeFound = res.headers["content-type"] as string;
-
-				if (typeFound.split("/")[0] !== "image") {
-					return reject(new DownloadWrongTypeError(ContentType.Picture, "image", typeFound));
-				}
-				if (parseInt(res.headers["content-length"] as string) > opt.imageSizeLimit) {
-					return reject(new DownloadTooLargeError(ContentType.Picture));
-				}
-
-				let picName: string | null = url.split("/").pop() as string;
-				picName = picName.length <= 1 ? null : picName.split(".").shift() as string;
-
-				if (picName == null) {
-					picName = "";
-				}
-
-				const title = new Html5Entities().encode(picName);
-
-				const stream = request(url).pipe(fs.createWriteStream(destination));
-
-				stream.on("close", () => {
-					return resolve(title);
-				});
-				stream.on("error", (err) => {
-					err.contentType = ContentType.Picture;
-					return reject(err);
-				});
-			});
-		});
 	}
 
 	end() {
@@ -596,7 +550,7 @@ export class ContentManager extends EventEmitter {
 
 		if (pic.isUrl) {
 			pathOnDisk = this.nextPicPath();
-			title = await this.downloadPic(pic.url, pathOnDisk);
+			title = await downloadPic(pic.url, pathOnDisk);
 
 		} else {
 			pathOnDisk = pic.path;
