@@ -6,19 +6,13 @@ This list is in a rough order of priority.
 List
 ----
 
-* Fix eog sometimes not coming out on top
-	* preliminary add option to add delay before showing image
-	* show images with the mpv instance
-		* music + static image
-		* music + animated image
-		* (music + silent looping video) // future story, investigate whether possible
-		* video + static image
-		* video + animated image
-		* (video + silent looping video) // future story, investigate whether possible
 * Silent looping Video overlay
-	* Gifv support
-	* Then rename image/pic variables to overlay everywhere
-	* These need making consistent anyway
+	* Rename image/pic variables to be be one of those. Possibly use "overlay" where it could be an image or a video.
+	* video file upload
+	* video is played with mpv silent and looping over the top of the existing video
+	* video file url
+	* youtube-dl video url
+	* indicate to the user they can choose a video and that it will be silent and looping
 * Use a separate setting for bucket size and max run time.
 * Change the options at run time from the admin panel
 * Make Clippy installable as a Progressive Web App
