@@ -6,7 +6,6 @@ This list is in a rough order of priority.
 List
 ----
 
-* within a single bucket, user content should be round robin
 * Fix eog sometimes not coming out on top
 	* preliminary add option to add delay before showing image
 	* show images with the mpv instance
@@ -17,11 +16,15 @@ List
 		* video + animated image
 		* (video + silent looping video) // future story, investigate whether possible
 * Silent looping Video overlay
+	* Gifv support
 	* Then rename image/pic variables to overlay everywhere
 	* These need making consistent anyway
-* Gifv support
-* Can reorder my uploads
+* Use a separate setting for bucket size and max run time.
+* Change the options at run time from the admin panel
 * Make Clippy installable as a Progressive Web App
+	* desktop icon is clippy with headphones on
+* within a single bucket, user content should be round robin
+* Can reorder my uploads
 * Clippy should state when the user is not connected to the internet at all
 * update the state of the choose music file button when dragging into url box
 * playlist upload
@@ -88,7 +91,6 @@ List
 * Make play queue DOM update more efficiently
 * clippy speaking a long url won't fit inside his bubble
 * Only try to delete empty files once
-* sort out the fact that the user sees "The admin controls can not be used because no admin password was set." for any unfound endpoint
 * Use a map of content id to item instead of a user queue
 * Allow videos to be uploaded by URL that references a file
 * Tests should execute in a random order
@@ -131,7 +133,6 @@ List
 * It's not obvious that you can't run tests without an "config.ts".
 * Move timer from ContentManager into a stopwatch class
 * Check it uses the minimum required JQuery UI
-* Change the options at run time from the admin panel
 * Reconnect websockets when attempting to perform a websocket action
 * use valid http response codes, things such as payload too large
 * Factor initial youtube-dl info request factor into total upload percentage
