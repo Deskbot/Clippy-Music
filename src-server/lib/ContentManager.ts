@@ -328,7 +328,7 @@ export class ContentManager extends EventEmitter {
 			const showPicture = (buf: any) => {
 				//we want to play the picture after the video has appeared, which takes a long time when doing it remotely
 				//so we have to check the output of mpv, for signs it's not just started up, but also playing :/
-				if (buf.includes("(+)") || buf.includes("Audio") || buf.includes("Video")) {
+				if (buf.includes("AO") || buf.includes("VO")) {
 					this.startPic(picPath, opt.timeout);
 					musicProc.stdout.removeListener("data", showPicture); //make sure we only check for this once, for efficiency
 				}
