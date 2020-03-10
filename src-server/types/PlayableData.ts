@@ -2,7 +2,7 @@ export interface PlayableData {
 	id: number;
 	userId: string;
 	music: MusicData;
-	pic: PicData;
+	overlay: OverlayData;
 	duration: number;
 	startTime: string | null;
 	endTime: string | null;
@@ -18,7 +18,7 @@ type MusicData = {
 	ytId?: string,
 };
 
-type PicData = {
+type OverlayData = {
 	exists: true,
 	hash?: number,
 	isUrl: boolean,

@@ -3,7 +3,7 @@ export interface UploadData {
 	id?: number;
 	userId?: string;
 	music: UrlMusic | FileMusic;
-	pic: UrlPic | FilePic | NoPic;
+	overlay: UrlImage | FileImage | NoImage;
 	startTime: number | null;
 	endTime: number | null;
 };
@@ -20,21 +20,21 @@ export interface FileMusic {
 	title: string;
 }
 
-export interface UrlPic {
+export interface UrlImage {
 	exists: true;
 	isUrl: true;
 	url: string;
 	title?: string;
 }
 
-export interface FilePic {
+export interface FileImage {
 	exists: true;
 	isUrl: false;
 	path: string;
 	title: string;
 }
 
-export interface NoPic {
+export interface NoImage {
 	exists: false;
 	isUrl: undefined;
 	path: undefined;

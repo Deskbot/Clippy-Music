@@ -318,15 +318,15 @@ quelaag.addEndpoint({
 		const query = middleware.urlWithQuery().query;
 
 		validateDownload(res, query.id, (content) => {
-			if (content.pic.isUrl) {
+			if (content.overlay.isUrl) {
 				endWithFailureText(res, "I couldn't download that music for you because it was submitted as a URL.");
 				return;
 			}
 
-			if (content.pic.path) {
-				downloadFile(req, res, content.pic.title, content.pic.path);
+			if (content.overlay.path) {
+				downloadFile(req, res, content.overlay.title, content.overlay.path);
 			} else {
-				endWithFailureText(res, "The upload with that id doesn't have have a picture.");
+				endWithFailureText(res, "The upload with that id doesn't have have an image.");
 			}
 		});
 	},

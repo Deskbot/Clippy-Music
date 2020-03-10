@@ -8,7 +8,7 @@ import * as utils from "../../lib/utils/utils";
 
 import { ProgressQueueServiceGetter } from "../ProgressQueueService";
 import { FileUploadError } from "../../lib/errors";
-import { UploadData, UrlPic, NoPic, FilePic, FileMusic, UrlMusic } from "../../types/UploadData";
+import { UploadData, UrlImage, NoImage, FileImage, FileMusic, UrlMusic } from "../../types/UploadData";
 
 function getFileForm(
     req: http.IncomingMessage,
@@ -98,7 +98,7 @@ export function parseUploadForm(
         }
 
         const musicFile = files["music-file"];
-        const picFile = files["image-file"];
+        const imageFile = files["image-file"];
 
         let music: FileMusic | UrlMusic;
 
@@ -113,25 +113,25 @@ export function parseUploadForm(
 
         } else {
             if (!musicFile) {
-                throw new FileUploadError("It looks like you uploaded a music file, but could not find it.", [musicFile, picFile]);
+                throw new FileUploadError("It looks like you uploaded a music file, but could not find it.", [musicFile, imageFile]);
             }
 
             //no file
             if (musicFile.size === 0) {
                 utils.deleteFile(musicFile.path); //empty file will still persist otherwise, due to the way multipart form uploads work / are handled
-                throw new FileUploadError("You didn't specify a music file or a URL given.", [musicFile, picFile]);
+                throw new FileUploadError("You didn't specify a music file or a URL given.", [musicFile, imageFile]);
             }
 
             //file too big
             if (musicFile.size > opt.musicSizeLimit) {
-                throw makeMusicTooBigError([musicFile, picFile]);
+                throw makeMusicTooBigError([musicFile, imageFile]);
             }
 
             //file wrong type
             const mimetype = musicFile.type;
             const lhs = mimetype.split("/")[0];
             if (!(lhs === "audio" || lhs === "video" || mimetype === "application/octet-stream")) { //audio, video, or default (un-typed) file
-                throw new FileUploadError(`The music you uploaded was not in an audio or video format I recognise. The type of file given was "${musicFile.type}".`, [musicFile, picFile]);
+                throw new FileUploadError(`The music you uploaded was not in an audio or video format I recognise. The type of file given was "${musicFile.type}".`, [musicFile, imageFile]);
             }
 
             //success
@@ -142,46 +142,46 @@ export function parseUploadForm(
             };
         }
 
-        let pic: UrlPic | FilePic | NoPic = {
+        let overlay: UrlImage | FileImage | NoImage = {
             exists: false,
             isUrl: undefined,
             path: undefined,
             title: undefined,
         };
 
-        //pic
+        // overlay
         if (fields["image-url"]) {
-            pic = {
+            overlay = {
                 exists: true,
                 isUrl: true,
                 url: fields["image-url"] as string,
             };
 
-            if (picFile) utils.deleteFile(picFile.path);
+            if (imageFile) utils.deleteFile(imageFile.path);
 
-        } else if (picFile) {
-            if (picFile.size !== 0) { //file exists
+        } else if (imageFile) {
+            if (imageFile.size !== 0) { //file exists
                 //file too big
-                if (picFile.size > opt.imageSizeLimit) {
-                    throw makeImageTooBigError([musicFile, picFile]);
+                if (imageFile.size > opt.imageSizeLimit) {
+                    throw makeImageTooBigError([musicFile, imageFile]);
                 }
 
                 //file wrong type
-                const lhs = picFile.type.split("/")[0];
+                const lhs = imageFile.type.split("/")[0];
                 if (lhs !== "image") {
-                    throw new FileUploadError(`The image file you gave was not in a format I recognise. The type of file given was "${picFile.type}".`, [musicFile, picFile]);
+                    throw new FileUploadError(`The image file you gave was not in a format I recognise. The type of file given was "${imageFile.type}".`, [musicFile, imageFile]);
                 }
 
                 //success
-                pic = {
+                overlay = {
                     exists: true,
                     isUrl: false,
-                    path: picFile.path,
-                    title: utils.sanitiseFilename(picFile.name),
+                    path: imageFile.path,
+                    title: utils.sanitiseFilename(imageFile.name),
                 };
 
-            } else { //empty picture given, as is typical with multipart forms where no picture is chosen
-                utils.deleteFile(picFile.path);
+            } else { //empty image given, as is typical with multipart forms where no image is chosen
+                utils.deleteFile(imageFile.path);
             }
         }
 
@@ -198,7 +198,7 @@ export function parseUploadForm(
 
         resolve({
             music,
-            pic,
+            overlay: overlay,
             startTime,
             endTime,
         });

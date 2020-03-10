@@ -20,7 +20,7 @@ export const maxPercentBeforeFinished = 0.99;
 export const dirs = {
 	httpUpload: opt.storageDir + "/httpUploads/",
 	music:	    opt.storageDir + "/music/",
-	pic:		opt.storageDir + "/pictures/",
+	overlay:    opt.storageDir + "/overlay/",
 };
 
 export const files = {

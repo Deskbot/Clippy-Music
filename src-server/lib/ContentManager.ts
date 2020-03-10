@@ -11,20 +11,20 @@ import * as time from "./time";
 import { ContentType } from "../types/ContentType";
 import { getMusicInfoByUrl, getFileDuration, UrlMusicData } from "./music";
 import { CancelError, UniqueError, YTError } from "./errors";
-import { UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic, MusicWithMetadata } from "../types/UploadData";
+import { UploadDataWithId, UploadDataWithIdTitleDuration, NoImage, FileImage, UrlImage, MusicWithMetadata } from "../types/UploadData";
 import { IdFactory } from "./IdFactory";
-import { ItemData, CompleteMusic, CompletePicture } from "../types/ItemData";
+import { ItemData, CompleteMusic, CompleteImage } from "../types/ItemData";
 import { YtDlDownloader } from "./YtDownloader";
 import { UserRecord } from "./UserRecord";
 import { ProgressQueue } from "./ProgressQueue";
 import { BarringerQueue, isSuspendedBarringerQueue } from "./queue/BarringerQueue";
 import { PublicItemData } from "../types/PublicItemData";
-import { downloadPic } from "./download";
+import { downloadImage } from "./download";
 
 export interface SuspendedContentManager {
 	playQueue: any;
 	hashes: any;
-	picHashes: any;
+	overlayHashes: any;
 	ytIds: any;
 }
 
@@ -32,7 +32,7 @@ export function isSuspendedContentManager(obj: any): obj is SuspendedContentMana
 	return "playQueue" in obj
 		&& isSuspendedBarringerQueue(obj.playQueue)
 		&& "hashes" in obj
-		&& "picHashes" in obj
+		&& "overlayHashes" in obj
 		&& "ytIds" in obj;
 }
 
@@ -42,7 +42,7 @@ export class ContentManager extends EventEmitter {
 	private musicHashes: {
 		[hash: string]: number
 	} = {};
-	private picHashes: {
+	private overlayHashes: {
 		[hash: string]: number
 	} = {};
 	private musicUrlRecord: {
@@ -57,7 +57,7 @@ export class ContentManager extends EventEmitter {
 
 	//processes
 	private runningMusicProc: cp.ChildProcess | null = null;
-	private runningPicProc: cp.ChildProcess | null = null;
+	private runningOverlayProc: cp.ChildProcess | null = null;
 	private currentlyPlaying: ItemData | null = null;
 
 	private stop?: boolean;
@@ -82,7 +82,7 @@ export class ContentManager extends EventEmitter {
 
 			this.playQueue = new BarringerQueue(maxTimePerBucket, startState.playQueue);
 			this.musicHashes = startState.hashes;
-			this.picHashes = startState.picHashes;
+			this.overlayHashes = startState.overlayHashes;
 			this.musicUrlRecord = startState.ytIds;
 		} else {
 			this.playQueue = new BarringerQueue(maxTimePerBucket);
@@ -101,12 +101,12 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	addHash(hash: number) {
+	addMusicHash(hash: number) {
 		this.musicHashes[hash] = new Date().getTime();
 	}
 
-	addPicHash(hash: number) {
-		this.picHashes[hash] = new Date().getTime();
+	addOverlayHash(hash: number) {
+		this.overlayHashes[hash] = new Date().getTime();
 	}
 
 	addUrlId(id: string) {
@@ -133,7 +133,7 @@ export class ContentManager extends EventEmitter {
 
 	deleteContent(contentObj: ItemData) {
 		if (!contentObj.music.stream) utils.deleteFile(contentObj.music.path);
-		if (contentObj.pic.exists) utils.deleteFile(contentObj.pic.path); //empty picture files can be uploaded and will persist
+		if (contentObj.overlay.exists) utils.deleteFile(contentObj.overlay.path); //empty overlay files can be uploaded and will persist
 	}
 
 	end() {
@@ -165,13 +165,13 @@ export class ContentManager extends EventEmitter {
 		if (!uplData.music.isUrl) {
 			// read the music file to determine its duration
 			const fileDuration = await getFileDuration(uplData.music.path);
-			const uplDataWithDuration = {
+			const uplDataWithDuration: UploadDataWithIdTitleDuration = {
 				...uplData,
 				music: {
 					...uplData.music,
 				},
-				pic: {
-					...uplData.pic,
+				overlay: {
+					...uplData.overlay,
 				},
 				duration: this.calcPlayableDuration(fileDuration, uplData.startTime, uplData.endTime),
 			};
@@ -221,18 +221,18 @@ export class ContentManager extends EventEmitter {
 
 	killCurrent() {
 		this.stopMusic();
-		this.stopPic();
+		this.stopOverlay();
 	}
 
 	logPlay(contentData: ItemData) {
 		const nickname = this.userRecord.getNickname(contentData.userId);
 		const currentTime = new Date().toISOString();
 
-		let picName;
-		if (contentData.pic.exists) {
-			picName = new Html5Entities().decode(contentData.pic.title);
+		let overlayName;
+		if (contentData.overlay.exists) {
+			overlayName = new Html5Entities().decode(contentData.overlay.title);
 		} else {
-			picName = "no picture";
+			overlayName = "no overlay";
 		}
 
 		const noHtmlEntityTitle = new Html5Entities().decode(contentData.music.title);
@@ -241,13 +241,13 @@ export class ContentManager extends EventEmitter {
 		console.log(currentTime);
 		console.log(`user   "${nickname}"`);
 		console.log(`played "${noHtmlEntityTitle}"`);
-		console.log(`with   "${picName}"`);
+		console.log(`with   "${overlayName}"`);
 
 		//private log uses private facing info
 		const message = currentTime + "\n" +
 			`user   "${contentData.userId}\n"` +
 			`played "${noHtmlEntityTitle}\n"` +
-			`with   "${picName}\n"`;
+			`with   "${overlayName}\n"`;
 
 		fs.appendFile(consts.files.log, message, (err) => {
 			if (err) throw err;
@@ -275,12 +275,12 @@ export class ContentManager extends EventEmitter {
 		return consts.dirs.music + this.idFactory.next();
 	}
 
-	nextPicPath(): string {
-		return consts.dirs.pic + this.idFactory.next();
+	nextOverlayPath(): string {
+		return consts.dirs.overlay + this.idFactory.next();
 	}
 
-	picHashIsUnique(hash: number): boolean {
-		let lastPlayed = this.picHashes[hash];
+	overlayHashIsUnique(hash: number): boolean {
+		let lastPlayed = this.overlayHashes[hash];
 		return !lastPlayed || lastPlayed + opt.imageUniqueCoolOff * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
 	}
 
@@ -313,7 +313,7 @@ export class ContentManager extends EventEmitter {
 		musicProc.on("close", (code, signal) => { // runs before next call to playNext
 			const secs = 1 + Math.ceil((Date.now() - timePlayedAt) / 1000); //seconds ran for, adds a little bit to prevent infinite <1 second content
 
-			this.stopPic();
+			this.stopOverlay();
 			this.deleteContent(contentData);
 			this.currentlyPlaying = null;
 
@@ -325,10 +325,10 @@ export class ContentManager extends EventEmitter {
 			this.emit("end");
 		});
 
-		if (contentData.pic.exists) {
-			const picPath = contentData.pic.path;
-			const showPicture = (buf: any) => {
-				// we want to play the picture after the video has appeared, which takes a long time when the video is remote
+		if (contentData.overlay.exists) {
+			const imagePath = contentData.overlay.path;
+			const showOverlay = (buf: any) => {
+				// we want to play the image after the video has appeared, which takes a long time when the video is remote
 				// so we have to check the output of the mpv process for when it creates a window
 
 				// Example mpv output. The lines beginning with square brackets only appear with `--msg-level=all=v`, which Clippy is not using.
@@ -346,12 +346,12 @@ export class ContentManager extends EventEmitter {
 				// VO: [gpu] 1920x1080 yuv420p
 				// ...
 				if (buf.includes("AO") || buf.includes("VO")) {
-					this.startPic(picPath, opt.timeout);
-					musicProc.stdout.removeListener("data", showPicture); //make sure we only check for this once, for efficiency
+					this.startOverlay(imagePath, opt.timeout);
+					musicProc.stdout.removeListener("data", showOverlay); //make sure we only check for this once, for efficiency
 				}
 			};
 
-			musicProc.stdout.on("data", showPicture);
+			musicProc.stdout.on("data", showOverlay);
 		}
 
 		this.logPlay(contentData);
@@ -370,10 +370,10 @@ export class ContentManager extends EventEmitter {
 			userId: item.userId,
 		};
 
-		if (item.pic.exists) {
+		if (item.overlay.exists) {
 			data.image = {
-				title: item.pic.title,
-				url: item.pic.isUrl ? item.pic.url : undefined,
+				title: item.overlay.title,
+				url: item.overlay.isUrl ? item.overlay.url : undefined,
 			};
 		}
 
@@ -394,11 +394,11 @@ export class ContentManager extends EventEmitter {
 		}
 
 		if (itemData.music.hash) {
-			this.addHash(itemData.music.hash);
+			this.addMusicHash(itemData.music.hash);
 		}
 
-		if (itemData.pic.exists) {
-			this.addPicHash(itemData.pic.hash);
+		if (itemData.overlay.exists) {
+			this.addOverlayHash(itemData.overlay.hash);
 		}
 	}
 
@@ -440,24 +440,25 @@ export class ContentManager extends EventEmitter {
 		if (this.runningMusicProc) this.runningMusicProc.kill();
 	}
 
-	startPic(path: string, duration: number) {
-		this.runningPicProc = cp.spawn("timeout", [duration + "s", opt.showImageCommand, path, ...opt.showImageArgs]);
+	startOverlay(path: string, duration: number) {
+		this.runningOverlayProc = cp.spawn("timeout", [duration + "s", opt.showImageCommand, path, ...opt.showImageArgs]);
 	}
 
-	stopPic() {
-		if (this.runningPicProc) {
-			this.runningPicProc.kill();
-			this.runningPicProc = null;
+	stopOverlay() {
+		if (this.runningOverlayProc) {
+			this.runningOverlayProc.kill();
+			this.runningOverlayProc = null;
 		}
 	}
 
 	toJSON() {
-		return JSON.stringify({
-			playQueue: this.playQueue, //luckily this is jsonable
+		const data: SuspendedContentManager = {
 			hashes: this.musicHashes,
-			picHashes: this.picHashes,
+			overlayHashes: this.overlayHashes,
+			playQueue: this.playQueue, //luckily this is jsonable
 			ytIds: this.musicUrlRecord,
-		});
+		};
+		return JSON.stringify(data);
 	}
 
 	private async tryQueue(someItemData: UploadDataWithIdTitleDuration) {
@@ -468,17 +469,17 @@ export class ContentManager extends EventEmitter {
 				someItemData.userId,
 			);
 
-			// if the picture fails, make sure any yt download is stopped
-			const picPrepProm = this.tryPrepPicture(someItemData.pic).catch(err => {
+			// if the overlay fails, make sure any yt download is stopped
+			const imagePrepProm = this.tryPrepOverlay(someItemData.overlay).catch(err => {
 				this.ytDownloader.tryCancel(someItemData.userId, someItemData.id);
 				throw err;
 			});
 
-			const [ music, pic ] = await Promise.all([musicPrepProm, picPrepProm]);
+			const [ music, overlay ] = await Promise.all([musicPrepProm, imagePrepProm]);
 
 			const itemData = {
 				...someItemData,
-				pic,
+				overlay,
 				music,
 			};
 
@@ -552,40 +553,40 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	private async tryPrepPicture(pic: NoPic | FilePic | UrlPic): Promise<CompletePicture> {
-		if (!pic.exists) {
+	private async tryPrepOverlay(overlay: NoImage | FileImage | UrlImage): Promise<CompleteImage> {
+		if (!overlay.exists) {
 			return {
-				...pic,
+				...overlay,
 				hash: undefined,
 			};
 		}
 
-		//we may already have the picture downloaded, but we always need to check the uniqueness
+		// we may already have the image downloaded, but we always need to check the uniqueness
 
 		let pathOnDisk: string;
 		let title: string;
 
-		if (pic.isUrl) {
-			pathOnDisk = this.nextPicPath();
-			title = await downloadPic(pic.url, pathOnDisk);
+		if (overlay.isUrl) {
+			pathOnDisk = this.nextOverlayPath();
+			title = await downloadImage(overlay.url, pathOnDisk);
 
 		} else {
-			pathOnDisk = pic.path;
-			title = pic.title;
+			pathOnDisk = overlay.path;
+			title = overlay.title;
 		}
 
-		const picHash = await utils.fileHash(pathOnDisk);
+		const imageHash = await utils.fileHash(pathOnDisk);
 
-		if (this.picHashIsUnique(picHash)) {
+		if (this.overlayHashIsUnique(imageHash)) {
 			return {
-				...pic,
+				...overlay,
 				path: pathOnDisk,
 				title,
-				hash: picHash,
+				hash: imageHash,
 			};
 
 		} else {
-			throw new UniqueError(ContentType.Picture);
+			throw new UniqueError(ContentType.Image);
 		}
 	}
 

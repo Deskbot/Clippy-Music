@@ -6,38 +6,38 @@ import { ContentType } from "../types/ContentType";
 import { BadUrlError, UnknownDownloadError, DownloadWrongTypeError, DownloadTooLargeError } from "./errors";
 import { Html5Entities } from "html-entities";
 
-export function downloadPic(url: string, destination: string): Promise < string > {
+export function downloadImage(url: string, destination: string): Promise < string > {
     return new Promise((resolve, reject) => {
         request.head(url, (err, res, body) => {
             if (err) {
-                err.contentType = ContentType.Picture;
+                err.contentType = ContentType.Image;
                 if (err.code === "ENOTFOUND" || err.code === "ETIMEDOUT") {
-                    return reject(new BadUrlError(ContentType.Picture));
+                    return reject(new BadUrlError(ContentType.Image));
                 }
                 return reject(err);
             }
 
             if (!res) {
-                return reject(new UnknownDownloadError("Could not get a response for the request.", ContentType.Picture));
+                return reject(new UnknownDownloadError("Could not get a response for the request.", ContentType.Image));
             }
 
             const typeFound = res.headers["content-type"] as string;
 
             if (typeFound.split("/")[0] !== "image") {
-                return reject(new DownloadWrongTypeError(ContentType.Picture, "image", typeFound));
+                return reject(new DownloadWrongTypeError(ContentType.Image, "image", typeFound));
             }
             if (parseInt(res.headers["content-length"] as string) > opt.imageSizeLimit) {
-                return reject(new DownloadTooLargeError(ContentType.Picture));
+                return reject(new DownloadTooLargeError(ContentType.Image));
             }
 
-            let picName: string | null = url.split("/").pop() as string;
-            picName = picName.length <= 1 ? null : picName.split(".").shift() as string;
+            let imageName: string | null = url.split("/").pop() as string;
+            imageName = imageName.length <= 1 ? null : imageName.split(".").shift() as string;
 
-            if (picName == null) {
-                picName = "";
+            if (imageName == null) {
+                imageName = "";
             }
 
-            const title = new Html5Entities().encode(picName);
+            const title = new Html5Entities().encode(imageName);
 
             const stream = request(url).pipe(fs.createWriteStream(destination));
 
@@ -45,7 +45,7 @@ export function downloadPic(url: string, destination: string): Promise < string 
                 return resolve(title);
             });
             stream.on("error", (err) => {
-                err.contentType = ContentType.Picture;
+                err.contentType = ContentType.Image;
                 return reject(err);
             });
         });

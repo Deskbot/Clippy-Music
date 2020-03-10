@@ -7,12 +7,13 @@ List
 ----
 
 * Silent looping Video overlay
-	* Rename image/pic variables to be be one of those. Possibly use "overlay" where it could be an image or a video.
+	* handleDlError can never have .picTitle
 	* video file upload
 	* video is played with mpv silent and looping over the top of the existing video
 	* video file url
 	* youtube-dl video url
 	* indicate to the user they can choose a video and that it will be silent and looping
+	* C:/My Pictures should be "My Videos" if a video is chosen
 * Use a separate setting for bucket size and max run time.
 * Change the options at run time from the admin panel
 * Make Clippy installable as a Progressive Web App
