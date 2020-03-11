@@ -46,7 +46,7 @@ $uploadForm.find("input[name=music-file]").change(function(e) {
 	$this.siblings(".file-name").text(fileName ? fileName : "No File Chosen");
 });
 
-$uploadForm.find("input[name=image-file]").change(function(e) {
+$uploadForm.find("input[name=overlay-file]").change(function(e) {
 	var $musicUrl = $uploadForm.find("[name=image-url]");
 
 	if (utils.inputHasFile(this)) $musicUrl.attr("disabled", true);

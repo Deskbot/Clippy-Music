@@ -37,7 +37,7 @@ function getFileForm(
         if (lastFileField === "music-file") {
             fileError = makeMusicTooBigError(files);
         }
-        else if (lastFileField === "image-file") {
+        else if (lastFileField === "overlay-file") {
             fileError = makeImageTooBigError(files);
         }
         else {
@@ -98,7 +98,7 @@ export function parseUploadForm(
         }
 
         const musicFile = files["music-file"];
-        const imageFile = files["image-file"];
+        const imageFile = files["overlay-file"];
 
         let music: FileMusic | UrlMusic;
 
