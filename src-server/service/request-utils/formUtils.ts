@@ -8,7 +8,7 @@ import * as utils from "../../lib/utils/utils";
 
 import { ProgressQueueServiceGetter } from "../ProgressQueueService";
 import { FileUploadError } from "../../lib/errors";
-import { UploadData, UrlOverlay, NoOverlay, FileOverlay, FileMusic, UrlMusic } from "../../types/UploadData";
+import { UploadData, UrlOverlay, NoOverlay, FileOverlay, FileMusic, UrlMusic, OverlayMedium } from "../../types/UploadData";
 
 function getFileForm(
     req: http.IncomingMessage,
@@ -154,6 +154,7 @@ export function parseUploadForm(
             overlay = {
                 exists: true,
                 isUrl: true,
+                medium: OverlayMedium.Image,
                 url: fields["image-url"] as string,
             };
 
@@ -178,6 +179,7 @@ export function parseUploadForm(
                 overlay = {
                     exists: true,
                     isUrl: false,
+                    medium: lhs === "video" ? OverlayMedium.Video : OverlayMedium.Image,
                     path: overlayFile.path,
                     title: utils.sanitiseFilename(overlayFile.name),
                 };

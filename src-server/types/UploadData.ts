@@ -20,9 +20,15 @@ export interface FileMusic {
 	title: string;
 }
 
+export enum OverlayMedium {
+	Image,
+	Video,
+}
+
 export interface UrlOverlay {
 	exists: true;
 	isUrl: true;
+	medium: OverlayMedium;
 	url: string;
 	title?: string;
 }
@@ -30,6 +36,7 @@ export interface UrlOverlay {
 export interface FileOverlay {
 	exists: true;
 	isUrl: false;
+	medium: OverlayMedium;
 	path: string;
 	title: string;
 }
