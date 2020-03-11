@@ -9,7 +9,7 @@ import * as opt from "../options";
 import * as time from "./time";
 
 import { ContentType } from "../types/ContentType";
-import { getMusicInfoByUrl, getFileDuration, UrlMusicData } from "./music";
+import { getMusicInfoByUrl, getFileDuration, UrlMusicData } from "./musicData";
 import { CancelError, UniqueError, YTError } from "./errors";
 import { UploadDataWithId, UploadDataWithIdTitleDuration, NoOverlay, FileOverlay, UrlOverlay, MusicWithMetadata, OverlayMedium } from "../types/UploadData";
 import { IdFactory } from "./IdFactory";
