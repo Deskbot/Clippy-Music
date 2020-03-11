@@ -98,7 +98,7 @@ export function parseUploadForm(
         }
 
         const musicFile = files["music-file"];
-        const imageFile = files["overlay-file"];
+        const overlayFile = files["overlay-file"];
 
         let music: FileMusic | UrlMusic;
 
@@ -113,25 +113,25 @@ export function parseUploadForm(
 
         } else {
             if (!musicFile) {
-                throw new FileUploadError("It looks like you uploaded a music file, but could not find it.", [musicFile, imageFile]);
+                throw new FileUploadError("It looks like you uploaded a music file, but could not find it.", [musicFile, overlayFile]);
             }
 
             //no file
             if (musicFile.size === 0) {
                 utils.deleteFile(musicFile.path); //empty file will still persist otherwise, due to the way multipart form uploads work / are handled
-                throw new FileUploadError("You didn't specify a music file or a URL given.", [musicFile, imageFile]);
+                throw new FileUploadError("You didn't specify a music file or a URL given.", [musicFile, overlayFile]);
             }
 
             //file too big
             if (musicFile.size > opt.musicSizeLimit) {
-                throw makeMusicTooBigError([musicFile, imageFile]);
+                throw makeMusicTooBigError([musicFile, overlayFile]);
             }
 
             //file wrong type
             const mimetype = musicFile.type;
             const lhs = mimetype.split("/")[0];
             if (!(lhs === "audio" || lhs === "video" || mimetype === "application/octet-stream")) { //audio, video, or default (un-typed) file
-                throw new FileUploadError(`The music you uploaded was not in an audio or video format I recognise. The type of file given was "${musicFile.type}".`, [musicFile, imageFile]);
+                throw new FileUploadError(`The music you uploaded was not in an audio or video format I recognise. The type of file given was "${musicFile.type}".`, [musicFile, overlayFile]);
             }
 
             //success
@@ -157,31 +157,31 @@ export function parseUploadForm(
                 url: fields["image-url"] as string,
             };
 
-            if (imageFile) utils.deleteFile(imageFile.path);
+            if (overlayFile) utils.deleteFile(overlayFile.path);
 
-        } else if (imageFile) {
-            if (imageFile.size !== 0) { //file exists
+        } else if (overlayFile) {
+            if (overlayFile.size !== 0) { //file exists
                 //file too big
-                if (imageFile.size > opt.imageSizeLimit) {
-                    throw makeImageTooBigError([musicFile, imageFile]);
+                if (overlayFile.size > opt.imageSizeLimit) {
+                    throw makeImageTooBigError([musicFile, overlayFile]);
                 }
 
                 //file wrong type
-                const lhs = imageFile.type.split("/")[0];
+                const lhs = overlayFile.type.split("/")[0];
                 if (lhs !== "image") {
-                    throw new FileUploadError(`The image file you gave was not in a format I recognise. The type of file given was "${imageFile.type}".`, [musicFile, imageFile]);
+                    throw new FileUploadError(`The image file you gave was not in a format I recognise. The type of file given was "${overlayFile.type}".`, [musicFile, overlayFile]);
                 }
 
                 //success
                 overlay = {
                     exists: true,
                     isUrl: false,
-                    path: imageFile.path,
-                    title: utils.sanitiseFilename(imageFile.name),
+                    path: overlayFile.path,
+                    title: utils.sanitiseFilename(overlayFile.name),
                 };
 
             } else { //empty image given, as is typical with multipart forms where no image is chosen
-                utils.deleteFile(imageFile.path);
+                utils.deleteFile(overlayFile.path);
             }
         }
 
