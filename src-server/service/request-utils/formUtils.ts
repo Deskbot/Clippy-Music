@@ -8,7 +8,7 @@ import * as utils from "../../lib/utils/utils";
 
 import { ProgressQueueServiceGetter } from "../ProgressQueueService";
 import { FileUploadError } from "../../lib/errors";
-import { UploadData, UrlImage, NoImage, FileImage, FileMusic, UrlMusic } from "../../types/UploadData";
+import { UploadData, UrlOverlay, NoOverlay, FileOverlay, FileMusic, UrlMusic } from "../../types/UploadData";
 
 function getFileForm(
     req: http.IncomingMessage,
@@ -142,7 +142,7 @@ export function parseUploadForm(
             };
         }
 
-        let overlay: UrlImage | FileImage | NoImage = {
+        let overlay: UrlOverlay | FileOverlay | NoOverlay = {
             exists: false,
             isUrl: undefined,
             path: undefined,
@@ -200,7 +200,7 @@ export function parseUploadForm(
 
         resolve({
             music,
-            overlay: overlay,
+            overlay,
             startTime,
             endTime,
         });

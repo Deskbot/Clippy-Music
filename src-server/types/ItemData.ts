@@ -1,10 +1,10 @@
-import { UrlImage, FileImage, NoImage } from "./UploadData";
+import { UrlOverlay, FileOverlay, NoOverlay } from "./UploadData";
 
 export interface ItemData {
 	id: number;
 	userId: string;
 	music: CompleteMusic;
-	overlay: CompleteImage;
+	overlay: CompleteOverlay;
 	duration: number;
 	startTime: number | null;
 	endTime: number | null;
@@ -34,18 +34,18 @@ export type CompleteMusic = {
 	url: string;
 }
 
-export interface CompleteUrlImg extends UrlImage {
+export interface CompleteUrlOverlay extends UrlOverlay {
 	hash: number;
 	path: string;
 	title: string;
 };
 
-export interface CompleteFileImg extends FileImage {
+export interface CompleteFileOverlay extends FileOverlay {
 	hash: number;
 };
 
-export interface CompleteNoImg extends NoImage {
+export interface CompleteNoOverlay extends NoOverlay {
 	hash: undefined;
 }
 
-export type CompleteImage = CompleteUrlImg | CompleteFileImg | CompleteNoImg;
+export type CompleteOverlay = CompleteUrlOverlay | CompleteFileOverlay | CompleteNoOverlay;

@@ -11,9 +11,9 @@ import * as time from "./time";
 import { ContentType } from "../types/ContentType";
 import { getMusicInfoByUrl, getFileDuration, UrlMusicData } from "./music";
 import { CancelError, UniqueError, YTError } from "./errors";
-import { UploadDataWithId, UploadDataWithIdTitleDuration, NoImage, FileImage, UrlImage, MusicWithMetadata } from "../types/UploadData";
+import { UploadDataWithId, UploadDataWithIdTitleDuration, NoOverlay, FileOverlay, UrlOverlay, MusicWithMetadata } from "../types/UploadData";
 import { IdFactory } from "./IdFactory";
-import { ItemData, CompleteMusic, CompleteImage } from "../types/ItemData";
+import { ItemData, CompleteMusic, CompleteOverlay } from "../types/ItemData";
 import { YtDlDownloader } from "./YtDownloader";
 import { UserRecord } from "./UserRecord";
 import { ProgressQueue } from "./ProgressQueue";
@@ -470,12 +470,12 @@ export class ContentManager extends EventEmitter {
 			);
 
 			// if the overlay fails, make sure any yt download is stopped
-			const imagePrepProm = this.tryPrepOverlay(someItemData.overlay).catch(err => {
+			const overlayPrepProm = this.tryPrepOverlay(someItemData.overlay).catch(err => {
 				this.ytDownloader.tryCancel(someItemData.userId, someItemData.id);
 				throw err;
 			});
 
-			const [ music, overlay ] = await Promise.all([musicPrepProm, imagePrepProm]);
+			const [ music, overlay ] = await Promise.all([musicPrepProm, overlayPrepProm]);
 
 			const itemData = {
 				...someItemData,
@@ -553,7 +553,7 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	private async tryPrepOverlay(overlay: NoImage | FileImage | UrlImage): Promise<CompleteImage> {
+	private async tryPrepOverlay(overlay: NoOverlay | FileOverlay | UrlOverlay): Promise<CompleteOverlay> {
 		if (!overlay.exists) {
 			return {
 				...overlay,
@@ -575,14 +575,14 @@ export class ContentManager extends EventEmitter {
 			title = overlay.title;
 		}
 
-		const imageHash = await utils.fileHash(pathOnDisk);
+		const overlayHash = await utils.fileHash(pathOnDisk);
 
-		if (this.overlayHashIsUnique(imageHash)) {
+		if (this.overlayHashIsUnique(overlayHash)) {
 			return {
 				...overlay,
 				path: pathOnDisk,
 				title,
-				hash: imageHash,
+				hash: overlayHash,
 			};
 
 		} else {
