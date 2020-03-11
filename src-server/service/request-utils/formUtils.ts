@@ -38,7 +38,7 @@ function getFileForm(
             fileError = makeMusicTooBigError(files);
         }
         else if (lastFileField === "overlay-file") {
-            fileError = makeImageTooBigError(files);
+            fileError = makeOverlayTooBigError(files);
         }
         else {
             fileError = err;
@@ -79,8 +79,8 @@ export function handleFileUpload(req: http.IncomingMessage, contentId: number): 
     return getFileForm(req, generateProgressHandler);
 }
 
-function makeImageTooBigError(files: formidable.File[]) {
-    return new FileUploadError(`The image file you gave was too large. The maximum size is ${consts.imageSizeLimStr}.`, files);
+function makeOverlayTooBigError(files: formidable.File[]) {
+    return new FileUploadError(`The overlay file you gave was too large. The maximum size is ${consts.imageSizeLimStr}.`, files);
 }
 
 function makeMusicTooBigError(files: formidable.File[]) {
@@ -157,18 +157,20 @@ export function parseUploadForm(
                 url: fields["image-url"] as string,
             };
 
-            if (overlayFile) utils.deleteFile(overlayFile.path);
+            if (overlayFile) {
+                utils.deleteFile(overlayFile.path);
+            }
 
         } else if (overlayFile) {
             if (overlayFile.size !== 0) { //file exists
                 //file too big
                 if (overlayFile.size > opt.imageSizeLimit) {
-                    throw makeImageTooBigError([musicFile, overlayFile]);
+                    throw makeOverlayTooBigError([musicFile, overlayFile]);
                 }
 
                 //file wrong type
                 const lhs = overlayFile.type.split("/")[0];
-                if (lhs !== "image") {
+                if (lhs !== "image" && lhs !== "video") {
                     throw new FileUploadError(`The image file you gave was not in a format I recognise. The type of file given was "${overlayFile.type}".`, [musicFile, overlayFile]);
                 }
 
