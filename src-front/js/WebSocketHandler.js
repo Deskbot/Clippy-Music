@@ -78,11 +78,12 @@ var WebSocketHandler = (function() {
 		var errorType = contentData.errorType;
 		var contentType = contentData.error.contentType;
 		var title = localDlData.title;
+		var picTitle = undefined; // this needs to be sent to the front end somehow at some point
 
 		var isMusic = contentType === "music";
 		var isPic = contentType === "picture"
 		var whatMus = title ? utils.entitle(title) : "the music you requested";
-		var whatPic = contentData.picTitle ? utils.entitle(contentData.picTitle) : "the picture you requested";
+		var whatPic = picTitle ? utils.entitle(picTitle) : "the picture you requested";
 
 		var clippySays;
 		var clippyAnimation;

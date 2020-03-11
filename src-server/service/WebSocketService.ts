@@ -203,7 +203,7 @@ export function startWebSocketService() {
 	});
 
 	//extraInfo is an optional argument
-	ProgressQueueService.on("error", (userId, contentId, error, extraInfo) => {
+	ProgressQueueService.on("error", (userId, contentId, error) => {
 		const data = {
 			contentId,
 			error,
