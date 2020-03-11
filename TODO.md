@@ -7,7 +7,6 @@ List
 ----
 
 * Silent looping Video overlay
-	* handleDlError can never have .picTitle
 	* video file upload
 	* video is played with mpv silent and looping over the top of the existing video
 	* video file url
