@@ -11,7 +11,7 @@ import * as time from "./time";
 import { ContentType } from "../types/ContentType";
 import { getMusicInfoByUrl, getFileDuration, UrlMusicData } from "./music";
 import { CancelError, UniqueError, YTError } from "./errors";
-import { UploadDataWithId, UploadDataWithIdTitleDuration, NoOverlay, FileOverlay, UrlOverlay, MusicWithMetadata } from "../types/UploadData";
+import { UploadDataWithId, UploadDataWithIdTitleDuration, NoOverlay, FileOverlay, UrlOverlay, MusicWithMetadata, OverlayMedium } from "../types/UploadData";
 import { IdFactory } from "./IdFactory";
 import { ItemData, CompleteMusic, CompleteOverlay } from "../types/ItemData";
 import { YtDlDownloader } from "./YtDownloader";
@@ -309,6 +309,7 @@ export class ContentManager extends EventEmitter {
 
 		const musicLocation = contentData.music.stream ? contentData.music.url : contentData.music.path;
 		const musicProc = this.startMusic(musicLocation, opt.timeout, contentData.startTime, contentData.endTime);
+		this.runningMusicProc = musicProc;
 
 		musicProc.on("close", (code, signal) => { // runs before next call to playNext
 			const secs = 1 + Math.ceil((Date.now() - timePlayedAt) / 1000); //seconds ran for, adds a little bit to prevent infinite <1 second content
@@ -326,32 +327,11 @@ export class ContentManager extends EventEmitter {
 		});
 
 		if (contentData.overlay.exists) {
-			const imagePath = contentData.overlay.path;
-			const showOverlay = (buf: any) => {
-				// we want to play the image after the video has appeared, which takes a long time when the video is remote
-				// so we have to check the output of the mpv process for when it creates a window
+			const path = contentData.overlay.path;
 
-				// Example mpv output. The lines beginning with square brackets only appear with `--msg-level=all=v`, which Clippy is not using.
-				// ...
-				// (+) Video --vid=1 (*) (h264 1920x1080 60.000fps)
-                // (+) Audio --aid=1 --alang=eng (*) (opus 2ch 48000Hz)
-				// [vo/gpu] Probing for best GPU context.
-				// [vo/gpu/opengl] Initializing GPU context 'wayland'
-				// [vo/gpu/opengl] Initializing GPU context 'x11egl'
-				// [vo/gpu/x11] X11 opening display: :0
-				// [vo/gpu/x11] X11 running at 2560x1440 (":0" => local display)
-				// ...
-				// AO: [pulse] 48000Hz stereo 2ch float
-				// ...
-				// VO: [gpu] 1920x1080 yuv420p
-				// ...
-				if (buf.includes("AO") || buf.includes("VO")) {
-					this.startOverlay(imagePath, opt.timeout);
-					musicProc.stdout.removeListener("data", showOverlay); //make sure we only check for this once, for efficiency
-				}
-			};
-
-			musicProc.stdout.on("data", showOverlay);
+			if (contentData.overlay.medium === OverlayMedium.Image) {
+				this.showImageWhileMusicIsPlaying(path, musicProc);
+			}
 		}
 
 		this.logPlay(contentData);
@@ -416,6 +396,33 @@ export class ContentManager extends EventEmitter {
 		return false;
 	}
 
+	private showImageWhileMusicIsPlaying(path: string, musicProc: cp.ChildProcessWithoutNullStreams) {
+		const showOverlay = (buf: any) => {
+			// we want to play the image after the video has appeared, which takes a long time when the video is remote
+			// so we have to check the output of the mpv process for when it creates a window
+
+			// Example mpv output. The lines beginning with square brackets only appear with `--msg-level=all=v`, which Clippy is not using.
+			// ...
+			// (+) Video --vid=1 (*) (h264 1920x1080 60.000fps)
+			// (+) Audio --aid=1 --alang=eng (*) (opus 2ch 48000Hz)
+			// [vo/gpu] Probing for best GPU context.
+			// [vo/gpu/opengl] Initializing GPU context 'wayland'
+			// [vo/gpu/opengl] Initializing GPU context 'x11egl'
+			// [vo/gpu/x11] X11 opening display: :0
+			// [vo/gpu/x11] X11 running at 2560x1440 (":0" => local display)
+			// ...
+			// AO: [pulse] 48000Hz stereo 2ch float
+			// ...
+			// VO: [gpu] 1920x1080 yuv420p
+			// ...
+			if (buf.includes("AO") || buf.includes("VO")) {
+				this.startImage(path, opt.timeout);
+				musicProc.stdout.removeListener("data", showOverlay); //make sure we only check for this once, for efficiency
+			}
+		};
+		musicProc.stdout.on("data", showOverlay);
+	}
+
 	startMusic(path: string, duration: number, startTime: number | null | undefined, endTime: number | null | undefined) {
 		const args = [duration + "s", opt.mpvCommand, ...opt.mpvArgs, "--quiet", path];
 
@@ -433,14 +440,14 @@ export class ContentManager extends EventEmitter {
 			args.push("--mute=yes");
 		}
 
-		return this.runningMusicProc = cp.spawn("timeout", args);
+		return cp.spawn("timeout", args);
 	}
 
 	stopMusic() {
 		if (this.runningMusicProc) this.runningMusicProc.kill();
 	}
 
-	startOverlay(path: string, duration: number) {
+	startImage(path: string, duration: number) {
 		this.runningOverlayProc = cp.spawn("timeout", [duration + "s", opt.showImageCommand, path, ...opt.showImageArgs]);
 	}
 

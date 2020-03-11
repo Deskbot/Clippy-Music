@@ -9,6 +9,7 @@ List
 * Silent looping Video overlay
 	* video file upload
 		* combine file size limit for music and pictures, or test overlay against the correct limit
+	* rename image download endpoint to overlay
 	* video is played with mpv silent and looping over the top of the existing video
 	* youtube-dl video url
 		* video file url
