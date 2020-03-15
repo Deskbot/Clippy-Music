@@ -7,7 +7,6 @@ List
 ----
 
 * Silent looping Video overlay
-	* C:/My Pictures should be "My Videos" if a video is chosen
 	* youtube-dl video url (this covers video files)
 	* ensure that the download bar correctly accounts for all situations
 	* show a different download button for videos and images

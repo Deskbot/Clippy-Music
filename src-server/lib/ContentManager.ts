@@ -13,8 +13,8 @@ import { getMusicInfoByUrl, getFileDuration, UrlMusicData } from "./musicData";
 import { CancelError, UniqueError, YTError } from "./errors";
 import { UploadDataWithId, UploadDataWithIdTitleDuration, NoOverlay, FileOverlay, UrlOverlay, MusicWithMetadata, OverlayMedium } from "../types/UploadData";
 import { IdFactory } from "./IdFactory";
-import { ItemData, CompleteMusic, CompleteOverlay, CompleteUrlOverlay } from "../types/ItemData";
-import { YtDlDownloader } from "./YtDownloader";
+import { ItemData, CompleteMusic, CompleteOverlay } from "../types/ItemData";
+import { YtDlDownloader } from "./YtDlDownloader";
 import { UserRecord } from "./UserRecord";
 import { ProgressQueue } from "./ProgressQueue";
 import { BarringerQueue, isSuspendedBarringerQueue } from "./queue/BarringerQueue";
@@ -54,7 +54,7 @@ export class ContentManager extends EventEmitter {
 	private idFactory: IdFactory;
 	private progressQueue: ProgressQueue;
 	private userRecord: UserRecord;
-	private ytDownloader: YtDlDownloader;
+	private ytDlDownloader: YtDlDownloader;
 
 	//processes
 	private runningMusicProc: cp.ChildProcessWithoutNullStreams | null = null;
@@ -69,14 +69,14 @@ export class ContentManager extends EventEmitter {
 		idFactory: IdFactory,
 		progressQueue: ProgressQueue,
 		userRecord: UserRecord,
-		ytDownloader: YtDlDownloader
+		ytDlDownloader: YtDlDownloader
 	) {
 		super();
 
 		this.idFactory = idFactory;
 		this.progressQueue = progressQueue;
 		this.userRecord = userRecord;
-		this.ytDownloader = ytDownloader;
+		this.ytDlDownloader = ytDlDownloader;
 
 		if (startState) {
 			console.log("Using suspended content manager");
@@ -443,7 +443,7 @@ export class ContentManager extends EventEmitter {
 
 			// if the overlay fails, make sure any yt download is stopped
 			const overlayPrepProm = this.tryPrepOverlay(someItemData.overlay).catch(err => {
-				this.ytDownloader.tryCancel(someItemData.userId, someItemData.id);
+				this.ytDlDownloader.tryCancel(someItemData.userId, someItemData.id);
 				throw err;
 			});
 
@@ -480,7 +480,7 @@ export class ContentManager extends EventEmitter {
 				const nmp = this.nextMusicPath();
 				const st = new Date().getTime();
 
-				await this.ytDownloader.new(cid, uid, music.title, music.url, nmp);
+				await this.ytDlDownloader.new(cid, uid, music.title, music.url, nmp);
 
 				// when download is completed, then
 				// count how long it took

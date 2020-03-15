@@ -22,7 +22,7 @@ interface YtDlQueueItem {
 export class YtDlDownloader {
 	private progressQueue: ProgressQueue;
 	private userQueues: {
-		[userId: string]: (YtDlQueueItem)[]
+		[userId: string]: YtDlQueueItem[]
 	};
 
 	constructor(progressQueue: ProgressQueue) {

@@ -7,7 +7,7 @@ import { IdFactoryGetter } from "./IdFactoryService";
 import { ProgressQueueServiceGetter } from "./ProgressQueueService";
 import { UserRecordGetter } from "./UserRecordService";
 import { ContentManager, SuspendedContentManager, isSuspendedContentManager } from "../lib/ContentManager";
-import { YtDlDownloader } from "../lib/YtDownloader";
+import { YtDlDownloader } from "../lib/YtDlDownloader";
 import { MakeOnce } from "../lib/utils/MakeOnce";
 
 export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> {
