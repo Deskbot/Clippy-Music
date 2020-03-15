@@ -15,7 +15,7 @@ interface YtDlQueueItem {
 	percent: number,
 	proc?: cp.ChildProcess,
 	userId: string,
-	vid: string,
+	target: string,
 }
 
 export class YtDlDownloader {
@@ -42,8 +42,8 @@ export class YtDlDownloader {
 		}
 	}
 
-	private download(vid: string, destination: string): [Promise<void>, cp.ChildProcessWithoutNullStreams] {
-		let proc = cp.spawn(opt.youtubeDlCommand, ["--no-playlist", vid, "-o", destination]);
+	private download(target: string, destination: string): [Promise<void>, cp.ChildProcessWithoutNullStreams] {
+		let proc = cp.spawn(opt.youtubeDlCommand, ["--no-playlist", target, "-o", destination]);
 
 		const prom = new Promise<void>((resolve, reject) => {
 			let errMessage = "";
@@ -75,14 +75,14 @@ export class YtDlDownloader {
 		if (queue.length === 0) return;
 
 		const head = queue[0]; //item at head of the queue
-		const { cid, defer, destination, vid } = head;
+		const { cid, defer, destination, target } = head;
 
-		const [ dlProm, dlProc ] = this.download(vid, destination);
+		const [ dlProm, dlProc ] = this.download(target, destination);
 		dlProm.then(() => {
 			defer.resolve();
 		}, (e) => {
 			if (head.cancelled) {
-				defer.reject(new CancelError(vid));
+				defer.reject(new CancelError(target));
 			} else {
 				defer.reject(e);
 			}
@@ -106,7 +106,7 @@ export class YtDlDownloader {
 		});
 	}
 
-	new(cid: number, userId: string, vid: string, destination: string): q.Promise<void> {
+	new(cid: number, userId: string, target: string, destination: string): q.Promise<void> {
 		let queue = this.userQueues[userId];
 		if (!queue) queue = this.userQueues[userId] = [];
 
@@ -119,7 +119,7 @@ export class YtDlDownloader {
 			destination,
 			percent: 0,
 			userId,
-			vid,
+			target,
 		});
 
 		//if the queue was empty just now, need to initiate download sequence
