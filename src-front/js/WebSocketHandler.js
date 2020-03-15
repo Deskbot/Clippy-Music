@@ -115,7 +115,7 @@ var WebSocketHandler = (function() {
 				} else {
 					what = whatPic;
 				}
-				clippySays = "I didn't download " + what + " because the file was the wrong type; " + contentData.error.actualTypeDesc + " was received instead.";
+				clippySays = "I couldn't queue " + what + " because the file was not an image or video. The type of your file was: " + contentData.error.actualTypeDesc + ".";
 
 			} else {
 				clippySays = "I didn't download one of your files because it was of the wrong type.";
