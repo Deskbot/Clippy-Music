@@ -2,7 +2,6 @@ import * as cp from "child_process";
 import * as q from "q";
 
 import * as opt from "../options";
-import * as utils from "./utils/utils";
 
 import { CancelError, UnknownDownloadError } from "./errors";
 import { ContentType } from "../types/ContentType";
@@ -44,7 +43,7 @@ export class YtDlDownloader {
 		}
 	}
 
-	download(vid: string, destination: string): [Promise<void>, cp.ChildProcessWithoutNullStreams] {
+	private download(vid: string, destination: string): [Promise<void>, cp.ChildProcessWithoutNullStreams] {
 		let proc = cp.spawn(opt.youtubeDlCommand, ["--no-playlist", vid, "-o", destination]);
 
 		const prom = new Promise<void>((resolve, reject) => {
@@ -71,7 +70,7 @@ export class YtDlDownloader {
 		return [ prom, proc ];
 	}
 
-	downloadNext(uid: string) {
+	private downloadNext(uid: string) {
 		const queue = this.userQueues[uid];
 
 		if (queue.length === 0) return;
@@ -105,16 +104,6 @@ export class YtDlDownloader {
 
 		this.progressQueue.addAutoUpdate(uid, cid, () => {
 			updater(percentReader.get());
-		});
-	}
-
-	getQueue(uid: string): unknown[] {
-		const queue = this.userQueues[uid];
-
-		if (!queue) return [];
-
-		return queue.map((item) => {
-			return utils.cloneWithout(item, ["defer", "destination", "proc", "vid"]);
 		});
 	}
 

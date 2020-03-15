@@ -7,8 +7,7 @@ List
 ----
 
 * Silent looping Video overlay
-	* youtube-dl video url
-		* video file url
+	* youtube-dl video url (this covers video files)
 	* indicate to the user they can choose a video and that it will be silent and looping
 	* rename image unique cooloff to be about overlay
 	* ensure that the download bar correctly accounts for all situations
