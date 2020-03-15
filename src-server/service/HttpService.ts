@@ -45,7 +45,7 @@ async function assertIsAdmin(password: string): Promise<void> {
 }
 
 function handleErrors(err: any, res: http.ServerResponse) {
-	res.setHeader('Content-Type', 'text/plain');
+	res.setHeader("Content-Type", "text/plain");
 	if (err instanceof AuthError) {
 		res.statusCode = 400;
 		res.end(err.message);
@@ -88,7 +88,7 @@ function recordUser(ipAddress: string, res: http.ServerResponse) {
 	expiryDate.setFullYear(expiryDate.getFullYear() + 1);
 
 	//store user id in cookie
-	res.setHeader('Set-Cookie', cookie.serialize("id", ipAddress, {
+	res.setHeader("Set-Cookie", cookie.serialize("id", ipAddress, {
 		maxAge: expiryDate.getTime(),
 	}));
 }
@@ -253,7 +253,7 @@ quelaag.addEndpoint({
 					ProgressQueueService.finishedWithError(ipAddress, contentId, err);
 				}
 
-				res.setHeader('Content-Type', 'application/json');
+				res.setHeader("Content-Type", "application/json");
 				res.end(JSON.stringify({
 					contentId,
 					errorType: err.constructor.name,

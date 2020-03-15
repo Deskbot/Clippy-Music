@@ -13,6 +13,7 @@ List
 	* C:/My Pictures should be "My Videos" if a video is chosen
 	* show a different download button for videos and images
 	* Updates TESTS file
+	* Update command line api in README
 * Add something to README about the configurableness of eog and mpv
 * Use a separate setting for bucket size and max run time.
 * Change the options at run time from the admin panel
