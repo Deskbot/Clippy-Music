@@ -42,9 +42,9 @@ var templates = (function() {
 			anchor.attr("href", url);
 			return anchor;
 		},
-		makeImageDownloadLink: function(name, id) {
+		makeOverlayDownloadLink: function(name, id) {
 			var anchor = linkToImageTemplate.clone();
-			anchor.attr("href", "/api/download/image?id=" + id);
+			anchor.attr("href", "/api/download/overlay?id=" + id);
 			anchor.attr("title", name);
 			return anchor;
 		},

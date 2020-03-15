@@ -234,7 +234,7 @@ var WebSocketHandler = (function() {
 				if (current.image) {
 					var imageLink = current.image.url
 						? templates.makeLinkToImage(current.image.title, current.image.url)
-						: templates.makeImageDownloadLink(current.image.title, current.id)
+						: templates.makeOverlayDownloadLink(current.image.title, current.id)
 
 					$currentlyPlaying.find(".image")
 						.html(imageLink);

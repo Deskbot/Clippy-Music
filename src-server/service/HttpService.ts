@@ -300,7 +300,7 @@ quelaag.addEndpoint({
 
 		validateDownload(res, query.id, (content) => {
 			if (content.music.isUrl) {
-				endWithFailureText(res, "I couldn't download that music for you because it was submitted as a URL.");
+				endWithFailureText(res, "I couldn't download that music for you because it was submitted by URL.");
 			} else {
 				downloadFile(req, res, content.music.title, content.music.path);
 			}
@@ -313,20 +313,20 @@ quelaag.addEndpoint({
 
 // GET variables: id
 quelaag.addEndpoint({
-	when: req => req.url!.startsWith("/api/download/image") && req.method === "GET",
+	when: req => req.url!.startsWith("/api/download/overlay") && req.method === "GET",
 	do(req, res, middleware) {
 		const query = middleware.urlWithQuery().query;
 
 		validateDownload(res, query.id, (content) => {
 			if (content.overlay.isUrl) {
-				endWithFailureText(res, "I couldn't download that music for you because it was submitted as a URL.");
+				endWithFailureText(res, "I couldn't download that overlay for you because it was submitted by URL.");
 				return;
 			}
 
 			if (content.overlay.path) {
 				downloadFile(req, res, content.overlay.title, content.overlay.path);
 			} else {
-				endWithFailureText(res, "The upload with that id doesn't have have an image.");
+				endWithFailureText(res, "The upload with that id doesn't have have an overlay.");
 			}
 		});
 	},

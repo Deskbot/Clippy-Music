@@ -39,7 +39,7 @@ var Queue = {
 			if (item.image) {
 				var imageLink = item.image.url
 					? templates.makeLinkToImage(item.image.title, item.image.url)
-					: templates.makeImageDownloadLink(item.image.title, item.id)
+					: templates.makeOverlayDownloadLink(item.image.title, item.id)
 
 				$bucketItem.children(".image").append(imageLink);
 			}
