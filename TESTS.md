@@ -24,5 +24,6 @@ Can not link to file music             |
 Restore users on restart               |
 Restore queue on restart               |
 Restore password on restart            |
+Whatever the noscript application says |
 
 All tests need to be done by the web interface and by `curl`.
