@@ -17,10 +17,10 @@ export const config = {
 	// 0 = never check for uniqueness
 	musicUniqueCoolOff: 3600,
 
-	// how long before the same image can be shown again, in seconds
+	// how long before the same overlay can be shown again, in seconds
 	// Infinity = nothing can be played twice
 	// 0 = never check for uniqueness
-	imageUniqueCoolOff: 3600,
+	overlayUniqueCoolOff: 3600,
 
 	// videos longer than this in seconds will be streamed from YouTube and not downloaded first
 	// (Long videos can take a while to download, regardless of what duration is played.)

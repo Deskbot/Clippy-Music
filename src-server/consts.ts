@@ -3,9 +3,9 @@ import * as path from "path";
 import * as utils from "./lib/utils/utils";
 
 export const fileSizeLimStr = utils.sizeToReadbleStr(opt.fileSizeLimit);
-export const imagePlayedWithin = opt.imageUniqueCoolOff === Infinity
+export const imagePlayedWithin = opt.overlayUniqueCoolOff === Infinity
 	? "already"
-	: "in the past " + utils.secToTimeStr(opt.imageUniqueCoolOff);
+	: "in the past " + utils.secToTimeStr(opt.overlayUniqueCoolOff);
 export const musicPlayedWithin = opt.musicUniqueCoolOff === Infinity
 	? "already"
 	: "in the past " + utils.secToTimeStr(opt.musicUniqueCoolOff);

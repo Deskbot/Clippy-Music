@@ -7,10 +7,9 @@ List
 ----
 
 * Silent looping Video overlay
-	* rename image unique cooloff to be about overlay
-	* ensure that the download bar correctly accounts for all situations
 	* C:/My Pictures should be "My Videos" if a video is chosen
 	* youtube-dl video url (this covers video files)
+	* ensure that the download bar correctly accounts for all situations
 	* show a different download button for videos and images
 	* Updates TESTS file
 	* Update command line api in README

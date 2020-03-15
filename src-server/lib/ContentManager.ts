@@ -282,7 +282,7 @@ export class ContentManager extends EventEmitter {
 
 	overlayHashIsUnique(hash: number): boolean {
 		let lastPlayed = this.overlayHashes[hash];
-		return !lastPlayed || lastPlayed + opt.imageUniqueCoolOff * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
+		return !lastPlayed || lastPlayed + opt.overlayUniqueCoolOff * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
 	}
 
 	playNext(): boolean {
