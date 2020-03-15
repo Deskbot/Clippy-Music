@@ -14,7 +14,6 @@ interface YtDlQueueItem {
 	destination: string,
 	percent: number,
 	proc?: cp.ChildProcess,
-	title: string,
 	userId: string,
 	vid: string,
 }
@@ -107,7 +106,7 @@ export class YtDlDownloader {
 		});
 	}
 
-	new(cid: number, userId: string, title: string, vid: string, destination: string): q.Promise<void> {
+	new(cid: number, userId: string, vid: string, destination: string): q.Promise<void> {
 		let queue = this.userQueues[userId];
 		if (!queue) queue = this.userQueues[userId] = [];
 
@@ -119,7 +118,6 @@ export class YtDlDownloader {
 			defer,
 			destination,
 			percent: 0,
-			title,
 			userId,
 			vid,
 		});

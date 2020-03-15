@@ -480,7 +480,7 @@ export class ContentManager extends EventEmitter {
 				const nmp = this.nextMusicPath();
 				const st = new Date().getTime();
 
-				await this.ytDlDownloader.new(cid, uid, music.title, music.url, nmp);
+				await this.ytDlDownloader.new(cid, uid, music.url, nmp);
 
 				// when download is completed, then
 				// count how long it took
