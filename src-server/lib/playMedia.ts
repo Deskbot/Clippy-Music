@@ -53,6 +53,6 @@ export function startMusic(path: string, duration: number, startTime: number | n
 }
 
 export function startVideoOverlay(path: string, duration: number): cp.ChildProcessWithoutNullStreams {
-    return cp.spawn("timeout", [duration + "s", opt.mpvCommand, path, ...opt.mpvArgs, "--loop-file=inf", "--mute"]);
+    return cp.spawn("timeout", [duration + "s", opt.mpvCommand, path, ...opt.mpvArgs, "--loop-file=inf", "--mute=yes"]);
 }
 
