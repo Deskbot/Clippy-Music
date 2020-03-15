@@ -172,7 +172,7 @@ export function parseUploadForm(
                 //file wrong type
                 const lhs = overlayFile.type.split("/")[0];
                 if (lhs !== "image" && lhs !== "video") {
-                    throw new FileUploadError(`The image file you gave was not in a format I recognise. The type of file given was "${overlayFile.type}".`, [musicFile, overlayFile]);
+                    throw new FileUploadError(`The overlay should be an image or video. The type of your file was "${overlayFile.type}".`, [musicFile, overlayFile]);
                 }
 
                 //success
