@@ -150,12 +150,12 @@ export function parseUploadForm(
         };
 
         // overlay
-        if (fields["image-url"]) {
+        if (fields["overlay-url"]) {
             overlay = {
                 exists: true,
                 isUrl: true,
                 medium: OverlayMedium.Image,
-                url: fields["image-url"] as string,
+                url: fields["overlay-url"] as string,
             };
 
             if (overlayFile) {

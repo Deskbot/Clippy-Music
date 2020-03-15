@@ -153,7 +153,7 @@ quelaag.addEndpoint({
 	* music-file (file)
 	* music-url
 	* overlay-file (file)
-	* image-url
+	* overlay-url
 	* start-time
 	* end-time
  */
