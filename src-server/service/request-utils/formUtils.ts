@@ -17,7 +17,7 @@ function getFileForm(
     const defer = q.defer<[formidable.IncomingForm, formidable.Fields, formidable.Files]>();
 
     const form = new formidable.IncomingForm();
-    form.maxFileSize = consts.biggestFileSizeLimit;
+    form.maxFileSize = opt.fileSizeLimit;
     form.uploadDir = consts.dirs.httpUpload;
 
     let lastFileField: string | undefined;
@@ -80,11 +80,11 @@ export function handleFileUpload(req: http.IncomingMessage, contentId: number): 
 }
 
 function makeOverlayTooBigError(files: formidable.File[]) {
-    return new FileUploadError(`The overlay file you gave was too large. The maximum size is ${consts.imageSizeLimStr}.`, files);
+    return new FileUploadError(`The overlay file you gave was too large. The maximum size is ${consts.fileSizeLimStr}.`, files);
 }
 
 function makeMusicTooBigError(files: formidable.File[]) {
-    return new FileUploadError(`The music file you gave was too large. The maximum size is ${consts.musicSizeLimStr}.`, files);
+    return new FileUploadError(`The music file you gave was too large. The maximum size is ${consts.fileSizeLimStr}.`, files);
 }
 
 export function parseUploadForm(
@@ -123,7 +123,7 @@ export function parseUploadForm(
             }
 
             //file too big
-            if (musicFile.size > opt.musicSizeLimit) {
+            if (musicFile.size > opt.fileSizeLimit) {
                 throw makeMusicTooBigError([musicFile, overlayFile]);
             }
 
@@ -165,7 +165,7 @@ export function parseUploadForm(
         } else if (overlayFile) {
             if (overlayFile.size !== 0) { //file exists
                 //file too big
-                if (overlayFile.size > opt.imageSizeLimit) {
+                if (overlayFile.size > opt.fileSizeLimit) {
                     throw makeOverlayTooBigError([musicFile, overlayFile]);
                 }
 

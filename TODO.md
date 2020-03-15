@@ -15,6 +15,7 @@ List
 		* video file url
 	* indicate to the user they can choose a video and that it will be silent and looping
 	* C:/My Pictures should be "My Videos" if a video is chosen
+	* Updates TESTS file
 * Add something to README about the configurableness of eog and mpv
 * Use a separate setting for bucket size and max run time.
 * Change the options at run time from the admin panel

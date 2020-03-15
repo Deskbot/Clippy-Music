@@ -1,5 +1,4 @@
 import * as formidable from "formidable";
-
 import * as consts from "../consts";
 
 import { ContentType } from "../types/ContentType";
@@ -37,9 +36,8 @@ export class DownloadTooLargeError extends DeferredContentError {
 	public readonly sizeLimit: string;
 
 	constructor(contentType: ContentType) {
-		const sizeLimit = contentType == ContentType.Music ? consts.musicSizeLimStr : consts.imageSizeLimStr;
-		super(`The ${contentType.toString()} requested was too large (over ${sizeLimit}).`, contentType);
-		this.sizeLimit = sizeLimit;
+		super(`The ${contentType.toString()} requested was too large (over ${consts.fileSizeLimStr}).`, contentType);
+		this.sizeLimit = consts.fileSizeLimStr;
 	}
 }
 

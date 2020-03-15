@@ -26,7 +26,7 @@ export function downloadImage(url: string, destination: string): Promise < strin
             if (typeFound.split("/")[0] !== "image") {
                 return reject(new DownloadWrongTypeError(ContentType.Image, "image", typeFound));
             }
-            if (parseInt(res.headers["content-length"] as string) > opt.imageSizeLimit) {
+            if (parseInt(res.headers["content-length"] as string) > opt.fileSizeLimit) {
                 return reject(new DownloadTooLargeError(ContentType.Image));
             }
 

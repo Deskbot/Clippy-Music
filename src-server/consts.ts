@@ -2,12 +2,7 @@ import * as opt from "./options";
 import * as path from "path";
 import * as utils from "./lib/utils/utils";
 
-export const biggestFileSizeLimit = opt.musicSizeLimit > opt.imageSizeLimit
-	? opt.musicSizeLimit
-	: opt.imageSizeLimit;
-
-export const imageSizeLimStr = utils.sizeToReadbleStr(opt.imageSizeLimit);
-export const musicSizeLimStr = utils.sizeToReadbleStr(opt.musicSizeLimit);
+export const fileSizeLimStr = utils.sizeToReadbleStr(opt.fileSizeLimit);
 export const imagePlayedWithin = opt.imageUniqueCoolOff === Infinity
 	? "already"
 	: "in the past " + utils.secToTimeStr(opt.imageUniqueCoolOff);

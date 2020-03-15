@@ -41,11 +41,8 @@ export const config = {
 	showImageArgs: ["-f"],
 	youtubeDlCommand: "youtube-dl",
 
-	// maximum image file size, in bytes
-	imageSizeLimit: 500000000,
-
-	// maximum music file size, in bytes
-	musicSizeLimit: 500000000,
+	// maximum uploadable file size, in bytes
+	fileSizeLimit: 500000000,
 
 	// maximum character length of nicknames
 	nicknameSizeLimit: 67,
