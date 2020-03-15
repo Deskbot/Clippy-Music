@@ -28,7 +28,6 @@ export enum OverlayMedium {
 export interface UrlOverlay {
 	exists: true;
 	isUrl: true;
-	medium: OverlayMedium;
 	url: string;
 	title?: string;
 }

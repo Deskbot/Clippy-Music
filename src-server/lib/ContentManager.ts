@@ -13,13 +13,13 @@ import { getMusicInfoByUrl, getFileDuration, UrlMusicData } from "./musicData";
 import { CancelError, UniqueError, YTError } from "./errors";
 import { UploadDataWithId, UploadDataWithIdTitleDuration, NoOverlay, FileOverlay, UrlOverlay, MusicWithMetadata, OverlayMedium } from "../types/UploadData";
 import { IdFactory } from "./IdFactory";
-import { ItemData, CompleteMusic, CompleteOverlay } from "../types/ItemData";
+import { ItemData, CompleteMusic, CompleteOverlay, CompleteUrlOverlay } from "../types/ItemData";
 import { YtDlDownloader } from "./YtDownloader";
 import { UserRecord } from "./UserRecord";
 import { ProgressQueue } from "./ProgressQueue";
 import { BarringerQueue, isSuspendedBarringerQueue } from "./queue/BarringerQueue";
 import { PublicItemData } from "../types/PublicItemData";
-import { downloadImage } from "./download";
+import { downloadOverlay } from "./download";
 import { startVideoOverlay, startImageOverlay, startMusic, doWhenMusicPlays as doWhenMusicStarts } from "./playMedia";
 
 export interface SuspendedContentManager {
@@ -537,14 +537,16 @@ export class ContentManager extends EventEmitter {
 
 		let pathOnDisk: string;
 		let title: string;
+		let medium: OverlayMedium;
 
 		if (overlay.isUrl) {
 			pathOnDisk = this.nextOverlayPath();
-			title = await downloadImage(overlay.url, pathOnDisk);
+			[title, medium] = await downloadOverlay(overlay.url, pathOnDisk);
 
 		} else {
 			pathOnDisk = overlay.path;
 			title = overlay.title;
+			medium = overlay.medium;
 		}
 
 		const overlayHash = await utils.fileHash(pathOnDisk);
@@ -552,6 +554,7 @@ export class ContentManager extends EventEmitter {
 		if (this.overlayHashIsUnique(overlayHash)) {
 			return {
 				...overlay,
+				medium,
 				path: pathOnDisk,
 				title,
 				hash: overlayHash,

@@ -154,7 +154,6 @@ export function parseUploadForm(
             overlay = {
                 exists: true,
                 isUrl: true,
-                medium: OverlayMedium.Image,
                 url: fields["overlay-url"] as string,
             };
 

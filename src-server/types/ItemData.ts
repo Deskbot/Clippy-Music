@@ -1,4 +1,4 @@
-import { UrlOverlay, FileOverlay, NoOverlay } from "./UploadData";
+import { UrlOverlay, FileOverlay, NoOverlay, OverlayMedium } from "./UploadData";
 
 export interface ItemData {
 	id: number;
@@ -36,6 +36,7 @@ export type CompleteMusic = {
 
 export interface CompleteUrlOverlay extends UrlOverlay {
 	hash: number;
+	medium: OverlayMedium;
 	path: string;
 	title: string;
 };

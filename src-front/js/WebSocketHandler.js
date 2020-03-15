@@ -83,7 +83,7 @@ var WebSocketHandler = (function() {
 		var isMusic = contentType === "music";
 		var isPic = contentType === "picture"
 		var whatMus = title ? utils.entitle(title) : "the music you requested";
-		var whatPic = picTitle ? utils.entitle(picTitle) : "the picture you requested";
+		var whatPic = picTitle ? utils.entitle(picTitle) : "the overlay you requested";
 
 		var clippySays;
 		var clippyAnimation;

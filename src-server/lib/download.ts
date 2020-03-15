@@ -5,8 +5,9 @@ import * as opt from "../options";
 import { ContentType } from "../types/ContentType";
 import { BadUrlError, UnknownDownloadError, DownloadWrongTypeError, DownloadTooLargeError } from "./errors";
 import { Html5Entities } from "html-entities";
+import { OverlayMedium } from "../types/UploadData";
 
-export function downloadImage(url: string, destination: string): Promise < string > {
+export function downloadOverlay(url: string, destination: string): Promise <[string, OverlayMedium]> {
     return new Promise((resolve, reject) => {
         request.head(url, (err, res, body) => {
             if (err) {
@@ -21,11 +22,18 @@ export function downloadImage(url: string, destination: string): Promise < strin
                 return reject(new UnknownDownloadError("Could not get a response for the request.", ContentType.Image));
             }
 
-            const typeFound = res.headers["content-type"] as string;
+            const mimeTypeFound = res.headers["content-type"] as string;
+            const typeFound = mimeTypeFound.split("/")[0];
 
-            if (typeFound.split("/")[0] !== "image") {
-                return reject(new DownloadWrongTypeError(ContentType.Image, "image", typeFound));
+            let overlayMedium: OverlayMedium;
+            if (typeFound === "image") {
+                overlayMedium = OverlayMedium.Image;
+            } else if (typeFound === "video") {
+                overlayMedium = OverlayMedium.Video;
+            } else {
+                return reject(new DownloadWrongTypeError(ContentType.Image, "image", mimeTypeFound));
             }
+
             if (parseInt(res.headers["content-length"] as string) > opt.fileSizeLimit) {
                 return reject(new DownloadTooLargeError(ContentType.Image));
             }
@@ -42,7 +50,7 @@ export function downloadImage(url: string, destination: string): Promise < strin
             const stream = request(url).pipe(fs.createWriteStream(destination));
 
             stream.on("close", () => {
-                return resolve(title);
+                return resolve([title, overlayMedium]);
             });
             stream.on("error", (err) => {
                 err.contentType = ContentType.Image;
