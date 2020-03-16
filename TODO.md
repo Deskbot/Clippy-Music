@@ -15,6 +15,7 @@ List
 		* video + static image
 		* video + animated image
 		* (video + silent looping video) // future story, investigate whether possible
+* type events
 * Silent looping Video overlay
 	* Gifv support
 	* Then rename image/pic variables to overlay everywhere
