@@ -15,6 +15,7 @@ List
 		* video + static image
 		* video + animated image
 		* (video + silent looping video) // future story, investigate whether possible
+* replace request (https://github.com/request/request/issues/3142)
 * type events
 * Silent looping Video overlay
 	* Gifv support
