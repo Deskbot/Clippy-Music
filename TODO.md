@@ -6,23 +6,14 @@ This list is in a rough order of priority.
 List
 ----
 
-* Fix eog sometimes not coming out on top
-	* preliminary add option to add delay before showing image
-	* show images with the mpv instance
-		* music + static image
-		* music + animated image
-		* (music + silent looping video) // future story, investigate whether possible
-		* video + static image
-		* video + animated image
-		* (video + silent looping video) // future story, investigate whether possible
-* replace request (https://github.com/request/request/issues/3142)
-* type events
 * Silent looping Video overlay
 	* youtube-dl video url (this covers video files)
 	* ensure that the download bar correctly accounts for all situations
 	* show a different download button for videos and images
 	* Updates TESTS file
 	* Update command line api in README
+* replace request (https://github.com/request/request/issues/3142)
+* type events
 * Add something to README about the configurableness of eog and mpv
 * Use a separate setting for bucket size and max run time.
 * Change the options at run time from the admin panel
