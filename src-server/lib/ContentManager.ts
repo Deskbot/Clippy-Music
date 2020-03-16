@@ -63,6 +63,20 @@ export class ContentManager extends EventEmitter {
 
 	private stop?: boolean;
 
+	public emit(eventName: "end"): boolean;
+	public emit(eventName: "queue-empty"): boolean;
+	public emit(eventName: "queue-update"): boolean;
+	public emit(eventName: string, ...args: any[]): boolean {
+		return super.emit(eventName, ...args);
+	}
+
+	public on(eventName: "end", handler: () => void): this;
+	public on(eventName: "queue-empty", handler: () => void): this;
+	public on(eventName: "queue-update", handler: () => void): this;
+	public on(eventName: string, handler: () => void): this {
+		return super.on(eventName, handler);
+	}
+
 	constructor(
 		maxTimePerBucket: number,
 		startState: SuspendedContentManager | null,

@@ -32,6 +32,22 @@ export class ProgressQueue extends EventEmitter {
 	private totalContents: number;
 	private transmitIntervalId: NodeJS.Timeout | undefined;
 
+	public emit(eventName: "delete", userId: string, contentId: number): boolean;
+	public emit(eventName: "error", userId: string, contentId: number, error: Error): boolean;
+	public emit(eventName: "prepared", userId: string, item: ProgressItem): boolean;
+	public emit(eventName: "list", userId: string, items: ProgressItem[]): boolean;
+	public emit(eventName: string, ...args: any[]): boolean {
+		return super.emit(eventName, ...args);
+	}
+
+	public on(eventName: "delete", handler: (userId: string, contentId: number) => void): this;
+	public on(eventName: "error", handler: (userId: string, contentId: number, error: Error) => void): this;
+	public on(eventName: "prepared", handler: (userId: string, item: ProgressItem) => void): this;
+	public on(eventName: "list", handler: (userId: string, items: ProgressItem[]) => void): this;
+	public on(eventName: string, handler: (...args: any[]) => void): this {
+		return super.on(eventName, handler);
+	}
+
 	constructor() {
 		super();
 

@@ -13,7 +13,6 @@ List
 	* Updates TESTS file
 	* Update command line api in README
 * replace request (https://github.com/request/request/issues/3142)
-* type events
 * Add something to README about the configurableness of eog and mpv
 * Use a separate setting for bucket size and max run time.
 * Change the options at run time from the admin panel
