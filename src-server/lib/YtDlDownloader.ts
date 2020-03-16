@@ -108,7 +108,9 @@ export class YtDlDownloader {
 
 	new(cid: number, userId: string, target: string, destination: string): q.Promise<void> {
 		let queue = this.userQueues[userId];
-		if (!queue) queue = this.userQueues[userId] = [];
+		if (!queue) {
+			queue = this.userQueues[userId] = [];
+		}
 
 		const defer = q.defer<void>();
 

@@ -79,7 +79,9 @@ export class ProgressQueue extends EventEmitter {
 
 	addAutoUpdate(userId: string, contentId: number, func: Function) {
 		const item = this.findQueueItem(userId, contentId);
-		if (item) item.autoUpdate = func;
+		if (item) {
+			item.autoUpdate = func;
+		}
 	}
 
 	addCancelFunc(userId: string, contentId: number, func: Function) {
