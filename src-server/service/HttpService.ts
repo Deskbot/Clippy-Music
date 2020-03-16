@@ -59,6 +59,7 @@ function handleErrors(err: any, res: http.ServerResponse) {
 	}
 
 	console.error(err);
+	console.trace();
 	res.statusCode = 500;
 
 	if (err instanceof Error) {

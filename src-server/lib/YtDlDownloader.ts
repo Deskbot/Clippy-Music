@@ -5,7 +5,7 @@ import * as opt from "../options";
 
 import { CancelError, UnknownDownloadError } from "./errors";
 import { ContentType } from "../types/ContentType";
-import { ProgressQueue } from "./ProgressQueue";
+import { EventEmitter } from "events";
 
 interface YtDlQueueItem {
 	cancelled: boolean,
@@ -18,14 +18,25 @@ interface YtDlQueueItem {
 	target: string,
 }
 
-export class YtDlDownloader {
-	private progressQueue: ProgressQueue;
+export class YtDlDownloader extends EventEmitter {
 	private userQueues: {
 		[userId: string]: YtDlQueueItem[]
 	};
 
-	constructor(progressQueue: ProgressQueue) {
-		this.progressQueue = progressQueue;
+	public emit(eventName: "new", uid: string, cid: number): boolean;
+	public emit(eventName: "started", uid: string, cid: number, getUpdate: () => number): boolean;
+	public emit(eventName: string, ...args: any[]): boolean {
+		return super.emit(eventName, ...args);
+	}
+
+	public on(eventName: "new", handler: (uid: string, cid: number) => void): this;
+	public on(eventName: "started", handler: (uid: string, cid: number, getUpdate: () => number) => void): this;
+	public on(eventName: string, handler: (...args: any[]) => void): this {
+		return super.on(eventName, handler);
+	}
+
+	constructor() {
+		super();
 		this.userQueues = {};
 	}
 
@@ -57,6 +68,7 @@ export class YtDlDownloader {
 					});
 				} else {
 					console.error(errMessage);
+					console.trace();
 					return reject(new UnknownDownloadError(`A non-zero exit code (${code}) downloading a YouTube video.`, ContentType.Music));
 				}
 			});
@@ -96,13 +108,10 @@ export class YtDlDownloader {
 
 		head.proc = dlProc; //save ref to proc
 
-		//deal with progress updating
-
+		// allow the outside world to get percentage updates
 		const percentReader = new PercentReader(dlProc);
-		const updater = this.progressQueue.createUpdater(uid, cid);
-
-		this.progressQueue.addAutoUpdate(uid, cid, () => {
-			updater(percentReader.get());
+		this.emit("started", uid, cid, () => {
+			return percentReader.get();
 		});
 	}
 
@@ -128,7 +137,7 @@ export class YtDlDownloader {
 		//otherwise the download queue is already being worked on
 		if (queue.length === 1) this.downloadNext(userId);
 
-		this.progressQueue.addCancelFunc(userId, cid, () => this.tryCancel(userId, cid));
+		this.emit("new", userId, cid);
 
 		return defer.promise;
 	}

@@ -18,13 +18,32 @@ export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> 
 			throw new Error("The suspended content manager is not of a valid format. Consider restarting the program with the --clean option.");
 		}
 
+		const progressQueue = ProgressQueueServiceGetter.get();
+		const ytDlDownloader = new YtDlDownloader();
+
+		ytDlDownloader.on("new", (userId, cid) => {
+			progressQueue.addCancelFunc(
+				userId,
+				cid,
+				() => ytDlDownloader.tryCancel(userId, cid)
+			);
+		});
+
+		ytDlDownloader.on("started", (uid, cid, getUpdate) => {
+			const updater = progressQueue.createUpdater(uid, cid);
+
+			progressQueue.addAutoUpdate(uid, cid, () => {
+				updater(getUpdate());
+			});
+		});
+
 		const cm = new ContentManager(
 			opt.timeout,
 			recoveredContentManager,
 			IdFactoryGetter.get(),
-			ProgressQueueServiceGetter.get(),
+			progressQueue,
 			UserRecordGetter.get(),
-			new YtDlDownloader(ProgressQueueServiceGetter.get())
+			ytDlDownloader,
 		);
 
 		cm.on("end", () => play(cm));
