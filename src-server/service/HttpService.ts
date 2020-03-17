@@ -161,20 +161,22 @@ quelaag.addEndpoint({
 quelaag.addEndpoint({
 	when: req => req.method === "POST" && req.url! === "/api/queue/add",
 	do(req, res, middleware) {
-		const ipAddress = middleware.ip();
+		const userId = middleware.ip();
 
-		recordUser(ipAddress, res);
+		recordUser(userId, res);
 		const ProgressQueueService = ProgressQueueServiceGetter.get();
 		const contentId = IdFactoryGetter.get().next();
 
-		handlePotentialBan(ipAddress) //assumes ip address is userId
-			.then(() => ProgressQueueService.add(ipAddress, contentId))
-			.then(() => handleFileUpload(req, contentId))
+		handlePotentialBan(userId)
+			.then(() => {
+				ProgressQueueService.add(userId, contentId)
+				return handleFileUpload(req, contentId);
+			})
 			.then(async ([form, fields, files]) => {
 				const uplData: UploadDataWithId = {
 					...await parseUploadForm(form, fields, files),
 					id: contentId,
-					userId: ipAddress,
+					userId: userId,
 				};
 
 				// ignore end time if it would make the play time less than 1 second
@@ -192,7 +194,7 @@ quelaag.addEndpoint({
 						throw new Error("I can not download music from an IP address.");
 					}
 
-					ProgressQueueService.setTitle(ipAddress, contentId, uplData.music.url, true);
+					ProgressQueueService.setTitle(userId, contentId, uplData.music.url, true);
 					// the title and duration are set later by `ContentService.add(uplData)`
 				}
 
@@ -211,7 +213,7 @@ quelaag.addEndpoint({
 				}
 
 				if (itemData.music.isUrl) {
-					ProgressQueueService.setTitle(ipAddress, contentId, itemData.music.title);
+					ProgressQueueService.setTitle(userId, contentId, itemData.music.title);
 				}
 
 				debug.log("successful upload: ", uplData);
@@ -222,36 +224,38 @@ quelaag.addEndpoint({
 					redirectSuccessfulPost(res, "/");
 				}
 			})
-			.catch(err => {
+			.catch((err) => {
 				if (err instanceof FileUploadError) {
 					debug.log("deleting these bad uploads: ", err.files);
 
 					if (err.files) {
 						for (let file of err.files) {
-							if (file) utils.deleteFileIfExists(file.path); // might already have been deleted if url upload
+							if (file) {
+								utils.deleteFileIfExists(file.path); // might already have been deleted if url upload
+							}
 						}
 
 						delete err.files; // so they aren't sent to the user
 					}
 
 					res.statusCode = 400;
-					ProgressQueueService.finishedWithError(ipAddress, contentId, err);
+					ProgressQueueService.finishedWithError(userId, contentId, err);
 
 				} else if (err instanceof BannedError) {
 					res.statusCode = 400;
 
 				} else if (err instanceof UniqueError) {
 					res.statusCode = 400;
-					ProgressQueueService.finishedWithError(ipAddress, contentId, err);
+					ProgressQueueService.finishedWithError(userId, contentId, err);
 
 				} else if (err instanceof YTError) {
 					res.statusCode = 400;
-					ProgressQueueService.finishedWithError(ipAddress, contentId, err);
+					ProgressQueueService.finishedWithError(userId, contentId, err);
 
 				} else {
 					console.error("Unknown upload error: ", err);
 					res.statusCode = 500;
-					ProgressQueueService.finishedWithError(ipAddress, contentId, err);
+					ProgressQueueService.finishedWithError(userId, contentId, err);
 				}
 
 				res.setHeader("Content-Type", "application/json");

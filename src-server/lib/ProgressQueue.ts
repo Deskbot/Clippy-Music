@@ -77,18 +77,18 @@ export class ProgressQueue extends EventEmitter {
 		this.maybeItemIsPrepared(newItem);
 	}
 
-	addPercentageGetter(userId: string, contentId: number, func: () => number) {
-		const item = this.findQueueItem(userId, contentId);
-		if (item) {
-			item.getPercent = func;
-		}
-	}
-
 	addCancelFunc(userId: string, contentId: number, func: Function) {
 		const item = this.findQueueItem(userId, contentId);
 		if (item) {
 			item.cancellable = true;
 			item.cancelFunc = func;
+		}
+	}
+
+	addPercentageGetter(userId: string, contentId: number, func: () => number) {
+		const item = this.findQueueItem(userId, contentId);
+		if (item) {
+			item.getPercent = func;
 		}
 	}
 
@@ -108,20 +108,6 @@ export class ProgressQueue extends EventEmitter {
 				this.finished(userId, contentId);
 			}
 			return success;
-		}
-	}
-
-	createUpdater(userId: string, contentId: number): (newPercent: number) => void {
-		//find the target queue item
-		const targetItem = this.findQueueItem(userId, contentId);
-
-		if (targetItem) {
-			//hold on to the reference
-			return newPercent => {
-				targetItem.percent = newPercent;
-			};
-		} else {
-			return utils.doNothing;
 		}
 	}
 

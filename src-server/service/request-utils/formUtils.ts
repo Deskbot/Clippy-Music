@@ -3,6 +3,7 @@ import * as formidable from "formidable";
 import * as q from "q";
 
 import * as consts from "../../consts";
+import * as debug from "../../lib/utils/debug";
 import * as opt from "../../options";
 import * as utils from "../../lib/utils/utils";
 
@@ -10,10 +11,9 @@ import { ProgressQueueServiceGetter } from "../ProgressQueueService";
 import { FileUploadError } from "../../lib/errors";
 import { UploadData, UrlOverlay, NoOverlay, FileOverlay, FileMusic, UrlMusic, OverlayMedium } from "../../types/UploadData";
 
-function getFileForm(
-    req: http.IncomingMessage,
-    generateProgressHandler: (file: formidable.File) => ((soFar: number, total: number) => void)
-): q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]> {
+export function handleFileUpload(req: http.IncomingMessage, contentId: number): q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]> {
+    const userId = req.connection.remoteAddress!;
+
     const defer = q.defer<[formidable.IncomingForm, formidable.Fields, formidable.Files]>();
 
     const form = new formidable.IncomingForm();
@@ -52,31 +52,21 @@ function getFileForm(
         defer.resolve([form, fields, files]);
     });
 
+    let percentComplete = 0;
     form.on("fileBegin", (fieldName, file) => {
         if (fieldName === "music-file" && file && file.name) {
-            const onProgress = generateProgressHandler(file);
-            form.on("progress", onProgress);
+            const progressQueue = ProgressQueueServiceGetter.get();
+            progressQueue.setTitle(userId, contentId, file.name);
+            progressQueue.addPercentageGetter(userId, contentId, () => percentComplete);
+
+            form.on("progress", (sofar: number, total: number) => {
+                percentComplete = sofar / total;
+                debug.log(percentComplete);
+            });
         }
     });
 
     return defer.promise;
-}
-
-export function handleFileUpload(req: http.IncomingMessage, contentId: number): q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]> {
-    const ipAddress = req.connection.remoteAddress!;
-
-    const generateProgressHandler = (file: formidable.File) => {
-        ProgressQueueServiceGetter.get().setTitle(ipAddress, contentId, file.name);
-
-        const updater = ProgressQueueServiceGetter.get().createUpdater(ipAddress, contentId);
-
-        return (sofar: number, total: number) => {
-            updater(sofar / total);
-        };
-    }
-
-    //pass along results and errors unaffected by internal error handling
-    return getFileForm(req, generateProgressHandler);
 }
 
 function makeOverlayTooBigError(files: formidable.File[]) {
