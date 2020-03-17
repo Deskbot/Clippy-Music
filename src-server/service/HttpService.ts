@@ -170,7 +170,7 @@ quelaag.addEndpoint({
 		handlePotentialBan(userId)
 			.then(() => {
 				ProgressQueueService.add(userId, contentId)
-				return handleFileUpload(req, contentId);
+				return handleFileUpload(req, userId, contentId);
 			})
 			.then(async ([form, fields, files]) => {
 				const uplData: UploadDataWithId = {

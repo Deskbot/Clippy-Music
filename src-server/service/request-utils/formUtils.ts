@@ -11,9 +11,7 @@ import { ProgressQueueServiceGetter } from "../ProgressQueueService";
 import { FileUploadError } from "../../lib/errors";
 import { UploadData, UrlOverlay, NoOverlay, FileOverlay, FileMusic, UrlMusic, OverlayMedium } from "../../types/UploadData";
 
-export function handleFileUpload(req: http.IncomingMessage, contentId: number): q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]> {
-    const userId = req.connection.remoteAddress!;
-
+export function handleFileUpload(req: http.IncomingMessage, userId: string, contentId: number): q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]> {
     const defer = q.defer<[formidable.IncomingForm, formidable.Fields, formidable.Files]>();
 
     const form = new formidable.IncomingForm();
@@ -36,11 +34,9 @@ export function handleFileUpload(req: http.IncomingMessage, contentId: number): 
 
         if (lastFileField === "music-file") {
             fileError = makeMusicTooBigError(files);
-        }
-        else if (lastFileField === "overlay-file") {
+        } else if (lastFileField === "overlay-file") {
             fileError = makeOverlayTooBigError(files);
-        }
-        else {
+        } else {
             fileError = err;
         }
 
@@ -48,7 +44,9 @@ export function handleFileUpload(req: http.IncomingMessage, contentId: number): 
     });
 
     form.parse(req, (err, fields, files) => {
-        if (err) defer.reject(err);
+        if (err) {
+            defer.reject(err);
+        }
         defer.resolve([form, fields, files]);
     });
 
