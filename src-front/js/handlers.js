@@ -318,8 +318,7 @@ $("#dl-list-container").on("click", "button.cancel", function(e) {
 		data: {
 			ajax: true,
 			"content-id": contentId,
-		},
-		dataType: "text/plain"
+		}
 
 	}).done(function() {
 		main.clippyAgent.speak("The download of " + utils.entitle(contentName) + " was cancelled.");
