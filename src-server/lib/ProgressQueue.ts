@@ -93,8 +93,10 @@ export class ProgressQueue extends EventEmitter {
 	}
 
 	private autoUpdateQueue(queueMap: QuickValuesMap<unknown, ProgressItem>) {
-		for (let item of queueMap.valuesQuick()) {
-			if (item.autoUpdate) item.autoUpdate();
+		for (const item of queueMap.valuesQuick()) {
+			if (item.autoUpdate) {
+				item.autoUpdate();
+			}
 		}
 	}
 
@@ -102,19 +104,21 @@ export class ProgressQueue extends EventEmitter {
 		const item = this.findQueueItem(userId, contentId);
 		if (item && item.cancelFunc) {
 			const success = item.cancelFunc();
-			if (success) this.finished(userId, contentId);
+			if (success) {
+				this.finished(userId, contentId);
+			}
 			return success;
 		}
 	}
 
-	createUpdater(userId: string, contentId: number): (percent: number) => void {
+	createUpdater(userId: string, contentId: number): (newPercent: number) => void {
 		//find the target queue item
 		const targetItem = this.findQueueItem(userId, contentId);
 
 		if (targetItem) {
 			//hold on to the reference
-			return percent => {
-				targetItem.percent = percent * consts.maxPercentBeforeFinished;
+			return newPercent => {
+				targetItem.percent = newPercent;
 			};
 		} else {
 			return utils.doNothing;

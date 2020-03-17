@@ -168,7 +168,7 @@ quelaag.addEndpoint({
 		const contentId = IdFactoryGetter.get().next();
 
 		handlePotentialBan(ipAddress) //assumes ip address is userId
-			.then(() => ProgressQueueServiceGetter.get().add(ipAddress, contentId))
+			.then(() => ProgressQueueService.add(ipAddress, contentId))
 			.then(() => handleFileUpload(req, contentId))
 			.then(async ([form, fields, files]) => {
 				const uplData: UploadDataWithId = {
@@ -192,7 +192,7 @@ quelaag.addEndpoint({
 						throw new Error("I can not download music from an IP address.");
 					}
 
-					ProgressQueueServiceGetter.get().setTitle(ipAddress, contentId, uplData.music.url, true);
+					ProgressQueueService.setTitle(ipAddress, contentId, uplData.music.url, true);
 					// the title and duration are set later by `ContentService.add(uplData)`
 				}
 
@@ -211,7 +211,7 @@ quelaag.addEndpoint({
 				}
 
 				if (itemData.music.isUrl) {
-					ProgressQueueServiceGetter.get().setTitle(ipAddress, contentId, itemData.music.title);
+					ProgressQueueService.setTitle(ipAddress, contentId, itemData.music.title);
 				}
 
 				debug.log("successful upload: ", uplData);

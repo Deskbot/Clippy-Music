@@ -10,8 +10,6 @@ export const musicPlayedWithin = opt.musicUniqueCoolOff === Infinity
 	? "already"
 	: "in the past " + utils.secToTimeStr(opt.musicUniqueCoolOff);
 
-export const maxPercentBeforeFinished = 0.99;
-
 export const dirs = {
 	httpUpload: opt.storageDir + "/httpUploads/",
 	music:	    opt.storageDir + "/music/",
