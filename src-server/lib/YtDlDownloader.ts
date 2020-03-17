@@ -162,8 +162,13 @@ export class YtDlDownloader extends EventEmitter {
 
 class PercentReader {
 	private lastPercent: number;
+	/**
+	 * targets with a video and music component will have 2 sequential downloads each with their own percentage
+	 */
 	private phase: 1 | 2;
 	private proc: cp.ChildProcessWithoutNullStreams;
+
+	private static phaseSize = 0.5;
 
 	constructor(dlProc: cp.ChildProcessWithoutNullStreams) {
 		this.lastPercent = 0;
@@ -182,22 +187,16 @@ class PercentReader {
 
 		pc /= 100; //convert to fraction
 
-		/* There are 2 phases of percentages from the download process
-		 * 1: downloading, 2: zipping downloads into a single file
-		 * During phase 2 the percent given by the process is added to the full phase 1 percent
-		 */
-		const zipFraction = 0.05;
-
 		if (this.phase === 1) {
 			if (pc < this.lastPercent) {
 				this.phase = 2;
 			} else {
-				pc *= 1 - zipFraction;
+				pc *= 1 - PercentReader.phaseSize;
 			}
 		}
 
 		if (this.phase === 2) {
-			pc = 1 - zipFraction + zipFraction * pc;
+			pc = 1 - PercentReader.phaseSize + pc * PercentReader.phaseSize;
 		}
 
 		this.lastPercent = pc;
@@ -205,7 +204,7 @@ class PercentReader {
 		return pc;
 	}
 
-	static extractPercent(s: string): number {
+	private static extractPercent(s: string): number {
 		const start = s.lastIndexOf("[download]") + 10; //[download] has length 10
 		const end = s.lastIndexOf("%");
 		const pcStr = s.substring(start, end).trim();

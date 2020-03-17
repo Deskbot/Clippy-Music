@@ -39,6 +39,9 @@ List
 
 ---
 
+* can cancel at any point in an upload
+* treat ytdl downloads that don't have 2 components as 100%
+	* need to figure out before the second phase appears whether that will happen
 * allow admins to kill clippy at the end of the next song
 * put user nickname in ItemData to remove need to refetch it
 * Admins can ban specific songs (even if uniqueness cooloff is disabled) hash checking needs to be applied
