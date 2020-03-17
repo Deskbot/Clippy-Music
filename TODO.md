@@ -6,9 +6,6 @@ This list is in a rough order of priority.
 List
 ----
 
-* jquery calls fail when status code is 200
-	* "parsererror" "No conversion from text to text/plain"
-	* dataType can be "text" but not "text/plain"
 * Silent looping Video overlay
 	* youtube-dl video url (this covers video files)
 	* ensure that the download bar correctly accounts for all situations
