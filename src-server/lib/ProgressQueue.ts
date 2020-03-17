@@ -92,7 +92,7 @@ export class ProgressQueue extends EventEmitter {
 		}
 	}
 
-	autoUpdateQueue(queueMap: QuickValuesMap<unknown, ProgressItem>) {
+	private autoUpdateQueue(queueMap: QuickValuesMap<unknown, ProgressItem>) {
 		for (let item of queueMap.valuesQuick()) {
 			if (item.autoUpdate) item.autoUpdate();
 		}
@@ -128,7 +128,7 @@ export class ProgressQueue extends EventEmitter {
 		this.totalContents--;
 	}
 
-	findQueueItem(userId: string, contentId: number): ProgressItem | undefined {
+	private findQueueItem(userId: string, contentId: number): ProgressItem | undefined {
 		const queueMap = this.queues[userId];
 
 		if (!queueMap) return undefined;
@@ -157,7 +157,7 @@ export class ProgressQueue extends EventEmitter {
 	/* emits a "prepared" event when the item has all the data needed
 	 * for Clippy to talk to the user about the item by name
 	 */
-	maybeItemIsPrepared(item: ProgressItem) {
+	private maybeItemIsPrepared(item: ProgressItem) {
 		if (item.unprepared && item.title && !item.titleIsTemp) {
 			delete item.unprepared;
 			delete item.titleIsTemp;
@@ -181,13 +181,13 @@ export class ProgressQueue extends EventEmitter {
 	}
 
 	startTransmitting() {
-		this.transmitIntervalId = setInterval(this.transmit.bind(this), opt.dlPercentUpdateFreq);
+		this.transmitIntervalId = setInterval(
+			() => this.transmit(),
+			opt.dlPercentUpdateFreq
+		);
 	}
 
 	stopTransmitting() {
-		// if the argument to clearInterval can be undefined,
-		// TypeScript thinks clearInterval is the browser implementation,
-		// which can't take NodeJS.Timeout, which is what setTimeout returns in NodeJS
 		if (this.transmitIntervalId !== undefined) {
 			clearInterval(this.transmitIntervalId);
 		}
@@ -195,7 +195,7 @@ export class ProgressQueue extends EventEmitter {
 		this.transmitIntervalId = undefined;
 	}
 
-	transmit() {
+	private transmit() {
 		if (this.totalContents === 0) return;
 
 		for (let userId in this.queues) {
@@ -203,7 +203,7 @@ export class ProgressQueue extends EventEmitter {
 		}
 	}
 
-	transmitToUserMaybe(userId: string) {
+	private transmitToUserMaybe(userId: string) {
 		const queueMap = this.queues[userId];
 		const queueLength = queueMap.size;
 
