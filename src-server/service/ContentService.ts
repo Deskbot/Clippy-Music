@@ -30,11 +30,7 @@ export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> 
 		});
 
 		ytDlDownloader.on("started", (uid, cid, getUpdate) => {
-			const updater = progressQueue.createUpdater(uid, cid);
-
-			progressQueue.addAutoUpdate(uid, cid, () => {
-				updater(getUpdate());
-			});
+			progressQueue.addPercentageGetter(uid, cid, getUpdate);
 		});
 
 		const cm = new ContentManager(

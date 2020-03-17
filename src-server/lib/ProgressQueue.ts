@@ -11,10 +11,10 @@ import * as utils from "./utils/utils";
 import { QuickValuesMap } from "./utils/QuickValuesMap";
 
 interface ProgressItem {
-	autoUpdate?: Function;
 	cancellable?: boolean;
 	cancelFunc?: Function;
 	contentId: number;
+	getPercent?: () => number;
 	percent: number;
 	title: string;
 	titleIsTemp?: boolean;
@@ -77,10 +77,10 @@ export class ProgressQueue extends EventEmitter {
 		this.maybeItemIsPrepared(newItem);
 	}
 
-	addAutoUpdate(userId: string, contentId: number, func: Function) {
+	addPercentageGetter(userId: string, contentId: number, func: () => number) {
 		const item = this.findQueueItem(userId, contentId);
 		if (item) {
-			item.autoUpdate = func;
+			item.getPercent = func;
 		}
 	}
 
@@ -92,10 +92,10 @@ export class ProgressQueue extends EventEmitter {
 		}
 	}
 
-	private autoUpdateQueue(queueMap: QuickValuesMap<unknown, ProgressItem>) {
+	private updateQueue(queueMap: QuickValuesMap<unknown, ProgressItem>) {
 		for (const item of queueMap.valuesQuick()) {
-			if (item.autoUpdate) {
-				item.autoUpdate();
+			if (item.getPercent) {
+				item.percent = item.getPercent();
 			}
 		}
 	}
@@ -212,7 +212,7 @@ export class ProgressQueue extends EventEmitter {
 		const queueLength = queueMap.size;
 
 		if (queueLength > 0 || this.lastQueueLength[userId] > 0) {
-			this.autoUpdateQueue(queueMap);
+			this.updateQueue(queueMap);
 			this.emit("list", userId, queueMap.valuesQuick());
 			this.lastQueueLength[userId] = queueLength;
 		}
