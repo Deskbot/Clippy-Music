@@ -110,9 +110,7 @@ export class YtDlDownloader extends EventEmitter {
 
 		// allow the outside world to get percentage updates
 		const percentReader = new PercentReader(dlProc);
-		this.emit("started", uid, cid, () => {
-			return percentReader.get();
-		});
+		this.emit("started", uid, cid, () => percentReader.get());
 	}
 
 	new(cid: number, userId: string, target: string, destination: string): q.Promise<void> {
