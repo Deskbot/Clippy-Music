@@ -28,7 +28,7 @@ export class ProgressQueue extends EventEmitter {
 		[contentId: number]: () => number
 	};
 	private queues: {
-		[userId: string]: QuickValuesMap<number, PublicProgressItem>
+		[userId: string]: QuickValuesMap<number, PublicProgressItem> // number is contentId
 	};
 	private totalContents: number;
 	private transmitIntervalId: NodeJS.Timeout | undefined;
@@ -55,7 +55,7 @@ export class ProgressQueue extends EventEmitter {
 		this.cancelFuncs = {};
 		this.lastQueueLength = {};
 		this.percentGetters = {};
-		this.queues = {}; // userId -> QuickValuesMap<contentId, progress item>
+		this.queues = {};
 		this.totalContents = 0;
 		this.transmitIntervalId = undefined;
 	}
