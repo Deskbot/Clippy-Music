@@ -21,14 +21,6 @@ export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> 
 		const progressQueue = ProgressQueueServiceGetter.get();
 		const ytDlDownloader = new YtDlDownloader();
 
-		ytDlDownloader.on("new", (userId, cid) => {
-			progressQueue.addCancelFunc(
-				userId,
-				cid,
-				() => ytDlDownloader.tryCancel(userId, cid)
-			);
-		});
-
 		ytDlDownloader.on("started", (uid, cid, getUpdate) => {
 			progressQueue.addPercentageGetter(cid, getUpdate);
 		});

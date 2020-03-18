@@ -133,9 +133,9 @@ export class YtDlDownloader extends EventEmitter {
 
 		//if the queue was empty just now, need to initiate download sequence
 		//otherwise the download queue is already being worked on
-		if (queue.length === 1) this.downloadNext(userId);
-
-		this.emit("new", userId, cid);
+		if (queue.length === 1) {
+			this.downloadNext(userId);
+		}
 
 		return defer.promise;
 	}

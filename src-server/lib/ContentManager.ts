@@ -494,6 +494,11 @@ export class ContentManager extends EventEmitter {
 				const nmp = this.nextMusicPath();
 				const st = new Date().getTime();
 
+				this.progressQueue.addCancelFunc(
+					uid,
+					cid,
+					() => this.ytDlDownloader.tryCancel(uid, cid)
+				);
 				await this.ytDlDownloader.new(cid, uid, music.url, nmp);
 
 				// when download is completed, then
@@ -513,10 +518,8 @@ export class ContentManager extends EventEmitter {
 				//or being downloaded twice in quick succession
 				if (this.musicHashIsUnique(musicHash)) {
 					return {
-						...{
-							...music,
-							path: nmp,
-						},
+						...music,
+						path: nmp,
 						hash: musicHash,
 						stream: false,
 					};
