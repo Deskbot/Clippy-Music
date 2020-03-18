@@ -39,6 +39,8 @@ List
 
 ---
 
+* clean up part files when cancelling a ytdl
+* clean up overlays for cancelled uploads
 * can cancel at any point in an upload
 * treat ytdl downloads that don't have 2 components as 100%
 	* need to figure out before the second phase appears whether that will happen
