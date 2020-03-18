@@ -4,13 +4,10 @@
 
 import { EventEmitter } from "events";
 
-import * as consts from "../consts";
 import * as opt from "../options";
-import * as utils from "./utils/utils";
-
 import { QuickValuesMap } from "./utils/QuickValuesMap";
 
-interface ProgressItem {
+interface PublicProgressItem {
 	cancellable?: boolean;
 	cancelFunc?: Function;
 	contentId: number;
@@ -27,23 +24,23 @@ export class ProgressQueue extends EventEmitter {
 		[userId: string]: number
 	};
 	private queues: {
-		[userId: string]: QuickValuesMap<number, ProgressItem>
+		[userId: string]: QuickValuesMap<number, PublicProgressItem>
 	};
 	private totalContents: number;
 	private transmitIntervalId: NodeJS.Timeout | undefined;
 
 	public emit(eventName: "delete", userId: string, contentId: number): boolean;
 	public emit(eventName: "error", userId: string, contentId: number, error: Error): boolean;
-	public emit(eventName: "prepared", userId: string, item: ProgressItem): boolean;
-	public emit(eventName: "list", userId: string, items: ProgressItem[]): boolean;
+	public emit(eventName: "prepared", userId: string, item: PublicProgressItem): boolean;
+	public emit(eventName: "list", userId: string, items: PublicProgressItem[]): boolean;
 	public emit(eventName: string, ...args: any[]): boolean {
 		return super.emit(eventName, ...args);
 	}
 
 	public on(eventName: "delete", handler: (userId: string, contentId: number) => void): this;
 	public on(eventName: "error", handler: (userId: string, contentId: number, error: Error) => void): this;
-	public on(eventName: "prepared", handler: (userId: string, item: ProgressItem) => void): this;
-	public on(eventName: "list", handler: (userId: string, items: ProgressItem[]) => void): this;
+	public on(eventName: "prepared", handler: (userId: string, item: PublicProgressItem) => void): this;
+	public on(eventName: "list", handler: (userId: string, items: PublicProgressItem[]) => void): this;
 	public on(eventName: string, handler: (...args: any[]) => void): this {
 		return super.on(eventName, handler);
 	}
@@ -92,7 +89,7 @@ export class ProgressQueue extends EventEmitter {
 		}
 	}
 
-	private updateQueue(queueMap: QuickValuesMap<unknown, ProgressItem>) {
+	private updateQueue(queueMap: QuickValuesMap<unknown, PublicProgressItem>) {
 		for (const item of queueMap.valuesQuick()) {
 			if (item.getPercent) {
 				item.percent = item.getPercent();
@@ -111,14 +108,14 @@ export class ProgressQueue extends EventEmitter {
 		}
 	}
 
-	deleteQueueItem(item: ProgressItem) {
+	private deleteQueueItem(item: PublicProgressItem) {
 		const queueMap = this.queues[item.userId];
 
 		queueMap.delete(item.contentId);
 		this.totalContents--;
 	}
 
-	private findQueueItem(userId: string, contentId: number): ProgressItem | undefined {
+	private findQueueItem(userId: string, contentId: number): PublicProgressItem | undefined {
 		const queueMap = this.queues[userId];
 
 		if (!queueMap) return undefined;
@@ -127,16 +124,16 @@ export class ProgressQueue extends EventEmitter {
 	}
 
 	finished(userId: string, contentId: number) {
-		this.deleteQueueItem(this.findQueueItem(userId, contentId) as ProgressItem);
+		this.deleteQueueItem(this.findQueueItem(userId, contentId) as PublicProgressItem);
 		this.emit("delete", userId, contentId);
 	}
 
 	finishedWithError(userId: string, contentId: number, error: Error) {
-		this.deleteQueueItem(this.findQueueItem(userId, contentId) as ProgressItem);
+		this.deleteQueueItem(this.findQueueItem(userId, contentId) as PublicProgressItem);
 		this.emit("error", userId, contentId, error);
 	}
 
-	getQueue(userId: string): ProgressItem[] | undefined {
+	getQueue(userId: string): PublicProgressItem[] | undefined {
 		const queueMap = this.queues[userId];
 
 		if (queueMap) return queueMap.valuesQuick();
@@ -147,7 +144,7 @@ export class ProgressQueue extends EventEmitter {
 	/* emits a "prepared" event when the item has all the data needed
 	 * for Clippy to talk to the user about the item by name
 	 */
-	private maybeItemIsPrepared(item: ProgressItem) {
+	private maybeItemIsPrepared(item: PublicProgressItem) {
 		if (item.unprepared && item.title && !item.titleIsTemp) {
 			delete item.unprepared;
 			delete item.titleIsTemp;
