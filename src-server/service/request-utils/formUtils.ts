@@ -55,7 +55,7 @@ export function handleFileUpload(req: http.IncomingMessage, userId: string, cont
         if (fieldName === "music-file" && file && file.name) {
             const progressQueue = ProgressQueueServiceGetter.get();
             progressQueue.setTitle(userId, contentId, file.name);
-            progressQueue.addPercentageGetter(userId, contentId, () => percentComplete);
+            progressQueue.addPercentageGetter(contentId, () => percentComplete);
 
             form.on("progress", (sofar: number, total: number) => {
                 percentComplete = sofar / total;
