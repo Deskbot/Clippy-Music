@@ -10,7 +10,6 @@ import { QuickValuesMap } from "./utils/QuickValuesMap";
 interface PublicProgressItem {
 	cancellable?: boolean;
 	contentId: number;
-	getPercent?: () => number;
 	percent: number;
 	title: string;
 	titleIsTemp?: boolean;
@@ -24,6 +23,9 @@ export class ProgressQueue extends EventEmitter {
 	};
 	private lastQueueLength: {
 		[userId: string]: number
+	};
+	private percentGetters: {
+		[contentId: number]: () => number
 	};
 	private queues: {
 		[userId: string]: QuickValuesMap<number, PublicProgressItem>
@@ -52,6 +54,7 @@ export class ProgressQueue extends EventEmitter {
 
 		this.cancelFuncs = {};
 		this.lastQueueLength = {};
+		this.percentGetters = {};
 		this.queues = {}; // userId -> QuickValuesMap<contentId, progress item>
 		this.totalContents = 0;
 		this.transmitIntervalId = undefined;
@@ -85,17 +88,14 @@ export class ProgressQueue extends EventEmitter {
 		}
 	}
 
-	addPercentageGetter(userId: string, contentId: number, func: () => number) {
-		const item = this.findQueueItem(userId, contentId);
-		if (item) {
-			item.getPercent = func;
-		}
+	addPercentageGetter(contentId: number, func: () => number) {
+		this.percentGetters[contentId] = func;
 	}
 
 	private updateQueue(queueMap: QuickValuesMap<unknown, PublicProgressItem>) {
 		for (const item of queueMap.valuesQuick()) {
-			if (item.getPercent) {
-				item.percent = item.getPercent();
+			if (this.percentGetters[item.contentId]) {
+				item.percent = this.percentGetters[item.contentId]();
 			}
 		}
 	}
