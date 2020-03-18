@@ -9,7 +9,6 @@ import { QuickValuesMap } from "./utils/QuickValuesMap";
 
 interface PublicProgressItem {
 	cancellable?: boolean;
-	cancelFunc?: Function;
 	contentId: number;
 	getPercent?: () => number;
 	percent: number;
@@ -20,6 +19,9 @@ interface PublicProgressItem {
 }
 
 export class ProgressQueue extends EventEmitter {
+	private cancelFuncs: {
+		[contentId: number]: () => boolean
+	};
 	private lastQueueLength: {
 		[userId: string]: number
 	};
@@ -48,6 +50,7 @@ export class ProgressQueue extends EventEmitter {
 	constructor() {
 		super();
 
+		this.cancelFuncs = {};
 		this.lastQueueLength = {};
 		this.queues = {}; // userId -> QuickValuesMap<contentId, progress item>
 		this.totalContents = 0;
@@ -74,11 +77,11 @@ export class ProgressQueue extends EventEmitter {
 		this.maybeItemIsPrepared(newItem);
 	}
 
-	addCancelFunc(userId: string, contentId: number, func: Function) {
+	addCancelFunc(userId: string, contentId: number, func: () => boolean) {
 		const item = this.findQueueItem(userId, contentId);
 		if (item) {
 			item.cancellable = true;
-			item.cancelFunc = func;
+			this.cancelFuncs[contentId] = func;
 		}
 	}
 
@@ -98,14 +101,14 @@ export class ProgressQueue extends EventEmitter {
 	}
 
 	cancel(userId: string, contentId: number) {
-		const item = this.findQueueItem(userId, contentId);
-		if (item && item.cancelFunc) {
-			const success = item.cancelFunc();
+		if (this.cancelFuncs[contentId]) {
+			const success = this.cancelFuncs[contentId]();
 			if (success) {
 				this.finished(userId, contentId);
 			}
 			return success;
 		}
+		return false;
 	}
 
 	private deleteQueueItem(item: PublicProgressItem) {
