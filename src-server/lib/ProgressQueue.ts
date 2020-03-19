@@ -112,10 +112,13 @@ export class ProgressQueue extends EventEmitter {
 	}
 
 	private deleteQueueItem(item: PublicProgressItem) {
+		delete this.percentGetters[item.contentId];
+		delete this.cancelFuncs[item.contentId];
 		const queueMap = this.queues[item.userId];
 
 		queueMap.delete(item.contentId);
 		this.totalContents--;
+
 	}
 
 	private findQueueItem(userId: string, contentId: number): PublicProgressItem | undefined {
