@@ -20,7 +20,7 @@ import { UserRecord } from "./UserRecord";
 import { ProgressQueue } from "./ProgressQueue";
 import { BarringerQueue, isSuspendedBarringerQueue } from "./queue/BarringerQueue";
 import { PublicItemData } from "../types/PublicItemData";
-import { canDownloadOverlay, downloadOverlay } from "./download";
+import { canDownloadOverlayFromRawUrl, downloadOverlayFromRawUrl } from "./download";
 import { startVideoOverlay, startImageOverlay, startMusic, doWhenMusicPlays as doWhenMusicStarts } from "./playMedia";
 
 export interface SuspendedContentManager {
@@ -558,8 +558,8 @@ export class ContentManager extends EventEmitter {
 		if (overlay.isUrl) {
 			pathOnDisk = this.nextOverlayPath();
 			try {
-				[title, medium] = await canDownloadOverlay(overlay.url);
-				await downloadOverlay(overlay.url, pathOnDisk);
+				[title, medium] = await canDownloadOverlayFromRawUrl(overlay.url);
+				await downloadOverlayFromRawUrl(overlay.url, pathOnDisk);
 			} catch (err) {
 				if (err instanceof BadUrlError) {
 					const { id, userId } = someItemData;

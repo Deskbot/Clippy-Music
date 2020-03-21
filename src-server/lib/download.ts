@@ -6,37 +6,9 @@ import { ContentPart } from "../types/ContentPart";
 import { BadUrlError, UnknownDownloadError, DownloadTooLargeError } from "./errors";
 import { Html5Entities } from "html-entities";
 import { OverlayMedium } from "../types/UploadData";
+import { getFileNameFromUrl } from "./utils/stringUtils";
 
-export function downloadOverlay(url: string, destination: string) {
-    return new Promise<void>((resolve, reject) => {
-        const stream = request(url).pipe(fs.createWriteStream(destination));
-
-        stream.on("close", () => {
-            return resolve();
-        });
-        stream.on("error", (err) => {
-            err.contentType = ContentPart.Overlay;
-            return reject(err);
-        });
-    });
-}
-
-function getFileNameFromUrl(url: string): string {
-    let name = url.split("/").pop();
-    if (name === undefined) {
-        return "";
-    } else {
-        name = name.length <= 1 ? undefined : name.split(".").shift();
-    }
-
-    if (name === undefined) {
-        return "";
-    }
-
-    return name;
-}
-
-export function canDownloadOverlay(url: string): Promise <[string, OverlayMedium]> {
+export function canDownloadOverlayFromRawUrl(url: string): Promise <[string, OverlayMedium]> {
     return new Promise((resolve, reject) => {
         request.head(url, async (err, res, body) => {
             if (err) {
@@ -70,6 +42,20 @@ export function canDownloadOverlay(url: string): Promise <[string, OverlayMedium
             const imageName = getFileNameFromUrl(url);
             const title = new Html5Entities().encode(imageName);
             resolve([title, overlayMedium]);
+        });
+    });
+}
+
+export function downloadOverlayFromRawUrl(url: string, destination: string) {
+    return new Promise<void>((resolve, reject) => {
+        const stream = request(url).pipe(fs.createWriteStream(destination));
+
+        stream.on("close", () => {
+            return resolve();
+        });
+        stream.on("error", (err) => {
+            err.contentType = ContentPart.Overlay;
+            return reject(err);
         });
     });
 }
