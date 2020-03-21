@@ -12,7 +12,7 @@ import * as time from "./time";
 import { ContentPart } from "../types/ContentPart";
 import { getMusicInfoByUrl, getFileDuration, UrlMusicData } from "./musicData";
 import { CancelError, UniqueError, YTError, BadUrlError } from "./errors";
-import { UploadDataWithId, UploadDataWithIdTitleDuration, MusicWithMetadata, OverlayMedium } from "../types/UploadData";
+import { UploadDataWithId, UploadDataWithIdTitleDuration, MusicWithMetadata, OverlayMedium, UrlOverlay, FileOverlay, NoOverlay } from "../types/UploadData";
 import { IdFactory } from "./IdFactory";
 import { ItemData, CompleteMusic, CompleteOverlay } from "../types/ItemData";
 import { YtDlDownloader } from "./YtDlDownloader";
@@ -453,7 +453,7 @@ export class ContentManager extends EventEmitter {
 			);
 
 			// if the overlay fails, make sure any yt download is stopped
-			const overlayPrepProm = this.tryPrepOverlay(someItemData);
+			const overlayPrepProm = this.tryPrepOverlay(someItemData.overlay, someItemData.id, someItemData.userId);
 
 			const [ music, overlay ] = await Promise.all([musicPrepProm, overlayPrepProm]);
 
@@ -537,9 +537,7 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	private async tryPrepOverlay(someItemData: UploadDataWithIdTitleDuration): Promise<CompleteOverlay> {
-		const { overlay } = someItemData;
-
+	private async tryPrepOverlay(overlay: UrlOverlay | FileOverlay | NoOverlay, contentId: number, userId: string): Promise<CompleteOverlay> {
 		if (!overlay.exists) {
 			return {
 				...overlay,
@@ -560,19 +558,17 @@ export class ContentManager extends EventEmitter {
 				await downloadOverlayFromRawUrl(overlay.url, pathOnDisk);
 			} catch (err) {
 				if (err instanceof BadUrlError) {
-					const { id, userId } = someItemData;
-
 					try {
 						title = (await getMusicInfoByUrl(overlay.url)).title;
 					} catch (err) {
 						throw new BadUrlError(ContentPart.Overlay, overlay.url);
 					}
 
-					const [downloadedPromise, cancel] = this.ytDlDownloader.new(id, userId, overlay.url, pathOnDisk);
+					const [downloadedPromise, cancel] = this.ytDlDownloader.new(contentId, userId, overlay.url, pathOnDisk);
 
-					this.progressQueue.addCancelFunc(userId, id, cancel);
+					this.progressQueue.addCancelFunc(userId, contentId, cancel);
 					await downloadedPromise;
-					this.progressQueue.removeCancelFunc(userId, id, cancel);
+					this.progressQueue.removeCancelFunc(userId, contentId, cancel);
 
 					medium = OverlayMedium.Video;
 				} else {
