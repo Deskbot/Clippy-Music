@@ -361,10 +361,57 @@ export class ContentManager extends EventEmitter {
 		return true;
 	}
 
+	private async prepFileOverlay(overlay: FileOverlay): Promise<CompleteFileOverlay> {
+		return {
+			...overlay,
+			hash: await utils.fileHash(overlay.path),
+		};
+	}
+
 	private prepNoOverlay(overlay: NoOverlay): CompleteOverlay {
 		return {
 			...overlay,
 			hash: undefined,
+		};
+	}
+
+	private async prepUrlOverlay(overlay: UrlOverlay, contentId: number, userId: string): Promise<CompleteUrlOverlay> {
+		const pathOnDisk = this.nextOverlayPath();
+
+		let title: string;
+		let medium: OverlayMedium;
+
+		try {
+			[title, medium] = await canDownloadOverlayFromRawUrl(overlay.url);
+			await downloadOverlayFromRawUrl(overlay.url, pathOnDisk);
+		} catch (err) {
+			if (err instanceof BadUrlError) { // can't get the resource from the file directly, so try youtube-dl
+				try {
+					title = (await getMusicInfoByUrl(overlay.url)).title;
+				} catch (err) {
+					throw new BadUrlError(ContentPart.Overlay, overlay.url);
+				}
+
+				const [downloadedPromise, cancel] = this.ytDlDownloader.new(contentId, userId, overlay.url, pathOnDisk);
+
+				this.progressQueue.addCancelFunc(userId, contentId, cancel);
+				await downloadedPromise;
+				this.progressQueue.removeCancelFunc(userId, contentId, cancel);
+
+				medium = OverlayMedium.Video;
+			} else {
+				throw err;
+			}
+		}
+
+		const hash = await utils.fileHash(pathOnDisk);
+
+		return {
+			...overlay,
+			medium,
+			path: pathOnDisk,
+			title,
+			hash,
 		};
 	}
 
@@ -570,52 +617,5 @@ export class ContentManager extends EventEmitter {
 		} else {
 			throw new UniqueError(ContentPart.Overlay);
 		}
-	}
-
-	private async prepFileOverlay(overlay: FileOverlay): Promise<CompleteFileOverlay> {
-		return {
-			...overlay,
-			hash: await utils.fileHash(overlay.path),
-		};
-	}
-
-	private async prepUrlOverlay(overlay: UrlOverlay, contentId: number, userId: string): Promise<CompleteUrlOverlay> {
-		const pathOnDisk = this.nextOverlayPath();
-
-		let title: string;
-		let medium: OverlayMedium;
-
-		try {
-			[title, medium] = await canDownloadOverlayFromRawUrl(overlay.url);
-			await downloadOverlayFromRawUrl(overlay.url, pathOnDisk);
-		} catch (err) {
-			if (err instanceof BadUrlError) { // can't get the resource from the file directly, so try youtube-dl
-				try {
-					title = (await getMusicInfoByUrl(overlay.url)).title;
-				} catch (err) {
-					throw new BadUrlError(ContentPart.Overlay, overlay.url);
-				}
-
-				const [downloadedPromise, cancel] = this.ytDlDownloader.new(contentId, userId, overlay.url, pathOnDisk);
-
-				this.progressQueue.addCancelFunc(userId, contentId, cancel);
-				await downloadedPromise;
-				this.progressQueue.removeCancelFunc(userId, contentId, cancel);
-
-				medium = OverlayMedium.Video;
-			} else {
-				throw err;
-			}
-		}
-
-		const hash = await utils.fileHash(pathOnDisk);
-
-		return {
-			...overlay,
-			medium,
-			path: pathOnDisk,
-			title,
-			hash,
-		};
 	}
 }
