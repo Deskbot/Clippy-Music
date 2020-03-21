@@ -477,7 +477,7 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	private async tryPrepMusic(music: MusicWithMetadata, cid: number, uid: string): Promise<CompleteMusic> {
+	private async tryPrepMusic(music: MusicWithMetadata, contentId: number, userId: string): Promise<CompleteMusic> {
 		if (music.isUrl) {
 			// Is it so big it should just be streamed?
 			if (music.totalFileDuration > opt.streamOverDuration) {
@@ -490,11 +490,11 @@ export class ContentManager extends EventEmitter {
 			} else {
 				const nmp = this.nextMusicPath();
 				const st = new Date().getTime();
-				const [downloadPromise, cancel] = this.ytDlDownloader.new(cid, uid, music.url, nmp);
+				const [downloadPromise, cancel] = this.ytDlDownloader.new(contentId, userId, music.url, nmp);
 
-				this.progressQueue.addCancelFunc(uid, cid, cancel);
-
+				this.progressQueue.addCancelFunc(userId, contentId, cancel);
 				await downloadPromise;
+				this.progressQueue.removeCancelFunc(userId, contentId, cancel);
 
 				// when download is completed, then
 				// count how long it took
@@ -569,9 +569,10 @@ export class ContentManager extends EventEmitter {
 					}
 
 					const [downloadedPromise, cancel] = this.ytDlDownloader.new(id, userId, overlay.url, pathOnDisk);
-					this.progressQueue.addCancelFunc(userId, id, cancel);
 
+					this.progressQueue.addCancelFunc(userId, id, cancel);
 					await downloadedPromise;
+					this.progressQueue.removeCancelFunc(userId, id, cancel);
 
 					medium = OverlayMedium.Video;
 				} else {

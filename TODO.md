@@ -16,6 +16,7 @@ List
 	* Update command line api in README
 * replace request (https://github.com/request/request/issues/3142)
 * Add something to README about the configurableness of eog and mpv
+* add to readme the quirks about leftover files
 * Use a separate setting for bucket size and max run time.
 * Change the options at run time from the admin panel
 * Make Clippy installable as a Progressive Web App

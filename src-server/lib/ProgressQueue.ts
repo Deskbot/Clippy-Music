@@ -155,6 +155,16 @@ export class ProgressQueue extends EventEmitter {
 		}
 	}
 
+	removeCancelFunc(userId: string, contentId: number, func: () => boolean) {
+		const item = this.findQueueItem(userId, contentId);
+		if (item && this.cancelFuncs[contentId]) {
+			const funcs = this.cancelFuncs[contentId];
+			const index = funcs.indexOf(func);
+			funcs.splice(index, 1);
+			item.cancellable = Boolean(funcs.length);
+		}
+	}
+
 	setTitle(userId: string, contentId: number, title: string, temporary=false) {
 		const item = this.findQueueItem(userId, contentId);
 
