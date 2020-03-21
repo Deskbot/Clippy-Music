@@ -472,7 +472,7 @@ export class ContentManager extends EventEmitter {
 			if (notCancelled) {
 				this.progressQueue.finishedWithError(someItemData.userId, someItemData.id, err);
 				debug.log(`Cancelling ${someItemData.id} due to a failure while trying to queue the media.`);
-				this.ytDlDownloader.tryCancel(someItemData.userId, someItemData.id);
+				this.progressQueue.cancel(someItemData.userId, someItemData.id);
 			}
 		}
 	}
@@ -490,13 +490,11 @@ export class ContentManager extends EventEmitter {
 			} else {
 				const nmp = this.nextMusicPath();
 				const st = new Date().getTime();
+				const [downloadPromise, cancel] = this.ytDlDownloader.new(cid, uid, music.url, nmp);
 
-				this.progressQueue.addCancelFunc(
-					uid,
-					cid,
-					() => this.ytDlDownloader.tryCancel(uid, cid)
-				);
-				await this.ytDlDownloader.new(cid, uid, music.url, nmp);
+				this.progressQueue.addCancelFunc(uid, cid, cancel);
+
+				await downloadPromise;
 
 				// when download is completed, then
 				// count how long it took
@@ -570,12 +568,10 @@ export class ContentManager extends EventEmitter {
 						throw new BadUrlError(ContentPart.Overlay, overlay.url);
 					}
 
-					this.progressQueue.addCancelFunc(
-						userId,
-						id,
-						() => this.ytDlDownloader.tryCancel(userId, id)
-					);
-					await this.ytDlDownloader.new(id, userId, overlay.url, pathOnDisk);
+					const [downloadedPromise, cancel] = this.ytDlDownloader.new(id, userId, overlay.url, pathOnDisk);
+					this.progressQueue.addCancelFunc(userId, id, cancel);
+
+					await downloadedPromise;
 
 					medium = OverlayMedium.Video;
 				} else {

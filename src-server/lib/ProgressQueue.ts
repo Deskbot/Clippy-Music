@@ -6,6 +6,7 @@ import { EventEmitter } from "events";
 
 import * as opt from "../options";
 import { QuickValuesMap } from "./utils/QuickValuesMap";
+import { allTrue } from "./utils/arrayUtils";
 
 interface PublicProgressItem {
 	cancellable?: boolean;
@@ -19,7 +20,7 @@ interface PublicProgressItem {
 
 export class ProgressQueue extends EventEmitter {
 	private cancelFuncs: {
-		[contentId: number]: () => boolean
+		[contentId: number]: (() => boolean)[]
 	};
 	private lastQueueLength: {
 		[userId: string]: number
@@ -84,7 +85,11 @@ export class ProgressQueue extends EventEmitter {
 		const item = this.findQueueItem(userId, contentId);
 		if (item) {
 			item.cancellable = true;
-			this.cancelFuncs[contentId] = func;
+			if (!this.cancelFuncs[contentId]) {
+				this.cancelFuncs[contentId] = [func]
+			} else {
+				this.cancelFuncs[contentId].push(func);
+			}
 		}
 	}
 
@@ -92,21 +97,13 @@ export class ProgressQueue extends EventEmitter {
 		this.percentGetters[contentId] = func;
 	}
 
-	private updateQueue(queueMap: QuickValuesMap<unknown, PublicProgressItem>) {
-		for (const item of queueMap.valuesQuick()) {
-			if (this.percentGetters[item.contentId]) {
-				item.percent = this.percentGetters[item.contentId]();
-			}
-		}
-	}
-
 	cancel(userId: string, contentId: number) {
 		if (this.cancelFuncs[contentId]) {
-			const success = this.cancelFuncs[contentId]();
-			if (success) {
+			const successes = this.cancelFuncs[contentId].map(func => func());
+			if (allTrue(successes)) {
 				this.finished(userId, contentId);
+				return true;
 			}
-			return success;
 		}
 		return false;
 	}
@@ -204,6 +201,14 @@ export class ProgressQueue extends EventEmitter {
 			this.updateQueue(queueMap);
 			this.emit("list", userId, queueMap.valuesQuick());
 			this.lastQueueLength[userId] = queueLength;
+		}
+	}
+
+	private updateQueue(queueMap: QuickValuesMap<number, PublicProgressItem>) {
+		for (const item of queueMap.valuesQuick()) {
+			if (this.percentGetters[item.contentId]) {
+				item.percent = this.percentGetters[item.contentId]();
+			}
 		}
 	}
 }

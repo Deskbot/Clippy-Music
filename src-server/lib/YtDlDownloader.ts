@@ -23,14 +23,12 @@ export class YtDlDownloader extends EventEmitter {
 		[userId: string]: YtDlQueueItem[]
 	};
 
-	public emit(eventName: "new", uid: string, cid: number): boolean;
-	public emit(eventName: "started", uid: string, cid: number, getUpdate: () => number): boolean;
+	public emit(eventName: "started", cid: number, getUpdate: () => number): boolean;
 	public emit(eventName: string, ...args: any[]): boolean {
 		return super.emit(eventName, ...args);
 	}
 
-	public on(eventName: "new", handler: (uid: string, cid: number) => void): this;
-	public on(eventName: "started", handler: (uid: string, cid: number, getUpdate: () => number) => void): this;
+	public on(eventName: "started", handler: (cid: number, getUpdate: () => number) => void): this;
 	public on(eventName: string, handler: (...args: any[]) => void): this {
 		return super.on(eventName, handler);
 	}
@@ -40,8 +38,13 @@ export class YtDlDownloader extends EventEmitter {
 		this.userQueues = {};
 	}
 
-	private cancel(queue: YtDlQueueItem[], index: number) {
-		const item = queue[index];
+	private cancel(userId: string, item: YtDlQueueItem): boolean {
+		const queue = this.userQueues[userId];
+		const itemPos = queue.indexOf(item);
+
+		if (itemPos === -1) {
+			return false;
+		}
 
 		// head of the queue can be looked at
 		// so don't remove it from the queue if the download is in progress
@@ -49,8 +52,10 @@ export class YtDlDownloader extends EventEmitter {
 			item.cancelled = true;
 			item.proc.kill(); // exit code 2 (SIGINT)
 		} else {
-			queue.splice(index, 1);
+			queue.splice(itemPos, 1);
 		}
+
+		return true;
 	}
 
 	private download(target: string, destination: string): [Promise<void>, cp.ChildProcessWithoutNullStreams] {
@@ -110,10 +115,18 @@ export class YtDlDownloader extends EventEmitter {
 
 		// allow the outside world to get percentage updates
 		const percentReader = new PercentReader(dlProc);
-		this.emit("started", uid, cid, () => percentReader.get());
+		this.emit("started", cid, () => percentReader.get());
 	}
 
-	new(cid: number, userId: string, target: string, destination: string): q.Promise<void> {
+	/**
+	 * Put a new download into the queue
+	 * @param cid The content id the download is for
+	 * @param userId The user downloading
+	 * @param target The resource to download
+	 * @param destination Where to put the downloaded file
+	 * @returns [A Promise that resolves when the download is complete, a function to cancel the download]
+	 */
+	new(cid: number, userId: string, target: string, destination: string): [q.Promise<void>, () => boolean] {
 		let queue = this.userQueues[userId];
 		if (!queue) {
 			queue = this.userQueues[userId] = [];
@@ -121,7 +134,7 @@ export class YtDlDownloader extends EventEmitter {
 
 		const defer = q.defer<void>();
 
-		queue.push({
+		const item = {
 			cancelled: false,
 			cid,
 			defer,
@@ -129,7 +142,8 @@ export class YtDlDownloader extends EventEmitter {
 			percent: 0,
 			userId,
 			target,
-		});
+		};
+		queue.push(item);
 
 		//if the queue was empty just now, need to initiate download sequence
 		//otherwise the download queue is already being worked on
@@ -137,26 +151,7 @@ export class YtDlDownloader extends EventEmitter {
 			this.downloadNext(userId);
 		}
 
-		return defer.promise;
-	}
-
-	tryCancel(uid: string, cid: number): boolean {
-		const queue = this.userQueues[uid];
-
-		if (!queue) return false;
-
-		let atLeatOneCancelled = false;
-
-		for (let i = 0; i < queue.length; i++) {
-			const item = queue[i];
-
-			if (item.cid == cid) {
-				this.cancel(queue, i);
-				atLeatOneCancelled = true;
-			}
-		}
-
-		return atLeatOneCancelled;
+		return [defer.promise, () => this.cancel(userId, item)];
 	}
 }
 
