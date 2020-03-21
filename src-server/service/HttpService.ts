@@ -193,9 +193,6 @@ quelaag.addEndpoint({
 						// prevent cheesing the uniqueness cooloff by using the IP Address and site name
 						throw new Error("I can not download music from an IP address.");
 					}
-
-					ProgressQueueService.setTitle(userId, contentId, uplData.music.url, true);
-					// the title and duration are set later by `ContentService.add(uplData)`
 				}
 
 				try {

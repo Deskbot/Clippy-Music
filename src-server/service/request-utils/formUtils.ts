@@ -12,6 +12,8 @@ import { FileUploadError } from "../../lib/errors";
 import { UploadData, UrlOverlay, NoOverlay, FileOverlay, FileMusic, UrlMusic, OverlayMedium } from "../../types/UploadData";
 
 export function handleFileUpload(req: http.IncomingMessage, userId: string, contentId: number): q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]> {
+    const progressQueue = ProgressQueueServiceGetter.get();
+
     const defer = q.defer<[formidable.IncomingForm, formidable.Fields, formidable.Files]>();
 
     const form = new formidable.IncomingForm();
@@ -53,7 +55,6 @@ export function handleFileUpload(req: http.IncomingMessage, userId: string, cont
     let percentComplete = 0;
     form.on("fileBegin", (fieldName, file) => {
         if (fieldName === "music-file" && file && file.name) {
-            const progressQueue = ProgressQueueServiceGetter.get();
             progressQueue.setTitle(userId, contentId, file.name);
             progressQueue.addPercentageGetter(contentId, () => percentComplete);
 
@@ -61,6 +62,13 @@ export function handleFileUpload(req: http.IncomingMessage, userId: string, cont
                 percentComplete = sofar / total;
                 debug.log(percentComplete);
             });
+        }
+    });
+
+    form.on("field", (name, value) => {
+        if (name === "music-url") {
+            // the title and duration are set later by `ContentService.add(uplData)`
+            progressQueue.setTitle(userId, contentId, value, true);
         }
     });
 
