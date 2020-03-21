@@ -113,15 +113,15 @@ export class ContentManager extends EventEmitter {
 		return dataToQueue;
 	}
 
-	addMusicHash(hash: number) {
+	private addMusicHash(hash: number) {
 		this.musicHashes[hash] = new Date().getTime();
 	}
 
-	addOverlayHash(hash: number) {
+	private addOverlayHash(hash: number) {
 		this.overlayHashes[hash] = new Date().getTime();
 	}
 
-	addUrlId(id: string) {
+	private addUrlId(id: string) {
 		this.musicUrlRecord[id] = new Date().getTime();
 	}
 
@@ -143,7 +143,7 @@ export class ContentManager extends EventEmitter {
 		return durationBasedOnStartAndFinish;
 	}
 
-	deleteContent(contentObj: ItemData) {
+	private deleteContent(contentObj: ItemData) {
 		if (!contentObj.music.stream) utils.deleteFile(contentObj.music.path);
 		if (contentObj.overlay.exists) utils.deleteFile(contentObj.overlay.path); //empty overlay files can be uploaded and will persist
 	}
@@ -236,7 +236,7 @@ export class ContentManager extends EventEmitter {
 		this.stopOverlay();
 	}
 
-	logPlay(contentData: ItemData) {
+	private logPlay(contentData: ItemData) {
 		const nickname = this.userRecord.getNickname(contentData.userId);
 		const currentTime = new Date().toISOString();
 
@@ -278,20 +278,20 @@ export class ContentManager extends EventEmitter {
 		return true;
 	}
 
-	musicHashIsUnique(hash: number): boolean {
+	private musicHashIsUnique(hash: number): boolean {
 		let lastPlayed = this.musicHashes[hash];
 		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
 	}
 
-	nextMusicPath(): string {
+	private nextMusicPath(): string {
 		return consts.dirs.music + this.idFactory.next();
 	}
 
-	nextOverlayPath(): string {
+	private nextOverlayPath(): string {
 		return consts.dirs.overlay + this.idFactory.next();
 	}
 
-	overlayHashIsUnique(hash: number): boolean {
+	private overlayHashIsUnique(hash: number): boolean {
 		let lastPlayed = this.overlayHashes[hash];
 		return !lastPlayed || lastPlayed + opt.overlayUniqueCoolOff * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
 	}
@@ -381,7 +381,7 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	remember(itemData: ItemData) {
+	private remember(itemData: ItemData) {
 		if (itemData.music.isUrl) {
 			this.addUrlId(itemData.music.uniqueId);
 		}
@@ -421,13 +421,13 @@ export class ContentManager extends EventEmitter {
 		});
 	}
 
-	stopMusic() {
+	private stopMusic() {
 		if (this.runningMusicProc) {
 			this.runningMusicProc.kill();
 		}
 	}
 
-	stopOverlay() {
+	private stopOverlay() {
 		if (this.runningOverlayProc) {
 			this.runningOverlayProc.kill();
 			this.runningOverlayProc = null;
