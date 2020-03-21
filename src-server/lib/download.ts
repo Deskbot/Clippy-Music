@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as request from "request";
 
 import * as opt from "../options";
-import { ContentType } from "../types/ContentType";
+import { ContentPart } from "../types/ContentPart";
 import { BadUrlError, UnknownDownloadError, DownloadTooLargeError } from "./errors";
 import { Html5Entities } from "html-entities";
 import { OverlayMedium } from "../types/UploadData";
@@ -15,7 +15,7 @@ export function downloadOverlay(url: string, destination: string) {
             return resolve();
         });
         stream.on("error", (err) => {
-            err.contentType = ContentType.Image;
+            err.contentType = ContentPart.Overlay;
             return reject(err);
         });
     });
@@ -40,15 +40,15 @@ export function canDownloadOverlay(url: string): Promise <[string, OverlayMedium
     return new Promise((resolve, reject) => {
         request.head(url, async (err, res, body) => {
             if (err) {
-                err.contentType = ContentType.Image;
+                err.contentType = ContentPart.Overlay;
                 if (err.code === "ENOTFOUND" || err.code === "ETIMEDOUT") {
-                    return reject(new BadUrlError(ContentType.Image, url));
+                    return reject(new BadUrlError(ContentPart.Overlay, url));
                 }
                 return reject(err);
             }
 
             if (!res) {
-                return reject(new UnknownDownloadError("I could not download the requested overlay.", ContentType.Image));
+                return reject(new UnknownDownloadError("I could not download the requested overlay.", ContentPart.Overlay));
             }
 
             const mimeTypeFound = res.headers["content-type"] as string;
@@ -60,11 +60,11 @@ export function canDownloadOverlay(url: string): Promise <[string, OverlayMedium
             } else if (typeFound === "video") {
                 overlayMedium = OverlayMedium.Video;
             } else {
-                return reject(new BadUrlError(ContentType.Image, url));
+                return reject(new BadUrlError(ContentPart.Overlay, url));
             }
 
             if (parseInt(res.headers["content-length"] as string) > opt.fileSizeLimit) {
-                return reject(new DownloadTooLargeError(ContentType.Image));
+                return reject(new DownloadTooLargeError(ContentPart.Overlay));
             }
 
             const imageName = getFileNameFromUrl(url);

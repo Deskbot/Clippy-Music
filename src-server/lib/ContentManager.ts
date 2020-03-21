@@ -9,7 +9,7 @@ import * as utils from "./utils/utils";
 import * as opt from "../options";
 import * as time from "./time";
 
-import { ContentType } from "../types/ContentType";
+import { ContentPart } from "../types/ContentPart";
 import { getMusicInfoByUrl, getFileDuration, UrlMusicData } from "./musicData";
 import { CancelError, UniqueError, YTError, BadUrlError } from "./errors";
 import { UploadDataWithId, UploadDataWithIdTitleDuration, MusicWithMetadata, OverlayMedium } from "../types/UploadData";
@@ -214,7 +214,7 @@ export class ContentManager extends EventEmitter {
 			};
 
 		} else {
-			throw new UniqueError(ContentType.Music);
+			throw new UniqueError(ContentPart.Music);
 		}
 	}
 
@@ -521,7 +521,7 @@ export class ContentManager extends EventEmitter {
 						stream: false,
 					};
 				} else {
-					throw new UniqueError(ContentType.Music);
+					throw new UniqueError(ContentPart.Music);
 				}
 			}
 		} else {
@@ -534,7 +534,7 @@ export class ContentManager extends EventEmitter {
 					stream: false,
 				};
 			} else {
-				throw new UniqueError(ContentType.Music);
+				throw new UniqueError(ContentPart.Music);
 			}
 		}
 	}
@@ -567,7 +567,7 @@ export class ContentManager extends EventEmitter {
 					try {
 						title = (await getMusicInfoByUrl(overlay.url)).title;
 					} catch (err) {
-						throw new BadUrlError(ContentType.Music, overlay.url);
+						throw new BadUrlError(ContentPart.Overlay, overlay.url);
 					}
 
 					this.progressQueue.addCancelFunc(
@@ -601,7 +601,7 @@ export class ContentManager extends EventEmitter {
 			};
 
 		} else {
-			throw new UniqueError(ContentType.Image);
+			throw new UniqueError(ContentPart.Overlay);
 		}
 	}
 

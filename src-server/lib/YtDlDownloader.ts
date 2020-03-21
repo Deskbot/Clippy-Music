@@ -4,7 +4,7 @@ import * as q from "q";
 import * as opt from "../options";
 
 import { CancelError, UnknownDownloadError } from "./errors";
-import { ContentType } from "../types/ContentType";
+import { ContentPart } from "../types/ContentPart";
 import { EventEmitter } from "events";
 
 interface YtDlQueueItem {
@@ -69,7 +69,7 @@ export class YtDlDownloader extends EventEmitter {
 				} else {
 					console.error(errMessage);
 					console.trace();
-					return reject(new UnknownDownloadError(`A non-zero exit code (${code}) downloading a YouTube video.`, ContentType.Music));
+					return reject(new UnknownDownloadError(`A non-zero exit code (${code}) downloading a YouTube video.`, ContentPart.Music));
 				}
 			});
 

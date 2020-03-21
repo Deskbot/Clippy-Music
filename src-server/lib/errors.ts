@@ -1,12 +1,12 @@
 import * as formidable from "formidable";
 import * as consts from "../consts";
 
-import { ContentType } from "../types/ContentType";
+import { ContentPart } from "../types/ContentPart";
 
 abstract class DeferredContentError extends Error {
-	public readonly contentType: ContentType;
+	public readonly contentType: ContentPart;
 
-	constructor(reason: string, contentType: ContentType) {
+	constructor(reason: string, contentType: ContentPart) {
 		super(reason + " So the content was not downloaded.");
 		this.contentType = contentType;
 	}
@@ -16,7 +16,7 @@ export class AuthError extends Error {}
 
 export class BadUrlError extends DeferredContentError {
 	public readonly badUrl: string;
-	constructor(contentType: ContentType, url: string) {
+	constructor(contentType: ContentPart, url: string) {
 		super("The url resource requested does not exist.", contentType);
 		this.badUrl = url;
 	}
@@ -37,7 +37,7 @@ export class CancelError extends Error {
 export class DownloadTooLargeError extends DeferredContentError {
 	public readonly sizeLimit: string;
 
-	constructor(contentType: ContentType) {
+	constructor(contentType: ContentPart) {
 		super(`The ${contentType.toString()} requested was too large (over ${consts.fileSizeLimStr}).`, contentType);
 		this.sizeLimit = consts.fileSizeLimStr;
 	}
@@ -66,9 +66,9 @@ export class FormParseError extends Error {
 export class UniqueError extends DeferredContentError {
 	public readonly playedWithin: string;
 
-	constructor(contentType: ContentType) {
+	constructor(contentType: ContentPart) {
 		let playedWithin;
-		if (contentType === ContentType.Music) {
+		if (contentType === ContentPart.Music) {
 			playedWithin = consts.musicPlayedWithin;
 		} else {
 			playedWithin = consts.imagePlayedWithin;
@@ -80,7 +80,7 @@ export class UniqueError extends DeferredContentError {
 }
 
 export class UnknownDownloadError extends DeferredContentError {
-	constructor(message: string, contentType: ContentType) {
+	constructor(message: string, contentType: ContentPart) {
 		super(message, contentType);
 	}
 }
