@@ -89,7 +89,7 @@ var WebSocketHandler = (function() {
 		var clippyAnimation;
 
 		if (errorType === "BadUrlError") {
-			clippySays = "I could not find anything at the " + contentType + " URL given. Is the url correct?";
+			clippySays = "I could not find anything I could download at the " + contentType + " URL given. Is the url correct?";
 
 		} else if (errorType === "DownloadTooLargeError") {
 			var what;
@@ -104,21 +104,6 @@ var WebSocketHandler = (function() {
 
 			} else {
 				clippySays = "I stopped processing your upload because it was too large.";
-			}
-
-		} else if (errorType === "DownloadWrongTypeError") {
-			var what;
-
-			if (isMusic || isPic) {
-				if (isMusic) {
-					what = whatMus;
-				} else {
-					what = whatPic;
-				}
-				clippySays = "I couldn't queue " + what + " because the file was not an image or video. The type of your file was: " + contentData.error.actualTypeDesc + ".";
-
-			} else {
-				clippySays = "I didn't download one of your files because it was of the wrong type.";
 			}
 
 		} else if (errorType === "FileUploadError") {

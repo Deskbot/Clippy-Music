@@ -6,9 +6,12 @@ This list is in a rough order of priority.
 List
 ----
 
+* rename contenttype and contenttype.image
 * Silent looping Video overlay
 	* youtube-dl video url (this covers video files)
 	* ensure that the download bar correctly accounts for all situations
+		* the progress queue should reflect all ytdl instances
+	* long ytdl url should be streamed
 	* show a different download button for videos and images
 	* Updates TESTS file
 	* Update command line api in README

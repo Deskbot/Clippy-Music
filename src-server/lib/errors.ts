@@ -45,17 +45,6 @@ export class DurationFindingError extends Error {
 
 }
 
-export class DownloadWrongTypeError extends DeferredContentError {
-	public readonly actualTypeDesc: string;
-	public readonly expectedType: string;
-
-	constructor(contentType: ContentType, expectedType: string, actualTypeDesc: string) {
-		super(`The ${expectedType.toString()} you requested was the wrong type. It's actually a "${actualTypeDesc}".`, contentType);
-		this.actualTypeDesc = actualTypeDesc;
-		this.expectedType = expectedType;
-	}
-}
-
 export class FileUploadError extends Error {
 	public files: formidable.File[];
 

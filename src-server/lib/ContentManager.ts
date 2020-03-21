@@ -11,8 +11,8 @@ import * as time from "./time";
 
 import { ContentType } from "../types/ContentType";
 import { getMusicInfoByUrl, getFileDuration, UrlMusicData } from "./musicData";
-import { CancelError, UniqueError, YTError } from "./errors";
-import { UploadDataWithId, UploadDataWithIdTitleDuration, NoOverlay, FileOverlay, UrlOverlay, MusicWithMetadata, OverlayMedium } from "../types/UploadData";
+import { CancelError, UniqueError, YTError, BadUrlError } from "./errors";
+import { UploadDataWithId, UploadDataWithIdTitleDuration, MusicWithMetadata, OverlayMedium } from "../types/UploadData";
 import { IdFactory } from "./IdFactory";
 import { ItemData, CompleteMusic, CompleteOverlay } from "../types/ItemData";
 import { YtDlDownloader } from "./YtDlDownloader";
@@ -20,7 +20,7 @@ import { UserRecord } from "./UserRecord";
 import { ProgressQueue } from "./ProgressQueue";
 import { BarringerQueue, isSuspendedBarringerQueue } from "./queue/BarringerQueue";
 import { PublicItemData } from "../types/PublicItemData";
-import { downloadOverlay } from "./download";
+import { canDownloadOverlay, downloadOverlay } from "./download";
 import { startVideoOverlay, startImageOverlay, startMusic, doWhenMusicPlays as doWhenMusicStarts } from "./playMedia";
 
 export interface SuspendedContentManager {
@@ -453,7 +453,7 @@ export class ContentManager extends EventEmitter {
 			);
 
 			// if the overlay fails, make sure any yt download is stopped
-			const overlayPrepProm = this.tryPrepOverlay(someItemData.overlay);
+			const overlayPrepProm = this.tryPrepOverlay(someItemData);
 
 			const [ music, overlay ] = await Promise.all([musicPrepProm, overlayPrepProm]);
 
@@ -539,7 +539,9 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	private async tryPrepOverlay(overlay: NoOverlay | FileOverlay | UrlOverlay): Promise<CompleteOverlay> {
+	private async tryPrepOverlay(someItemData: UploadDataWithIdTitleDuration): Promise<CompleteOverlay> {
+		const { overlay } = someItemData;
+
 		if (!overlay.exists) {
 			return {
 				...overlay,
@@ -555,7 +557,31 @@ export class ContentManager extends EventEmitter {
 
 		if (overlay.isUrl) {
 			pathOnDisk = this.nextOverlayPath();
-			[title, medium] = await downloadOverlay(overlay.url, pathOnDisk);
+			try {
+				[title, medium] = await canDownloadOverlay(overlay.url);
+				await downloadOverlay(overlay.url, pathOnDisk);
+			} catch (err) {
+				if (err instanceof BadUrlError) {
+					const { id, userId } = someItemData;
+
+					try {
+						title = (await getMusicInfoByUrl(overlay.url)).title;
+					} catch (err) {
+						throw new BadUrlError(ContentType.Music);
+					}
+
+					this.progressQueue.addCancelFunc(
+						userId,
+						id,
+						() => this.ytDlDownloader.tryCancel(userId, id)
+					);
+					await this.ytDlDownloader.new(id, userId, overlay.url, pathOnDisk);
+
+					medium = OverlayMedium.Video;
+				} else {
+					throw err;
+				}
+			}
 
 		} else {
 			pathOnDisk = overlay.path;

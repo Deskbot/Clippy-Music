@@ -3,13 +3,42 @@ import * as request from "request";
 
 import * as opt from "../options";
 import { ContentType } from "../types/ContentType";
-import { BadUrlError, UnknownDownloadError, DownloadWrongTypeError, DownloadTooLargeError } from "./errors";
+import { BadUrlError, UnknownDownloadError, DownloadTooLargeError } from "./errors";
 import { Html5Entities } from "html-entities";
 import { OverlayMedium } from "../types/UploadData";
 
-export function downloadOverlay(url: string, destination: string): Promise <[string, OverlayMedium]> {
+export function downloadOverlay(url: string, destination: string) {
+    return new Promise<void>((resolve, reject) => {
+        const stream = request(url).pipe(fs.createWriteStream(destination));
+
+        stream.on("close", () => {
+            return resolve();
+        });
+        stream.on("error", (err) => {
+            err.contentType = ContentType.Image;
+            return reject(err);
+        });
+    });
+}
+
+function getFileNameFromUrl(url: string): string {
+    let name = url.split("/").pop();
+    if (name === undefined) {
+        return "";
+    } else {
+        name = name.length <= 1 ? undefined : name.split(".").shift();
+    }
+
+    if (name === undefined) {
+        return "";
+    }
+
+    return name;
+}
+
+export function canDownloadOverlay(url: string): Promise <[string, OverlayMedium]> {
     return new Promise((resolve, reject) => {
-        request.head(url, (err, res, body) => {
+        request.head(url, async (err, res, body) => {
             if (err) {
                 err.contentType = ContentType.Image;
                 if (err.code === "ENOTFOUND" || err.code === "ETIMEDOUT") {
@@ -19,7 +48,7 @@ export function downloadOverlay(url: string, destination: string): Promise <[str
             }
 
             if (!res) {
-                return reject(new UnknownDownloadError("Could not get a response for the request.", ContentType.Image));
+                return reject(new UnknownDownloadError("I could not download the requested overlay.", ContentType.Image));
             }
 
             const mimeTypeFound = res.headers["content-type"] as string;
@@ -31,31 +60,16 @@ export function downloadOverlay(url: string, destination: string): Promise <[str
             } else if (typeFound === "video") {
                 overlayMedium = OverlayMedium.Video;
             } else {
-                return reject(new DownloadWrongTypeError(ContentType.Image, "image", mimeTypeFound));
+                return reject(new BadUrlError(ContentType.Image));
             }
 
             if (parseInt(res.headers["content-length"] as string) > opt.fileSizeLimit) {
                 return reject(new DownloadTooLargeError(ContentType.Image));
             }
 
-            let imageName: string | null = url.split("/").pop() as string;
-            imageName = imageName.length <= 1 ? null : imageName.split(".").shift() as string;
-
-            if (imageName == null) {
-                imageName = "";
-            }
-
+            const imageName = getFileNameFromUrl(url);
             const title = new Html5Entities().encode(imageName);
-
-            const stream = request(url).pipe(fs.createWriteStream(destination));
-
-            stream.on("close", () => {
-                return resolve([title, overlayMedium]);
-            });
-            stream.on("error", (err) => {
-                err.contentType = ContentType.Image;
-                return reject(err);
-            });
+            resolve([title, overlayMedium]);
         });
     });
 }
