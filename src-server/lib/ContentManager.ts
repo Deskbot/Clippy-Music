@@ -283,6 +283,14 @@ export class ContentManager extends EventEmitter {
 		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
 	}
 
+	private musicUrlIsUnique(uniqueUrlId: string): boolean {
+		const lastPlayed = this.musicUrlRecord[uniqueUrlId];
+
+		// never played
+		// or the current time is after the cooloff period
+		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff * 1000 < new Date().getTime();
+	}
+
 	private nextMusicPath(): string {
 		return consts.dirs.music + this.idFactory.next();
 	}
@@ -351,6 +359,13 @@ export class ContentManager extends EventEmitter {
 		this.emit("queue-update");
 
 		return true;
+	}
+
+	private prepNoOverlay(overlay: NoOverlay): CompleteOverlay {
+		return {
+			...overlay,
+			hash: undefined,
+		};
 	}
 
 	private publicify(item: ItemData): PublicItemData {
@@ -539,11 +554,9 @@ export class ContentManager extends EventEmitter {
 
 	private async tryPrepOverlay(overlay: UrlOverlay | FileOverlay | NoOverlay, contentId: number, userId: string): Promise<CompleteOverlay> {
 		if (!overlay.exists) {
-			return {
-				...overlay,
-				hash: undefined,
-			};
+			return this.prepNoOverlay(overlay);
 		}
+
 
 		// we may already have the image downloaded, but we always need to check the uniqueness
 
@@ -575,11 +588,8 @@ export class ContentManager extends EventEmitter {
 					throw err;
 				}
 			}
-
 		} else {
-			pathOnDisk = overlay.path;
-			title = overlay.title;
-			medium = overlay.medium;
+			return this.prepFileOverlay(overlay);
 		}
 
 		const overlayHash = await utils.fileHash(pathOnDisk);
@@ -598,11 +608,10 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	private musicUrlIsUnique(uniqueUrlId: string): boolean {
-		const lastPlayed = this.musicUrlRecord[uniqueUrlId];
-
-		// never played
-		// or the current time is after the cooloff period
-		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff * 1000 < new Date().getTime();
+	private async prepFileOverlay(overlay: FileOverlay): Promise<CompleteOverlay> {
+		return {
+			...overlay,
+			hash: await utils.fileHash(overlay.path),
+		};
 	}
 }
