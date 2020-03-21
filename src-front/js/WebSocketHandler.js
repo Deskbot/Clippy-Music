@@ -89,7 +89,7 @@ var WebSocketHandler = (function() {
 		var clippyAnimation;
 
 		if (errorType === "BadUrlError") {
-			clippySays = "I could not find anything I could download at the " + contentType + " URL given. Is the url correct?";
+			clippySays = "I could not find anything I could download at the " + contentType + " URL given. Is the URL correct? (" + contentData.error.badUrl + ")";
 
 		} else if (errorType === "DownloadTooLargeError") {
 			var what;

@@ -42,7 +42,7 @@ export function canDownloadOverlay(url: string): Promise <[string, OverlayMedium
             if (err) {
                 err.contentType = ContentType.Image;
                 if (err.code === "ENOTFOUND" || err.code === "ETIMEDOUT") {
-                    return reject(new BadUrlError(ContentType.Image));
+                    return reject(new BadUrlError(ContentType.Image, url));
                 }
                 return reject(err);
             }
@@ -60,7 +60,7 @@ export function canDownloadOverlay(url: string): Promise <[string, OverlayMedium
             } else if (typeFound === "video") {
                 overlayMedium = OverlayMedium.Video;
             } else {
-                return reject(new BadUrlError(ContentType.Image));
+                return reject(new BadUrlError(ContentType.Image, url));
             }
 
             if (parseInt(res.headers["content-length"] as string) > opt.fileSizeLimit) {

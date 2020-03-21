@@ -567,7 +567,7 @@ export class ContentManager extends EventEmitter {
 					try {
 						title = (await getMusicInfoByUrl(overlay.url)).title;
 					} catch (err) {
-						throw new BadUrlError(ContentType.Music);
+						throw new BadUrlError(ContentType.Music, overlay.url);
 					}
 
 					this.progressQueue.addCancelFunc(

@@ -15,8 +15,10 @@ abstract class DeferredContentError extends Error {
 export class AuthError extends Error {}
 
 export class BadUrlError extends DeferredContentError {
-	constructor(contentType: ContentType) {
+	public readonly badUrl: string;
+	constructor(contentType: ContentType, url: string) {
 		super("The url resource requested does not exist.", contentType);
+		this.badUrl = url;
 	}
 }
 
