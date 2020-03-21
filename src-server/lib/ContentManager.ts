@@ -4,6 +4,7 @@ import { Html5Entities } from "html-entities";
 import * as fs from "fs";
 
 import * as consts from "../consts";
+import * as debug from "../lib/utils/debug";
 import * as utils from "./utils/utils";
 import * as opt from "../options";
 import * as time from "./time";
@@ -104,16 +105,12 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	async add(uplData: UploadDataWithId) {
-		try {
-			// awaits everything that needs to happen before http response
-			const dataToQueue = await this.getDataToQueue(uplData);
-			this.tryQueue(dataToQueue);
-			return dataToQueue;
-		} catch (err) {
-			// errors here are sent by websocket
-			throw err;
-		}
+	async add(uplData: UploadDataWithId): Promise<UploadDataWithIdTitleDuration> {
+		// awaits everything that needs to happen before http response
+		const dataToQueue = await this.getDataToQueue(uplData);
+		// don't wait for the actual queueing to finish
+		this.tryQueue(dataToQueue).catch(utils.reportError);
+		return dataToQueue;
 	}
 
 	addMusicHash(hash: number) {
@@ -456,10 +453,7 @@ export class ContentManager extends EventEmitter {
 			);
 
 			// if the overlay fails, make sure any yt download is stopped
-			const overlayPrepProm = this.tryPrepOverlay(someItemData.overlay).catch(err => {
-				this.ytDlDownloader.tryCancel(someItemData.userId, someItemData.id);
-				throw err;
-			});
+			const overlayPrepProm = this.tryPrepOverlay(someItemData.overlay);
 
 			const [ music, overlay ] = await Promise.all([musicPrepProm, overlayPrepProm]);
 
@@ -474,8 +468,11 @@ export class ContentManager extends EventEmitter {
 			this.emit("queue-update");
 
 		} catch (err) {
-			if (!(err instanceof CancelError)) {
+			const notCancelled = !(err instanceof CancelError);
+			if (notCancelled) {
 				this.progressQueue.finishedWithError(someItemData.userId, someItemData.id, err);
+				debug.log(`Cancelling ${someItemData.id} due to a failure while trying to queue the media.`);
+				this.ytDlDownloader.tryCancel(someItemData.userId, someItemData.id);
 			}
 		}
 	}
