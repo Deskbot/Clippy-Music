@@ -145,16 +145,18 @@ export class YtDlDownloader extends EventEmitter {
 
 		if (!queue) return false;
 
+		let atLeatOneCancelled = false;
+
 		for (let i = 0; i < queue.length; i++) {
 			const item = queue[i];
 
 			if (item.cid == cid) {
 				this.cancel(queue, i);
-				return true;
+				atLeatOneCancelled = true;
 			}
 		}
 
-		return false;
+		return atLeatOneCancelled;
 	}
 }
 
