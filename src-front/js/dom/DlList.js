@@ -40,6 +40,9 @@ var DlList = (function() {
 			for (var i = blocksAlready; i < targetBlockCount; i++) {
 				$bar.append(templates.makeDlBlock());
 			}
+			for (var i = blocksAlready; i > targetBlockCount; i--) {
+				$bar.children().last().remove();
+			}
 		},
 
 		findDlItemElem: function findDlItemElem(contentId) {
