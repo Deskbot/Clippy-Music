@@ -169,6 +169,12 @@ class PercentReader {
 		this.lastPercent = 0;
 		this.phase = 1;
 		this.proc = dlProc;
+
+		dlProc.on("exit", (code, signal) => {
+			if (code === 0) {
+				this.lastPercent = 1;
+			}
+		})
 	}
 
 	get(): number {
