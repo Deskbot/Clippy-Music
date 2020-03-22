@@ -326,8 +326,8 @@ export class ContentManager extends EventEmitter {
 		this.currentlyPlaying = contentData;
 
 		const timePlayedAt = Date.now();
-
 		const musicLocation = contentData.music.stream ? contentData.music.url : contentData.music.path;
+
 		this.runningMusicProc = startMusic(musicLocation, opt.timeout, contentData.startTime, contentData.endTime);
 
 		this.runningMusicProc.on("close", (code, signal) => { // runs before next call to playNext

@@ -7,7 +7,6 @@ List
 ----
 
 * Silent looping Video overlay
-	* youtube-dl video url (this covers video files)
 	* ensure that the download bar correctly accounts for all situations
 		* the progress queue should reflect all ytdl instances
 	* long ytdl url should be streamed

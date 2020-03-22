@@ -6,7 +6,7 @@ import { EventEmitter } from "events";
 
 import * as opt from "../options";
 import { QuickValuesMap } from "./utils/QuickValuesMap";
-import { allTrue } from "./utils/arrayUtils";
+import { anyTrue } from "./utils/arrayUtils";
 
 interface PublicProgressItem {
 	cancellable?: boolean;
@@ -20,16 +20,16 @@ interface PublicProgressItem {
 
 export class ProgressQueue extends EventEmitter {
 	private cancelFuncs: {
-		[contentId: number]: (() => boolean)[]
+		[contentId: number]: (() => boolean)[] | undefined
 	};
 	private lastQueueLength: {
-		[userId: string]: number
+		[userId: string]: number | undefined
 	};
 	private percentGetters: {
-		[contentId: number]: () => number
+		[contentId: number]: (() => number)[] | undefined
 	};
 	private queues: {
-		[userId: string]: QuickValuesMap<number, PublicProgressItem> // number is contentId
+		[userId: string]: QuickValuesMap<number, PublicProgressItem> | undefined // number is contentId
 	};
 	private totalContents: number;
 	private transmitIntervalId: NodeJS.Timeout | undefined;
@@ -74,7 +74,7 @@ export class ProgressQueue extends EventEmitter {
 			userId
 		};
 
-		this.queues[userId].set(contentId, newItem);
+		this.queues[userId]!.set(contentId, newItem);
 		this.totalContents++;
 
 		this.transmitToUserMaybe(userId);
@@ -88,19 +88,24 @@ export class ProgressQueue extends EventEmitter {
 			if (!this.cancelFuncs[contentId]) {
 				this.cancelFuncs[contentId] = [func]
 			} else {
-				this.cancelFuncs[contentId].push(func);
+				this.cancelFuncs[contentId]!.push(func);
 			}
 		}
 	}
 
 	addPercentageGetter(contentId: number, func: () => number) {
-		this.percentGetters[contentId] = func;
+		if (!this.percentGetters[contentId]) {
+			this.percentGetters[contentId] = [func];
+		} else {
+			this.percentGetters[contentId]!.push(func);
+		}
 	}
 
 	cancel(userId: string, contentId: number) {
-		if (this.cancelFuncs[contentId]) {
-			const successes = this.cancelFuncs[contentId].map(func => func());
-			if (allTrue(successes)) {
+		const cancelFuncs = this.cancelFuncs[contentId];
+		if (cancelFuncs) {
+			const successes = cancelFuncs.map(func => func());
+			if (anyTrue(successes)) {
 				this.finished(userId, contentId);
 				return true;
 			}
@@ -113,9 +118,10 @@ export class ProgressQueue extends EventEmitter {
 		delete this.cancelFuncs[item.contentId];
 		const queueMap = this.queues[item.userId];
 
-		queueMap.delete(item.contentId);
-		this.totalContents--;
-
+		if (queueMap) {
+			queueMap.delete(item.contentId);
+			this.totalContents--;
+		}
 	}
 
 	private findQueueItem(userId: string, contentId: number): PublicProgressItem | undefined {
@@ -158,7 +164,7 @@ export class ProgressQueue extends EventEmitter {
 	removeCancelFunc(userId: string, contentId: number, func: () => boolean) {
 		const item = this.findQueueItem(userId, contentId);
 		if (item && this.cancelFuncs[contentId]) {
-			const funcs = this.cancelFuncs[contentId];
+			const funcs = this.cancelFuncs[contentId]!;
 			const index = funcs.indexOf(func);
 			funcs.splice(index, 1);
 			item.cancellable = Boolean(funcs.length);
@@ -204,10 +210,12 @@ export class ProgressQueue extends EventEmitter {
 	}
 
 	private transmitToUserMaybe(userId: string) {
-		const queueMap = this.queues[userId];
+		const queueMap = this.queues[userId]!;
 		const queueLength = queueMap.size;
 
-		if (queueLength > 0 || this.lastQueueLength[userId] > 0) {
+		const lastQueueLength = this.lastQueueLength[userId];
+
+		if (queueLength > 0 || (lastQueueLength && lastQueueLength > 0)) {
 			this.updateQueue(queueMap);
 			this.emit("list", userId, queueMap.valuesQuick());
 			this.lastQueueLength[userId] = queueLength;
@@ -216,8 +224,11 @@ export class ProgressQueue extends EventEmitter {
 
 	private updateQueue(queueMap: QuickValuesMap<number, PublicProgressItem>) {
 		for (const item of queueMap.valuesQuick()) {
-			if (this.percentGetters[item.contentId]) {
-				item.percent = this.percentGetters[item.contentId]();
+			const getters = this.percentGetters[item.contentId];
+			if (getters) {
+				const totalPercents = getters.map(func  => func())
+					.reduce((a,b) => a + b, 0);
+				item.percent = totalPercents / getters.length;
 			}
 		}
 	}

@@ -15,6 +15,17 @@ export function allTrue(bools: boolean[]): boolean {
     return true;
 }
 
+/**
+ * @return True when the given array contains at least one true
+ */
+export function anyTrue(bools: boolean[]): boolean {
+    for (const bool of bools) {
+        if (bool === true) return true;
+    }
+
+    return false;
+}
+
 export function findLastIndex<T>(arr: T[], predicate: (item: T) => boolean): number {
     for (let i = arr.length - 1; i >= 0; i--) {
         if (predicate(arr[i])) {
