@@ -29,7 +29,6 @@ export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> 
 			opt.timeout,
 			recoveredContentManager,
 			IdFactoryGetter.get(),
-			progressQueue,
 			UserRecordGetter.get(),
 			ytDlDownloader,
 		);

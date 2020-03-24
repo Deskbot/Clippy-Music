@@ -9,6 +9,13 @@ List
 * Silent looping Video overlay
 	* ensure that the download bar correctly accounts for all situations
 		* the progress queue should reflect all ytdl instances
+			* refactor
+				* refactor to have an object that tracks one content progress
+				* make ytdownloader.new return a progress state function
+				* move progress getting funcs into the progress tracker object
+			* give progress tracker percent chunks to track separately
+			* make the progress tracker stages be ignoreable i.e. don't factor as a chunk that needs doing
+
 	* long ytdl url should be streamed
 	* show a different download button for videos and images
 	* Updates TESTS file
