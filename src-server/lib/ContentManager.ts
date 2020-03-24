@@ -388,7 +388,7 @@ export class ContentManager extends EventEmitter {
 			if (err instanceof BadUrlError) { // can't get the resource from the file directly, so try youtube-dl
 				try {
 					title = (await getMusicInfoByUrl(overlay.url)).title;
-				} catch (err) {
+				} catch (err) { // can't get the info needed to try youtube-dl, so give up
 					throw new BadUrlError(ContentPart.Overlay, overlay.url);
 				}
 
@@ -408,10 +408,10 @@ export class ContentManager extends EventEmitter {
 
 		return {
 			...overlay,
+			hash,
 			medium,
 			path: pathOnDisk,
 			title,
-			hash,
 		};
 	}
 
@@ -521,8 +521,8 @@ export class ContentManager extends EventEmitter {
 
 			const itemData = {
 				...someItemData,
-				overlay,
 				music,
+				overlay,
 			};
 
 			this.playQueue.add(itemData);
