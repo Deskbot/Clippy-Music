@@ -10,9 +10,8 @@ import * as utils from "../../lib/utils/utils";
 import { FileUploadError } from "../../lib/errors";
 import { UploadData, UrlOverlay, NoOverlay, FileOverlay, FileMusic, UrlMusic, OverlayMedium } from "../../types/UploadData";
 import { ProgressTracker } from "../../lib/ProgressQueue";
-import { ProgressQueueServiceGetter } from "../ProgressQueueService";
 
-export function handleFileUpload(req: http.IncomingMessage, contentId: number, progressTracker: ProgressTracker)
+export function handleFileUpload(req: http.IncomingMessage, progressTracker: ProgressTracker)
     : q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]>
 {
     const defer = q.defer<[formidable.IncomingForm, formidable.Fields, formidable.Files]>();
@@ -57,7 +56,7 @@ export function handleFileUpload(req: http.IncomingMessage, contentId: number, p
     form.on("fileBegin", (fieldName, file) => {
         if (fieldName === "music-file" && file && file.name) {
             progressTracker.setTitle(file.name);
-            ProgressQueueServiceGetter.get().addPercentageGetter(contentId, () => percentComplete);
+            progressTracker.addProgressSource(() => percentComplete);
 
             form.on("progress", (sofar: number, total: number) => {
                 percentComplete = sofar / total;

@@ -18,12 +18,7 @@ export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> 
 			throw new Error("The suspended content manager is not of a valid format. Consider restarting the program with the --clean option.");
 		}
 
-		const progressQueue = ProgressQueueServiceGetter.get();
 		const ytDlDownloader = new YtDlDownloader();
-
-		ytDlDownloader.on("started", (cid, getUpdate) => {
-			progressQueue.addPercentageGetter(cid, getUpdate);
-		});
 
 		const cm = new ContentManager(
 			opt.timeout,

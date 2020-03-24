@@ -389,8 +389,9 @@ export class ContentManager extends EventEmitter {
 					throw new BadUrlError(ContentPart.Overlay, overlay.url);
 				}
 
-				const [downloadedPromise, cancel] = this.ytDlDownloader.new(contentId, userId, overlay.url, pathOnDisk);
+				const [downloadedPromise, getProgress, cancel] = this.ytDlDownloader.new(userId, overlay.url, pathOnDisk);
 
+				progressTracker.addProgressSource(getProgress);
 				progressTracker.addCancelFunc(cancel);
 				await downloadedPromise;
 				progressTracker.removeCancelFunc(cancel);
@@ -550,8 +551,9 @@ export class ContentManager extends EventEmitter {
 			} else {
 				const nmp = this.nextMusicPath();
 				const st = new Date().getTime();
-				const [downloadPromise, cancel] = this.ytDlDownloader.new(contentId, userId, music.url, nmp);
+				const [downloadPromise, getProgress, cancel] = this.ytDlDownloader.new(userId, music.url, nmp);
 
+				progressTracker.addProgressSource(getProgress);
 				progressTracker.addCancelFunc(cancel);
 				await downloadPromise;
 				progressTracker.removeCancelFunc(cancel);

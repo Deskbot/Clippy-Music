@@ -10,9 +10,11 @@ import { anyTrue } from "./utils/arrayUtils";
 
 export interface ProgressTracker {
 	addCancelFunc(func: () => boolean): void;
+	addProgressSource(source: () => number): void;
 	cancel(): void;
 	finished(): void;
 	finishedWithError(err: any): void;
+	getPercentComplete(): number;
 	removeCancelFunc(func: () => boolean): void;
 	setTitle(title: string, temporary?: boolean): void;
 }
@@ -30,9 +32,6 @@ interface PublicProgressItem {
 export class ProgressQueue extends EventEmitter {
 	private lastQueueLength: {
 		[userId: string]: number | undefined
-	};
-	private percentGetters: {
-		[contentId: number]: (() => number)[] | undefined
 	};
 	private queues: {
 		[userId: string]: QuickValuesMap<number, PublicProgressItem> | undefined // number is contentId
@@ -63,7 +62,6 @@ export class ProgressQueue extends EventEmitter {
 		super();
 
 		this.lastQueueLength = {};
-		this.percentGetters = {};
 		this.progressTrackers = {};
 		this.queues = {};
 		this.totalContents = 0;
@@ -112,22 +110,20 @@ export class ProgressQueue extends EventEmitter {
 		return tracker;
 	}
 
-	addPercentageGetter(contentId: number, func: () => number) {
-		if (this.percentGetters[contentId]) {
-			this.percentGetters[contentId]!.push(func);
-		} else {
-			this.percentGetters[contentId] = [func];
-		}
-	}
-
 	private deleteQueueItem(item: PublicProgressItem) {
-		delete this.percentGetters[item.contentId];
+		const progressTrackers = this.progressTrackers[item.userId];
+
+		if (progressTrackers) {
+			progressTrackers.delete(item.contentId);
+		}
+
 		const queueMap = this.queues[item.userId];
 
 		if (queueMap) {
 			queueMap.delete(item.contentId);
-			this.totalContents--;
 		}
+
+		this.totalContents--;
 	}
 
 	private findQueueItem(userId: string, contentId: number): PublicProgressItem | undefined {
@@ -199,19 +195,24 @@ export class ProgressQueue extends EventEmitter {
 		const lastQueueLength = this.lastQueueLength[userId];
 
 		if (queueLength > 0 || (lastQueueLength && lastQueueLength > 0)) {
-			this.updateQueue(queueMap);
+			this.updateQueue(userId);
 			this.emit("list", userId, queueMap.valuesQuick());
 			this.lastQueueLength[userId] = queueLength;
 		}
 	}
 
-	private updateQueue(queueMap: QuickValuesMap<number, PublicProgressItem>) {
+	private updateQueue(userId: string) {
+		const queueMap = this.queues[userId];
+		const trackersMap = this.progressTrackers[userId];
+
+		if (!trackersMap || !queueMap) {
+			return;
+		}
+
 		for (const item of queueMap.valuesQuick()) {
-			const getters = this.percentGetters[item.contentId];
-			if (getters) {
-				const totalPercents = getters.map(func  => func())
-					.reduce((a,b) => a + b, 0);
-				item.percent = totalPercents / getters.length;
+			const tracker = trackersMap.get(item.contentId);
+			if (tracker) {
+				item.percent = tracker.getPercentComplete();
 			}
 		}
 	}
@@ -220,6 +221,7 @@ export class ProgressQueue extends EventEmitter {
 class ProgressTrackerImpl extends EventEmitter {
 	private cancelFuncs: (() => boolean)[];
 	private item: PublicProgressItem;
+	private progressSources: (() => number)[];
 
 	emit(eventName: "error", error: any): boolean;
 	emit(eventName: "finished"): boolean;
@@ -239,11 +241,16 @@ class ProgressTrackerImpl extends EventEmitter {
 		super();
 		this.cancelFuncs = [];
 		this.item = item;
+		this.progressSources = [];
 	}
 
 	addCancelFunc(func: () => boolean) {
 		this.item.cancellable = true;
 		this.cancelFuncs.push(func);
+	}
+
+	addProgressSource(getProgress: () => number) {
+		this.progressSources.push(getProgress);
 	}
 
 	cancel() {
@@ -262,6 +269,12 @@ class ProgressTrackerImpl extends EventEmitter {
 
 	finishedWithError(error: any) {
 		this.emit("error", error);
+	}
+
+	getPercentComplete() {
+		const totalPercents = this.progressSources.map(func => func())
+			.reduce((a, b) => a + b, 0);
+		return totalPercents / this.progressSources.length;
 	}
 
 	removeCancelFunc(func: () => boolean) {
