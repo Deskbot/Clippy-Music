@@ -25,7 +25,6 @@ interface PublicProgressItem {
 	percent: number;
 	title: string;
 	titleIsTemp?: boolean;
-	unprepared: boolean;
 	userId: string;
 }
 
@@ -77,7 +76,6 @@ export class ProgressQueue extends EventEmitter {
 			contentId,
 			percent: 0,
 			title: title || "",
-			unprepared: true,
 			userId,
 		};
 
@@ -90,12 +88,12 @@ export class ProgressQueue extends EventEmitter {
 		const tracker = new ProgressTrackerImpl(newItem);
 
 		tracker.on("error", (error) => {
-			this.deleteQueueItem(this.findQueueItem(userId, contentId) as PublicProgressItem);
+			this.deleteQueueItem(this.findQueueItem(userId, contentId)!);
 			this.emit("error", userId, contentId, error);
 		});
 
 		tracker.on("finished", () => {
-			this.deleteQueueItem(this.findQueueItem(userId, contentId) as PublicProgressItem);
+			this.deleteQueueItem(this.findQueueItem(userId, contentId)!);
 			this.emit("delete", userId, contentId);
 		});
 
@@ -150,7 +148,7 @@ export class ProgressQueue extends EventEmitter {
 	 * for Clippy to talk to the user about the item by name
 	 */
 	private maybeItemIsPrepared(item: PublicProgressItem) {
-		if (item.unprepared && item.title && !item.titleIsTemp) {
+		if (item.title && !item.titleIsTemp) {
 			this.emit("prepared", item.userId, item.title);
 		}
 	}
