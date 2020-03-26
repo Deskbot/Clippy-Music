@@ -162,9 +162,9 @@ var WebSocketHandler = (function() {
 		});
 	};
 
-	WebSocketHandler.prototype.handleDlPrepared = function(contentData) {
+	WebSocketHandler.prototype.handleDlPrepared = function(title) {
 		main.clippyAgent.stop();
-		main.clippyAgent.speak("I am now downloading " + utils.entitle(contentData.title) + ".");
+		main.clippyAgent.speak("I am now downloading " + utils.entitle(title) + ".");
 	};
 
 	WebSocketHandler.prototype.handleNickname = function(name) {

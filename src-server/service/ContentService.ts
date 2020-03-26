@@ -4,7 +4,6 @@ import * as consts from "../consts";
 import * as opt from "../options";
 
 import { IdFactoryGetter } from "./IdFactoryService";
-import { ProgressQueueServiceGetter } from "./ProgressQueueService";
 import { UserRecordGetter } from "./UserRecordService";
 import { ContentManager, SuspendedContentManager, isSuspendedContentManager } from "../lib/ContentManager";
 import { YtDlDownloader } from "../lib/YtDlDownloader";
