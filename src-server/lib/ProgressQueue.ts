@@ -214,7 +214,7 @@ export class ProgressQueue extends EventEmitter {
 	}
 }
 
-class ProgressTrackerImpl extends EventEmitter {
+class ProgressTrackerImpl extends EventEmitter implements ProgressTracker {
 	private cancelFuncs: (() => boolean)[];
 	private item: PublicProgressItem;
 	private progressSources: (() => number)[];
