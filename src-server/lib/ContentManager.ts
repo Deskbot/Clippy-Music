@@ -365,7 +365,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		};
 	}
 
-	private async prepUrlOverlay(overlay: UrlOverlay, contentId: number, userId: string, progressTracker: ProgressTracker): Promise<CompleteUrlOverlay> {
+	private async prepUrlOverlay(overlay: UrlOverlay, userId: string, progressTracker: ProgressTracker): Promise<CompleteUrlOverlay> {
 		const pathOnDisk = this.nextOverlayPath();
 
 		let title: string;
@@ -507,7 +507,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 			);
 
 			// if the overlay fails, make sure any yt download is stopped
-			const overlayPrepProm = this.tryPrepOverlay(someItemData.overlay, someItemData.id, someItemData.userId, progressTracker);
+			const overlayPrepProm = this.tryPrepOverlay(someItemData.overlay, someItemData.userId, progressTracker);
 
 			const [ music, overlay ] = await Promise.all([musicPrepProm, overlayPrepProm]);
 
@@ -592,7 +592,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		}
 	}
 
-	private async tryPrepOverlay(overlay: UrlOverlay | FileOverlay | NoOverlay, contentId: number, userId: string, progressTracker: ProgressTracker): Promise<CompleteOverlay> {
+	private async tryPrepOverlay(overlay: UrlOverlay | FileOverlay | NoOverlay, userId: string, progressTracker: ProgressTracker): Promise<CompleteOverlay> {
 		if (!overlay.exists) {
 			return this.prepNoOverlay(overlay);
 		}
@@ -600,7 +600,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		// we may already have the image downloaded, but we always need to check the uniqueness
 		let completeOveraly: CompleteFileOverlay | CompleteUrlOverlay;
 		if (overlay.isUrl) {
-			completeOveraly = await this.prepUrlOverlay(overlay, contentId, userId, progressTracker);
+			completeOveraly = await this.prepUrlOverlay(overlay, userId, progressTracker);
 		} else {
 			completeOveraly = await this.prepFileOverlay(overlay);
 		}
