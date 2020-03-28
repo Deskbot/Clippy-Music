@@ -193,8 +193,8 @@ export function startWebSocketService() {
 		WebSocketService.broadcastQueue();
 	});
 
-	ProgressQueueService.on("prepared", (userId, content) => {
-		WebSocketService.sendMessage(UserRecordService.getSockets(userId), "dl-prep", content);
+	ProgressQueueService.on("prepared", (userId, title) => {
+		WebSocketService.sendMessage(UserRecordService.getSockets(userId), "dl-prep", title);
 	});
 
 	ProgressQueueService.on("delete", (userId, contentId) => {

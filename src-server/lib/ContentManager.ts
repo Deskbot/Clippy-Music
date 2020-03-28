@@ -17,11 +17,12 @@ import { IdFactory } from "./IdFactory";
 import { ItemData, CompleteMusic, CompleteOverlay, CompleteFileOverlay, CompleteUrlOverlay } from "../types/ItemData";
 import { YtDlDownloader } from "./YtDlDownloader";
 import { UserRecord } from "./UserRecord";
-import { ProgressQueue } from "./ProgressQueue";
+import { ProgressTracker } from "./ProgressQueue";
 import { BarringerQueue, isSuspendedBarringerQueue } from "./queue/BarringerQueue";
 import { PublicItemData } from "../types/PublicItemData";
 import { canDownloadOverlayFromRawUrl, downloadOverlayFromRawUrl } from "./download";
 import { startVideoOverlay, startImageOverlay, startMusic, doWhenMusicPlays as doWhenMusicStarts } from "./playMedia";
+import { TypedEmitter } from "./utils/TypedEmitter";
 
 export interface SuspendedContentManager {
 	playQueue: any;
@@ -38,7 +39,13 @@ export function isSuspendedContentManager(obj: any): obj is SuspendedContentMana
 		&& "ytIds" in obj;
 }
 
-export class ContentManager extends EventEmitter {
+interface ContentManagerEvents {
+	end: () => void;
+	"queue-empty": () => void;
+	"queue-update": () => void;
+}
+
+export class ContentManager extends (EventEmitter as TypedEmitter<ContentManagerEvents>) {
 	//data stores
 	private playQueue: BarringerQueue;
 	private musicHashes: {
@@ -53,7 +60,6 @@ export class ContentManager extends EventEmitter {
 
 	//injected objects
 	private idFactory: IdFactory;
-	private progressQueue: ProgressQueue;
 	private userRecord: UserRecord;
 	private ytDlDownloader: YtDlDownloader;
 
@@ -64,32 +70,16 @@ export class ContentManager extends EventEmitter {
 
 	private stop?: boolean;
 
-	public emit(eventName: "end"): boolean;
-	public emit(eventName: "queue-empty"): boolean;
-	public emit(eventName: "queue-update"): boolean;
-	public emit(eventName: string, ...args: any[]): boolean {
-		return super.emit(eventName, ...args);
-	}
-
-	public on(eventName: "end", handler: () => void): this;
-	public on(eventName: "queue-empty", handler: () => void): this;
-	public on(eventName: "queue-update", handler: () => void): this;
-	public on(eventName: string, handler: () => void): this {
-		return super.on(eventName, handler);
-	}
-
 	constructor(
 		maxTimePerBucket: number,
 		startState: SuspendedContentManager | null,
 		idFactory: IdFactory,
-		progressQueue: ProgressQueue,
 		userRecord: UserRecord,
 		ytDlDownloader: YtDlDownloader
 	) {
 		super();
 
 		this.idFactory = idFactory;
-		this.progressQueue = progressQueue;
 		this.userRecord = userRecord;
 		this.ytDlDownloader = ytDlDownloader;
 
@@ -105,11 +95,11 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	async add(uplData: UploadDataWithId): Promise<UploadDataWithIdTitleDuration> {
+	async add(uplData: UploadDataWithId, progressTracker: ProgressTracker): Promise<UploadDataWithIdTitleDuration> {
 		// awaits everything that needs to happen before http response
 		const dataToQueue = await this.getDataToQueue(uplData);
 		// don't wait for the actual queueing to finish
-		this.tryQueue(dataToQueue).catch(utils.reportError);
+		this.tryQueue(dataToQueue, progressTracker).catch(utils.reportError);
 		return dataToQueue;
 	}
 
@@ -375,7 +365,7 @@ export class ContentManager extends EventEmitter {
 		};
 	}
 
-	private async prepUrlOverlay(overlay: UrlOverlay, contentId: number, userId: string): Promise<CompleteUrlOverlay> {
+	private async prepUrlOverlay(overlay: UrlOverlay, contentId: number, userId: string, progressTracker: ProgressTracker): Promise<CompleteUrlOverlay> {
 		const pathOnDisk = this.nextOverlayPath();
 
 		let title: string;
@@ -392,11 +382,12 @@ export class ContentManager extends EventEmitter {
 					throw new BadUrlError(ContentPart.Overlay, overlay.url);
 				}
 
-				const [downloadedPromise, cancel] = this.ytDlDownloader.new(contentId, userId, overlay.url, pathOnDisk);
+				const [downloadedPromise, getProgress, cancel] = this.ytDlDownloader.new(userId, overlay.url, pathOnDisk);
 
-				this.progressQueue.addCancelFunc(userId, contentId, cancel);
+				progressTracker.addProgressSource(getProgress);
+				progressTracker.addCancelFunc(cancel);
 				await downloadedPromise;
-				this.progressQueue.removeCancelFunc(userId, contentId, cancel);
+				progressTracker.removeCancelFunc(cancel);
 
 				medium = OverlayMedium.Video;
 			} else {
@@ -506,16 +497,17 @@ export class ContentManager extends EventEmitter {
 		return JSON.stringify(data);
 	}
 
-	private async tryQueue(someItemData: UploadDataWithIdTitleDuration) {
+	private async tryQueue(someItemData: UploadDataWithIdTitleDuration, progressTracker: ProgressTracker) {
 		try {
 			const musicPrepProm = this.tryPrepMusic(
 				someItemData.music,
 				someItemData.id,
 				someItemData.userId,
+				progressTracker,
 			);
 
 			// if the overlay fails, make sure any yt download is stopped
-			const overlayPrepProm = this.tryPrepOverlay(someItemData.overlay, someItemData.id, someItemData.userId);
+			const overlayPrepProm = this.tryPrepOverlay(someItemData.overlay, someItemData.id, someItemData.userId, progressTracker);
 
 			const [ music, overlay ] = await Promise.all([musicPrepProm, overlayPrepProm]);
 
@@ -526,20 +518,20 @@ export class ContentManager extends EventEmitter {
 			};
 
 			this.playQueue.add(itemData);
-			this.progressQueue.finished(itemData.userId, itemData.id);
+			progressTracker.finished();
 			this.emit("queue-update");
 
 		} catch (err) {
 			const notCancelled = !(err instanceof CancelError);
 			if (notCancelled) {
-				this.progressQueue.finishedWithError(someItemData.userId, someItemData.id, err);
+				progressTracker.finishedWithError(err);
 				debug.log(`Cancelling ${someItemData.id} due to a failure while trying to queue the media.`);
-				this.progressQueue.cancel(someItemData.userId, someItemData.id);
+				progressTracker.cancel();
 			}
 		}
 	}
 
-	private async tryPrepMusic(music: MusicWithMetadata, contentId: number, userId: string): Promise<CompleteMusic> {
+	private async tryPrepMusic(music: MusicWithMetadata, contentId: number, userId: string, progressTracker: ProgressTracker): Promise<CompleteMusic> {
 		if (music.isUrl) {
 			// Is it so big it should just be streamed?
 			if (music.totalFileDuration > opt.streamOverDuration) {
@@ -552,11 +544,12 @@ export class ContentManager extends EventEmitter {
 			} else {
 				const nmp = this.nextMusicPath();
 				const st = new Date().getTime();
-				const [downloadPromise, cancel] = this.ytDlDownloader.new(contentId, userId, music.url, nmp);
+				const [downloadPromise, getProgress, cancel] = this.ytDlDownloader.new(userId, music.url, nmp);
 
-				this.progressQueue.addCancelFunc(userId, contentId, cancel);
+				progressTracker.addProgressSource(getProgress);
+				progressTracker.addCancelFunc(cancel);
 				await downloadPromise;
-				this.progressQueue.removeCancelFunc(userId, contentId, cancel);
+				progressTracker.removeCancelFunc(cancel);
 
 				// when download is completed, then
 				// count how long it took
@@ -599,7 +592,7 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	private async tryPrepOverlay(overlay: UrlOverlay | FileOverlay | NoOverlay, contentId: number, userId: string): Promise<CompleteOverlay> {
+	private async tryPrepOverlay(overlay: UrlOverlay | FileOverlay | NoOverlay, contentId: number, userId: string, progressTracker: ProgressTracker): Promise<CompleteOverlay> {
 		if (!overlay.exists) {
 			return this.prepNoOverlay(overlay);
 		}
@@ -607,7 +600,7 @@ export class ContentManager extends EventEmitter {
 		// we may already have the image downloaded, but we always need to check the uniqueness
 		let completeOveraly: CompleteFileOverlay | CompleteUrlOverlay;
 		if (overlay.isUrl) {
-			completeOveraly = await this.prepUrlOverlay(overlay, contentId, userId);
+			completeOveraly = await this.prepUrlOverlay(overlay, contentId, userId, progressTracker);
 		} else {
 			completeOveraly = await this.prepFileOverlay(overlay);
 		}

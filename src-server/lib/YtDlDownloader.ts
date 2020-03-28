@@ -5,36 +5,23 @@ import * as opt from "../options";
 
 import { CancelError, UnknownDownloadError } from "./errors";
 import { ContentPart } from "../types/ContentPart";
-import { EventEmitter } from "events";
 
 interface YtDlQueueItem {
-	cancelled: boolean,
-	cid: number,
-	defer: q.Deferred<void>,
-	destination: string,
-	percent: number,
-	proc?: cp.ChildProcess,
-	userId: string,
-	target: string,
+	cancelled: boolean;
+	defer: q.Deferred<void>;
+	destination: string;
+	percentSource: PercentSource;
+	proc?: cp.ChildProcess;
+	userId: string;
+	target: string;
 }
 
-export class YtDlDownloader extends EventEmitter {
+export class YtDlDownloader {
 	private userQueues: {
 		[userId: string]: YtDlQueueItem[]
 	};
 
-	public emit(eventName: "started", cid: number, getUpdate: () => number): boolean;
-	public emit(eventName: string, ...args: any[]): boolean {
-		return super.emit(eventName, ...args);
-	}
-
-	public on(eventName: "started", handler: (cid: number, getUpdate: () => number) => void): this;
-	public on(eventName: string, handler: (...args: any[]) => void): this {
-		return super.on(eventName, handler);
-	}
-
 	constructor() {
-		super();
 		this.userQueues = {};
 	}
 
@@ -92,7 +79,7 @@ export class YtDlDownloader extends EventEmitter {
 		if (queue.length === 0) return;
 
 		const head = queue[0]; //item at head of the queue
-		const { cid, defer, destination, target } = head;
+		const { defer, destination, percentSource, target } = head;
 
 		const [ dlProm, dlProc ] = this.download(target, destination);
 		dlProm.then(() => {
@@ -115,18 +102,21 @@ export class YtDlDownloader extends EventEmitter {
 
 		// allow the outside world to get percentage updates
 		const percentReader = new PercentReader(dlProc);
-		this.emit("started", cid, () => percentReader.get());
+		percentSource.set(() => percentReader.get());
 	}
 
 	/**
 	 * Put a new download into the queue
-	 * @param cid The content id the download is for
 	 * @param userId The user downloading
 	 * @param target The resource to download
 	 * @param destination Where to put the downloaded file
-	 * @returns [A Promise that resolves when the download is complete, a function to cancel the download]
+	 * @returns [
+	 *     a Promise that resolves when the download is complete,
+	 *     a function that returns the percent complete
+	 *     a function to cancel the download,
+	 * ]
 	 */
-	new(cid: number, userId: string, target: string, destination: string): [q.Promise<void>, () => boolean] {
+	new(userId: string, target: string, destination: string): [q.Promise<void>, () => number, () => boolean] {
 		let queue = this.userQueues[userId];
 		if (!queue) {
 			queue = this.userQueues[userId] = [];
@@ -134,12 +124,13 @@ export class YtDlDownloader extends EventEmitter {
 
 		const defer = q.defer<void>();
 
-		const item = {
+		const percentSource = new PercentSource();
+
+		const item: YtDlQueueItem = {
 			cancelled: false,
-			cid,
 			defer,
 			destination,
-			percent: 0,
+			percentSource,
 			userId,
 			target,
 		};
@@ -151,7 +142,17 @@ export class YtDlDownloader extends EventEmitter {
 			this.downloadNext(userId);
 		}
 
-		return [defer.promise, () => this.cancel(userId, item)];
+		return [defer.promise, () => percentSource.get(), () => this.cancel(userId, item)];
+	}
+}
+
+class PercentSource {
+	get() {
+		return 0;
+	}
+
+	set(source: () => number) {
+		this.get = source;
 	}
 }
 

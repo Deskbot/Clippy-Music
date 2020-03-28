@@ -25,6 +25,7 @@ import { URL, UrlWithParsedQuery } from "url";
 import { ServerResponse } from "http";
 import { ItemData } from "../types/ItemData";
 import { toNumber } from "../lib/utils/stringUtils";
+import { ProgressTracker } from "../lib/ProgressQueue";
 
 type FormData = {
 	fields: formidable.Fields;
@@ -167,10 +168,12 @@ quelaag.addEndpoint({
 		const ProgressQueueService = ProgressQueueServiceGetter.get();
 		const contentId = IdFactoryGetter.get().next();
 
+		let progressTracker: ProgressTracker;
+
 		handlePotentialBan(userId)
 			.then(() => {
-				ProgressQueueService.add(userId, contentId)
-				return handleFileUpload(req, userId, contentId);
+				progressTracker = ProgressQueueService.add(userId, contentId);
+				return handleFileUpload(req, progressTracker);
 			})
 			.then(async ([form, fields, files]) => {
 				const uplData: UploadDataWithId = {
@@ -196,7 +199,7 @@ quelaag.addEndpoint({
 				}
 
 				try {
-					var itemData = await ContentServiceGetter.get().add(uplData);
+					var itemData = await ContentServiceGetter.get().add(uplData, progressTracker);
 				} catch (err) {
 					if (err instanceof DurationFindingError) {
 						console.error("Error discerning the duration of a music file.", err, uplData.music);
@@ -210,7 +213,7 @@ quelaag.addEndpoint({
 				}
 
 				if (itemData.music.isUrl) {
-					ProgressQueueService.setTitle(userId, contentId, itemData.music.title);
+					progressTracker.setTitle(itemData.music.title);
 				}
 
 				debug.log("successful upload: ", uplData);
@@ -236,23 +239,23 @@ quelaag.addEndpoint({
 					}
 
 					res.statusCode = 400;
-					ProgressQueueService.finishedWithError(userId, contentId, err);
+					progressTracker.finishedWithError(err);
 
 				} else if (err instanceof BannedError) {
 					res.statusCode = 400;
 
 				} else if (err instanceof UniqueError) {
 					res.statusCode = 400;
-					ProgressQueueService.finishedWithError(userId, contentId, err);
+					progressTracker.finishedWithError(err);
 
 				} else if (err instanceof YTError) {
 					res.statusCode = 400;
-					ProgressQueueService.finishedWithError(userId, contentId, err);
+					progressTracker.finishedWithError(err);
 
 				} else {
 					console.error("Unknown upload error: ", err);
 					res.statusCode = 500;
-					ProgressQueueService.finishedWithError(userId, contentId, err);
+					progressTracker.finishedWithError(err);
 				}
 
 				res.setHeader("Content-Type", "application/json");
@@ -366,7 +369,11 @@ quelaag.addEndpoint({
 		const ProgressQueueService = ProgressQueueServiceGetter.get();
 		const { fields } = await middleware.form();
 
-		if (ProgressQueueService.cancel(middleware.ip(), parseInt(fields["content-id"] as string))) {
+		const userId = middleware.ip();
+		const contentId = parseInt(fields["content-id"] as string);
+
+		const progressTracker = ProgressQueueService.getTracker(userId, contentId)
+		if (progressTracker && progressTracker.cancel()) {
 			if (await middleware.noRedirect()) {
 				endWithSuccessText(res, "Success\n");
 			} else {

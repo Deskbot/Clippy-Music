@@ -7,13 +7,13 @@ import * as debug from "../../lib/utils/debug";
 import * as opt from "../../options";
 import * as utils from "../../lib/utils/utils";
 
-import { ProgressQueueServiceGetter } from "../ProgressQueueService";
 import { FileUploadError } from "../../lib/errors";
 import { UploadData, UrlOverlay, NoOverlay, FileOverlay, FileMusic, UrlMusic, OverlayMedium } from "../../types/UploadData";
+import { ProgressTracker } from "../../lib/ProgressQueue";
 
-export function handleFileUpload(req: http.IncomingMessage, userId: string, contentId: number): q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]> {
-    const progressQueue = ProgressQueueServiceGetter.get();
-
+export function handleFileUpload(req: http.IncomingMessage, progressTracker: ProgressTracker)
+    : q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]>
+{
     const defer = q.defer<[formidable.IncomingForm, formidable.Fields, formidable.Files]>();
 
     const form = new formidable.IncomingForm();
@@ -55,8 +55,8 @@ export function handleFileUpload(req: http.IncomingMessage, userId: string, cont
     let percentComplete = 0;
     form.on("fileBegin", (fieldName, file) => {
         if (fieldName === "music-file" && file && file.name) {
-            progressQueue.setTitle(userId, contentId, file.name);
-            progressQueue.addPercentageGetter(contentId, () => percentComplete);
+            progressTracker.setTitle(file.name);
+            progressTracker.addProgressSource(() => percentComplete);
 
             form.on("progress", (sofar: number, total: number) => {
                 percentComplete = sofar / total;
@@ -68,7 +68,7 @@ export function handleFileUpload(req: http.IncomingMessage, userId: string, cont
     form.on("field", (name, value) => {
         if (name === "music-url") {
             // the title and duration are set later by `ContentService.add(uplData)`
-            progressQueue.setTitle(userId, contentId, value, true);
+            progressTracker.setTitle(value, true);
         }
     });
 
