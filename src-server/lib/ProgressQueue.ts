@@ -3,11 +3,11 @@
  */
 
 import { EventEmitter } from "events";
-import { StrictEventEmitter } from "strict-event-emitter-types";
 
 import * as opt from "../options";
 import { QuickValuesMap } from "./utils/QuickValuesMap";
 import { anyTrue } from "./utils/arrayUtils";
+import { TypedEmitter } from "./utils/TypedEmitter";
 
 export interface ProgressTracker {
 	addCancelFunc(func: () => boolean): void;
@@ -36,9 +36,7 @@ interface ProgressQueueEvents {
 	prepared: (userId: string, title: string) => void;
 }
 
-type ProgressQueueEventEmitter = { new(): StrictEventEmitter<EventEmitter, ProgressQueueEvents> };
-
-export class ProgressQueue extends (EventEmitter as ProgressQueueEventEmitter) {
+export class ProgressQueue extends (EventEmitter as TypedEmitter<ProgressQueueEvents>) {
 	private lastQueueLength: {
 		[userId: string]: number | undefined
 	};
@@ -208,24 +206,16 @@ export class ProgressQueue extends (EventEmitter as ProgressQueueEventEmitter) {
 	}
 }
 
-class ProgressTrackerImpl extends EventEmitter implements ProgressTracker {
+interface ProgressTrackerEvents {
+	error: (error: any) => void;
+	finished: () => void;
+	title: () => void;
+}
+
+class ProgressTrackerImpl extends (EventEmitter as TypedEmitter<ProgressTrackerEvents>) implements ProgressTracker {
 	private cancelFuncs: (() => boolean)[];
 	private item: PublicProgressItem;
 	private progressSources: (() => number)[];
-
-	emit(eventName: "error", error: any): boolean;
-	emit(eventName: "finished"): boolean;
-	emit(eventName: "title"): boolean;
-	emit(eventName: string, ...args: any[]) {
-		return super.emit(eventName, ...args);
-	}
-
-	on(eventName: "error", handler: (error: any) => void): this;
-	on(eventName: "finished", handler: () => void): this;
-	on(eventName: "title", handler: () => void): this;
-	on(eventName: string, hander: (...args: any[]) => void) {
-		return super.on(eventName, hander);
-	}
 
 	constructor(item: PublicProgressItem) {
 		super();

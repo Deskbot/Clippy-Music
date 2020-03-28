@@ -5,7 +5,6 @@ import * as opt from "../options";
 
 import { CancelError, UnknownDownloadError } from "./errors";
 import { ContentPart } from "../types/ContentPart";
-import { EventEmitter, prototype } from "events";
 
 interface YtDlQueueItem {
 	cancelled: boolean;
@@ -17,21 +16,12 @@ interface YtDlQueueItem {
 	target: string;
 }
 
-export class YtDlDownloader extends EventEmitter {
+export class YtDlDownloader {
 	private userQueues: {
 		[userId: string]: YtDlQueueItem[]
 	};
 
-	public emit(eventName: string, ...args: any[]): boolean {
-		return super.emit(eventName, ...args);
-	}
-
-	public on(eventName: string, handler: (...args: any[]) => void): this {
-		return super.on(eventName, handler);
-	}
-
 	constructor() {
-		super();
 		this.userQueues = {};
 	}
 

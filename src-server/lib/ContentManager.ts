@@ -17,11 +17,12 @@ import { IdFactory } from "./IdFactory";
 import { ItemData, CompleteMusic, CompleteOverlay, CompleteFileOverlay, CompleteUrlOverlay } from "../types/ItemData";
 import { YtDlDownloader } from "./YtDlDownloader";
 import { UserRecord } from "./UserRecord";
-import { ProgressQueue, ProgressTracker } from "./ProgressQueue";
+import { ProgressTracker } from "./ProgressQueue";
 import { BarringerQueue, isSuspendedBarringerQueue } from "./queue/BarringerQueue";
 import { PublicItemData } from "../types/PublicItemData";
 import { canDownloadOverlayFromRawUrl, downloadOverlayFromRawUrl } from "./download";
 import { startVideoOverlay, startImageOverlay, startMusic, doWhenMusicPlays as doWhenMusicStarts } from "./playMedia";
+import { TypedEmitter } from "./utils/TypedEmitter";
 
 export interface SuspendedContentManager {
 	playQueue: any;
@@ -38,7 +39,13 @@ export function isSuspendedContentManager(obj: any): obj is SuspendedContentMana
 		&& "ytIds" in obj;
 }
 
-export class ContentManager extends EventEmitter {
+interface ContentManagerEvents {
+	end: () => void;
+	"queue-empty": () => void;
+	"queue-update": () => void;
+}
+
+export class ContentManager extends (EventEmitter as TypedEmitter<ContentManagerEvents>) {
 	//data stores
 	private playQueue: BarringerQueue;
 	private musicHashes: {
@@ -62,20 +69,6 @@ export class ContentManager extends EventEmitter {
 	private currentlyPlaying: ItemData | null = null;
 
 	private stop?: boolean;
-
-	public emit(eventName: "end"): boolean;
-	public emit(eventName: "queue-empty"): boolean;
-	public emit(eventName: "queue-update"): boolean;
-	public emit(eventName: string, ...args: any[]): boolean {
-		return super.emit(eventName, ...args);
-	}
-
-	public on(eventName: "end", handler: () => void): this;
-	public on(eventName: "queue-empty", handler: () => void): this;
-	public on(eventName: "queue-update", handler: () => void): this;
-	public on(eventName: string, handler: () => void): this {
-		return super.on(eventName, handler);
-	}
 
 	constructor(
 		maxTimePerBucket: number,
