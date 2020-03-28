@@ -3,6 +3,7 @@
  */
 
 import { EventEmitter } from "events";
+import { StrictEventEmitter } from "strict-event-emitter-types";
 
 import * as opt from "../options";
 import { QuickValuesMap } from "./utils/QuickValuesMap";
@@ -28,7 +29,16 @@ interface PublicProgressItem {
 	userId: string;
 }
 
-export class ProgressQueue extends EventEmitter {
+interface ProgressQueueEvents {
+	delete: (userId: string, contentId: number) => void;
+	error: (userId: string, contentId: number, error: Error) => void;
+	list: (userId: string, items: PublicProgressItem[]) => void;
+	prepared: (userId: string, title: string) => void;
+}
+
+type ProgressQueueEventEmitter = { new(): StrictEventEmitter<EventEmitter, ProgressQueueEvents> };
+
+export class ProgressQueue extends (EventEmitter as ProgressQueueEventEmitter) {
 	private lastQueueLength: {
 		[userId: string]: number | undefined
 	};
@@ -40,22 +50,6 @@ export class ProgressQueue extends EventEmitter {
 	};
 	private totalContents: number;
 	private transmitIntervalId: NodeJS.Timeout | undefined;
-
-	public emit(eventName: "delete", userId: string, contentId: number): boolean;
-	public emit(eventName: "error", userId: string, contentId: number, error: Error): boolean;
-	public emit(eventName: "list", userId: string, items: PublicProgressItem[]): boolean;
-	public emit(eventName: "prepared", userId: string, title: string): boolean;
-	public emit(eventName: string, ...args: any[]): boolean {
-		return super.emit(eventName, ...args);
-	}
-
-	public on(eventName: "delete", handler: (userId: string, contentId: number) => void): this;
-	public on(eventName: "error", handler: (userId: string, contentId: number, error: Error) => void): this;
-	public on(eventName: "list", handler: (userId: string, items: PublicProgressItem[]) => void): this;
-	public on(eventName: "prepared", handler: (userId: string, title: string) => void): this;
-	public on(eventName: string, handler: (...args: any[]) => void): this {
-		return super.on(eventName, handler);
-	}
 
 	constructor() {
 		super();
