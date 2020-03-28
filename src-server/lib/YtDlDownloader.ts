@@ -1,6 +1,7 @@
 import * as cp from "child_process";
 import * as q from "q";
 
+import * as debug from "../lib/utils/debug";
 import * as opt from "../options";
 
 import { CancelError, UnknownDownloadError } from "./errors";
@@ -53,8 +54,9 @@ export class YtDlDownloader {
 
 			proc.on("close", (code, signal) => {
 				if (code === 0) {
-					//youtube-dl adds an unknown file extension
-					const mvProc = cp.spawn("mv", [destination + ".*", destination], {shell:true});
+					// youtube-dl adds an unknown file extension to the destination we gave
+					// so move the fle to the chosen name
+					const mvProc = cp.spawn("mv", [destination + ".*", destination], { shell: true });
 					mvProc.on("close", () => {
 						return resolve();
 					});
@@ -69,6 +71,12 @@ export class YtDlDownloader {
 				errMessage += part;
 			});
 		});
+
+		if (debug.isOn()) {
+			prom.then(() => {
+				debug.log(`YtDl Downloaded ${target}.`);
+			});
+		}
 
 		return [ prom, proc ];
 	}

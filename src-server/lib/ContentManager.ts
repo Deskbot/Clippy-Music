@@ -543,22 +543,12 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 
 			} else {
 				const nmp = this.nextMusicPath();
-				const st = new Date().getTime();
 				const [downloadPromise, getProgress, cancel] = this.ytDlDownloader.new(userId, music.url, nmp);
 
 				progressTracker.addProgressSource(getProgress);
 				progressTracker.addCancelFunc(cancel);
 				await downloadPromise;
 				progressTracker.removeCancelFunc(cancel);
-
-				// when download is completed, then
-				// count how long it took
-				const et = new Date().getTime();
-				const dlTime = utils.roundDps((et - st) / 1000, 2);
-				const ratio = utils.roundDps(music.totalFileDuration / dlTime, 2);
-
-				//log the time taken to download
-				console.log(`yt-dl vid (${music.uniqueId}) of length ${music.totalFileDuration}s took ${dlTime}s to download, ratio: ${ratio}`);
 
 				//hash the music (async)
 				const musicHash = await utils.fileHash(nmp);

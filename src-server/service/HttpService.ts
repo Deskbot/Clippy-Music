@@ -216,7 +216,7 @@ quelaag.addEndpoint({
 					progressTracker.setTitle(itemData.music.title);
 				}
 
-				debug.log("successful upload: ", uplData);
+				debug.log("successfully queued: ", uplData);
 
 				if (fields.ajax || (req.headers["user-agent"] && req.headers["user-agent"].includes("curl"))) {
 					endWithSuccessText(res, "Success\n");

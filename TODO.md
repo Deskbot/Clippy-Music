@@ -37,6 +37,7 @@ List
 * Improve the way clippy reconnects the websocket, maybe do it as soon as the tab regains focus and update the queue data at the same time.
 * allow downloading of things that have previously played
 * dragging and dropping a file/url into anywhere in the upload window should stage the upload
+* maybe the overlay title should be fetched before the item is successfully queued
 * Put development diagrams in repo
 * no suspended id factory implies content manager recovery should be ignored
 * no suspended user record found implies content manager should be ignored
