@@ -535,6 +535,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		if (music.isUrl) {
 			// Is it so big it should just be streamed?
 			if (music.totalFileDuration > opt.streamOverDuration) {
+				progressTracker.addProgressSource(() => 1); // treat this as though the download is complete
 				return {
 					...music,
 					hash: undefined,
@@ -584,6 +585,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 
 	private async tryPrepOverlay(overlay: UrlOverlay | FileOverlay | NoOverlay, userId: string, progressTracker: ProgressTracker): Promise<CompleteOverlay> {
 		if (!overlay.exists) {
+			progressTracker.dontExpectProgressSource();
 			return this.prepNoOverlay(overlay);
 		}
 

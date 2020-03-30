@@ -52,22 +52,31 @@ export function handleFileUpload(req: http.IncomingMessage, progressTracker: Pro
         defer.resolve([form, fields, files]);
     });
 
-    let percentComplete = 0;
+    let musicPercentComplete = 0;
+    let overlayPercentComplete = 0;
     form.on("fileBegin", (fieldName, file) => {
         if (fieldName === "music-file" && file && file.name) {
             progressTracker.setTitle(file.name);
-            progressTracker.addProgressSource(() => percentComplete);
+            progressTracker.addProgressSource(() => musicPercentComplete);
 
             form.on("progress", (sofar: number, total: number) => {
-                percentComplete = sofar / total;
-                debug.log(percentComplete);
+                musicPercentComplete = sofar / total;
+                debug.log("music upload", musicPercentComplete);
+            });
+        } else if (fieldName === "overlay-file" && file) {
+            progressTracker.addProgressSource(() => overlayPercentComplete);
+
+            form.on("progress", (sofar: number, total: number) => {
+                overlayPercentComplete = sofar / total;
+                debug.log("overlay upload", overlayPercentComplete);
             });
         }
     });
 
     form.on("field", (name, value) => {
         if (name === "music-url") {
-            // the title and duration are set later by `ContentService.add(uplData)`
+            // the true title is set later by the ContentManager
+            // a progress source is added later when the url is downloaded
             progressTracker.setTitle(value, true);
         }
     });
