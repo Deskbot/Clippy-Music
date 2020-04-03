@@ -10,6 +10,9 @@ List
 	* ensure that the download bar correctly accounts for all situations
 		* the progress queue should reflect all ytdl instances
 			* downloadOverlayFromRawUrl needs progress tracking
+				* what happens with http/https
+		* handle content length not set
+		* is canDownloadOverlayFromRawUrl needed? those checks can be done in the actual download
 		* tryPrepMusic doesn't need contentId
 		* give progress tracker percent chunks to track separately
 		* titleIsTmp not optional
@@ -31,6 +34,7 @@ List
 	* Update command line api in README
 	* test everything
 
+* is the "with" log correct (for raw url overlays)
 * Choosing a file with a long name should make it show ellipsis (a literal ... not the unicode …)
 * Uploading a video as music should say my videos
 * configure
@@ -66,7 +70,9 @@ List
 
 * clean up part files when cancelling a ytdl
 * clean up overlays for cancelled uploads
-* can cancel at any point in an upload
+* can cancel raw url downloads
+* can cancel file uploads
+* can cancel at any point in an upload i.e. before adding to content manager
 * treat ytdl downloads that don't have 2 components as 100%
 	* need to figure out before the second phase appears whether that will happen
 * combine YTError and BadUrlError

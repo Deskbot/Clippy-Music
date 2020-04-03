@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import * as https from "https";
 import * as request from "request";
 
 import * as opt from "../options";
@@ -7,6 +8,7 @@ import { BadUrlError, UnknownDownloadError, DownloadTooLargeError } from "./erro
 import { Html5Entities } from "html-entities";
 import { OverlayMedium } from "../types/UploadData";
 import { getFileNameFromUrl } from "./utils/stringUtils";
+import { defaultIfNaN, parseNaNableInt } from "./utils/numberUtils";
 
 export function canDownloadOverlayFromRawUrl(url: string): Promise <[string, OverlayMedium]> {
     return new Promise((resolve, reject) => {
@@ -48,32 +50,45 @@ export function canDownloadOverlayFromRawUrl(url: string): Promise <[string, Ove
 
 export function downloadOverlayFromRawUrl(url: string, destination: string): [Promise<void>, () => number] {
     let contentLength = 0;
-    let totalData = 0;
+    let totalDataDownloaded = 0;
 
     const promise = new Promise<void>((resolve, reject) => {
-        const req = request(url);
-        req.on("response", (res) => {
-            contentLength = parseInt(res.headers["content-length"] as string);
-        });
-
-        const stream = req.pipe(fs.createWriteStream(destination));
-
-        if (contentLength > opt.fileSizeLimit) {
-            return reject(new DownloadTooLargeError(ContentPart.Overlay));
-        }
-
-        stream.on("close", () => {
-            return resolve();
-        });
-        stream.on("data", (data) => {
-            console.log(contentLength, totalData, data.length, contentLength / totalData);
-            totalData += data.length;
-        });
-        stream.on("error", (err) => {
-            err.contentType = ContentPart.Overlay;
+        const streamIntoFile = fs.createWriteStream(destination);
+        streamIntoFile.on("error", (err) => {
+            (err as any).contentType = ContentPart.Overlay;
             return reject(err);
         });
+
+        // start the download
+        const req = https.get(url, (res) => {
+            contentLength = parseNaNableInt(res.headers["content-length"]);
+
+            if (contentLength > opt.fileSizeLimit) {
+                return reject(new DownloadTooLargeError(ContentPart.Overlay));
+            }
+
+            // store the file
+            res.pipe(streamIntoFile);
+
+            // the content size was not specified, so the amount of data downloaded will not be used
+            if (!Number.isNaN(contentLength)) {
+                res.on("data", (data) => {
+                    totalDataDownloaded += data.length;
+                });
+            }
+            req.on("error", (err) => {
+                (err as any).contentType = ContentPart.Overlay;
+                return reject(err);
+            });
+            res.on("finish", () => {
+                return resolve();
+            });
+        });
+
+        req.end();
     });
 
-    return [promise, () => contentLength === 0 ? 0 : totalData / contentLength];
+    const getProgress = () => defaultIfNaN(totalDataDownloaded / contentLength, 0);
+
+    return [promise, getProgress];
 }
