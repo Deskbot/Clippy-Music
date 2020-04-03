@@ -10,22 +10,30 @@ List
 	* ensure that the download bar correctly accounts for all situations
 		* the progress queue should reflect all ytdl instances
 			* downloadOverlayFromRawUrl needs progress tracking
-
 		* tryPrepMusic doesn't need contentId
 		* give progress tracker percent chunks to track separately
 		* titleIsTmp not optional
 		* add shouldn't take title
+		* simplify prepUrlOverlay
 		* ProgressTrackerImpl shouldn't need PublicProgressItem
+		* get rid of removeProgressSource on fail
+			* A source should have a gettable percent
+			* and an attribute for whether it counts
+		* long ytdl url should be streamed
 
 	* Error when an upload fails:
 		* `TypeError: Cannot read property 'userId' of undefined at ProgressQueue.deleteQueueItem`
-	* long ytdl url should be streamed
 	* if there's nothing to download at the given overlay url, clippy calls it a picture
+		* stop setting `contentType` on err of type `any`
+	* rename getMusicInfoByUrl and possibly put youtube-dl calls together
 	* show a different download button for videos and images
 	* Updates TESTS file
 	* Update command line api in README
+	* test everything
+
 * Choosing a file with a long name should make it show ellipsis (a literal ... not the unicode …)
 * Uploading a video as music should say my videos
+* configure
 * replace request (https://github.com/request/request/issues/3142)
 * Add something to README about the configurableness of eog and mpv
 * add to readme the quirks about leftover files
@@ -33,6 +41,7 @@ List
 * Change the options at run time from the admin panel
 * Make Clippy installable as a Progressive Web App
 	* desktop icon is clippy with headphones on
+* long text comes out of clippy's bubble. If the width is known, artifical \n could be added.
 * within a single bucket, user content should be round robin
 * Can reorder my uploads
 * Clippy should state when the user is not connected to the internet at all
