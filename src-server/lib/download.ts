@@ -46,16 +46,34 @@ export function canDownloadOverlayFromRawUrl(url: string): Promise <[string, Ove
     });
 }
 
-export function downloadOverlayFromRawUrl(url: string, destination: string) {
-    return new Promise<void>((resolve, reject) => {
-        const stream = request(url).pipe(fs.createWriteStream(destination));
+export function downloadOverlayFromRawUrl(url: string, destination: string): [Promise<void>, () => number] {
+    let contentLength = 0;
+    let totalData = 0;
+
+    const promise = new Promise<void>((resolve, reject) => {
+        const req = request(url);
+        req.on("response", (res) => {
+            contentLength = parseInt(res.headers["content-length"] as string);
+        });
+
+        const stream = req.pipe(fs.createWriteStream(destination));
+
+        if (contentLength > opt.fileSizeLimit) {
+            return reject(new DownloadTooLargeError(ContentPart.Overlay));
+        }
 
         stream.on("close", () => {
             return resolve();
+        });
+        stream.on("data", (data) => {
+            console.log(contentLength, totalData, data.length, contentLength / totalData);
+            totalData += data.length;
         });
         stream.on("error", (err) => {
             err.contentType = ContentPart.Overlay;
             return reject(err);
         });
     });
+
+    return [promise, () => contentLength === 0 ? 0 : totalData / contentLength];
 }

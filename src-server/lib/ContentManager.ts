@@ -373,7 +373,12 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 
 		try {
 			[title, medium] = await canDownloadOverlayFromRawUrl(overlay.url);
-			await downloadOverlayFromRawUrl(overlay.url, pathOnDisk);
+			const [overlayUrlPromise, getProgress] = downloadOverlayFromRawUrl(overlay.url, pathOnDisk);
+			progressTracker.addProgressSource(getProgress);
+			await overlayUrlPromise.catch((err) => {
+				progressTracker.removeProgressSource(getProgress);
+				throw err;
+			});
 		} catch (err) {
 			if (err instanceof BadUrlError) { // can't get the resource from the file directly, so try youtube-dl
 				try {
@@ -391,6 +396,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 
 				medium = OverlayMedium.Video;
 			} else {
+				progressTracker.finishedWithError(err);
 				throw err;
 			}
 		}

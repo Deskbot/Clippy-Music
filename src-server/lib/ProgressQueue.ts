@@ -18,6 +18,7 @@ export interface ProgressTracker {
 	finishedWithError(err: any): void;
 	getPercentComplete(): number;
 	removeCancelFunc(func: () => boolean): void;
+	removeProgressSource(func: () => number): void;
 	setTitle(title: string, temporary?: boolean): void;
 }
 
@@ -281,6 +282,11 @@ class ProgressTrackerImpl extends (EventEmitter as TypedEmitter<ProgressTrackerE
 		const index = this.cancelFuncs.indexOf(func);
 		this.cancelFuncs.splice(index, 1);
 		this.item.cancellable = Boolean(this.cancelFuncs.length);
+	}
+
+	removeProgressSource(func: () => number) {
+		const index = this.progressSources.indexOf(func);
+		this.progressSources.splice(index, 1);
 	}
 
 	setTitle(title: string, temporary = false) {

@@ -61,14 +61,12 @@ export function handleFileUpload(req: http.IncomingMessage, progressTracker: Pro
 
             form.on("progress", (sofar: number, total: number) => {
                 musicPercentComplete = sofar / total;
-                debug.log("music upload", musicPercentComplete);
             });
         } else if (fieldName === "overlay-file" && file) {
             progressTracker.addProgressSource(() => overlayPercentComplete);
 
             form.on("progress", (sofar: number, total: number) => {
                 overlayPercentComplete = sofar / total;
-                debug.log("overlay upload", overlayPercentComplete);
             });
         }
     });
