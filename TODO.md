@@ -34,6 +34,7 @@ List
 	* Update command line api in README
 	* test everything
 
+* look at casts to string when using headers, some of these things can be undefined if something is done wrong
 * is the "with" log correct (for raw url overlays)
 * Choosing a file with a long name should make it show ellipsis (a literal ... not the unicode …)
 * Uploading a video as music should say my videos
