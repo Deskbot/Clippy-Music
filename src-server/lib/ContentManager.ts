@@ -380,6 +380,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 				throw err;
 			});
 		} catch (err) {
+			debug.error(err);
 			if (err instanceof BadUrlError) { // can't get the resource from the file directly, so try youtube-dl
 				try {
 					title = (await getMusicInfoByUrl(overlay.url)).title;

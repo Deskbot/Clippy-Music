@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import * as http from "https";
 import * as https from "https";
 import * as request from "request";
 
@@ -9,6 +10,7 @@ import { Html5Entities } from "html-entities";
 import { OverlayMedium } from "../types/UploadData";
 import { getFileNameFromUrl } from "./utils/stringUtils";
 import { defaultIfNaN, parseNaNableInt } from "./utils/numberUtils";
+import { URL } from "url";
 
 export function canDownloadOverlayFromRawUrl(url: string): Promise <[string, OverlayMedium]> {
     return new Promise((resolve, reject) => {
@@ -25,16 +27,9 @@ export function canDownloadOverlayFromRawUrl(url: string): Promise <[string, Ove
                 return reject(new UnknownDownloadError("I could not download the requested overlay.", ContentPart.Overlay));
             }
 
-            const mimeTypeFound = res.headers["content-type"] as string;
-            const typeFound = mimeTypeFound.split("/")[0];
-
-            let overlayMedium: OverlayMedium;
-            if (typeFound === "image") {
-                overlayMedium = OverlayMedium.Image;
-            } else if (typeFound === "video") {
-                overlayMedium = OverlayMedium.Video;
-            } else {
-                return reject(new BadUrlError(ContentPart.Overlay, url));
+            const overlayMedium = mimeTypeToOverlayMedium(res.headers["content-type"]);
+            if (overlayMedium === undefined) {
+                return reject(new BadUrlError(ContentPart.Overlay, url, "Invalid mime type"));
             }
 
             if (parseInt(res.headers["content-length"] as string) > opt.fileSizeLimit) {
@@ -59,8 +54,19 @@ export function downloadOverlayFromRawUrl(url: string, destination: string): [Pr
             return reject(err);
         });
 
+        const protocolStr = new URL(url).protocol;
+        const protocol = protocolStr === "http:" // yes literally it requires a colon
+            ? http
+            : protocolStr === "https:"
+                ? https
+                : undefined;
+
+        if (!protocol) {
+            return reject(new BadUrlError(ContentPart.Overlay, url, "Unsupported url protocol."));
+        }
+
         // start the download
-        const req = https.get(url, (res) => {
+        const req = protocol.get(url, (res) => {
             contentLength = parseNaNableInt(res.headers["content-length"]);
 
             if (contentLength > opt.fileSizeLimit) {
@@ -76,13 +82,14 @@ export function downloadOverlayFromRawUrl(url: string, destination: string): [Pr
                     totalDataDownloaded += data.length;
                 });
             }
-            req.on("error", (err) => {
-                (err as any).contentType = ContentPart.Overlay;
-                return reject(err);
-            });
-            res.on("finish", () => {
+            res.on("end", () => {
                 return resolve();
             });
+        });
+
+        req.on("error", (err) => {
+            (err as any).contentType = ContentPart.Overlay;
+            return reject(err);
         });
 
         req.end();
@@ -91,4 +98,21 @@ export function downloadOverlayFromRawUrl(url: string, destination: string): [Pr
     const getProgress = () => defaultIfNaN(totalDataDownloaded / contentLength, 0);
 
     return [promise, getProgress];
+}
+
+function mimeTypeToOverlayMedium(mimeType: string | undefined): OverlayMedium | undefined {
+    if (mimeType) {
+        const contentTypeArr = mimeType.split("/");
+        const typeFound = contentTypeArr[0];
+
+        if (typeFound === "image") {
+            return OverlayMedium.Image;
+        }
+
+        if (typeFound === "video") {
+            return OverlayMedium.Video;
+        }
+    }
+
+    return undefined;
 }

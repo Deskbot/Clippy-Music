@@ -16,8 +16,8 @@ export class AuthError extends Error {}
 
 export class BadUrlError extends DeferredContentError {
 	public readonly badUrl: string;
-	constructor(contentType: ContentPart, url: string) {
-		super("The url resource requested does not exist.", contentType);
+	constructor(contentType: ContentPart, url: string, message?: string) {
+		super(message ?? "The url resource requested does not exist.", contentType);
 		this.badUrl = url;
 	}
 }
