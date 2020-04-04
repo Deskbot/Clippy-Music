@@ -371,53 +371,65 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		userId: string,
 		progressSource: ProgressSource
 	): Promise<CompleteUrlOverlay> {
-		const pathOnDisk = this.nextOverlayPath();
-
 		let title: string;
 		let medium: OverlayMedium;
 
+		const destinationPath = this.nextOverlayPath();
+
 		try {
 			[title, medium] = await canDownloadOverlayFromRawUrl(overlay.url);
-			const [overlayUrlPromise, getPercent] = downloadOverlayFromRawUrl(overlay.url, pathOnDisk);
+
+			const [overlayUrlPromise, getPercent] = downloadOverlayFromRawUrl(overlay.url, destinationPath);
 			progressSource.setPercentGetter(getPercent);
 
+			// undo progress if this fails
 			overlayUrlPromise.catch(() => {
-				progressSource.setPercentGetter(undefined);
+				progressSource.setPercentGetter(() => 0);
 			});
+
 			await overlayUrlPromise;
 
 		} catch (err) {
 			debug.error(err);
 			if (err instanceof BadUrlError) { // can't get the resource from the file directly, so try youtube-dl
-				try {
-					title = (await getMusicInfoByUrl(overlay.url)).title;
-				} catch (err) { // can't get the info needed to try youtube-dl, so give up
-					throw new BadUrlError(ContentPart.Overlay, overlay.url);
-				}
-
-				const [downloadedPromise, getPercent, cancel] = this.ytDlDownloader.new(userId, overlay.url, pathOnDisk);
-
-				progressSource.setPercentGetter(getPercent);
-				progressSource.setCancelFunc(cancel);
-				downloadedPromise.finally(() => progressSource.done());
-
-				await downloadedPromise;
-
-				medium = OverlayMedium.Video;
+				[title, medium] = await this.prepYtDlOverlay(overlay, userId, destinationPath, progressSource);
 			} else {
 				throw err;
 			}
 		}
 
-		const hash = await utils.fileHash(pathOnDisk);
+		const hash = await utils.fileHash(destinationPath);
 
 		return {
 			...overlay,
 			hash,
 			medium,
-			path: pathOnDisk,
+			path: destinationPath,
 			title,
 		};
+	}
+
+	private async prepYtDlOverlay(
+		overlay: UrlOverlay,
+		userId: string,
+		destinationPath: string,
+		progressSource: ProgressSource
+	): Promise<[string, OverlayMedium]> {
+		try {
+			var title = (await getMusicInfoByUrl(overlay.url)).title;
+		} catch (err) { // can't get the info needed to try youtube-dl, so give up
+			throw new BadUrlError(ContentPart.Overlay, overlay.url);
+		}
+
+		const [downloadedPromise, getPercent, cancel] = this.ytDlDownloader.new(userId, overlay.url, destinationPath);
+
+		progressSource.setPercentGetter(getPercent);
+		progressSource.setCancelFunc(cancel);
+		downloadedPromise.finally(() => progressSource.done());
+
+		await downloadedPromise;
+
+		return [ title, OverlayMedium.Video];
 	}
 
 	private publicify(item: ItemData): PublicItemData {
@@ -562,7 +574,6 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 			// Is it so big it should just be streamed?
 			if (music.totalFileDuration > opt.streamOverDuration) {
 				progressSource.setPercentGetter(() => 1); // treat this as though the download is complete
-				progressSource.done();
 				return {
 					...music,
 					hash: undefined,

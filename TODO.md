@@ -9,6 +9,7 @@ List
 * Silent looping Video overlay
 	* simplify prepUrlOverlay
 		* is canDownloadOverlayFromRawUrl needed? those checks can be done in the actual download
+	* is everything that is meant to be cancellable cancellable
 	* long ytdl url should be streamed
 	* Error when an upload fails:
 		* `TypeError: Cannot read property 'userId' of undefined at ProgressQueue.deleteQueueItem`

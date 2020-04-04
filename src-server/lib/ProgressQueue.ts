@@ -25,7 +25,7 @@ export interface ProgressSource {
 	 * @param func Explain how to cancel the work being tracked
 	 */
 	setCancelFunc(func: () => boolean): void;
-	setPercentGetter(getter: (() => number) | undefined): void;
+	setPercentGetter(getter: () => number): void;
 
 	/**
 	 * Make this source not contribute to the total amount of work needing to be done.
@@ -303,7 +303,7 @@ class ProgressSourceImpl implements ProgressSource {
 		this.cancelFunc = func;
 	}
 
-	setPercentGetter(func: (() => number) | undefined): void {
+	setPercentGetter(func: () => number): void {
 		this.percentGetter = func;
 	}
 }
