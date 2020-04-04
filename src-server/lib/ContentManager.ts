@@ -10,7 +10,7 @@ import * as opt from "../options";
 import * as time from "./time";
 
 import { ContentPart } from "../types/ContentPart";
-import { getMusicInfoByUrl, getFileDuration, UrlMusicData } from "./musicData";
+import { getFileDuration } from "./utils/musicFileUtils";
 import { CancelError, UniqueError, YTError, BadUrlError } from "./errors";
 import { UploadDataWithId, UploadDataWithIdTitleDuration, MusicWithMetadata, OverlayMedium, UrlOverlay, FileOverlay, NoOverlay } from "../types/UploadData";
 import { IdFactory } from "./IdFactory";
@@ -20,9 +20,10 @@ import { UserRecord } from "./UserRecord";
 import { ProgressTracker, ProgressSource } from "./ProgressQueue";
 import { BarringerQueue, isSuspendedBarringerQueue } from "./queue/BarringerQueue";
 import { PublicItemData } from "../types/PublicItemData";
-import { canDownloadOverlayFromRawUrl, downloadOverlayFromRawUrl } from "./download";
+import { canDownloadOverlayFromRawUrl, downloadOverlayFromRawUrl } from "./rawUrlDownload";
 import { startVideoOverlay, startImageOverlay, startMusic, doWhenMusicPlays as doWhenMusicStarts } from "./playMedia";
 import { TypedEmitter } from "./utils/TypedEmitter";
+import { UrlMusicData, getYtDlMusicInfo } from "./ytDlInterface";
 
 export interface SuspendedContentManager {
 	playQueue: any;
@@ -184,7 +185,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		let info: UrlMusicData;
 
 		try {
-			info = await getMusicInfoByUrl(uplData.music.url);
+			info = await getYtDlMusicInfo(uplData.music.url);
 		} catch (err) {
 			throw new YTError(`I was unable to download (${uplData.music.title ? uplData.music.title : uplData.music.url}). Is the URL correct? The video might not be compatible.`);
 		}
@@ -416,7 +417,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		progressSource: ProgressSource
 	): Promise<[string, OverlayMedium]> {
 		try {
-			var title = (await getMusicInfoByUrl(overlay.url)).title;
+			var title = (await getYtDlMusicInfo(overlay.url)).title;
 		} catch (err) { // can't get the info needed to try youtube-dl, so give up
 			throw new BadUrlError(ContentPart.Overlay, overlay.url);
 		}

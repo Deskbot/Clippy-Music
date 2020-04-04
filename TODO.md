@@ -7,7 +7,6 @@ List
 ----
 
 * Silent looping Video overlay
-	* is everything that is meant to be cancellable cancellable
 	* long ytdl url should be streamed
 	* Error when an upload fails:
 		* `TypeError: Cannot read property 'userId' of undefined at ProgressQueue.deleteQueueItem`

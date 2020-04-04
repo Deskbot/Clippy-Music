@@ -47,7 +47,7 @@ export class YtDlDownloader {
 	}
 
 	private download(target: string, destination: string): [Promise<void>, cp.ChildProcessWithoutNullStreams] {
-		let proc = cp.spawn(opt.youtubeDlCommand, ["--no-playlist", target, "-o", destination]);
+		const proc = cp.spawn(opt.youtubeDlCommand, ["--no-playlist", target, "-o", destination]);
 
 		const prom = new Promise<void>((resolve, reject) => {
 			let errMessage = "";
