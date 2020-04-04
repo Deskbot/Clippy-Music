@@ -7,14 +7,12 @@ List
 ----
 
 * Silent looping Video overlay
-	* is canDownloadOverlayFromRawUrl needed? those checks can be done in the actual download
-	* simplify prepUrlOverlay
-	* ProgressTrackerImpl shouldn't need PublicProgressItem
 	* get rid of removeProgressSource on fail
 		* A source should have a gettable percent
 		* and an attribute for whether it counts
+	* simplify prepUrlOverlay
+		* is canDownloadOverlayFromRawUrl needed? those checks can be done in the actual download
 	* long ytdl url should be streamed
-
 	* Error when an upload fails:
 		* `TypeError: Cannot read property 'userId' of undefined at ProgressQueue.deleteQueueItem`
 	* if there's nothing to download at the given overlay url, clippy calls it a picture
