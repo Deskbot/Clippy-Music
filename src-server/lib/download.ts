@@ -32,7 +32,7 @@ export function canDownloadOverlayFromRawUrl(url: string): Promise <[string, Ove
                 return reject(new BadUrlError(ContentPart.Overlay, url, "Invalid mime type"));
             }
 
-            if (parseInt(res.headers["content-length"] as string) > opt.fileSizeLimit) {
+            if (parseNaNableInt(res.headers["content-length"]) > opt.fileSizeLimit) {
                 return reject(new DownloadTooLargeError(ContentPart.Overlay));
             }
 

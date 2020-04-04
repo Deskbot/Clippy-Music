@@ -7,22 +7,17 @@ List
 ----
 
 * Silent looping Video overlay
-	* ensure that the download bar correctly accounts for all situations
-		* the progress queue should reflect all ytdl instances
-			* downloadOverlayFromRawUrl needs progress tracking
-				* what happens with http/https
-		* handle content length not set
-		* is canDownloadOverlayFromRawUrl needed? those checks can be done in the actual download
-		* tryPrepMusic doesn't need contentId
-		* give progress tracker percent chunks to track separately
-		* titleIsTmp not optional
-		* add shouldn't take title
-		* simplify prepUrlOverlay
-		* ProgressTrackerImpl shouldn't need PublicProgressItem
-		* get rid of removeProgressSource on fail
-			* A source should have a gettable percent
-			* and an attribute for whether it counts
-		* long ytdl url should be streamed
+	* is canDownloadOverlayFromRawUrl needed? those checks can be done in the actual download
+	* tryPrepMusic doesn't need contentId
+	* give progress tracker percent chunks to track separately
+	* titleIsTmp not optional
+	* add shouldn't take title
+	* simplify prepUrlOverlay
+	* ProgressTrackerImpl shouldn't need PublicProgressItem
+	* get rid of removeProgressSource on fail
+		* A source should have a gettable percent
+		* and an attribute for whether it counts
+	* long ytdl url should be streamed
 
 	* Error when an upload fails:
 		* `TypeError: Cannot read property 'userId' of undefined at ProgressQueue.deleteQueueItem`
@@ -60,6 +55,7 @@ List
 	* maybe consider changing the way the layout is done. how often do people resize the browser window anyway? I don't think i need to be account for all that
 * Improve the way clippy reconnects the websocket, maybe do it as soon as the tab regains focus and update the queue data at the same time.
 * allow downloading of things that have previously played
+* during overlay download if no content length is given and the we read more bytes than the allowed amount, no more data should be downloaded and the process should reject
 * dragging and dropping a file/url into anywhere in the upload window should stage the upload
 * maybe the overlay title should be fetched before the item is successfully queued
 * Put development diagrams in repo
