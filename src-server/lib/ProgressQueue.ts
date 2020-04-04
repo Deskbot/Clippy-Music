@@ -135,6 +135,16 @@ export class ProgressQueue extends (EventEmitter as TypedEmitter<ProgressQueueEv
 		return tracker;
 	}
 
+	cancel(userId: string, contentId: number): boolean {
+		const tracker = this.progressTrackers[userId]?.get(contentId);
+
+		if (tracker) {
+			return tracker.cancel();
+		}
+
+		return false;
+	}
+
 	private deleteQueueItem(item: PublicProgressItem) {
 		const progressTrackers = this.progressTrackers[item.userId];
 
@@ -165,10 +175,6 @@ export class ProgressQueue extends (EventEmitter as TypedEmitter<ProgressQueueEv
 		if (queueMap) return queueMap.valuesQuick();
 
 		return undefined;
-	}
-
-	getTracker(userId: string, contentId: number): ProgressTracker | undefined {
-		return this.progressTrackers[userId]?.get(contentId);
 	}
 
 	/* emits a "prepared" event when the item has all the data needed

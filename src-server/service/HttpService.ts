@@ -373,8 +373,7 @@ quelaag.addEndpoint({
 		const userId = middleware.ip();
 		const contentId = parseInt(fields["content-id"] as string);
 
-		const progressTracker = ProgressQueueService.getTracker(userId, contentId)
-		if (progressTracker && progressTracker.cancel()) {
+		if (ProgressQueueService.cancel(userId, contentId)) {
 			if (await middleware.noRedirect()) {
 				endWithSuccessText(res, "Success\n");
 			} else {
