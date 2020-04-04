@@ -9,16 +9,47 @@ import { QuickValuesMap } from "./utils/QuickValuesMap";
 import { anyTrue } from "./utils/arrayUtils";
 import { TypedEmitter } from "./utils/TypedEmitter";
 
+/**
+ * Represents a unit of work to be done
+ */
+export interface ProgressSource {
+	cancel(): boolean;
+
+	/**
+	 * Indicate that there is nothing to cancel.
+	 */
+	done(): void;
+	getPercent(): number;
+
+	/**
+	 * @param func Explain how to cancel the work being tracked
+	 */
+	setCancelFunc(func: () => boolean): void;
+	setPercentGetter(getter: (() => number) | undefined): void;
+
+	/**
+	 * Make this source not contribute to the total amount of work needing to be done.
+	 * A source should be created if it may be needed and later ignored if needed.
+	 * If sources were created only when definitely needed,
+	 * the aggregated percent complete would decrease when work to do is found.
+	 * By ignoring a source instead of setting it to 100%,
+	 * the aggregated percent will be more accurate, by only including progress that matters.
+	 */
+	ignore(): void;
+	ignoreIfNoPercentGetter(): void;
+	isIgnored(): boolean;
+}
+
+/**
+ * Represents all the work to be done for a single upload.
+ * Tracks multiple ProgressSources associated with it.
+ */
 export interface ProgressTracker {
-	addCancelFunc(func: () => boolean): void;
-	addProgressSource(source: () => number): void;
-	cancel(): void;
-	dontExpectProgressSource(): void;
+	cancel(): boolean;
+	createSource(): ProgressSource;
 	finished(): void;
 	finishedWithError(err: any): void;
 	getPercentComplete(): number;
-	removeCancelFunc(func: () => boolean): void;
-	removeProgressSource(func: () => number): void;
 	setTitle(title: string, temporary?: boolean): void;
 }
 
@@ -80,7 +111,8 @@ export class ProgressQueue extends (EventEmitter as TypedEmitter<ProgressQueueEv
 		this.transmitToUserMaybe(userId);
 		this.maybeItemIsPrepared(newItem);
 
-		const tracker = new ProgressTrackerImpl(newItem, 2);
+		// create a tracker that the external world can use to interact indirectly with the queue
+		const tracker = new ProgressTrackerImpl(newItem);
 
 		tracker.on("error", (error) => {
 			this.deleteQueueItem(this.findQueueItem(userId, contentId)!);
@@ -101,6 +133,16 @@ export class ProgressQueue extends (EventEmitter as TypedEmitter<ProgressQueueEv
 		this.setTracker(userId, contentId, tracker);
 
 		return tracker;
+	}
+
+	cancel(userId: string, contentId: number): boolean {
+		const tracker = this.progressTrackers[userId]?.get(contentId);
+
+		if (tracker) {
+			return tracker.cancel();
+		}
+
+		return false;
 	}
 
 	private deleteQueueItem(item: PublicProgressItem) {
@@ -133,10 +175,6 @@ export class ProgressQueue extends (EventEmitter as TypedEmitter<ProgressQueueEv
 		if (queueMap) return queueMap.valuesQuick();
 
 		return undefined;
-	}
-
-	getTracker(userId: string, contentId: number): ProgressTracker | undefined {
-		return this.progressTrackers[userId]?.get(contentId);
 	}
 
 	/* emits a "prepared" event when the item has all the data needed
@@ -209,6 +247,67 @@ export class ProgressQueue extends (EventEmitter as TypedEmitter<ProgressQueueEv
 	}
 }
 
+class ProgressSourceImpl implements ProgressSource {
+	private cancelFunc?: () => boolean;
+	private percentGetter?: () => number;
+
+	private isDone: boolean;
+	private _isIgnored: boolean;
+
+	constructor() {
+		this.isDone = false;
+		this._isIgnored = false;
+	}
+
+	cancel(): boolean {
+		if (this.isDone) {
+			return false;
+		}
+
+		if (this.cancelFunc) {
+			return this.cancelFunc();
+		}
+
+		return false;
+	}
+
+	done(): void {
+		this.isDone = true;
+	}
+
+	getPercent(): number {
+		if (this.percentGetter) {
+			return this.percentGetter();
+		}
+
+		return 0;
+	}
+
+	ignore(): void {
+		console.trace();
+		this.isDone = true;
+		this._isIgnored = true;
+	}
+
+	isIgnored(): boolean {
+		return this._isIgnored;
+	}
+
+	ignoreIfNoPercentGetter(): void {
+		if (!this.percentGetter) {
+			this.ignore();
+		}
+	}
+
+	setCancelFunc(func: () => boolean): void {
+		this.cancelFunc = func;
+	}
+
+	setPercentGetter(func: (() => number) | undefined): void {
+		this.percentGetter = func;
+	}
+}
+
 interface ProgressTrackerEvents {
 	error: (error: any) => void;
 	finished: () => void;
@@ -216,10 +315,8 @@ interface ProgressTrackerEvents {
 }
 
 class ProgressTrackerImpl extends (EventEmitter as TypedEmitter<ProgressTrackerEvents>) implements ProgressTracker {
-	private cancelFuncs: (() => boolean)[];
 	private item: PublicProgressItem;
-	private maximumExpectedSources: number;
-	private progressSources: (() => number)[];
+	private progressSources: ProgressSource[];
 
 	/**
 	 * @param item The item being tracked.
@@ -227,25 +324,14 @@ class ProgressTrackerImpl extends (EventEmitter as TypedEmitter<ProgressTrackerE
 	 *             however this is not ideal
 	 * @param maximumExpectedSources The number of progress sources that are expected to be added.
 	 */
-	constructor(item: PublicProgressItem, maximumExpectedSources: number) {
+	constructor(item: PublicProgressItem) {
 		super();
-		this.cancelFuncs = [];
 		this.item = item;
-		this.maximumExpectedSources = maximumExpectedSources;
 		this.progressSources = [];
 	}
 
-	addCancelFunc(func: () => boolean) {
-		this.item.cancellable = true;
-		this.cancelFuncs.push(func);
-	}
-
-	addProgressSource(getProgress: () => number) {
-		this.progressSources.push(getProgress);
-	}
-
-	cancel() {
-		const successes = this.cancelFuncs.map(func => func());
+	cancel(): boolean {
+		const successes = this.progressSources.map(source => source.cancel());
 		if (anyTrue(successes)) {
 			this.finished();
 			return true;
@@ -254,13 +340,10 @@ class ProgressTrackerImpl extends (EventEmitter as TypedEmitter<ProgressTrackerE
 		return false;
 	}
 
-	/**
-	 * Tell the tracker to reduce the expected number of sources by one.
-	 * Therefore the trackers knows there is less work needed to be done.
-	 * This gives a more accurate percentage of work complete than to add a source at 100%.
-	 */
-	dontExpectProgressSource() {
-		this.maximumExpectedSources--;
+	createSource(): ProgressSource {
+		const source = new ProgressSourceImpl();
+		this.progressSources.push(source);
+		return source;
 	}
 
 	finished() {
@@ -272,22 +355,15 @@ class ProgressTrackerImpl extends (EventEmitter as TypedEmitter<ProgressTrackerE
 	}
 
 	getPercentComplete() {
-		const totalPercents = this.progressSources.map(func => func())
+		const sourcesToAggregate = this.progressSources
+			.filter(source => !source.isIgnored());
+
+		const totalPercents = sourcesToAggregate
+			.map(source => source.getPercent())
 			.reduce((a, b) => a + b, 0);
-		return this.maximumExpectedSources === 0
+		return sourcesToAggregate.length === 0
 			? 0
-			: totalPercents / this.maximumExpectedSources;
-	}
-
-	removeCancelFunc(func: () => boolean) {
-		const index = this.cancelFuncs.indexOf(func);
-		this.cancelFuncs.splice(index, 1);
-		this.item.cancellable = Boolean(this.cancelFuncs.length);
-	}
-
-	removeProgressSource(func: () => number) {
-		const index = this.progressSources.indexOf(func);
-		this.progressSources.splice(index, 1);
+			: totalPercents / sourcesToAggregate.length;
 	}
 
 	setTitle(title: string, temporary = false) {

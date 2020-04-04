@@ -17,7 +17,7 @@ import { IdFactory } from "./IdFactory";
 import { ItemData, CompleteMusic, CompleteOverlay, CompleteFileOverlay, CompleteUrlOverlay } from "../types/ItemData";
 import { YtDlDownloader } from "./YtDlDownloader";
 import { UserRecord } from "./UserRecord";
-import { ProgressTracker } from "./ProgressQueue";
+import { ProgressTracker, ProgressSource } from "./ProgressQueue";
 import { BarringerQueue, isSuspendedBarringerQueue } from "./queue/BarringerQueue";
 import { PublicItemData } from "../types/PublicItemData";
 import { canDownloadOverlayFromRawUrl, downloadOverlayFromRawUrl } from "./download";
@@ -321,7 +321,8 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		this.runningMusicProc = startMusic(musicLocation, opt.timeout, contentData.startTime, contentData.endTime);
 
 		this.runningMusicProc.on("close", (code, signal) => { // runs before next call to playNext
-			const secs = 1 + Math.ceil((Date.now() - timePlayedAt) / 1000); //seconds ran for, adds a little bit to prevent infinite <1 second content
+			// seconds ran for, adds a little bit to prevent infinite <1 second content
+			const secs = 1 + Math.ceil((Date.now() - timePlayedAt) / 1000);
 
 			this.stopOverlay();
 			this.deleteContent(contentData);
@@ -365,7 +366,11 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		};
 	}
 
-	private async prepUrlOverlay(overlay: UrlOverlay, userId: string, progressTracker: ProgressTracker): Promise<CompleteUrlOverlay> {
+	private async prepUrlOverlay(
+		overlay: UrlOverlay,
+		userId: string,
+		progressSource: ProgressSource
+	): Promise<CompleteUrlOverlay> {
 		const pathOnDisk = this.nextOverlayPath();
 
 		let title: string;
@@ -373,12 +378,14 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 
 		try {
 			[title, medium] = await canDownloadOverlayFromRawUrl(overlay.url);
-			const [overlayUrlPromise, getProgress] = downloadOverlayFromRawUrl(overlay.url, pathOnDisk);
-			progressTracker.addProgressSource(getProgress);
-			await overlayUrlPromise.catch((err) => {
-				progressTracker.removeProgressSource(getProgress);
-				throw err;
+			const [overlayUrlPromise, getPercent] = downloadOverlayFromRawUrl(overlay.url, pathOnDisk);
+			progressSource.setPercentGetter(getPercent);
+
+			overlayUrlPromise.catch(() => {
+				progressSource.setPercentGetter(undefined);
 			});
+			await overlayUrlPromise;
+
 		} catch (err) {
 			debug.error(err);
 			if (err instanceof BadUrlError) { // can't get the resource from the file directly, so try youtube-dl
@@ -388,12 +395,13 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 					throw new BadUrlError(ContentPart.Overlay, overlay.url);
 				}
 
-				const [downloadedPromise, getProgress, cancel] = this.ytDlDownloader.new(userId, overlay.url, pathOnDisk);
+				const [downloadedPromise, getPercent, cancel] = this.ytDlDownloader.new(userId, overlay.url, pathOnDisk);
 
-				progressTracker.addProgressSource(getProgress);
-				progressTracker.addCancelFunc(cancel);
+				progressSource.setPercentGetter(getPercent);
+				progressSource.setCancelFunc(cancel);
+				downloadedPromise.finally(() => progressSource.done());
+
 				await downloadedPromise;
-				progressTracker.removeCancelFunc(cancel);
 
 				medium = OverlayMedium.Video;
 			} else {
@@ -504,15 +512,23 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 	}
 
 	private async tryQueue(someItemData: UploadDataWithIdTitleDuration, progressTracker: ProgressTracker) {
+		// these should be ignored or have a percent getter before an await
+		const musicProgressSource = progressTracker.createSource();
+		const overlayProgressSource = progressTracker.createSource();
+
 		try {
 			const musicPrepProm = this.tryPrepMusic(
 				someItemData.music,
 				someItemData.userId,
-				progressTracker,
+				musicProgressSource,
 			);
 
 			// if the overlay fails, make sure any yt download is stopped
-			const overlayPrepProm = this.tryPrepOverlay(someItemData.overlay, someItemData.userId, progressTracker);
+			const overlayPrepProm = this.tryPrepOverlay(
+				someItemData.overlay,
+				someItemData.userId,
+				overlayProgressSource
+			);
 
 			const [ music, overlay ] = await Promise.all([musicPrepProm, overlayPrepProm]);
 
@@ -536,11 +552,17 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		}
 	}
 
-	private async tryPrepMusic(music: MusicWithMetadata, userId: string, progressTracker: ProgressTracker): Promise<CompleteMusic> {
+	private async tryPrepMusic(
+		music: MusicWithMetadata,
+		userId: string,
+		progressSource: ProgressSource
+	): Promise<CompleteMusic> {
+
 		if (music.isUrl) {
 			// Is it so big it should just be streamed?
 			if (music.totalFileDuration > opt.streamOverDuration) {
-				progressTracker.addProgressSource(() => 1); // treat this as though the download is complete
+				progressSource.setPercentGetter(() => 1); // treat this as though the download is complete
+				progressSource.done();
 				return {
 					...music,
 					hash: undefined,
@@ -551,10 +573,11 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 				const nmp = this.nextMusicPath();
 				const [downloadPromise, getProgress, cancel] = this.ytDlDownloader.new(userId, music.url, nmp);
 
-				progressTracker.addProgressSource(getProgress);
-				progressTracker.addCancelFunc(cancel);
+				progressSource.setPercentGetter(getProgress);
+				progressSource.setCancelFunc(cancel);
+				downloadPromise.finally(() => progressSource.done());
+
 				await downloadPromise;
-				progressTracker.removeCancelFunc(cancel);
 
 				//hash the music (async)
 				const musicHash = await utils.fileHash(nmp);
@@ -574,6 +597,9 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 				}
 			}
 		} else {
+			// already downloaded
+			progressSource.ignore();
+
 			//validate by music hash
 			const musicHash = await utils.fileHash(music.path);
 			if (this.musicHashIsUnique(musicHash)) {
@@ -588,17 +614,23 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		}
 	}
 
-	private async tryPrepOverlay(overlay: UrlOverlay | FileOverlay | NoOverlay, userId: string, progressTracker: ProgressTracker): Promise<CompleteOverlay> {
+	private async tryPrepOverlay(
+		overlay: UrlOverlay | FileOverlay | NoOverlay,
+		userId: string,
+		progressSource: ProgressSource
+	): Promise<CompleteOverlay> {
+
 		if (!overlay.exists) {
-			progressTracker.dontExpectProgressSource();
+			progressSource.ignore();
 			return this.prepNoOverlay(overlay);
 		}
 
 		// we may already have the image downloaded, but we always need to check the uniqueness
 		let completeOveraly: CompleteFileOverlay | CompleteUrlOverlay;
 		if (overlay.isUrl) {
-			completeOveraly = await this.prepUrlOverlay(overlay, userId, progressTracker);
+			completeOveraly = await this.prepUrlOverlay(overlay, userId, progressSource);
 		} else {
+			progressSource.ignore();
 			completeOveraly = await this.prepFileOverlay(overlay);
 		}
 
