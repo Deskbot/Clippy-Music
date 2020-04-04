@@ -27,7 +27,7 @@ interface PublicProgressItem {
 	contentId: number;
 	percent: number;
 	title: string;
-	titleIsTemp?: boolean;
+	titleIsTemp: boolean;
 	userId: string;
 }
 
@@ -61,7 +61,7 @@ export class ProgressQueue extends (EventEmitter as TypedEmitter<ProgressQueueEv
 		this.transmitIntervalId = undefined;
 	}
 
-	add(userId: string, contentId: number, title?: string): ProgressTrackerImpl {
+	add(userId: string, contentId: number): ProgressTrackerImpl {
 		if (!this.queues[userId]) {
 			this.queues[userId] = new QuickValuesMap();
 		}
@@ -69,7 +69,8 @@ export class ProgressQueue extends (EventEmitter as TypedEmitter<ProgressQueueEv
 		const newItem: PublicProgressItem = {
 			contentId,
 			percent: 0,
-			title: title || "",
+			title: "",
+			titleIsTemp: false,
 			userId,
 		};
 

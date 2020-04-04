@@ -508,7 +508,6 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		try {
 			const musicPrepProm = this.tryPrepMusic(
 				someItemData.music,
-				someItemData.id,
 				someItemData.userId,
 				progressTracker,
 			);
@@ -538,7 +537,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		}
 	}
 
-	private async tryPrepMusic(music: MusicWithMetadata, contentId: number, userId: string, progressTracker: ProgressTracker): Promise<CompleteMusic> {
+	private async tryPrepMusic(music: MusicWithMetadata, userId: string, progressTracker: ProgressTracker): Promise<CompleteMusic> {
 		if (music.isUrl) {
 			// Is it so big it should just be streamed?
 			if (music.totalFileDuration > opt.streamOverDuration) {

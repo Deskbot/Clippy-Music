@@ -8,10 +8,6 @@ List
 
 * Silent looping Video overlay
 	* is canDownloadOverlayFromRawUrl needed? those checks can be done in the actual download
-	* tryPrepMusic doesn't need contentId
-	* give progress tracker percent chunks to track separately
-	* titleIsTmp not optional
-	* add shouldn't take title
 	* simplify prepUrlOverlay
 	* ProgressTrackerImpl shouldn't need PublicProgressItem
 	* get rid of removeProgressSource on fail
