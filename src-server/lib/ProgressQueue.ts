@@ -9,6 +9,9 @@ import { QuickValuesMap } from "./utils/QuickValuesMap";
 import { anyTrue } from "./utils/arrayUtils";
 import { TypedEmitter } from "./utils/TypedEmitter";
 
+/**
+ * Represents a unit of work to be done
+ */
 export interface ProgressSource {
 	cancel(): boolean;
 	done(): void;
@@ -17,8 +20,7 @@ export interface ProgressSource {
 	setPercentGetter(getter: (() => number) | undefined): void;
 	ignore(): void;
 	ignoreIfNoPercentGetter(): void;
-	isDone: boolean;
-	isIgnored: boolean;
+	isIgnored(): boolean;
 }
 
 export interface ProgressTracker {
@@ -221,16 +223,16 @@ class ProgressSourceImpl implements ProgressSource {
 	private cancelFunc?: () => boolean;
 	private percentGetter?: () => number;
 
-	private _isDone: boolean;
+	private isDone: boolean;
 	private _isIgnored: boolean;
 
 	constructor() {
-		this._isDone = false;
+		this.isDone = false;
 		this._isIgnored = false;
 	}
 
 	cancel(): boolean {
-		if (this._isDone) {
+		if (this.isDone) {
 			return false;
 		}
 
@@ -242,7 +244,7 @@ class ProgressSourceImpl implements ProgressSource {
 	}
 
 	done(): void {
-		this._isDone = true;
+		this.isDone = true;
 	}
 
 	getPercent(): number {
@@ -255,8 +257,12 @@ class ProgressSourceImpl implements ProgressSource {
 
 	ignore(): void {
 		console.trace();
-		this._isDone = true;
+		this.isDone = true;
 		this._isIgnored = true;
+	}
+
+	isIgnored(): boolean {
+		return this._isIgnored;
 	}
 
 	ignoreIfNoPercentGetter(): void {
@@ -271,14 +277,6 @@ class ProgressSourceImpl implements ProgressSource {
 
 	setPercentGetter(func: (() => number) | undefined): void {
 		this.percentGetter = func;
-	}
-
-	get isDone(): boolean {
-		return this._isDone;
-	}
-
-	get isIgnored(): boolean {
-		return this._isIgnored;
 	}
 }
 
@@ -330,7 +328,7 @@ class ProgressTrackerImpl extends (EventEmitter as TypedEmitter<ProgressTrackerE
 
 	getPercentComplete() {
 		const sourcesToAggregate = this.progressSources
-			.filter(source => !source.isIgnored);
+			.filter(source => !source.isIgnored());
 
 		const totalPercents = sourcesToAggregate
 			.map(source => source.getPercent())
