@@ -512,6 +512,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 	}
 
 	private async tryQueue(someItemData: UploadDataWithIdTitleDuration, progressTracker: ProgressTracker) {
+		// these should be ignored or have a percent getter before an await
 		const musicProgressSource = progressTracker.createSource();
 		const overlayProgressSource = progressTracker.createSource();
 

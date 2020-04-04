@@ -14,15 +14,36 @@ import { TypedEmitter } from "./utils/TypedEmitter";
  */
 export interface ProgressSource {
 	cancel(): boolean;
+
+	/**
+	 * Indicate that there is nothing to cancel.
+	 */
 	done(): void;
-	setCancelFunc(func: () => boolean): void;
 	getPercent(): number;
+
+	/**
+	 * @param func Explain how to cancel the work being tracked
+	 */
+	setCancelFunc(func: () => boolean): void;
 	setPercentGetter(getter: (() => number) | undefined): void;
+
+	/**
+	 * Make this source not contribute to the total amount of work needing to be done.
+	 * A source should be created if it may be needed and later ignored if needed.
+	 * If sources were created only when definitely needed,
+	 * the aggregated percent complete would decrease when work to do is found.
+	 * By ignoring a source instead of setting it to 100%,
+	 * the aggregated percent will be more accurate, by only including progress that matters.
+	 */
 	ignore(): void;
 	ignoreIfNoPercentGetter(): void;
 	isIgnored(): boolean;
 }
 
+/**
+ * Represents all the work to be done for a single upload.
+ * Tracks multiple ProgressSources associated with it.
+ */
 export interface ProgressTracker {
 	cancel(): boolean;
 	createSource(): ProgressSource;
@@ -90,6 +111,7 @@ export class ProgressQueue extends (EventEmitter as TypedEmitter<ProgressQueueEv
 		this.transmitToUserMaybe(userId);
 		this.maybeItemIsPrepared(newItem);
 
+		// create a tracker that the external world can use to interact indirectly with the queue
 		const tracker = new ProgressTrackerImpl(newItem);
 
 		tracker.on("error", (error) => {
@@ -302,7 +324,7 @@ class ProgressTrackerImpl extends (EventEmitter as TypedEmitter<ProgressTrackerE
 		this.progressSources = [];
 	}
 
-	cancel() {
+	cancel(): boolean {
 		const successes = this.progressSources.map(source => source.cancel());
 		if (anyTrue(successes)) {
 			this.finished();
