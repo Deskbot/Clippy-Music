@@ -397,7 +397,6 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 
 				medium = OverlayMedium.Video;
 			} else {
-				progressTracker.finishedWithError(err);
 				throw err;
 			}
 		}
