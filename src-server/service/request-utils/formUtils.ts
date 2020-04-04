@@ -3,16 +3,19 @@ import * as formidable from "formidable";
 import * as q from "q";
 
 import * as consts from "../../consts";
-import * as debug from "../../lib/utils/debug";
 import * as opt from "../../options";
 import * as utils from "../../lib/utils/utils";
 
 import { FileUploadError } from "../../lib/errors";
 import { UploadData, UrlOverlay, NoOverlay, FileOverlay, FileMusic, UrlMusic, OverlayMedium } from "../../types/UploadData";
-import { ProgressTracker } from "../../lib/ProgressQueue";
+import { ProgressTracker, ProgressSource } from "../../lib/ProgressQueue";
 
 export function handleFileUpload(req: http.IncomingMessage, progressTracker: ProgressTracker)
-    : q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]>
+    : [
+        q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]>,
+        ProgressSource,
+        ProgressSource
+    ]
 {
     const defer = q.defer<[formidable.IncomingForm, formidable.Fields, formidable.Files]>();
 
@@ -52,18 +55,22 @@ export function handleFileUpload(req: http.IncomingMessage, progressTracker: Pro
         defer.resolve([form, fields, files]);
     });
 
+    const musicProgressSource = progressTracker.createSource();
+    const overlayProgressSource = progressTracker.createSource();
+
     let musicPercentComplete = 0;
     let overlayPercentComplete = 0;
+
     form.on("fileBegin", (fieldName, file) => {
         if (fieldName === "music-file" && file && file.name) {
             progressTracker.setTitle(file.name);
-            progressTracker.addProgressSource(() => musicPercentComplete);
+            musicProgressSource.setPercentGetter(() => musicPercentComplete);
 
             form.on("progress", (sofar: number, total: number) => {
                 musicPercentComplete = sofar / total;
             });
         } else if (fieldName === "overlay-file" && file) {
-            progressTracker.addProgressSource(() => overlayPercentComplete);
+            overlayProgressSource.setPercentGetter(() => overlayPercentComplete);
 
             form.on("progress", (sofar: number, total: number) => {
                 overlayPercentComplete = sofar / total;
@@ -79,7 +86,7 @@ export function handleFileUpload(req: http.IncomingMessage, progressTracker: Pro
         }
     });
 
-    return defer.promise;
+    return [defer.promise, musicProgressSource, overlayProgressSource];
 }
 
 function makeOverlayTooBigError(files: formidable.File[]) {

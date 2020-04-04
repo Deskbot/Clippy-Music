@@ -175,7 +175,14 @@ quelaag.addEndpoint({
 		handlePotentialBan(userId)
 			.then(() => {
 				progressTracker = ProgressQueueService.add(userId, contentId);
-				return handleFileUpload(req, progressTracker);
+				const [filePromise, musicProgressSource, overlayProgressSource] = handleFileUpload(req, progressTracker);
+
+				filePromise.finally(() => {
+					musicProgressSource.ignoreIfNoPercentGetter();
+					overlayProgressSource.ignoreIfNoPercentGetter();
+				});
+
+				return filePromise;
 			})
 			.then(async ([form, fields, files]) => {
 				const uplData: UploadDataWithId = {
