@@ -38,7 +38,6 @@ export interface StreamedUrlOverlay extends UrlOverlay {
 	hash: undefined;
 	medium: OverlayMedium;
 	stream: true;
-	title: string;
 }
 
 export interface RawUrlOrYtDlOverlay extends UrlOverlay {

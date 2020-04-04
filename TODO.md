@@ -7,7 +7,6 @@ List
 ----
 
 * Silent looping Video overlay
-	* long ytdl url should be streamed
 	* Error when an upload fails:
 		* `TypeError: Cannot read property 'userId' of undefined at ProgressQueue.deleteQueueItem`
 	* if there's nothing to download at the given overlay url, clippy calls it a picture
@@ -18,6 +17,7 @@ List
 	* Update command line api in README
 	* test everything
 
+* duplicate ytdls should be named by clippy instead of clippy stating the url
 * look at casts to string when using headers, some of these things can be undefined if something is done wrong
 * is the "with" log correct (for raw url overlays)
 * Choosing a file with a long name should make it show ellipsis (a literal ... not the unicode …)

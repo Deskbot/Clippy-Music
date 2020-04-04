@@ -66,19 +66,6 @@ export class ClippyQueue {
 		return null;
 	}
 
-	getTitlesFromUserBucket(userId: string) {
-		const bucket = this.userBuckets[userId];
-
-		if (bucket) return bucket.map((item) => {
-			return {
-				title: item.music.title,
-				id: item.id,
-			};
-		});
-
-		else return [];
-	}
-
 	getUserBucket(uid: string) {
 		return this.userBuckets[uid];
 	}

@@ -14,7 +14,7 @@ import { getFileDuration } from "./utils/musicFileUtils";
 import { CancelError, UniqueError, YTError, BadUrlError } from "./errors";
 import { UploadDataWithId, UploadDataWithIdTitleDuration, MusicWithMetadata, OverlayMedium, UrlOverlay, FileOverlay, NoOverlay } from "../types/UploadData";
 import { IdFactory } from "./IdFactory";
-import { ItemData, CompleteMusic, CompleteOverlay, CompleteFileOverlay, CompleteUrlOverlay } from "../types/ItemData";
+import { ItemData, CompleteMusic, CompleteOverlay, CompleteFileOverlay, CompleteUrlOverlay, StreamedUrlOverlay } from "../types/ItemData";
 import { YtDlDownloader } from "./YtDlDownloader";
 import { UserRecord } from "./UserRecord";
 import { ProgressTracker, ProgressSource } from "./ProgressQueue";
@@ -238,7 +238,9 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 
 		let overlayName;
 		if (contentData.overlay.exists) {
-			overlayName = new Html5Entities().decode(contentData.overlay.title);
+			overlayName = contentData.overlay.title !== undefined
+				? new Html5Entities().decode(contentData.overlay.title)
+				: contentData.overlay.url;
 		} else {
 			overlayName = "no overlay";
 		}
@@ -344,7 +346,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 
 		if (contentData.overlay.exists) {
 			if (contentData.overlay.stream) {
-				// TODO stream
+				this.showVideoOverlayWhenMusicPlays(contentData.overlay.url, this.runningMusicProc);
 			} else {
 				const path = contentData.overlay.path;
 
@@ -378,6 +380,18 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		};
 	}
 
+	private prepStreamOverlay(overlay: UrlOverlay, progressSource: ProgressSource): StreamedUrlOverlay {
+		// treat this as though the download is complete
+		progressSource.setPercentGetter(() => 1);
+
+		return {
+			...overlay,
+			hash: undefined,
+			medium: OverlayMedium.Video,
+			stream: true,
+		};
+	}
+
 	private async prepUrlOverlay(
 		overlay: UrlOverlay,
 		userId: string,
@@ -402,9 +416,31 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 			await overlayUrlPromise;
 
 		} catch (err) {
-			debug.error(err);
-			if (err instanceof BadUrlError) { // can't get the resource from the file directly, so try youtube-dl
-				[title, medium] = await this.prepYtDlOverlay(overlay, userId, destinationPath, progressSource);
+			if (err instanceof BadUrlError) {
+				medium = OverlayMedium.Video;
+
+				// can't get the resource from the file directly, so try youtube-dl
+				try {
+					const info = await getYtDlMusicInfo(overlay.url);
+					title = info.title;
+
+					console.log(info, opt.streamOverDuration)
+					if (info.duration > opt.streamOverDuration) {
+						return this.prepStreamOverlay(overlay, progressSource);
+					} else {
+						await this.prepYtDlOverlay(
+							overlay,
+							userId,
+							destinationPath,
+							progressSource
+						);
+					}
+
+				} catch (err) {
+					debug.error(err);
+					// can't get the info needed to try youtube-dl, so give up
+					throw new BadUrlError(ContentPart.Overlay, overlay.url);
+				}
 			} else {
 				throw err;
 			}
@@ -427,27 +463,13 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		userId: string,
 		destinationPath: string,
 		progressSource: ProgressSource
-	): Promise<[string, OverlayMedium]> {
-		try {
-			var { duration, title } = await getYtDlMusicInfo(overlay.url);
-		} catch (err) {
-			// can't get the info needed to try youtube-dl, so give up
-			throw new BadUrlError(ContentPart.Overlay, overlay.url);
-		}
+	): Promise<void> {
+		const [downloadedPromise, getPercent, cancel] = this.ytDlDownloader.new(userId, overlay.url, destinationPath);
 
-		if (duration > opt.streamOverDuration) {
-			progressSource.setPercentGetter(() => 1); // treat this as though the download is complete
-		} else {
-			const [downloadedPromise, getPercent, cancel] = this.ytDlDownloader.new(userId, overlay.url, destinationPath);
-
-			progressSource.setPercentGetter(getPercent);
-			progressSource.setCancelFunc(cancel);
-			downloadedPromise.finally(() => progressSource.done());
-
-			await downloadedPromise;
-		}
-
-		return [ title, OverlayMedium.Video];
+		progressSource.setPercentGetter(getPercent);
+		progressSource.setCancelFunc(cancel);
+		downloadedPromise.finally(() => progressSource.done());
+		return downloadedPromise;
 	}
 
 	private publicify(item: ItemData): PublicItemData {
@@ -462,7 +484,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 
 		if (item.overlay.exists) {
 			data.image = {
-				title: item.overlay.title,
+				title: item.overlay.title ?? item.overlay.url,
 				url: item.overlay.isUrl ? item.overlay.url : undefined,
 			};
 		}
