@@ -173,13 +173,10 @@ quelaag.addEndpoint({
 		let progressTracker: ProgressTracker;
 
 		handlePotentialBan(userId)
-			.then(() => {
+			.then(async () => {
 				progressTracker = ProgressQueueService.add(userId, contentId);
-				const [filePromise] = handleFileUpload(req, progressTracker);
+				const [form, fields, files] = await handleFileUpload(req, progressTracker);
 
-				return filePromise;
-			})
-			.then(async ([form, fields, files]) => {
 				const uplData: UploadDataWithId = {
 					...await parseUploadForm(form, fields, files),
 					id: contentId,

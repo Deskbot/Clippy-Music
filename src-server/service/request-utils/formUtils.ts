@@ -11,11 +11,7 @@ import { UploadData, UrlOverlay, NoOverlay, FileOverlay, FileMusic, UrlMusic, Ov
 import { ProgressTracker, ProgressSource } from "../../lib/ProgressQueue";
 
 export function handleFileUpload(req: http.IncomingMessage, progressTracker: ProgressTracker)
-    : [
-        q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]>,
-        ProgressSource,
-        ProgressSource
-    ]
+    : q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]>
 {
     const defer = q.defer<[formidable.IncomingForm, formidable.Fields, formidable.Files]>();
 
@@ -95,7 +91,7 @@ export function handleFileUpload(req: http.IncomingMessage, progressTracker: Pro
         }
     });
 
-    return [defer.promise, musicProgressSource, overlayProgressSource];
+    return defer.promise;
 }
 
 function makeOverlayTooBigError(files: formidable.File[]) {

@@ -321,7 +321,8 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		this.runningMusicProc = startMusic(musicLocation, opt.timeout, contentData.startTime, contentData.endTime);
 
 		this.runningMusicProc.on("close", (code, signal) => { // runs before next call to playNext
-			const secs = 1 + Math.ceil((Date.now() - timePlayedAt) / 1000); //seconds ran for, adds a little bit to prevent infinite <1 second content
+			// seconds ran for, adds a little bit to prevent infinite <1 second content
+			const secs = 1 + Math.ceil((Date.now() - timePlayedAt) / 1000);
 
 			this.stopOverlay();
 			this.deleteContent(contentData);
@@ -365,7 +366,11 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		};
 	}
 
-	private async prepUrlOverlay(overlay: UrlOverlay, userId: string, progressSource: ProgressSource): Promise<CompleteUrlOverlay> {
+	private async prepUrlOverlay(
+		overlay: UrlOverlay,
+		userId: string,
+		progressSource: ProgressSource
+	): Promise<CompleteUrlOverlay> {
 		const pathOnDisk = this.nextOverlayPath();
 
 		let title: string;
@@ -546,7 +551,12 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		}
 	}
 
-	private async tryPrepMusic(music: MusicWithMetadata, userId: string, progressSource: ProgressSource): Promise<CompleteMusic> {
+	private async tryPrepMusic(
+		music: MusicWithMetadata,
+		userId: string,
+		progressSource: ProgressSource
+	): Promise<CompleteMusic> {
+
 		if (music.isUrl) {
 			// Is it so big it should just be streamed?
 			if (music.totalFileDuration > opt.streamOverDuration) {
@@ -603,7 +613,12 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		}
 	}
 
-	private async tryPrepOverlay(overlay: UrlOverlay | FileOverlay | NoOverlay, userId: string, progressSource: ProgressSource): Promise<CompleteOverlay> {
+	private async tryPrepOverlay(
+		overlay: UrlOverlay | FileOverlay | NoOverlay,
+		userId: string,
+		progressSource: ProgressSource
+	): Promise<CompleteOverlay> {
+
 		if (!overlay.exists) {
 			progressSource.ignore();
 			return this.prepNoOverlay(overlay);
