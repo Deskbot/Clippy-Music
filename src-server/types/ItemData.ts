@@ -34,19 +34,31 @@ export type CompleteMusic = {
 	url: string;
 }
 
-export interface CompleteUrlOverlay extends UrlOverlay {
+export interface StreamedUrlOverlay extends UrlOverlay {
+	hash: undefined;
+	medium: OverlayMedium;
+	stream: true;
+	title: string;
+}
+
+export interface RawUrlOrYtDlOverlay extends UrlOverlay {
 	hash: number;
 	medium: OverlayMedium;
 	path: string;
+	stream: false;
 	title: string;
 };
 
+export type CompleteUrlOverlay = RawUrlOrYtDlOverlay | StreamedUrlOverlay;
+
 export interface CompleteFileOverlay extends FileOverlay {
 	hash: number;
+	stream: false;
 };
 
 export interface CompleteNoOverlay extends NoOverlay {
 	hash: undefined;
+	stream: false;
 }
 
 export type CompleteOverlay = CompleteUrlOverlay | CompleteFileOverlay | CompleteNoOverlay;

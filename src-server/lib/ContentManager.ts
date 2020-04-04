@@ -135,8 +135,13 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 	}
 
 	private deleteContent(contentObj: ItemData) {
-		if (!contentObj.music.stream) utils.deleteFile(contentObj.music.path);
-		if (contentObj.overlay.exists) utils.deleteFile(contentObj.overlay.path); //empty overlay files can be uploaded and will persist
+		if (!contentObj.music.stream) {
+			utils.deleteFile(contentObj.music.path);
+		}
+
+		if (!contentObj.overlay.stream && contentObj.overlay.path) {
+			utils.deleteFile(contentObj.overlay.path);
+		}
 	}
 
 	end() {
@@ -247,10 +252,10 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		console.log(`with   "${overlayName}"`);
 
 		//private log uses private facing info
-		const message = currentTime + "\n" +
-			`user   "${contentData.userId}\n"` +
-			`played "${noHtmlEntityTitle}\n"` +
-			`with   "${overlayName}\n"`;
+		const message = currentTime + "\n"
+			+ `user   "${contentData.userId}\n"`
+			+ `played "${noHtmlEntityTitle}\n"`
+			+ `with   "${overlayName}\n"`;
 
 		fs.appendFile(consts.files.log, message, (err) => {
 			if (err) throw err;
@@ -338,12 +343,16 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		});
 
 		if (contentData.overlay.exists) {
-			const path = contentData.overlay.path;
+			if (contentData.overlay.stream) {
+				// TODO stream
+			} else {
+				const path = contentData.overlay.path;
 
-			if (contentData.overlay.medium === OverlayMedium.Image) {
-				this.showImageOverlayWhenMusicPlays(path, this.runningMusicProc);
-			} else if (contentData.overlay.medium === OverlayMedium.Video) {
-				this.showVideoOverlayWhenMusicPlays(path, this.runningMusicProc);
+				if (contentData.overlay.medium === OverlayMedium.Image) {
+					this.showImageOverlayWhenMusicPlays(path, this.runningMusicProc);
+				} else if (contentData.overlay.medium === OverlayMedium.Video) {
+					this.showVideoOverlayWhenMusicPlays(path, this.runningMusicProc);
+				}
 			}
 		}
 
@@ -357,6 +366,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		return {
 			...overlay,
 			hash: await utils.fileHash(overlay.path),
+			stream: false,
 		};
 	}
 
@@ -364,6 +374,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		return {
 			...overlay,
 			hash: undefined,
+			stream: false,
 		};
 	}
 
@@ -406,6 +417,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 			hash,
 			medium,
 			path: destinationPath,
+			stream: false,
 			title,
 		};
 	}
@@ -417,18 +429,23 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		progressSource: ProgressSource
 	): Promise<[string, OverlayMedium]> {
 		try {
-			var title = (await getYtDlMusicInfo(overlay.url)).title;
-		} catch (err) { // can't get the info needed to try youtube-dl, so give up
+			var { duration, title } = await getYtDlMusicInfo(overlay.url);
+		} catch (err) {
+			// can't get the info needed to try youtube-dl, so give up
 			throw new BadUrlError(ContentPart.Overlay, overlay.url);
 		}
 
-		const [downloadedPromise, getPercent, cancel] = this.ytDlDownloader.new(userId, overlay.url, destinationPath);
+		if (duration > opt.streamOverDuration) {
+			progressSource.setPercentGetter(() => 1); // treat this as though the download is complete
+		} else {
+			const [downloadedPromise, getPercent, cancel] = this.ytDlDownloader.new(userId, overlay.url, destinationPath);
 
-		progressSource.setPercentGetter(getPercent);
-		progressSource.setCancelFunc(cancel);
-		downloadedPromise.finally(() => progressSource.done());
+			progressSource.setPercentGetter(getPercent);
+			progressSource.setCancelFunc(cancel);
+			downloadedPromise.finally(() => progressSource.done());
 
-		await downloadedPromise;
+			await downloadedPromise;
+		}
 
 		return [ title, OverlayMedium.Video];
 	}
@@ -470,7 +487,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 			this.addMusicHash(itemData.music.hash);
 		}
 
-		if (itemData.overlay.exists) {
+		if (itemData.overlay.exists && !itemData.overlay.stream) {
 			this.addOverlayHash(itemData.overlay.hash);
 		}
 	}
@@ -646,7 +663,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 			completeOveraly = await this.prepFileOverlay(overlay);
 		}
 
-		if (this.overlayHashIsUnique(completeOveraly.hash)) {
+		if (!completeOveraly.hash || this.overlayHashIsUnique(completeOveraly.hash)) {
 			return completeOveraly;
 		} else {
 			throw new UniqueError(ContentPart.Overlay);
