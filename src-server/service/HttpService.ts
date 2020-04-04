@@ -164,6 +164,8 @@ quelaag.addEndpoint({
 	do(req, res, middleware) {
 		const userId = middleware.ip();
 
+		debug.log(userId);
+
 		recordUser(userId, res);
 		const ProgressQueueService = ProgressQueueServiceGetter.get();
 		const contentId = IdFactoryGetter.get().next();
