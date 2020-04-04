@@ -61,16 +61,25 @@ export function handleFileUpload(req: http.IncomingMessage, progressTracker: Pro
     let musicPercentComplete = 0;
     let overlayPercentComplete = 0;
 
+    form.once("end", () => {
+        musicProgressSource.ignoreIfNoPercentGetter();
+        overlayProgressSource.ignoreIfNoPercentGetter();
+    });
+
     form.on("fileBegin", (fieldName, file) => {
         if (fieldName === "music-file" && file && file.name) {
-            progressTracker.setTitle(file.name);
-            musicProgressSource.setPercentGetter(() => musicPercentComplete);
+            form.once("progress", () => {
+                progressTracker.setTitle(file.name);
+                musicProgressSource.setPercentGetter(() => musicPercentComplete);
+            });
 
             form.on("progress", (sofar: number, total: number) => {
                 musicPercentComplete = sofar / total;
             });
         } else if (fieldName === "overlay-file" && file) {
-            overlayProgressSource.setPercentGetter(() => overlayPercentComplete);
+            form.once("progress", () => {
+                overlayProgressSource.setPercentGetter(() => overlayPercentComplete);
+            });
 
             form.on("progress", (sofar: number, total: number) => {
                 overlayPercentComplete = sofar / total;

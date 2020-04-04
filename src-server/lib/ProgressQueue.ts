@@ -254,6 +254,7 @@ class ProgressSourceImpl implements ProgressSource {
 	}
 
 	ignore(): void {
+		console.trace();
 		this._isDone = true;
 		this._isIgnored = true;
 	}
@@ -328,19 +329,15 @@ class ProgressTrackerImpl extends (EventEmitter as TypedEmitter<ProgressTrackerE
 	}
 
 	getPercentComplete() {
-		console.log(this.progressSources);
-		console.log(this.progressSources.filter(source => !source.isIgnored));
-		console.log(this.progressSources
-			.filter(source => !source.isIgnored)
-			.map(source => source.getPercent()));
+		const sourcesToAggregate = this.progressSources
+			.filter(source => !source.isIgnored);
 
-		const totalPercents = this.progressSources
-			.filter(source => !source.isIgnored)
+		const totalPercents = sourcesToAggregate
 			.map(source => source.getPercent())
 			.reduce((a, b) => a + b, 0);
-		return this.progressSources.length === 0
+		return sourcesToAggregate.length === 0
 			? 0
-			: totalPercents / this.progressSources.length;
+			: totalPercents / sourcesToAggregate.length;
 	}
 
 	setTitle(title: string, temporary = false) {
