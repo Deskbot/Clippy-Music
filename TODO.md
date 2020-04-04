@@ -7,8 +7,6 @@ List
 ----
 
 * Silent looping Video overlay
-	* simplify prepUrlOverlay
-		* is canDownloadOverlayFromRawUrl needed? those checks can be done in the actual download
 	* is everything that is meant to be cancellable cancellable
 	* long ytdl url should be streamed
 	* Error when an upload fails:
@@ -67,6 +65,7 @@ List
 * combine YTError and BadUrlError
 * allow admins to kill clippy at the end of the next song
 * put user nickname in ItemData to remove need to refetch it
+* is canDownloadOverlayFromRawUrl needed? those checks can be done in the actual download
 * Admins can ban specific songs (even if uniqueness cooloff is disabled) hash checking needs to be applied
 * Admins can see a list of all users and can ban directly
 * add checkbox to enable instant upload on form input change (for quick pasting and file selecting)

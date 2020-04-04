@@ -13,7 +13,13 @@ import { TypedEmitter } from "./utils/TypedEmitter";
  * Represents a unit of work to be done
  */
 export interface ProgressSource {
+	/**
+	 * Attempts to cancels this unit of work.
+	 * @returns Whether the item could be cancelled.
+	 *          If false, the item may or may not have finished already.
+	 */
 	cancel(): boolean;
+	readonly cancellable: boolean;
 
 	/**
 	 * Indicate that there is nothing to cancel.
@@ -54,7 +60,7 @@ export interface ProgressTracker {
 }
 
 interface PublicProgressItem {
-	cancellable?: boolean;
+	cancellable: boolean;
 	contentId: number;
 	percent: number;
 	title: string;
@@ -98,6 +104,7 @@ export class ProgressQueue extends (EventEmitter as TypedEmitter<ProgressQueueEv
 		}
 
 		const newItem: PublicProgressItem = {
+			cancellable: false,
 			contentId,
 			percent: 0,
 			title: "",
@@ -247,7 +254,13 @@ export class ProgressQueue extends (EventEmitter as TypedEmitter<ProgressQueueEv
 	}
 }
 
-class ProgressSourceImpl implements ProgressSource {
+interface ProgressSourceImplEvents {
+	cancellable: (cancellable: boolean) => void;
+}
+
+class ProgressSourceImpl extends (EventEmitter as TypedEmitter<ProgressSourceImplEvents>)
+	implements ProgressSource
+{
 	private cancelFunc?: () => boolean;
 	private percentGetter?: () => number;
 
@@ -255,6 +268,7 @@ class ProgressSourceImpl implements ProgressSource {
 	private _isIgnored: boolean;
 
 	constructor() {
+		super();
 		this.isDone = false;
 		this._isIgnored = false;
 	}
@@ -271,6 +285,10 @@ class ProgressSourceImpl implements ProgressSource {
 		return false;
 	}
 
+	get cancellable(): boolean {
+		return Boolean(this.cancelFunc);
+	}
+
 	done(): void {
 		this.isDone = true;
 	}
@@ -284,7 +302,6 @@ class ProgressSourceImpl implements ProgressSource {
 	}
 
 	ignore(): void {
-		console.trace();
 		this.isDone = true;
 		this._isIgnored = true;
 	}
@@ -301,6 +318,7 @@ class ProgressSourceImpl implements ProgressSource {
 
 	setCancelFunc(func: () => boolean): void {
 		this.cancelFunc = func;
+		this.emit("cancellable", true);
 	}
 
 	setPercentGetter(func: () => number): void {
@@ -343,6 +361,16 @@ class ProgressTrackerImpl extends (EventEmitter as TypedEmitter<ProgressTrackerE
 	createSource(): ProgressSource {
 		const source = new ProgressSourceImpl();
 		this.progressSources.push(source);
+
+		// if any source is cancellable, the whole thing is
+		source.on("cancellable", (bool) => {
+			if (bool) {
+				this.item.cancellable = true;
+			} else {
+				this.item.cancellable = anyTrue(this.progressSources.map(source => source.cancellable));
+			}
+		});
+
 		return source;
 	}
 
