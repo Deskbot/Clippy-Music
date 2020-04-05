@@ -4,7 +4,7 @@ import * as q from "q";
 import * as debug from "../lib/utils/debug";
 import * as opt from "../options";
 
-import { CancelError, UnknownDownloadError } from "./errors";
+import { CancelError, UnknownDownloadError, YTError } from "./errors";
 import { ContentPart } from "../types/ContentPart";
 
 interface YtDlQueueItem {
@@ -62,11 +62,8 @@ export class YtDlDownloader {
 						return resolve();
 					});
 				} else {
-					console.error(errMessage);
-					console.trace();
-					return reject(new UnknownDownloadError(
-						`A youtube-dl processes ended with a non-zero exit (code: ${code}) (signal: ${signal}).`,
-						ContentPart.Music
+					return reject(new YTError(
+						`A youtube-dl processes ended with a non-zero exit (code: ${code}) (signal: ${signal}).\n${errMessage}`,
 					));
 				}
 			});
@@ -94,7 +91,9 @@ export class YtDlDownloader {
 			if (head.cancelled) {
 				defer.reject(new CancelError(target));
 			} else {
-				defer.reject(e);
+				console.error(e);
+				console.trace();
+				defer.reject(new UnknownDownloadError(e, ContentPart.Music));
 			}
 		}).then(() => {
 			// whether or not this download was successful
