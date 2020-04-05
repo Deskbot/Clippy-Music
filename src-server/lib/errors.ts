@@ -6,8 +6,11 @@ import { ContentPart } from "../types/ContentPart";
 abstract class DeferredContentError extends Error {
 	public readonly contentPart: ContentPart;
 
-	constructor(reason: string, contentPart: ContentPart) {
-		super(reason + " So the content was not downloaded.");
+	constructor(reason: string | Error, contentPart: ContentPart) {
+		const message = reason instanceof Error
+			? reason.message
+			: reason + " So the content was not downloaded.";
+		super(message);
 		this.contentPart = contentPart;
 	}
 }
@@ -16,7 +19,7 @@ export class AuthError extends Error {}
 
 export class BadUrlError extends DeferredContentError {
 	public readonly badUrl: string;
-	constructor(contentPart: ContentPart, url: string, message?: string) {
+	constructor(contentPart: ContentPart, url: string, message?: string | Error) {
 		super(message ?? "The url resource requested does not exist.", contentPart);
 		this.badUrl = url;
 	}
@@ -57,7 +60,6 @@ export class FileUploadError extends Error {
 }
 
 export class FormParseError extends Error {
-
 	constructor(message: any) {
 		super(message);
 	}

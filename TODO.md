@@ -9,8 +9,6 @@ List
 * Silent looping Video overlay
 	* Error when an upload fails:
 		* `TypeError: Cannot read property 'userId' of undefined at ProgressQueue.deleteQueueItem`
-	* stop setting `contentPart` on err of type `any`
-	* rename getMusicInfoByUrl and possibly put youtube-dl calls together
 	* show a different download button for videos and images
 	* Updates TESTS file
 	* Update command line api in README
