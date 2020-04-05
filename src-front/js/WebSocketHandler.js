@@ -76,12 +76,12 @@ var WebSocketHandler = (function() {
 		});
 
 		var errorType = contentData.errorType;
-		var contentType = contentData.error.contentType;
+		var contentPart = contentData.error.contentPart;
 		var title = localDlData.title;
 		var picTitle = undefined; // this needs to be sent to the front end somehow at some point
 
-		var isMusic = contentType === "music";
-		var isPic = contentType === "picture"
+		var isMusic = contentPart === "music";
+		var isPic = contentPart === "overlay"
 		var whatMus = title ? utils.entitle(title) : "the music you requested";
 		var whatPic = picTitle ? utils.entitle(picTitle) : "the overlay you requested";
 
@@ -89,7 +89,7 @@ var WebSocketHandler = (function() {
 		var clippyAnimation;
 
 		if (errorType === "BadUrlError") {
-			clippySays = "I could not find anything I could download at the " + contentType + " URL given. Is the URL correct? (" + contentData.error.badUrl + ")";
+			clippySays = "I could not find anything I could download at the " + contentPart + " URL given. Is the URL correct? (" + contentData.error.badUrl + ")";
 
 		} else if (errorType === "DownloadTooLargeError") {
 			var what;

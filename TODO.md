@@ -10,7 +10,7 @@ List
 	* Error when an upload fails:
 		* `TypeError: Cannot read property 'userId' of undefined at ProgressQueue.deleteQueueItem`
 	* if there's nothing to download at the given overlay url, clippy calls it a picture
-		* stop setting `contentType` on err of type `any`
+		* stop setting `contentPart` on err of type `any`
 	* rename getMusicInfoByUrl and possibly put youtube-dl calls together
 	* show a different download button for videos and images
 	* Updates TESTS file

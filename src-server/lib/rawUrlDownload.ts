@@ -16,7 +16,7 @@ export function canDownloadOverlayFromRawUrl(url: string): Promise <[string, Ove
     return new Promise((resolve, reject) => {
         request.head(url, async (err, res, body) => {
             if (err) {
-                err.contentType = ContentPart.Overlay;
+                err.contentPart = ContentPart.Overlay;
                 if (err.code === "ENOTFOUND" || err.code === "ETIMEDOUT") {
                     return reject(new BadUrlError(ContentPart.Overlay, url));
                 }
@@ -50,7 +50,7 @@ export function downloadOverlayFromRawUrl(url: string, destination: string): [Pr
     const promise = new Promise<void>((resolve, reject) => {
         const streamIntoFile = fs.createWriteStream(destination);
         streamIntoFile.on("error", (err) => {
-            (err as any).contentType = ContentPart.Overlay;
+            (err as any).contentPart = ContentPart.Overlay;
             return reject(err);
         });
 
@@ -88,7 +88,7 @@ export function downloadOverlayFromRawUrl(url: string, destination: string): [Pr
         });
 
         req.on("error", (err) => {
-            (err as any).contentType = ContentPart.Overlay;
+            (err as any).contentPart = ContentPart.Overlay;
             return reject(err);
         });
 

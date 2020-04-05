@@ -4,11 +4,11 @@ import * as consts from "../consts";
 import { ContentPart } from "../types/ContentPart";
 
 abstract class DeferredContentError extends Error {
-	public readonly contentType: ContentPart;
+	public readonly contentPart: ContentPart;
 
-	constructor(reason: string, contentType: ContentPart) {
+	constructor(reason: string, contentPart: ContentPart) {
 		super(reason + " So the content was not downloaded.");
-		this.contentType = contentType;
+		this.contentPart = contentPart;
 	}
 }
 
@@ -16,8 +16,8 @@ export class AuthError extends Error {}
 
 export class BadUrlError extends DeferredContentError {
 	public readonly badUrl: string;
-	constructor(contentType: ContentPart, url: string, message?: string) {
-		super(message ?? "The url resource requested does not exist.", contentType);
+	constructor(contentPart: ContentPart, url: string, message?: string) {
+		super(message ?? "The url resource requested does not exist.", contentPart);
 		this.badUrl = url;
 	}
 }
@@ -37,8 +37,8 @@ export class CancelError extends Error {
 export class DownloadTooLargeError extends DeferredContentError {
 	public readonly sizeLimit: string;
 
-	constructor(contentType: ContentPart) {
-		super(`The ${contentType.toString()} requested was too large (over ${consts.fileSizeLimStr}).`, contentType);
+	constructor(contentPart: ContentPart) {
+		super(`The ${contentPart.toString()} requested was too large (over ${consts.fileSizeLimStr}).`, contentPart);
 		this.sizeLimit = consts.fileSizeLimStr;
 	}
 }
@@ -66,22 +66,22 @@ export class FormParseError extends Error {
 export class UniqueError extends DeferredContentError {
 	public readonly playedWithin: string;
 
-	constructor(contentType: ContentPart) {
+	constructor(contentPart: ContentPart) {
 		let playedWithin;
-		if (contentType === ContentPart.Music) {
+		if (contentPart === ContentPart.Music) {
 			playedWithin = consts.musicPlayedWithin;
 		} else {
 			playedWithin = consts.imagePlayedWithin;
 		}
 
-		super(`The ${contentType} you gave has been played in the past ${playedWithin}.`, contentType);
+		super(`The ${contentPart} you gave has been played in the past ${playedWithin}.`, contentPart);
 		this.playedWithin = playedWithin;
 	}
 }
 
 export class UnknownDownloadError extends DeferredContentError {
-	constructor(message: string, contentType: ContentPart) {
-		super(message, contentType);
+	constructor(message: string, contentPart: ContentPart) {
+		super(message, contentPart);
 	}
 }
 
