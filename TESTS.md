@@ -33,13 +33,20 @@ All tests need to be done by the web interface and by `curl`.
 
 ## File Upload Method Combinations
 
-Musc | Overlay
------|---------
-file | none
-file | file
-file | url
-file | ytdl
-ytdl | none
-ytdl | file
-ytdl | url
-ytdl | ytdl
+Musc   | Overlay
+-------|---------
+file   | none
+file   | file
+file   | url
+file   | ytdl
+file   | stream
+ytdl   | none
+ytdl   | file
+ytdl   | url
+ytdl   | ytdl
+ytdl   | stream
+stream | none
+stream | file
+stream | url
+stream | ytdl
+stream | stream
