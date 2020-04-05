@@ -627,21 +627,21 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 
 				progressSource.setPercentGetter(getProgress);
 				progressSource.setCancelFunc(cancel);
+
 				downloadPromise.finally(() => progressSource.done());
 
 				await downloadPromise;
 
-				//hash the music (async)
 				const musicHash = await utils.fileHash(nmp);
 
-				//this exists to prevent a YouTube video from
-				//being downloaded by user and played, then played again by url
-				//or being downloaded twice in quick succession
+				// this exists to prevent a YouTube video from
+				// being downloaded by user and played, then played again by url
+				// or being downloaded twice in quick succession
 				if (this.musicHashIsUnique(musicHash)) {
 					return {
 						...music,
-						path: nmp,
 						hash: musicHash,
+						path: nmp,
 						stream: false,
 					};
 				} else {

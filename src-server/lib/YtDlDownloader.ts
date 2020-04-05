@@ -13,8 +13,8 @@ interface YtDlQueueItem {
 	destination: string;
 	percentSource: PercentSource;
 	proc?: cp.ChildProcess;
-	userId: string;
 	target: string;
+	userId: string;
 }
 
 export class YtDlDownloader {
@@ -38,7 +38,7 @@ export class YtDlDownloader {
 		// so don't remove it from the queue if the download is in progress
 		if (item.proc) {
 			item.cancelled = true;
-			item.proc.kill(); // exit code 2 (SIGINT)
+			item.proc.kill("SIGINT");
 		} else {
 			queue.splice(itemPos, 1);
 		}
@@ -58,12 +58,16 @@ export class YtDlDownloader {
 					// so move the fle to the chosen name
 					const mvProc = cp.spawn("mv", [destination + ".*", destination], { shell: true });
 					mvProc.on("close", () => {
+						debug.log(`YtDl Downloaded ${target}.`);
 						return resolve();
 					});
 				} else {
 					console.error(errMessage);
 					console.trace();
-					return reject(new UnknownDownloadError(`A non-zero exit code (${code}) downloading a YouTube video.`, ContentPart.Music));
+					return reject(new UnknownDownloadError(
+						`A youtube-dl processes ended with a non-zero exit (code: ${code}) (signal: ${signal}).`,
+						ContentPart.Music
+					));
 				}
 			});
 
@@ -71,12 +75,6 @@ export class YtDlDownloader {
 				errMessage += part;
 			});
 		});
-
-		if (debug.isOn()) {
-			prom.then(() => {
-				debug.log(`YtDl Downloaded ${target}.`);
-			});
-		}
 
 		return [ prom, proc ];
 	}
@@ -86,7 +84,7 @@ export class YtDlDownloader {
 
 		if (queue.length === 0) return;
 
-		const head = queue[0]; //item at head of the queue
+		const head = queue[0]; // item at head of the queue
 		const { defer, destination, percentSource, target } = head;
 
 		const [ dlProm, dlProc ] = this.download(target, destination);
@@ -100,13 +98,14 @@ export class YtDlDownloader {
 			}
 		}).then(() => {
 			// whether or not this download was successful
-			queue.shift(); // remove this item from queue (defined as `head` above)
+			// remove this item from queue (defined as `head` above)
+			queue.shift();
 			this.downloadNext(uid);
 		});
 
 		dlProc.stdout.pause();
 
-		head.proc = dlProc; //save ref to proc
+		head.proc = dlProc; // save ref to proc
 
 		// allow the outside world to get percentage updates
 		const percentReader = new PercentReader(dlProc);
@@ -144,8 +143,8 @@ export class YtDlDownloader {
 		};
 		queue.push(item);
 
-		//if the queue was empty just now, need to initiate download sequence
-		//otherwise the download queue is already being worked on
+		// if the queue was empty just now, need to initiate download sequence
+		// otherwise the download queue is already being worked on
 		if (queue.length === 1) {
 			this.downloadNext(userId);
 		}

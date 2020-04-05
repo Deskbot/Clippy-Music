@@ -46,9 +46,7 @@ export class DownloadTooLargeError extends DeferredContentError {
 	}
 }
 
-export class DurationFindingError extends Error {
-
-}
+export class DurationFindingError extends Error {}
 
 export class FileUploadError extends Error {
 	public files: formidable.File[];
@@ -81,11 +79,7 @@ export class UniqueError extends DeferredContentError {
 	}
 }
 
-export class UnknownDownloadError extends DeferredContentError {
-	constructor(message: string, contentPart: ContentPart) {
-		super(message, contentPart);
-	}
-}
+export class UnknownDownloadError extends DeferredContentError {}
 
 export class YTError extends Error {
 	constructor(message: string) {

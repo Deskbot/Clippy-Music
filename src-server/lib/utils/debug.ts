@@ -12,10 +12,6 @@ export function err(...args: any[]) {
 	if (isOnVar) console.error("debug", ...args);
 }
 
-export function isOn() {
-	return isOnVar;
-}
-
 export function error(...args: any[]) {
 	if (isOnVar) console.error("debug", ...args);
 }
