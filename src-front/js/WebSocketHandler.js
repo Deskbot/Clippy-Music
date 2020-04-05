@@ -217,8 +217,12 @@ var WebSocketHandler = (function() {
 				$title.attr("data-text", utils.htmlEntityDecode(current.title));
 
 				if (current.image) {
+					var medium = current.image.medium;
 					var imageLink = current.image.url
-						? templates.makeLinkToImage(current.image.title, current.image.url)
+						? (medium === "image"
+							? templates.makeLinkToImage(current.image.title, current.image.url)
+							: templates.makeLinkToVideo(current.image.title, current.image.url)
+						)
 						: templates.makeOverlayDownloadLink(current.image.title, current.id)
 
 					$currentlyPlaying.find(".image")
@@ -233,11 +237,12 @@ var WebSocketHandler = (function() {
 
 				$currentNickname.html(current.nickname);
 
-				//get a random class, but always the same for the same title
+				// get a random class, but always the same for the same title
 				var wordartClass = main.goodWordArt[
 					digestString(current.title + current.nickname) % main.goodWordArt.length
 				];
-				//remove all classes because we don't know which word art it currently is, add back "wordart" then add the type of wordart
+				// remove all classes because we don't know which word art it currently is
+				// then add back "wordart" then add the type of wordart
 				$currentlyPlaying.find(".wordart")
 					.removeClass()
 					.addClass("wordart")

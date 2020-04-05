@@ -484,6 +484,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 
 		if (item.overlay.exists) {
 			data.image = {
+				medium: item.overlay.medium,
 				title: item.overlay.title ?? item.overlay.url,
 				url: item.overlay.isUrl ? item.overlay.url : undefined,
 			};

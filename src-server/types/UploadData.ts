@@ -21,8 +21,8 @@ export interface FileMusic {
 }
 
 export enum OverlayMedium {
-	Image = 1,
-	Video,
+	Image = "image",
+	Video = "video",
 }
 
 export interface UrlOverlay {

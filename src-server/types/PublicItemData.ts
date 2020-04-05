@@ -1,12 +1,15 @@
+import { OverlayMedium } from "./UploadData";
+
 export interface PublicItemData {
-    musicDownloadUrl?: string;
     duration: number;
     id: number;
+    image?: {
+        medium: OverlayMedium;
+        title: string;
+        url: string | undefined;
+    };
+    musicDownloadUrl?: string;
     nickname: string;
     title: string;
     userId: string;
-    image?: {
-        url: string | undefined;
-        title: string;
-    }
 }

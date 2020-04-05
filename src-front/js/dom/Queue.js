@@ -36,10 +36,15 @@ var Queue = {
 			$bucketItem.children(".duration").html("[" + utils.formatSeconds(item.duration) + "]");
 			$bucketItem.children(".title").html(title);
 
-			if (item.image) {
+			var image = item.image;
+
+			if (image) {
 				var imageLink = item.image.url
-					? templates.makeLinkToImage(item.image.title, item.image.url)
-					: templates.makeOverlayDownloadLink(item.image.title, item.id)
+					? (image.medium === "image"
+						? templates.makeLinkToImage(image.title, image.url)
+						: templates.makeLinkToVideo(image.title, image.url)
+					)
+					: templates.makeOverlayDownloadLink(image.title, item.id)
 
 				$bucketItem.children(".image").append(imageLink);
 			}
