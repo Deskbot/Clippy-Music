@@ -7,8 +7,6 @@ List
 ----
 
 * Silent looping Video overlay
-	* Error when an upload fails:
-		* `TypeError: Cannot read property 'userId' of undefined at ProgressQueue.deleteQueueItem`
 	* test everything
 
 * duplicate ytdls should be named by clippy instead of clippy stating the url

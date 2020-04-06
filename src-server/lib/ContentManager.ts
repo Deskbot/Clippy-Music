@@ -600,7 +600,6 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 			if (notCancelled) {
 				progressTracker.finishedWithError(err);
 				debug.log(`Cancelling ${someItemData.id} due to a failure while trying to queue the media.`);
-				progressTracker.cancel();
 			}
 		}
 	}

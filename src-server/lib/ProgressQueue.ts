@@ -28,12 +28,6 @@ export interface ProgressSource {
 	getPercent(): number;
 
 	/**
-	 * @param func Explain how to cancel the work being tracked
-	 */
-	setCancelFunc(func: () => boolean): void;
-	setPercentGetter(getter: () => number): void;
-
-	/**
 	 * Make this source not contribute to the total amount of work needing to be done.
 	 * A source should be created if it may be needed and later ignored if needed.
 	 * If sources were created only when definitely needed,
@@ -44,6 +38,12 @@ export interface ProgressSource {
 	ignore(): void;
 	ignoreIfNoPercentGetter(): void;
 	isIgnored(): boolean;
+
+	/**
+	 * @param func Explain how to cancel the work being tracked
+	 */
+	setCancelFunc(func: () => boolean): void;
+	setPercentGetter(getter: () => number): void;
 }
 
 /**
@@ -51,12 +51,37 @@ export interface ProgressSource {
  * Tracks multiple ProgressSources associated with it.
  */
 export interface ProgressTracker {
+	/**
+	 * End all work being tracked. No method calls are valid afterwards.
+	 */
 	cancel(): boolean;
+	/**
+	 * Create an object to track a unit of work to be done.
+	 * Previously the tracker was created with a built in number of work items to expect
+	 * and this number could be decremented.
+	 * Now it is expected that sources are created and then later ignored.
+	 */
 	createSource(): ProgressSource;
+	/**
+	 * State that all work associated is done.
+	 * No more work is expected to be tracked. No method calls are valid afterwards.
+	 */
 	finished(): void;
+	/**
+	 * State that all work associated is done and it failed due to an error.
+	 * No more work is expected to be tracked. No method calls are valid afterwards.
+	 * This will trigger a cancellation of all associated sources.
+	 */
 	finishedWithError(err: any): void;
+	/**
+	 * @returns The aggregated percent complete of all associated work
+	 */
 	getPercentComplete(): number;
-	setTitle(title: string, temporary?: boolean): void;
+	/**
+	 * @param title The new title
+	 * @param temporary Whether this title is expected to be replaced.
+	 */
+	setTitle(title: string, temporary: boolean): void;
 }
 
 interface PublicProgressItem {
@@ -126,12 +151,11 @@ export class ProgressQueue extends (EventEmitter as TypedEmitter<ProgressQueueEv
 		});
 
 		tracker.on("error", (error) => {
-			this.deleteQueueItem(this.findQueueItem(userId, contentId)!);
 			this.emit("error", userId, contentId, error);
 		});
 
-		tracker.on("finished", () => {
-			this.deleteQueueItem(this.findQueueItem(userId, contentId)!);
+		tracker.once("finished", () => {
+			this.deleteQueueItem(newItem);
 			this.emit("delete", userId, contentId);
 		});
 
@@ -172,14 +196,6 @@ export class ProgressQueue extends (EventEmitter as TypedEmitter<ProgressQueueEv
 		}
 
 		this.totalContents--;
-	}
-
-	private findQueueItem(userId: string, contentId: number): PublicProgressItem | undefined {
-		const queueMap = this.queues[userId];
-
-		if (!queueMap) return undefined;
-
-		return queueMap.get(contentId);
 	}
 
 	getQueue(userId: string): PublicProgressItem[] | undefined {
@@ -353,7 +369,7 @@ class ProgressTrackerImpl extends (EventEmitter as TypedEmitter<ProgressTrackerE
 	cancel(): boolean {
 		const successes = this.progressSources.map(source => source.cancel());
 		if (anyTrue(successes)) {
-			this.finished();
+			this.finished(); // the progress is done
 			return true;
 		}
 
@@ -381,6 +397,7 @@ class ProgressTrackerImpl extends (EventEmitter as TypedEmitter<ProgressTrackerE
 	}
 
 	finishedWithError(error: any) {
+		this.cancel(); // clean up all sources
 		this.emit("error", error);
 	}
 
