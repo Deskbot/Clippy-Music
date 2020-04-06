@@ -1,7 +1,3 @@
-/*
- * percentages are 0 to 1
- */
-
 import { EventEmitter } from "events";
 
 import * as opt from "../options";
@@ -25,6 +21,9 @@ export interface ProgressSource {
 	 * Indicate that there is nothing to cancel.
 	 */
 	done(): void;
+	/**
+	 * @returns The amount of work done as a number from 0 to 1
+	 */
 	getPercent(): number;
 
 	/**
@@ -74,7 +73,7 @@ export interface ProgressTracker {
 	 */
 	finishedWithError(err: any): void;
 	/**
-	 * @returns The aggregated percent complete of all associated work
+	 * @returns The aggregated percent completion of all created sources as a number from 0 to 1.
 	 */
 	getPercentComplete(): number;
 	/**
@@ -87,6 +86,9 @@ export interface ProgressTracker {
 interface PublicProgressItem {
 	cancellable: boolean;
 	contentId: number;
+	/**
+	 * 0 to 1
+	 */
 	percent: number;
 	title: string;
 	titleIsTemp: boolean;
