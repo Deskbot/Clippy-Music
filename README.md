@@ -85,12 +85,13 @@ Admin controls are available in browser by visiting any of:
 
 An admin API is also availabled as detailed below.
 
-Controls
---------
+Terminal Controls
+-----------------
 
 * End the current song: hit the **'end'** key in the terminal
 * Close the server: hit **ctrl+c**
-* Closing an instance of `mpv` instantiated by the server (such as by pressing **q** in the mpv window) will cause the next track to be played.
+* Closing the music player will cause the next track to be played. The music player is `mpv`, which when windowed, is closed by pressing **q** or **alt+f4**.
+* If the overlay window is closed, the music will continue. By default `eog` is the image displayer; it can be closed with **'esc'** or **alt-f4**.
 
 User API
 --------
@@ -109,17 +110,19 @@ curl --form "field1=@/my/file/path;field2=value2" [url]/api/content/upload
 
 Please note the difference in term separator: `&` vs `;`.
 
-Method | Path                 | Variables                                                              | Effect
--------|----------------------|------------------------------------------------------------------------|--------
-GET    | /api/wsport          |                                                                        | Gives the web socket port being used for front end communication
-POST   | /api/queue/add       | music-file, music-url, overlay-file, overlay-url, start-time, end-time | Add an item to the queue
-POST   | /api/queue/remove    | content-id                                                             | Removes an item from the queue
-POST   | /api/upload/cancel   | dl-index                                                               | Cancel a download
-POST   | /api/nickname/set    | nickname                                                               | Set your nickname
-POST   | /api/ban/add         | password, id, nickname                                                 | Ban a specific player by name or id
-POST   | /api/ban/remove      | password, id                                                           | Un-Ban a specific player by id
-POST   | /api/skip            | password                                                               | Skip the current track
-POST   | /api/skipAndBan      | password                                                               | Skip the current track and ban the uploader
+Method | Path                  | Variables                                                              | Effect
+-------|-----------------------|------------------------------------------------------------------------|--------
+GET    | /api/wsport           |                                                                        | Gives the web socket port being used for front end communication
+POST   | /api/queue/add        | music-file, music-url, overlay-file, overlay-url, start-time, end-time | Add an item to the queue
+POST   | /api/queue/remove     | content-id                                                             | Removes an item from the queue
+POST   | /api/upload/cancel    | dl-index                                                               | Cancel a download
+POST   | /api/nickname/set     | nickname                                                               | Set your nickname
+POST   | /api/ban/add          | password, id, nickname                                                 | Ban a specific player by name or id
+POST   | /api/ban/remove       | password, id                                                           | Un-Ban a specific player by id
+POST   | /api/skip             | password                                                               | Skip the current track
+POST   | /api/skipAndBan       | password                                                               | Skip the current track and ban the uploader
+GET    | /api/download/music   | id                                                                     | Downloads the music as part of the upload with the given id.
+GET    | /api/download/overlay | id                                                                     | Downloads the overlay as part of the upload with the given id.
 
 Contributions
 -------------
