@@ -1,3 +1,12 @@
+/**
+ * This file contains interfaces and classes to enable tracking information about an upload,
+ * while the request is being processed so it can be queued.
+ * This information can all change over time. It includes:
+ *     percent complete
+ *     title
+ *     whether the upload can be cancelled
+ */
+
 import { EventEmitter } from "events";
 
 import * as opt from "../options";
@@ -102,6 +111,13 @@ interface ProgressQueueEvents {
 	prepared: (userId: string, title: string) => void;
 }
 
+/**
+ * A class responsible for knowing all of the progress information about uploads waiting to be queued.
+ * It can:
+ *     have new uploads added to it,
+ *     cancel uploads in progress,
+ * 	   emit the state of each user's uploads in progress at regular intervals
+ */
 export class ProgressQueue extends (EventEmitter as TypedEmitter<ProgressQueueEvents>) {
 	private lastQueueLength: {
 		[userId: string]: number | undefined
