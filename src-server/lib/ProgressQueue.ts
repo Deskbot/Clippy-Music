@@ -119,7 +119,11 @@ export class ProgressQueue extends (EventEmitter as TypedEmitter<ProgressQueueEv
 		this.maybeItemIsPrepared(newItem);
 
 		// create a tracker that the external world can use to interact indirectly with the queue
-		const tracker = new ProgressTrackerImpl(newItem);
+		const tracker = new ProgressTrackerImpl();
+
+		tracker.on("cancellable", (isCancellable) => {
+			newItem.cancellable = isCancellable;
+		});
 
 		tracker.on("error", (error) => {
 			this.deleteQueueItem(this.findQueueItem(userId, contentId)!);
@@ -131,7 +135,9 @@ export class ProgressQueue extends (EventEmitter as TypedEmitter<ProgressQueueEv
 			this.emit("delete", userId, contentId);
 		});
 
-		tracker.on("title", () => {
+		tracker.on("title", (title, isTemporary) => {
+			newItem.title = title;
+			newItem.titleIsTemp = isTemporary;
 			// might have just gained all the data needed
 			this.maybeItemIsPrepared(newItem);
 			this.transmitToUserMaybe(userId);
@@ -327,24 +333,20 @@ class ProgressSourceImpl extends (EventEmitter as TypedEmitter<ProgressSourceImp
 }
 
 interface ProgressTrackerEvents {
+	cancellable: (isCancellable: boolean) => void;
 	error: (error: any) => void;
 	finished: () => void;
-	title: () => void;
+	title: (title: string, isTemporary: boolean) => void;
 }
 
 class ProgressTrackerImpl extends (EventEmitter as TypedEmitter<ProgressTrackerEvents>) implements ProgressTracker {
-	private item: PublicProgressItem;
 	private progressSources: ProgressSource[];
 
 	/**
-	 * @param item The item being tracked.
-	 *             Some of this data is modified to accomodate the expectations of the ProgressQueue,
-	 *             however this is not ideal
 	 * @param maximumExpectedSources The number of progress sources that are expected to be added.
 	 */
-	constructor(item: PublicProgressItem) {
+	constructor() {
 		super();
-		this.item = item;
 		this.progressSources = [];
 	}
 
@@ -365,9 +367,9 @@ class ProgressTrackerImpl extends (EventEmitter as TypedEmitter<ProgressTrackerE
 		// if any source is cancellable, the whole thing is
 		source.on("cancellable", (bool) => {
 			if (bool) {
-				this.item.cancellable = true;
+				this.emit("cancellable", true);
 			} else {
-				this.item.cancellable = anyTrue(this.progressSources.map(source => source.cancellable));
+				this.emit("cancellable", anyTrue(this.progressSources.map(source => source.cancellable)));
 			}
 		});
 
@@ -394,9 +396,7 @@ class ProgressTrackerImpl extends (EventEmitter as TypedEmitter<ProgressTrackerE
 			: totalPercents / sourcesToAggregate.length;
 	}
 
-	setTitle(title: string, temporary = false) {
-		this.item.title = title;
-		this.item.titleIsTemp = temporary;
-		this.emit("title");
+	setTitle(title: string, isTemporary = false) {
+		this.emit("title", title, isTemporary);
 	}
 }
