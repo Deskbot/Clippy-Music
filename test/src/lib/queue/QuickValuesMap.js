@@ -1,4 +1,4 @@
-const { QuickValuesMap } = require("../../../../build/lib/QuickValuesMap");
+const { QuickValuesMap } = require("../../../../build/lib/utils/QuickValuesMap");
 
 const assert = require("assert");
 

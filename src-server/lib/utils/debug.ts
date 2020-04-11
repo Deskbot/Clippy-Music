@@ -1,25 +1,33 @@
-let isOn = false;
+/**
+ * This file provides logging functions like those on `console`,
+ * however these functions prepend the given message with "debug"
+ */
+
+/**
+ * Is the debugger on?
+ */
+let isOnVar = false;
 
 export function err(...args: any[]) {
-	if (isOn) console.error("debug", ...args);
+	if (isOnVar) console.error("debug", ...args);
 }
 
 export function error(...args: any[]) {
-	if (isOn) console.error("debug", ...args);
+	if (isOnVar) console.error("debug", ...args);
 }
 
 export function log(...args: any[]) {
-	if (isOn) console.log("debug", ...args);
+	if (isOnVar) console.log("debug", ...args);
 }
 
 export function trace() {
-	if (isOn) console.trace();
+	if (isOnVar) console.trace("debug");
 }
 
 export function on() {
-	isOn = true;
+	isOnVar = true;
 }
 
 export function off() {
-	isOn = false;
+	isOnVar = false;
 }

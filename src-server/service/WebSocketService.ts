@@ -193,16 +193,15 @@ export function startWebSocketService() {
 		WebSocketService.broadcastQueue();
 	});
 
-	ProgressQueueService.on("prepared", (userId, content) => {
-		WebSocketService.sendMessage(UserRecordService.getSockets(userId), "dl-prep", content);
+	ProgressQueueService.on("prepared", (userId, title) => {
+		WebSocketService.sendMessage(UserRecordService.getSockets(userId), "dl-prep", title);
 	});
 
-	ProgressQueueService.on("delete", (userId, contentId) => {
+	ProgressQueueService.on("success", (userId, contentId) => {
 		const socs = UserRecordService.getSockets(userId);
 		WebSocketService.sendMessage(socs, "dl-delete", contentId);
 	});
 
-	//extraInfo is an optional argument
 	ProgressQueueService.on("error", (userId, contentId, error) => {
 		const data = {
 			contentId,

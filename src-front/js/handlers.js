@@ -46,16 +46,23 @@ $uploadForm.find("input[name=music-file]").change(function(e) {
 	$this.siblings(".file-name").text(fileName ? fileName : "No File Chosen");
 });
 
-$uploadForm.find("input[name=image-file]").change(function(e) {
+$uploadForm.find("input[name=overlay-file]").change(function(e) {
 	var $musicUrl = $uploadForm.find("[name=image-url]");
 
 	if (utils.inputHasFile(this)) $musicUrl.attr("disabled", true);
 	else						  $musicUrl.attr("disabled", false);
 
-	var $this = $(this);
+	var typeArr = this.files[0].type.split("/");
 
+	var folder = typeArr[0] === "image"
+	? "My Pictures"
+	: typeArr[0] === "video"
+	? "My Videos"
+	: "My Documents";
+
+	var $this = $(this);
 	var title = $this.val().replace("C:\\fakepath\\", "");
-	var fileName = title === "" ? "No File Chosen" : "C:\\My Pictures\\" + title;
+	var fileName = title === "" ? "No File Chosen" : "C:\\" + folder + "\\" + title;
 	$this.siblings(".file-name").text(fileName ? fileName : "No File Chosen");
 });
 

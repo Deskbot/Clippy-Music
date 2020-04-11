@@ -1,23 +1,11 @@
 import * as crc_32 from "crc-32";
 import * as fs from "fs";
 import { Html5Entities } from "html-entities";
-import { URL } from "url";
 
 import * as opt from "../../options";
 
 export function asciiOnly(str: string): string {
 	return str.replace(/[^\x00-\x7F]/g, "");
-}
-
-export function cloneWithout<T extends object>(o: T, badAttrs: (keyof T)[]) {
-	if (!Array.isArray(badAttrs)) badAttrs = [badAttrs];
-
-	if (null == o || "object" != typeof o) return o;
-	let copy = o.constructor();
-	for (let attr in o) {
-		if (!(badAttrs.includes(attr)) && o.hasOwnProperty(attr)) copy[attr] = o[attr];
-	}
-	return copy;
 }
 
 //based on alex030293's solution https://stackoverflow.com/questions/38485622/delete-folder-containing-files-node-js

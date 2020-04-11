@@ -8,13 +8,13 @@ export function downloadFile(req: IncomingMessage, res: ServerResponse, title: s
 }
 
 export function endWithSuccessText(res: ServerResponse, text: string) {
-    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader("Content-Type", "text/plain");
     res.statusCode = 200;
     res.end(text);
 }
 
 export function endWithFailureText(res: ServerResponse, text: string) {
-    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader("Content-Type", "text/plain");
     res.statusCode = 400;
     res.end(text);
 }

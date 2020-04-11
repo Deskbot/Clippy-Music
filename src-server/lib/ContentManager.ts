@@ -1,30 +1,34 @@
 import * as cp from "child_process";
 import { EventEmitter } from "events";
 import { Html5Entities } from "html-entities";
-import * as request from "request";
 import * as fs from "fs";
 
 import * as consts from "../consts";
+import * as debug from "../lib/utils/debug";
 import * as utils from "./utils/utils";
 import * as opt from "../options";
 import * as time from "./time";
 
-import { ContentType } from "../types/ContentType";
-import { getMusicInfoByUrl, getFileDuration, UrlMusicData } from "./music";
-import { BadUrlError, CancelError, DownloadTooLargeError, DownloadWrongTypeError, UniqueError, UnknownDownloadError, YTError } from "./errors";
-import { UploadDataWithId, UploadDataWithIdTitleDuration, NoPic, FilePic, UrlPic, MusicWithMetadata } from "../types/UploadData";
+import { ContentPart } from "../types/ContentPart";
+import { getFileDuration } from "./utils/musicFileUtils";
+import { CancelError, UniqueError, YTError, BadUrlError } from "./errors";
+import { UploadDataWithId, UploadDataWithIdTitleDuration, MusicWithMetadata, OverlayMedium, UrlOverlay, FileOverlay, NoOverlay } from "../types/UploadData";
 import { IdFactory } from "./IdFactory";
-import { ItemData, CompleteMusic, CompletePicture } from "../types/ItemData";
-import { YtDlDownloader } from "./YtDownloader";
+import { ItemData, CompleteMusic, CompleteOverlay, CompleteFileOverlay, CompleteUrlOverlay, StreamedUrlOverlay } from "../types/ItemData";
+import { YtDlDownloader } from "./YtDlDownloader";
 import { UserRecord } from "./UserRecord";
-import { ProgressQueue } from "./ProgressQueue";
+import { ProgressTracker, ProgressSource } from "./ProgressQueue";
 import { BarringerQueue, isSuspendedBarringerQueue } from "./queue/BarringerQueue";
 import { PublicItemData } from "../types/PublicItemData";
+import { canDownloadOverlayFromRawUrl, downloadOverlayFromRawUrl } from "./rawUrlDownload";
+import { startVideoOverlay, startImageOverlay, startMusic, doWhenMusicPlays as doWhenMusicStarts } from "./playMedia";
+import { TypedEmitter } from "./utils/TypedEmitter";
+import { UrlMusicData, getYtDlMusicInfo } from "./ytDlInterface";
 
 export interface SuspendedContentManager {
 	playQueue: any;
 	hashes: any;
-	picHashes: any;
+	overlayHashes: any;
 	ytIds: any;
 }
 
@@ -32,17 +36,23 @@ export function isSuspendedContentManager(obj: any): obj is SuspendedContentMana
 	return "playQueue" in obj
 		&& isSuspendedBarringerQueue(obj.playQueue)
 		&& "hashes" in obj
-		&& "picHashes" in obj
+		&& "overlayHashes" in obj
 		&& "ytIds" in obj;
 }
 
-export class ContentManager extends EventEmitter {
+interface ContentManagerEvents {
+	end: () => void;
+	"queue-empty": () => void;
+	"queue-update": () => void;
+}
+
+export class ContentManager extends (EventEmitter as TypedEmitter<ContentManagerEvents>) {
 	//data stores
 	private playQueue: BarringerQueue;
 	private musicHashes: {
 		[hash: string]: number
 	} = {};
-	private picHashes: {
+	private overlayHashes: {
 		[hash: string]: number
 	} = {};
 	private musicUrlRecord: {
@@ -51,13 +61,12 @@ export class ContentManager extends EventEmitter {
 
 	//injected objects
 	private idFactory: IdFactory;
-	private progressQueue: ProgressQueue;
 	private userRecord: UserRecord;
-	private ytDownloader: YtDlDownloader;
+	private ytDlDownloader: YtDlDownloader;
 
 	//processes
-	private runningMusicProc: cp.ChildProcess | null = null;
-	private runningPicProc: cp.ChildProcess | null = null;
+	private runningMusicProc: cp.ChildProcessWithoutNullStreams | null = null;
+	private runningOverlayProc: cp.ChildProcessWithoutNullStreams | null = null;
 	private currentlyPlaying: ItemData | null = null;
 
 	private stop?: boolean;
@@ -66,50 +75,49 @@ export class ContentManager extends EventEmitter {
 		maxTimePerBucket: number,
 		startState: SuspendedContentManager | null,
 		idFactory: IdFactory,
-		progressQueue: ProgressQueue,
 		userRecord: UserRecord,
-		ytDownloader: YtDlDownloader
+		ytDlDownloader: YtDlDownloader
 	) {
 		super();
 
 		this.idFactory = idFactory;
-		this.progressQueue = progressQueue;
 		this.userRecord = userRecord;
-		this.ytDownloader = ytDownloader;
+		this.ytDlDownloader = ytDlDownloader;
 
 		if (startState) {
 			console.log("Using suspended content manager");
 
 			this.playQueue = new BarringerQueue(maxTimePerBucket, startState.playQueue);
 			this.musicHashes = startState.hashes;
-			this.picHashes = startState.picHashes;
+			this.overlayHashes = startState.overlayHashes;
 			this.musicUrlRecord = startState.ytIds;
 		} else {
 			this.playQueue = new BarringerQueue(maxTimePerBucket);
 		}
 	}
 
-	async add(uplData: UploadDataWithId) {
-		try {
-			// awaits everything that needs to happen before http response
-			const dataToQueue = await this.getDataToQueue(uplData);
-			this.tryQueue(dataToQueue);
-			return dataToQueue;
-		} catch (err) {
-			// errors here are sent by websocket
-			throw err;
+	async add(uplData: UploadDataWithId, progressTracker: ProgressTracker): Promise<UploadDataWithIdTitleDuration> {
+		// awaits everything that needs to happen before http response
+		const dataToQueue = await this.getDataToQueue(uplData);
+
+		if (dataToQueue.music.isUrl) {
+			progressTracker.setTitle(dataToQueue.music.title, false);
 		}
+
+		// don't wait for the actual queueing to finish
+		this.tryQueue(dataToQueue, progressTracker).catch(utils.reportError);
+		return dataToQueue;
 	}
 
-	addHash(hash: number) {
+	private addMusicHash(hash: number) {
 		this.musicHashes[hash] = new Date().getTime();
 	}
 
-	addPicHash(hash: number) {
-		this.picHashes[hash] = new Date().getTime();
+	private addOverlayHash(hash: number) {
+		this.overlayHashes[hash] = new Date().getTime();
 	}
 
-	addUrlId(id: string) {
+	private addUrlId(id: string) {
 		this.musicUrlRecord[id] = new Date().getTime();
 	}
 
@@ -131,55 +139,14 @@ export class ContentManager extends EventEmitter {
 		return durationBasedOnStartAndFinish;
 	}
 
-	deleteContent(contentObj: ItemData) {
-		if (!contentObj.music.stream) utils.deleteFile(contentObj.music.path);
-		if (contentObj.pic.exists) utils.deleteFile(contentObj.pic.path); //empty picture files can be uploaded and will persist
-	}
+	private deleteContent(contentObj: ItemData) {
+		if (!contentObj.music.stream) {
+			utils.deleteFile(contentObj.music.path);
+		}
 
-	downloadPic(url: string, destination: string): Promise<string> {
-		return new Promise((resolve, reject) => {
-			request.head(url, (err, res, body) => {
-				if (err) {
-					err.contentType = ContentType.Picture;
-					if (err.code === "ENOTFOUND" || err.code === "ETIMEDOUT") {
-						return reject(new BadUrlError(ContentType.Picture));
-					}
-					return reject(err);
-				}
-
-				if (!res) {
-					return reject(new UnknownDownloadError("Could not get a response for the request.", ContentType.Picture));
-				}
-
-				const typeFound = res.headers["content-type"] as string;
-
-				if (typeFound.split("/")[0] !== "image") {
-					return reject(new DownloadWrongTypeError(ContentType.Picture, "image", typeFound));
-				}
-				if (parseInt(res.headers["content-length"] as string) > opt.imageSizeLimit) {
-					return reject(new DownloadTooLargeError(ContentType.Picture));
-				}
-
-				let picName: string | null = url.split("/").pop() as string;
-				picName = picName.length <= 1 ? null : picName.split(".").shift() as string;
-
-				if (picName == null) {
-					picName = "";
-				}
-
-				const title = new Html5Entities().encode(picName);
-
-				const stream = request(url).pipe(fs.createWriteStream(destination));
-
-				stream.on("close", () => {
-					return resolve(title);
-				});
-				stream.on("error", (err) => {
-					err.contentType = ContentType.Picture;
-					return reject(err);
-				});
-			});
-		});
+		if (!contentObj.overlay.stream && contentObj.overlay.path) {
+			utils.deleteFile(contentObj.overlay.path);
+		}
 	}
 
 	end() {
@@ -211,13 +178,13 @@ export class ContentManager extends EventEmitter {
 		if (!uplData.music.isUrl) {
 			// read the music file to determine its duration
 			const fileDuration = await getFileDuration(uplData.music.path);
-			const uplDataWithDuration = {
+			const uplDataWithDuration: UploadDataWithIdTitleDuration = {
 				...uplData,
 				music: {
 					...uplData.music,
 				},
-				pic: {
-					...uplData.pic,
+				overlay: {
+					...uplData.overlay,
 				},
 				duration: this.calcPlayableDuration(fileDuration, uplData.startTime, uplData.endTime),
 			};
@@ -228,9 +195,9 @@ export class ContentManager extends EventEmitter {
 		let info: UrlMusicData;
 
 		try {
-			info = await getMusicInfoByUrl(uplData.music.url);
+			info = await getYtDlMusicInfo(uplData.music.url);
 		} catch (err) {
-			throw new YTError(`I was unable to download (${uplData.music.title ? uplData.music.title : uplData.music.url}). Is the URL correct? The video might not be compatible.`);
+			throw new YTError(`I was unable to download (${uplData.music.title ? uplData.music.title : uplData.music.url}). Is the URL correct?`);
 		}
 
 		if (this.musicUrlIsUnique(info.uniqueUrlId)) {
@@ -248,7 +215,7 @@ export class ContentManager extends EventEmitter {
 			};
 
 		} else {
-			throw new UniqueError(ContentType.Music);
+			throw new UniqueError(ContentPart.Music);
 		}
 	}
 
@@ -267,18 +234,20 @@ export class ContentManager extends EventEmitter {
 
 	killCurrent() {
 		this.stopMusic();
-		this.stopPic();
+		this.stopOverlay();
 	}
 
-	logPlay(contentData: ItemData) {
+	private logPlay(contentData: ItemData) {
 		const nickname = this.userRecord.getNickname(contentData.userId);
 		const currentTime = new Date().toISOString();
 
-		let picName;
-		if (contentData.pic.exists) {
-			picName = new Html5Entities().decode(contentData.pic.title);
+		let overlayName;
+		if (contentData.overlay.exists) {
+			overlayName = contentData.overlay.title !== undefined
+				? new Html5Entities().decode(contentData.overlay.title)
+				: contentData.overlay.url;
 		} else {
-			picName = "no picture";
+			overlayName = "no overlay";
 		}
 
 		const noHtmlEntityTitle = new Html5Entities().decode(contentData.music.title);
@@ -287,13 +256,13 @@ export class ContentManager extends EventEmitter {
 		console.log(currentTime);
 		console.log(`user   "${nickname}"`);
 		console.log(`played "${noHtmlEntityTitle}"`);
-		console.log(`with   "${picName}"`);
+		console.log(`with   "${overlayName}"`);
 
 		//private log uses private facing info
-		const message = currentTime + "\n" +
-			`user   "${contentData.userId}\n"` +
-			`played "${noHtmlEntityTitle}\n"` +
-			`with   "${picName}\n"`;
+		const message = currentTime + "\n"
+			+ `user   "${contentData.userId}\n"`
+			+ `played "${noHtmlEntityTitle}\n"`
+			+ `with   "${overlayName}\n"`;
 
 		fs.appendFile(consts.files.log, message, (err) => {
 			if (err) throw err;
@@ -312,22 +281,30 @@ export class ContentManager extends EventEmitter {
 		return true;
 	}
 
-	musicHashIsUnique(hash: number): boolean {
+	private musicHashIsUnique(hash: number): boolean {
 		let lastPlayed = this.musicHashes[hash];
 		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
 	}
 
-	nextMusicPath(): string {
+	private musicUrlIsUnique(uniqueUrlId: string): boolean {
+		const lastPlayed = this.musicUrlRecord[uniqueUrlId];
+
+		// never played
+		// or the current time is after the cooloff period
+		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff * 1000 < new Date().getTime();
+	}
+
+	private nextMusicPath(): string {
 		return consts.dirs.music + this.idFactory.next();
 	}
 
-	nextPicPath(): string {
-		return consts.dirs.pic + this.idFactory.next();
+	private nextOverlayPath(): string {
+		return consts.dirs.overlay + this.idFactory.next();
 	}
 
-	picHashIsUnique(hash: number): boolean {
-		let lastPlayed = this.picHashes[hash];
-		return !lastPlayed || lastPlayed + opt.imageUniqueCoolOff * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
+	private overlayHashIsUnique(hash: number): boolean {
+		let lastPlayed = this.overlayHashes[hash];
+		return !lastPlayed || lastPlayed + opt.overlayUniqueCoolOff * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
 	}
 
 	playNext(): boolean {
@@ -352,41 +329,152 @@ export class ContentManager extends EventEmitter {
 		this.currentlyPlaying = contentData;
 
 		const timePlayedAt = Date.now();
-
 		const musicLocation = contentData.music.stream ? contentData.music.url : contentData.music.path;
-		const musicProc = this.startMusic(musicLocation, opt.timeout, contentData.startTime, contentData.endTime);
 
-		musicProc.on("close", (code, signal) => { // runs before next call to playNext
-			const secs = 1 + Math.ceil((Date.now() - timePlayedAt) / 1000); //seconds ran for, adds a little bit to prevent infinite <1 second content
+		this.runningMusicProc = startMusic(musicLocation, opt.timeout, contentData.startTime, contentData.endTime);
 
-			this.stopPic();
+		this.runningMusicProc.on("close", (code, signal) => { // runs before next call to playNext
+			// seconds ran for, adds a little bit to prevent infinite <1 second content
+			const secs = 1 + Math.ceil((Date.now() - timePlayedAt) / 1000);
+
+			this.stopOverlay();
 			this.deleteContent(contentData);
 			this.currentlyPlaying = null;
 
 			// save hashes if the music played for long enough
-			if (secs > opt.tooShortToCauseCoolOff) this.remember(contentData);
+			if (secs > opt.tooShortToCauseCoolOff) {
+				this.remember(contentData);
+			}
 
 			this.emit("end");
 		});
 
-		if (contentData.pic.exists) {
-			const picPath = contentData.pic.path;
-			const showPicture = (buf: any) => {
-				//we want to play the picture after the video has appeared, which takes a long time when doing it remotely
-				//so we have to check the output of mpv, for signs it's not just started up, but also playing :/
-				if (buf.includes("(+)") || buf.includes("Audio") || buf.includes("Video")) {
-					this.startPic(picPath, opt.timeout);
-					musicProc.stdout.removeListener("data", showPicture); //make sure we only check for this once, for efficiency
-				}
-			};
+		if (contentData.overlay.exists) {
+			if (contentData.overlay.stream) {
+				this.showVideoOverlayWhenMusicPlays(contentData.overlay.url, this.runningMusicProc);
+			} else {
+				const path = contentData.overlay.path;
 
-			musicProc.stdout.on("data", showPicture);
+				if (contentData.overlay.medium === OverlayMedium.Image) {
+					this.showImageOverlayWhenMusicPlays(path, this.runningMusicProc);
+				} else if (contentData.overlay.medium === OverlayMedium.Video) {
+					this.showVideoOverlayWhenMusicPlays(path, this.runningMusicProc);
+				}
+			}
 		}
 
 		this.logPlay(contentData);
 		this.emit("queue-update");
 
 		return true;
+	}
+
+	private async prepFileOverlay(overlay: FileOverlay): Promise<CompleteFileOverlay> {
+		return {
+			...overlay,
+			hash: await utils.fileHash(overlay.path),
+			stream: false,
+		};
+	}
+
+	private prepNoOverlay(overlay: NoOverlay): CompleteOverlay {
+		return {
+			...overlay,
+			hash: undefined,
+			stream: false,
+		};
+	}
+
+	private prepStreamOverlay(overlay: UrlOverlay, progressSource: ProgressSource): StreamedUrlOverlay {
+		// treat this as though the download is complete
+		progressSource.setPercentGetter(() => 1);
+
+		return {
+			...overlay,
+			hash: undefined,
+			medium: OverlayMedium.Video,
+			stream: true,
+		};
+	}
+
+	private async prepUrlOverlay(
+		overlay: UrlOverlay,
+		userId: string,
+		progressSource: ProgressSource
+	): Promise<CompleteUrlOverlay> {
+		let title: string;
+		let medium: OverlayMedium;
+
+		const destinationPath = this.nextOverlayPath();
+
+		try {
+			[title, medium] = await canDownloadOverlayFromRawUrl(overlay.url);
+
+			const [overlayUrlPromise, getPercent] = downloadOverlayFromRawUrl(overlay.url, destinationPath);
+			progressSource.setPercentGetter(getPercent);
+
+			// undo progress if this fails
+			overlayUrlPromise.catch(() => {
+				progressSource.setPercentGetter(() => 0);
+			});
+
+			await overlayUrlPromise;
+
+		} catch (err) {
+			if (err instanceof BadUrlError) {
+				medium = OverlayMedium.Video;
+
+				// can't get the resource from the file directly, so try youtube-dl
+				try {
+					const info = await getYtDlMusicInfo(overlay.url);
+					title = info.title;
+
+					console.log(info, opt.streamOverDuration)
+					if (info.duration > opt.streamOverDuration) {
+						return this.prepStreamOverlay(overlay, progressSource);
+					} else {
+						await this.prepYtDlOverlay(
+							overlay,
+							userId,
+							destinationPath,
+							progressSource
+						);
+					}
+
+				} catch (err) {
+					debug.error(err);
+					// can't get the info needed to try youtube-dl, so give up
+					throw new BadUrlError(ContentPart.Overlay, overlay.url);
+				}
+			} else {
+				throw err;
+			}
+		}
+
+		const hash = await utils.fileHash(destinationPath);
+
+		return {
+			...overlay,
+			hash,
+			medium,
+			path: destinationPath,
+			stream: false,
+			title,
+		};
+	}
+
+	private async prepYtDlOverlay(
+		overlay: UrlOverlay,
+		userId: string,
+		destinationPath: string,
+		progressSource: ProgressSource
+	): Promise<void> {
+		const [downloadedPromise, getPercent, cancel] = this.ytDlDownloader.new(userId, overlay.url, destinationPath);
+
+		progressSource.setPercentGetter(getPercent);
+		progressSource.setCancelFunc(cancel);
+		downloadedPromise.finally(() => progressSource.done());
+		return downloadedPromise;
 	}
 
 	private publicify(item: ItemData): PublicItemData {
@@ -399,10 +487,11 @@ export class ContentManager extends EventEmitter {
 			userId: item.userId,
 		};
 
-		if (item.pic.exists) {
+		if (item.overlay.exists) {
 			data.image = {
-				title: item.pic.title,
-				url: item.pic.isUrl ? item.pic.url : undefined,
+				medium: item.overlay.medium,
+				title: item.overlay.title ?? item.overlay.url,
+				url: item.overlay.isUrl ? item.overlay.url : undefined,
 			};
 		}
 
@@ -417,17 +506,17 @@ export class ContentManager extends EventEmitter {
 		}
 	}
 
-	remember(itemData: ItemData) {
+	private remember(itemData: ItemData) {
 		if (itemData.music.isUrl) {
 			this.addUrlId(itemData.music.uniqueId);
 		}
 
 		if (itemData.music.hash) {
-			this.addHash(itemData.music.hash);
+			this.addMusicHash(itemData.music.hash);
 		}
 
-		if (itemData.pic.exists) {
-			this.addPicHash(itemData.pic.hash);
+		if (itemData.overlay.exists && !itemData.overlay.stream) {
+			this.addOverlayHash(itemData.overlay.hash);
 		}
 	}
 
@@ -445,87 +534,89 @@ export class ContentManager extends EventEmitter {
 		return false;
 	}
 
-	startMusic(path: string, duration: number, startTime: number | null | undefined, endTime: number | null | undefined) {
-		const args = [duration + "s", opt.mpvCommand, ...opt.mpvArgs, "--quiet", path];
-
-		if (startTime) {
-			args.push("--start");
-			args.push(startTime.toString());
-		}
-
-		if (endTime) {
-			args.push("--end");
-			args.push(endTime.toString());
-		}
-
-		if (opt.mute.get()) {
-			args.push("--mute=yes");
-		}
-
-		return this.runningMusicProc = cp.spawn("timeout", args);
+	private showImageOverlayWhenMusicPlays(path: string, musicProc: cp.ChildProcessWithoutNullStreams) {
+		doWhenMusicStarts(musicProc, () => {
+			this.runningOverlayProc = startImageOverlay(path, opt.timeout);
+		});
 	}
 
-	stopMusic() {
-		if (this.runningMusicProc) this.runningMusicProc.kill();
+	private showVideoOverlayWhenMusicPlays(path: string, musicProc: cp.ChildProcessWithoutNullStreams) {
+		doWhenMusicStarts(musicProc, () => {
+			this.runningOverlayProc = startVideoOverlay(path, opt.timeout);
+		});
 	}
 
-	startPic(path: string, duration: number) {
-		this.runningPicProc = cp.spawn("timeout", [duration + "s", opt.showImageCommand, path, ...opt.showImageArgs]);
+	private stopMusic() {
+		if (this.runningMusicProc) {
+			this.runningMusicProc.kill();
+		}
 	}
 
-	stopPic() {
-		if (this.runningPicProc) {
-			this.runningPicProc.kill();
-			this.runningPicProc = null;
+	private stopOverlay() {
+		if (this.runningOverlayProc) {
+			this.runningOverlayProc.kill();
+			this.runningOverlayProc = null;
 		}
 	}
 
 	toJSON() {
-		return JSON.stringify({
-			playQueue: this.playQueue, //luckily this is jsonable
+		const data: SuspendedContentManager = {
 			hashes: this.musicHashes,
-			picHashes: this.picHashes,
+			overlayHashes: this.overlayHashes,
+			playQueue: this.playQueue, //luckily this is jsonable
 			ytIds: this.musicUrlRecord,
-		});
+		};
+		return JSON.stringify(data);
 	}
 
-	private async tryQueue(someItemData: UploadDataWithIdTitleDuration) {
+	private async tryQueue(someItemData: UploadDataWithIdTitleDuration, progressTracker: ProgressTracker) {
+		const musicProgressSource = progressTracker.getMusicSource();
+		const overlayProgressSource = progressTracker.getOverlaySource();
+
 		try {
 			const musicPrepProm = this.tryPrepMusic(
 				someItemData.music,
-				someItemData.id,
 				someItemData.userId,
+				musicProgressSource,
 			);
 
-			// if the picture fails, make sure any yt download is stopped
-			const picPrepProm = this.tryPrepPicture(someItemData.pic).catch(err => {
-				this.ytDownloader.tryCancel(someItemData.userId, someItemData.id);
-				throw err;
-			});
+			const overlayPrepProm = this.tryPrepOverlay(
+				someItemData.overlay,
+				someItemData.userId,
+				overlayProgressSource
+			);
 
-			const [ music, pic ] = await Promise.all([musicPrepProm, picPrepProm]);
+			const [ music, overlay ] = await Promise.all([musicPrepProm, overlayPrepProm]);
 
 			const itemData = {
 				...someItemData,
-				pic,
 				music,
+				overlay,
 			};
 
 			this.playQueue.add(itemData);
-			this.progressQueue.finished(itemData.userId, itemData.id);
+			progressTracker.finished();
 			this.emit("queue-update");
 
 		} catch (err) {
-			if (!(err instanceof CancelError)) {
-				this.progressQueue.finishedWithError(someItemData.userId, someItemData.id, err);
+			const notCancelled = !(err instanceof CancelError);
+			if (notCancelled) {
+				progressTracker.finishedWithError(err);
+				debug.log(`Cancelling ${someItemData.id} due to a failure while trying to queue the media.`);
 			}
 		}
 	}
 
-	private async tryPrepMusic(music: MusicWithMetadata, cid: number, uid: string): Promise<CompleteMusic> {
+	private async tryPrepMusic(
+		music: MusicWithMetadata,
+		userId: string,
+		progressSource: ProgressSource
+	): Promise<CompleteMusic> {
+
 		if (music.isUrl) {
 			// Is it so big it should just be streamed?
 			if (music.totalFileDuration > opt.streamOverDuration) {
+				progressSource.setPercentGetter(() => 1); // treat this as though the download is complete
 				return {
 					...music,
 					hash: undefined,
@@ -534,36 +625,29 @@ export class ContentManager extends EventEmitter {
 
 			} else {
 				const nmp = this.nextMusicPath();
-				const st = new Date().getTime();
+				const [downloadPromise, getProgress, cancel] = this.ytDlDownloader.new(userId, music.url, nmp);
 
-				await this.ytDownloader.new(cid, uid, music.title, music.url, nmp);
+				progressSource.setPercentGetter(getProgress);
+				progressSource.setCancelFunc(cancel);
 
-				// when download is completed, then
-				// count how long it took
-				const et = new Date().getTime();
-				const dlTime = utils.roundDps((et - st) / 1000, 2);
-				const ratio = utils.roundDps(music.totalFileDuration / dlTime, 2);
+				downloadPromise.finally(() => progressSource.done());
 
-				//log the time taken to download
-				console.log(`yt-dl vid (${music.uniqueId}) of length ${music.totalFileDuration}s took ${dlTime}s to download, ratio: ${ratio}`);
+				await downloadPromise;
 
-				//hash the music (async)
 				const musicHash = await utils.fileHash(nmp);
 
-				//this exists to prevent a YouTube video from
-				//being downloaded by user and played, then played again by url
-				//or being downloaded twice in quick succession
+				// this exists to prevent a YouTube video from
+				// being downloaded by user and played, then played again by url
+				// or being downloaded twice in quick succession
 				if (this.musicHashIsUnique(musicHash)) {
 					return {
-						...{
-							...music,
-							path: nmp,
-						},
+						...music,
 						hash: musicHash,
+						path: nmp,
 						stream: false,
 					};
 				} else {
-					throw new UniqueError(ContentType.Music);
+					throw new UniqueError(ContentPart.Music);
 				}
 			}
 		} else {
@@ -576,53 +660,34 @@ export class ContentManager extends EventEmitter {
 					stream: false,
 				};
 			} else {
-				throw new UniqueError(ContentType.Music);
+				throw new UniqueError(ContentPart.Music);
 			}
 		}
 	}
 
-	private async tryPrepPicture(pic: NoPic | FilePic | UrlPic): Promise<CompletePicture> {
-		if (!pic.exists) {
-			return {
-				...pic,
-				hash: undefined,
-			};
+	private async tryPrepOverlay(
+		overlay: UrlOverlay | FileOverlay | NoOverlay,
+		userId: string,
+		progressSource: ProgressSource
+	): Promise<CompleteOverlay> {
+
+		if (!overlay.exists) {
+			progressSource.ignore();
+			return this.prepNoOverlay(overlay);
 		}
 
-		//we may already have the picture downloaded, but we always need to check the uniqueness
-
-		let pathOnDisk: string;
-		let title: string;
-
-		if (pic.isUrl) {
-			pathOnDisk = this.nextPicPath();
-			title = await this.downloadPic(pic.url, pathOnDisk);
-
+		// we may already have the image downloaded, but we always need to check the uniqueness
+		let completeOveraly: CompleteFileOverlay | CompleteUrlOverlay;
+		if (overlay.isUrl) {
+			completeOveraly = await this.prepUrlOverlay(overlay, userId, progressSource);
 		} else {
-			pathOnDisk = pic.path;
-			title = pic.title;
+			completeOveraly = await this.prepFileOverlay(overlay);
 		}
 
-		const picHash = await utils.fileHash(pathOnDisk);
-
-		if (this.picHashIsUnique(picHash)) {
-			return {
-				...pic,
-				path: pathOnDisk,
-				title,
-				hash: picHash,
-			};
-
+		if (!completeOveraly.hash || this.overlayHashIsUnique(completeOveraly.hash)) {
+			return completeOveraly;
 		} else {
-			throw new UniqueError(ContentType.Picture);
+			throw new UniqueError(ContentPart.Overlay);
 		}
-	}
-
-	private musicUrlIsUnique(uniqueUrlId: string): boolean {
-		const lastPlayed = this.musicUrlRecord[uniqueUrlId];
-
-		// never played
-		// or the current time is after the cooloff period
-		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff * 1000 < new Date().getTime();
 	}
 }

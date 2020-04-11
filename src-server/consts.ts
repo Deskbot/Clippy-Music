@@ -2,25 +2,18 @@ import * as opt from "./options";
 import * as path from "path";
 import * as utils from "./lib/utils/utils";
 
-export const biggestFileSizeLimit = opt.musicSizeLimit > opt.imageSizeLimit
-	? opt.musicSizeLimit
-	: opt.imageSizeLimit;
-
-export const imageSizeLimStr = utils.sizeToReadbleStr(opt.imageSizeLimit);
-export const musicSizeLimStr = utils.sizeToReadbleStr(opt.musicSizeLimit);
-export const imagePlayedWithin = opt.imageUniqueCoolOff === Infinity
+export const fileSizeLimStr = utils.sizeToReadbleStr(opt.fileSizeLimit);
+export const imagePlayedWithin = opt.overlayUniqueCoolOff === Infinity
 	? "already"
-	: "in the past " + utils.secToTimeStr(opt.imageUniqueCoolOff);
+	: "in the past " + utils.secToTimeStr(opt.overlayUniqueCoolOff);
 export const musicPlayedWithin = opt.musicUniqueCoolOff === Infinity
 	? "already"
 	: "in the past " + utils.secToTimeStr(opt.musicUniqueCoolOff);
 
-export const maxPercentBeforeFinished = 0.99;
-
 export const dirs = {
 	httpUpload: opt.storageDir + "/httpUploads/",
 	music:	    opt.storageDir + "/music/",
-	pic:		opt.storageDir + "/pictures/",
+	overlay:    opt.storageDir + "/overlay/",
 };
 
 export const files = {

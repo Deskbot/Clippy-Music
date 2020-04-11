@@ -76,20 +76,20 @@ var WebSocketHandler = (function() {
 		});
 
 		var errorType = contentData.errorType;
-		var contentType = contentData.error.contentType;
+		var contentPart = contentData.error.contentPart;
 		var title = localDlData.title;
 		var picTitle = undefined; // this needs to be sent to the front end somehow at some point
 
-		var isMusic = contentType === "music";
-		var isPic = contentType === "picture"
+		var isMusic = contentPart === "music";
+		var isPic = contentPart === "overlay"
 		var whatMus = title ? utils.entitle(title) : "the music you requested";
-		var whatPic = picTitle ? utils.entitle(picTitle) : "the picture you requested";
+		var whatPic = picTitle ? utils.entitle(picTitle) : "the overlay you requested";
 
 		var clippySays;
 		var clippyAnimation;
 
 		if (errorType === "BadUrlError") {
-			clippySays = "I could not find anything at the " + contentType + " URL given. Is the url correct?";
+			clippySays = "I could not find anything I could download at the " + contentPart + " URL given. Is the URL correct? (" + contentData.error.badUrl + ")";
 
 		} else if (errorType === "DownloadTooLargeError") {
 			var what;
@@ -104,21 +104,6 @@ var WebSocketHandler = (function() {
 
 			} else {
 				clippySays = "I stopped processing your upload because it was too large.";
-			}
-
-		} else if (errorType === "DownloadWrongTypeError") {
-			var what;
-
-			if (isMusic || isPic) {
-				if (isMusic) {
-					what = whatMus;
-				} else {
-					what = whatPic;
-				}
-				clippySays = "I didn't download " + what + " because the file was the wrong type; " + contentData.error.actualTypeDesc + " was received instead.";
-
-			} else {
-				clippySays = "I didn't download one of your files because it was of the wrong type.";
 			}
 
 		} else if (errorType === "FileUploadError") {
@@ -177,9 +162,9 @@ var WebSocketHandler = (function() {
 		});
 	};
 
-	WebSocketHandler.prototype.handleDlPrepared = function(contentData) {
+	WebSocketHandler.prototype.handleDlPrepared = function(title) {
 		main.clippyAgent.stop();
-		main.clippyAgent.speak("I am now downloading " + utils.entitle(contentData.title) + ".");
+		main.clippyAgent.speak("I am now downloading " + utils.entitle(title) + ".");
 	};
 
 	WebSocketHandler.prototype.handleNickname = function(name) {
@@ -232,9 +217,13 @@ var WebSocketHandler = (function() {
 				$title.attr("data-text", utils.htmlEntityDecode(current.title));
 
 				if (current.image) {
+					var medium = current.image.medium;
 					var imageLink = current.image.url
-						? templates.makeLinkToImage(current.image.title, current.image.url)
-						: templates.makeImageDownloadLink(current.image.title, current.id)
+						? (medium === "image"
+							? templates.makeLinkToImage(current.image.title, current.image.url)
+							: templates.makeLinkToVideo(current.image.title, current.image.url)
+						)
+						: templates.makeOverlayDownloadLink(current.image.title, current.id)
 
 					$currentlyPlaying.find(".image")
 						.html(imageLink);
@@ -248,11 +237,12 @@ var WebSocketHandler = (function() {
 
 				$currentNickname.html(current.nickname);
 
-				//get a random class, but always the same for the same title
+				// get a random class, but always the same for the same title
 				var wordartClass = main.goodWordArt[
 					digestString(current.title + current.nickname) % main.goodWordArt.length
 				];
-				//remove all classes because we don't know which word art it currently is, add back "wordart" then add the type of wordart
+				// remove all classes because we don't know which word art it currently is
+				// then add back "wordart" then add the type of wordart
 				$currentlyPlaying.find(".wordart")
 					.removeClass()
 					.addClass("wordart")

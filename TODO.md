@@ -6,25 +6,21 @@ This list is in a rough order of priority.
 List
 ----
 
-* Fix eog sometimes not coming out on top
-	* preliminary add option to add delay before showing image
-	* show images with the mpv instance
-		* music + static image
-		* music + animated image
-		* (music + silent looping video) // future story, investigate whether possible
-		* video + static image
-		* video + animated image
-		* (video + silent looping video) // future story, investigate whether possible
+* document quirk about when uniqueness is checked
+* duplicate ytdls should be named by clippy instead of clippy stating the url
+* look at casts to string when using headers, some of these things can be undefined if something is done wrong
+* is the "with" log correct (for raw url overlays)
+* Choosing a file with a long name should make it show ellipsis (a literal ... not the unicode …)
+* Uploading a video as music should say my videos
+* configure
 * replace request (https://github.com/request/request/issues/3142)
-* type events
-* Silent looping Video overlay
-	* Gifv support
-	* Then rename image/pic variables to overlay everywhere
-	* These need making consistent anyway
+* Add something to README about the configurableness of eog and mpv
+* add to readme the quirks about leftover files
 * Use a separate setting for bucket size and max run time.
 * Change the options at run time from the admin panel
 * Make Clippy installable as a Progressive Web App
 	* desktop icon is clippy with headphones on
+* long text comes out of clippy's bubble. If the width is known, artifical \n could be added.
 * within a single bucket, user content should be round robin
 * Can reorder my uploads
 * Clippy should state when the user is not connected to the internet at all
@@ -38,15 +34,27 @@ List
 	* maybe consider changing the way the layout is done. how often do people resize the browser window anyway? I don't think i need to be account for all that
 * Improve the way clippy reconnects the websocket, maybe do it as soon as the tab regains focus and update the queue data at the same time.
 * allow downloading of things that have previously played
+* during overlay download if no content length is given and the we read more bytes than the allowed amount, no more data should be downloaded and the process should reject
 * dragging and dropping a file/url into anywhere in the upload window should stage the upload
+* maybe the overlay title should be fetched before the item is successfully queued
 * Put development diagrams in repo
 * no suspended id factory implies content manager recovery should be ignored
 * no suspended user record found implies content manager should be ignored
+* subtitles
 
 ---
 
+* clean up part files when cancelling a ytdl
+* clean up overlays for cancelled uploads
+* can cancel raw url downloads
+* can cancel file uploads
+* can cancel at any point in an upload i.e. before adding to content manager
+* treat ytdl downloads that don't have 2 components as 100%
+	* need to figure out before the second phase appears whether that will happen
+* combine YTError and BadUrlError
 * allow admins to kill clippy at the end of the next song
 * put user nickname in ItemData to remove need to refetch it
+* is canDownloadOverlayFromRawUrl needed? those checks can be done in the actual download
 * Admins can ban specific songs (even if uniqueness cooloff is disabled) hash checking needs to be applied
 * Admins can see a list of all users and can ban directly
 * add checkbox to enable instant upload on form input change (for quick pasting and file selecting)

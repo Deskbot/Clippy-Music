@@ -6,26 +6,21 @@ import * as consts from "../../consts";
 import * as opt from "../../options";
 import * as utils from "../../lib/utils/utils";
 
-import { ProgressQueueServiceGetter } from "../ProgressQueueService";
 import { FileUploadError } from "../../lib/errors";
-import { UploadData, UrlPic, NoPic, FilePic, FileMusic, UrlMusic } from "../../types/UploadData";
+import { UploadData, UrlOverlay, NoOverlay, FileOverlay, FileMusic, UrlMusic, OverlayMedium } from "../../types/UploadData";
+import { ProgressTracker } from "../../lib/ProgressQueue";
 
-function getFileForm(
-    req: http.IncomingMessage,
-    generateProgressHandler: (file: formidable.File) => ((soFar: number, total: number) => void)
-): q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]> {
+export function parseForm(req: http.IncomingMessage, progressTracker: ProgressTracker)
+    : q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]>
+{
     const defer = q.defer<[formidable.IncomingForm, formidable.Fields, formidable.Files]>();
 
     const form = new formidable.IncomingForm();
-    form.maxFileSize = consts.biggestFileSizeLimit;
+    form.maxFileSize = opt.fileSizeLimit;
     form.uploadDir = consts.dirs.httpUpload;
 
     let lastFileField: string | undefined;
     let files: formidable.File[] = [];
-
-    form.on("fileBegin", (fieldName) => {
-        lastFileField = fieldName;
-    });
 
     form.on("file", (fieldName: string, file: formidable.File) => {
         files.push(file);
@@ -36,58 +31,67 @@ function getFileForm(
 
         if (lastFileField === "music-file") {
             fileError = makeMusicTooBigError(files);
-        }
-        else if (lastFileField === "image-file") {
-            fileError = makeImageTooBigError(files);
-        }
-        else {
+        } else if (lastFileField === "overlay-file") {
+            fileError = makeOverlayTooBigError(files);
+        } else {
             fileError = err;
         }
 
         defer.reject(fileError);
     });
 
-    form.parse(req, (err, fields, files) => {
-        if (err) defer.reject(err);
-        defer.resolve([form, fields, files]);
-    });
+    const musicProgressSource = progressTracker.getMusicSource();
+    const overlayProgressSource = progressTracker.getOverlaySource();
+
+    let musicPercentComplete = 0;
+    let overlayPercentComplete = 0;
 
     form.on("fileBegin", (fieldName, file) => {
+        lastFileField = fieldName;
+
         if (fieldName === "music-file" && file && file.name) {
-            const onProgress = generateProgressHandler(file);
-            form.on("progress", onProgress);
+            progressTracker.setTitle(file.name, false);
+            musicProgressSource.setPercentGetter(() => musicPercentComplete);
+
+            form.on("progress", (soFar: number, total: number) => {
+                musicPercentComplete = soFar / total;
+            });
+        } else if (fieldName === "overlay-file" && file) {
+            overlayProgressSource.setPercentGetter(() => overlayPercentComplete);
+
+            form.on("progress", (soFar: number, total: number) => {
+                overlayPercentComplete = soFar / total;
+            });
         }
+    });
+
+    form.on("field", (name, value) => {
+        if (name === "music-url") {
+            // the true title is set later by the ContentManager
+            // a progress source is added later when the url is downloaded
+            progressTracker.setTitle(value, true);
+        }
+    });
+
+    form.parse(req, (err, fields, files) => {
+        if (err) {
+            defer.reject(err);
+        }
+        defer.resolve([form, fields, files]);
     });
 
     return defer.promise;
 }
 
-export function handleFileUpload(req: http.IncomingMessage, contentId: number): q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]> {
-    const ipAddress = req.connection.remoteAddress!;
-
-    const generateProgressHandler = (file: formidable.File) => {
-        ProgressQueueServiceGetter.get().setTitle(ipAddress, contentId, file.name);
-
-        const updater = ProgressQueueServiceGetter.get().createUpdater(ipAddress, contentId);
-
-        return (sofar: number, total: number) => {
-            updater(sofar / total);
-        };
-    }
-
-    //pass along results and errors unaffected by internal error handling
-    return getFileForm(req, generateProgressHandler);
-}
-
-function makeImageTooBigError(files: formidable.File[]) {
-    return new FileUploadError(`The image file you gave was too large. The maximum size is ${consts.imageSizeLimStr}.`, files);
+function makeOverlayTooBigError(files: formidable.File[]) {
+    return new FileUploadError(`The overlay file you gave was too large. The maximum size is ${consts.fileSizeLimStr}.`, files);
 }
 
 function makeMusicTooBigError(files: formidable.File[]) {
-    return new FileUploadError(`The music file you gave was too large. The maximum size is ${consts.musicSizeLimStr}.`, files);
+    return new FileUploadError(`The music file you gave was too large. The maximum size is ${consts.fileSizeLimStr}.`, files);
 }
 
-export function parseUploadForm(
+export function extractFormData(
     form: formidable.IncomingForm,
     fields: formidable.Fields,
     files: formidable.Files
@@ -98,7 +102,7 @@ export function parseUploadForm(
         }
 
         const musicFile = files["music-file"];
-        const picFile = files["image-file"];
+        const overlayFile = files["overlay-file"];
 
         let music: FileMusic | UrlMusic;
 
@@ -113,25 +117,25 @@ export function parseUploadForm(
 
         } else {
             if (!musicFile) {
-                throw new FileUploadError("It looks like you uploaded a music file, but could not find it.", [musicFile, picFile]);
+                throw new FileUploadError("It looks like you uploaded a music file, but could not find it.", [musicFile, overlayFile]);
             }
 
             //no file
             if (musicFile.size === 0) {
                 utils.deleteFile(musicFile.path); //empty file will still persist otherwise, due to the way multipart form uploads work / are handled
-                throw new FileUploadError("You didn't specify a music file or a URL given.", [musicFile, picFile]);
+                throw new FileUploadError("You didn't specify a music file or a URL given.", [musicFile, overlayFile]);
             }
 
             //file too big
-            if (musicFile.size > opt.musicSizeLimit) {
-                throw makeMusicTooBigError([musicFile, picFile]);
+            if (musicFile.size > opt.fileSizeLimit) {
+                throw makeMusicTooBigError([musicFile, overlayFile]);
             }
 
             //file wrong type
             const mimetype = musicFile.type;
             const lhs = mimetype.split("/")[0];
             if (!(lhs === "audio" || lhs === "video" || mimetype === "application/octet-stream")) { //audio, video, or default (un-typed) file
-                throw new FileUploadError(`The music you uploaded was not in an audio or video format I recognise. The type of file given was "${musicFile.type}".`, [musicFile, picFile]);
+                throw new FileUploadError(`The music you uploaded was not in an audio or video format I recognise. The type of file given was "${musicFile.type}".`, [musicFile, overlayFile]);
             }
 
             //success
@@ -142,46 +146,49 @@ export function parseUploadForm(
             };
         }
 
-        let pic: UrlPic | FilePic | NoPic = {
+        let overlay: UrlOverlay | FileOverlay | NoOverlay = {
             exists: false,
             isUrl: undefined,
             path: undefined,
             title: undefined,
         };
 
-        //pic
-        if (fields["image-url"]) {
-            pic = {
+        // overlay
+        if (fields["overlay-url"]) {
+            overlay = {
                 exists: true,
                 isUrl: true,
-                url: fields["image-url"] as string,
+                url: fields["overlay-url"] as string,
             };
 
-            if (picFile) utils.deleteFile(picFile.path);
+            if (overlayFile) {
+                utils.deleteFile(overlayFile.path);
+            }
 
-        } else if (picFile) {
-            if (picFile.size !== 0) { //file exists
+        } else if (overlayFile) {
+            if (overlayFile.size !== 0) { //file exists
                 //file too big
-                if (picFile.size > opt.imageSizeLimit) {
-                    throw makeImageTooBigError([musicFile, picFile]);
+                if (overlayFile.size > opt.fileSizeLimit) {
+                    throw makeOverlayTooBigError([musicFile, overlayFile]);
                 }
 
                 //file wrong type
-                const lhs = picFile.type.split("/")[0];
-                if (lhs !== "image") {
-                    throw new FileUploadError(`The image file you gave was not in a format I recognise. The type of file given was "${picFile.type}".`, [musicFile, picFile]);
+                const lhs = overlayFile.type.split("/")[0];
+                if (lhs !== "image" && lhs !== "video") {
+                    throw new FileUploadError(`The overlay should be an image or video. The type of your file was "${overlayFile.type}".`, [musicFile, overlayFile]);
                 }
 
                 //success
-                pic = {
+                overlay = {
                     exists: true,
                     isUrl: false,
-                    path: picFile.path,
-                    title: utils.sanitiseFilename(picFile.name),
+                    medium: lhs === "video" ? OverlayMedium.Video : OverlayMedium.Image,
+                    path: overlayFile.path,
+                    title: utils.sanitiseFilename(overlayFile.name),
                 };
 
-            } else { //empty picture given, as is typical with multipart forms where no picture is chosen
-                utils.deleteFile(picFile.path);
+            } else { //empty image given, as is typical with multipart forms where no image is chosen
+                utils.deleteFile(overlayFile.path);
             }
         }
 
@@ -198,7 +205,7 @@ export function parseUploadForm(
 
         resolve({
             music,
-            pic,
+            overlay,
             startTime,
             endTime,
         });
