@@ -25,7 +25,6 @@ import { URL, UrlWithParsedQuery } from "url";
 import { ServerResponse } from "http";
 import { ItemData } from "../types/ItemData";
 import { toNumber } from "../lib/utils/stringUtils";
-import { ProgressTracker } from "../lib/ProgressQueue";
 
 type FormData = {
 	fields: formidable.Fields;
@@ -161,7 +160,7 @@ quelaag.addEndpoint({
  */
 quelaag.addEndpoint({
 	when: req => req.method === "POST" && req.url! === "/api/queue/add",
-	do(req, res, middleware) {
+	async do(req, res, middleware) {
 		const userId = middleware.ip();
 
 		debug.log(userId);
@@ -170,105 +169,103 @@ quelaag.addEndpoint({
 		const ProgressQueueService = ProgressQueueServiceGetter.get();
 		const contentId = IdFactoryGetter.get().next();
 
-		let progressTracker: ProgressTracker;
+		const progressTracker = ProgressQueueService.add(userId, contentId);
 
-		handlePotentialBan(userId)
-			.then(async () => {
-				progressTracker = ProgressQueueService.add(userId, contentId);
-				const [form, fields, files] = await handleFileUpload(req, progressTracker);
+		try {
+			await handlePotentialBan(userId);
 
-				const uplData: UploadDataWithId = {
-					...await parseUploadForm(form, fields, files),
-					id: contentId,
-					userId: userId,
-				};
+			const [form, fields, files] = await handleFileUpload(req, progressTracker);
 
-				// ignore end time if it would make the play time less than 1 second
-				if (uplData.endTime !== null
-					&& uplData.startTime !== null
-					&& uplData.endTime - uplData.startTime < 1
-				) {
-					uplData.endTime = null;
+			const uplData: UploadDataWithId = {
+				...await parseUploadForm(form, fields, files),
+				id: contentId,
+				userId: userId,
+			};
+
+			// ignore end time if it would make the play time less than 1 second
+			if (uplData.endTime !== null
+				&& uplData.startTime !== null
+				&& uplData.endTime - uplData.startTime < 1
+			) {
+				uplData.endTime = null;
+			}
+
+			if (uplData.music.isUrl) {
+				const { hostname } = new URL(uplData.music.url);
+				if (utils.looksLikeIpAddress(hostname)) {
+					// prevent cheesing the uniqueness cooloff by using the IP Address and site name
+					throw new Error("I can not download music from an IP address.");
 				}
+			}
 
-				if (uplData.music.isUrl) {
-					const { hostname } = new URL(uplData.music.url);
-					if (utils.looksLikeIpAddress(hostname)) {
-						// prevent cheesing the uniqueness cooloff by using the IP Address and site name
-						throw new Error("I can not download music from an IP address.");
-					}
-				}
-
-				try {
-					var itemData = await ContentServiceGetter.get().add(uplData, progressTracker);
-				} catch (err) {
-					if (err instanceof DurationFindingError) {
-						console.error("Error discerning the duration of a music file.", err, uplData.music);
-						throw new FileUploadError(
-							`I could not count the duration of the music file you uploaded (${uplData.music.title}).`,
-							Object.values(files)
-						);
-					} else {
-						throw err;
-					}
-				}
-
-				if (itemData.music.isUrl) {
-					progressTracker.setTitle(itemData.music.title, false);
-				}
-
-				debug.log("successfully queued: ", uplData);
-
-				if (fields.ajax || (req.headers["user-agent"] && req.headers["user-agent"].includes("curl"))) {
-					endWithSuccessText(res, "Success\n");
+			try {
+				var itemData = await ContentServiceGetter.get().add(uplData, progressTracker);
+			} catch (err) {
+				if (err instanceof DurationFindingError) {
+					console.error("Error discerning the duration of a music file.", err, uplData.music);
+					throw new FileUploadError(
+						`I could not count the duration of the music file you uploaded (${uplData.music.title}).`,
+						Object.values(files)
+					);
 				} else {
-					redirectSuccessfulPost(res, "/");
+					throw err;
 				}
-			})
-			.catch((err) => {
-				if (err instanceof FileUploadError) {
-					debug.log("deleting these bad uploads: ", err.files);
+			}
 
-					if (err.files) {
-						for (let file of err.files) {
-							if (file) {
-								utils.deleteFileIfExists(file.path); // might already have been deleted if url upload
-							}
+			if (itemData.music.isUrl) {
+				progressTracker.setTitle(itemData.music.title, false);
+			}
+
+			debug.log("successfully queued: ", uplData);
+
+			if (fields.ajax || (req.headers["user-agent"] && req.headers["user-agent"].includes("curl"))) {
+				endWithSuccessText(res, "Success\n");
+			} else {
+				redirectSuccessfulPost(res, "/");
+			}
+		} catch (err) {
+			if (err instanceof FileUploadError) {
+				debug.log("deleting these bad uploads: ", err.files);
+
+				if (err.files) {
+					for (let file of err.files) {
+						if (file) {
+							utils.deleteFileIfExists(file.path); // might already have been deleted if url upload
 						}
-
-						delete err.files; // so they aren't sent to the user
 					}
 
-					res.statusCode = 400;
-					progressTracker.finishedWithError(err);
-
-				} else if (err instanceof BannedError) {
-					res.statusCode = 400;
-
-				} else if (err instanceof UniqueError) {
-					res.statusCode = 400;
-					progressTracker.finishedWithError(err);
-
-				} else if (err instanceof YTError) {
-					res.statusCode = 400;
-					progressTracker.finishedWithError(err);
-
-				} else {
-					console.error("Unknown upload error: ", err);
-					res.statusCode = 500;
-					progressTracker.finishedWithError(err);
+					delete err.files; // so they aren't sent to the user
 				}
 
-				res.setHeader("Content-Type", "application/json");
-				res.end(JSON.stringify({
-					contentId,
-					errorType: err.constructor.name,
-					message: err.message,
-				}));
-			});
+				res.statusCode = 400;
+				progressTracker.finishedWithError(err);
+
+			} else if (err instanceof BannedError) {
+				res.statusCode = 400;
+
+			} else if (err instanceof UniqueError) {
+				res.statusCode = 400;
+				progressTracker.finishedWithError(err);
+
+			} else if (err instanceof YTError) {
+				res.statusCode = 400;
+				progressTracker.finishedWithError(err);
+
+			} else {
+				console.error("Unknown upload error: ", err);
+				res.statusCode = 500;
+				progressTracker.finishedWithError(err);
+			}
+
+			res.setHeader("Content-Type", "application/json");
+			res.end(JSON.stringify({
+				contentId,
+				errorType: err.constructor.name,
+				message: err.message,
+			}));
 		}
 	}
-);
+});
 
 function validateDownload(res: ServerResponse, contentIdStr: string | string[], success: (content: ItemData) => void) {
 	if (typeof contentIdStr !== "string") {
