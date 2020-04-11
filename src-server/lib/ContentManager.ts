@@ -197,7 +197,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		try {
 			info = await getYtDlMusicInfo(uplData.music.url);
 		} catch (err) {
-			throw new YTError(`I was unable to download (${uplData.music.title ? uplData.music.title : uplData.music.url}). Is the URL correct? The video might not be compatible.`);
+			throw new YTError(`I was unable to download (${uplData.music.title ? uplData.music.title : uplData.music.url}). Is the URL correct?`);
 		}
 
 		if (this.musicUrlIsUnique(info.uniqueUrlId)) {

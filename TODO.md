@@ -6,9 +6,7 @@ This list is in a rough order of priority.
 List
 ----
 
-* Silent looping Video overlay
-	* test everything
-
+* document quirk about when uniqueness is checked
 * duplicate ytdls should be named by clippy instead of clippy stating the url
 * look at casts to string when using headers, some of these things can be undefined if something is done wrong
 * is the "with" log correct (for raw url overlays)
