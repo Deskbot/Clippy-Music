@@ -80,7 +80,7 @@ export interface ProgressTracker {
 	 * No more work is expected to be tracked. No method calls are valid afterwards.
 	 * This will trigger a cancellation of all associated sources.
 	 */
-	finishedWithError(err: any): void;
+	finishedWithError(err: Error): void;
 	/**
 	 * @returns The aggregated percent completion of all created sources as a number from 0 to 1.
 	 */
@@ -414,7 +414,7 @@ class ProgressTrackerImpl extends (EventEmitter as TypedEmitter<ProgressTrackerE
 		this.emit("finished");
 	}
 
-	finishedWithError(error: any) {
+	finishedWithError(error: Error) {
 		this.cancel(); // clean up all sources
 		this.emit("finished", error);
 	}

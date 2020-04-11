@@ -254,7 +254,7 @@ quelaag.addEndpoint({
 			} else {
 				console.error("Unknown upload error: ", err);
 				res.statusCode = 500;
-				progressTracker.finishedWithError(err);
+				progressTracker.finishedWithError(new Error(err));
 			}
 
 			res.setHeader("Content-Type", "application/json");
