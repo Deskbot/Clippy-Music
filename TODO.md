@@ -6,21 +6,15 @@ This list is in a rough order of priority.
 List
 ----
 
-* document quirk about when uniqueness is checked
 * duplicate ytdls should be named by clippy instead of clippy stating the url
-* look at casts to string when using headers, some of these things can be undefined if something is done wrong
-* is the "with" log correct (for raw url overlays)
 * Choosing a file with a long name should make it show ellipsis (a literal ... not the unicode …)
 * Uploading a video as music should say my videos
-* configure
 * replace request (https://github.com/request/request/issues/3142)
-* Add something to README about the configurableness of eog and mpv
-* add to readme the quirks about leftover files
 * Use a separate setting for bucket size and max run time.
 * Change the options at run time from the admin panel
 * Make Clippy installable as a Progressive Web App
 	* desktop icon is clippy with headphones on
-* long text comes out of clippy's bubble. If the width is known, artifical \n could be added.
+* long text comes out of clippy's bubble. If the width is known, artifical \n could be added or zero width spaces.
 * within a single bucket, user content should be round robin
 * Can reorder my uploads
 * Clippy should state when the user is not connected to the internet at all
@@ -36,8 +30,6 @@ List
 * allow downloading of things that have previously played
 * during overlay download if no content length is given and the we read more bytes than the allowed amount, no more data should be downloaded and the process should reject
 * dragging and dropping a file/url into anywhere in the upload window should stage the upload
-* maybe the overlay title should be fetched before the item is successfully queued
-* Put development diagrams in repo
 * no suspended id factory implies content manager recovery should be ignored
 * no suspended user record found implies content manager should be ignored
 * subtitles
@@ -46,12 +38,12 @@ List
 
 * clean up part files when cancelling a ytdl
 * clean up overlays for cancelled uploads
+* clean up music files from httpUploads when there is an error during upload
 * can cancel raw url downloads
 * can cancel file uploads
 * can cancel at any point in an upload i.e. before adding to content manager
 * treat ytdl downloads that don't have 2 components as 100%
 	* need to figure out before the second phase appears whether that will happen
-* combine YTError and BadUrlError
 * allow admins to kill clippy at the end of the next song
 * put user nickname in ItemData to remove need to refetch it
 * is canDownloadOverlayFromRawUrl needed? those checks can be done in the actual download
@@ -63,55 +55,34 @@ List
 * add tests for / and /admin loading
 * use pick, exclude etc to corretly type some of the utils
 * FileUploadError probably only needs to take file paths and not files
-* Make internal errors that aren't user errors get put in the terminal
 * Only attach user ids to items belonging to the user the queue is sent to
-* Check picture for duplicate again before playing it
 * Account for possibility of CDN being down
 	* `<script>window.jQuery || document.write('<script src="js/vendor/jquery-1.11.2.min.js"><\/script>')</script>`
-* Add all npm scripts like unit-test and ban
 * clippy tests have own assertTrue or assertFalse methods
-* Replace utils.valList with Object.values
-* Remove debug file and commands
 * Split up `static/handlers.js`
+* use a lightweight front end framework
+* turn front end into typescript
+	* modularise front end JS
 * Replace array.forEach with something better
 * use a custom defer class instead of using q
 	* last time I tried using my own implementation, I encounterred an error. I'm not certain it was caused by this though.
-* Separate the 3 upload types into separate functions use "type system"
-	* There's a lot of checking `isUrl` and `stream` which wildly change the behaviour of a function
 * Modernise front end code
 	* I wanted to use old JS on the front end for old browsers
 	* But I'm using templates which I now know aren't available on old browsers
 	* Could use babel or typescript to compile to compatible JS
-* Prevent Firefox getting urls that are POST only
-	* use 405 Method Not Allowed responses
-* Split up HttpService into sub files based on common middleware
-* Svelte front end
-	* compile time / server side rendering
-	* compare bundle size before and after
-	* update TODO to remove obsolete ideas after doing this
 * keep all windows scroll-to-able when resizing the browser window
 * Make it so Clippy can't be dropped in a place that covers the scroll bar partially
 * Use consistent "id", "cid", "contentId" / "uid", "userId" properties
-* "use strict"
 * Split ContentManager into more modules
 	* One for playing and one for queuing
 * Split up `main.css`
 * Remove duplicate code in `static/handlers.js`
-* Have a second type of error for things clippy should(n't) say
-* Make play queue DOM update more efficiently
-* clippy speaking a long url won't fit inside his bubble
-* Only try to delete empty files once
-* Use a map of content id to item instead of a user queue
-* Allow videos to be uploaded by URL that references a file
 * Tests should execute in a random order
 * Add JSDoc to all functions
-* Remove null from codebase
 * Truncate file names before sending the files to the server
 * Use exponential form for numbers in default_options
 * Add integration tests
 	* Worth doing before refactors
-* Check what method is used for each HTTP endpoint, is there a better one?
-* Replace websockets with long poll http
 
 ---
 
@@ -121,37 +92,23 @@ List
 * Alternative stylesheet
 * Find a unicode remover only for problematic characters
 * Admins can toggle a user's ban state from a list of all users
-* Continue downloading after the server is suspended
 * Use a consistent unit for differet time lengths in options
 * Move queueUpdateMaxFreq from consts to options
 * Simulate upload time delay for during manual testing
-* Include upload type in error (file, yt, stream)
-* In WebSocketService take a userId instead of a soc in methods
-* Make start and end time boxes adjacent
-* Replace utils.spread with modern JS
 * Language pack framework for localisation
-* Build all error messages on the front end
 * Tell the user how long until something is no longer blocked due to the uniqueness constraint
-* Use a consistent method for checking for an empty string
 * Add a unicode play/pause icon to the play/pause button on the admin panel
-* Make quotes consistent around numbers
-* Make it so progress items can be passed around the system rather than re-searched for frequently
 * Put Clippy in his own window
 	* harder than it looks
 * Grey bar at the top of unfocused windows
-* Nickname uniqueness
-* It's not obvious that you can't run tests without an "config.ts".
+* It's not obvious that you can't run tests without a "config.ts".
 * Move timer from ContentManager into a stopwatch class
 * Check it uses the minimum required JQuery UI
 * Reconnect websockets when attempting to perform a websocket action
 * use valid http response codes, things such as payload too large
 * Factor initial youtube-dl info request factor into total upload percentage
-* Factor image url download into total upload percentage
-	* can factor in the vid duration to the ratio between the two
 * Accidental missile test Easter egg
 * Safe Increment i.e. ids start at min safe integer and loop back round if they reach max safe integer
 * Command line overrides for options
 * Can stream content to the browser for users to watch
-* Must give a legal warning at the user's first attempt to download, which prompts the user to confirm their intent
-* Works without JavaScript
 * Use CSS Preprocessor
