@@ -105,10 +105,10 @@ interface PublicProgressItem {
 }
 
 interface ProgressQueueEvents {
-	delete: (userId: string, contentId: number) => void;
 	error: (userId: string, contentId: number, error: Error) => void;
 	list: (userId: string, items: PublicProgressItem[]) => void;
 	prepared: (userId: string, title: string) => void;
+	success: (userId: string, contentId: number) => void;
 }
 
 /**
@@ -171,10 +171,11 @@ export class ProgressQueue extends (EventEmitter as TypedEmitter<ProgressQueueEv
 		tracker.once("finished", (error) => {
 			if (error) {
 				this.emit("error", userId, contentId, error);
+			} else {
+				this.emit("success", userId, contentId);
 			}
 
 			this.deleteQueueItem(newItem);
-			this.emit("delete", userId, contentId);
 		});
 
 		tracker.on("title", (title, isTemporary) => {
