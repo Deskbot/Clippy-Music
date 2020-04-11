@@ -570,9 +570,8 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 	}
 
 	private async tryQueue(someItemData: UploadDataWithIdTitleDuration, progressTracker: ProgressTracker) {
-		// these should be ignored or have a percent getter before an await
-		const musicProgressSource = progressTracker.createSource();
-		const overlayProgressSource = progressTracker.createSource();
+		const musicProgressSource = progressTracker.getMusicSource();
+		const overlayProgressSource = progressTracker.getOverlaySource();
 
 		try {
 			const musicPrepProm = this.tryPrepMusic(
@@ -581,7 +580,6 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 				musicProgressSource,
 			);
 
-			// if the overlay fails, make sure any yt download is stopped
 			const overlayPrepProm = this.tryPrepOverlay(
 				someItemData.overlay,
 				someItemData.userId,
@@ -653,9 +651,6 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 				}
 			}
 		} else {
-			// already downloaded
-			progressSource.ignore();
-
 			//validate by music hash
 			const musicHash = await utils.fileHash(music.path);
 			if (this.musicHashIsUnique(musicHash)) {
@@ -686,7 +681,6 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		if (overlay.isUrl) {
 			completeOveraly = await this.prepUrlOverlay(overlay, userId, progressSource);
 		} else {
-			progressSource.ignore();
 			completeOveraly = await this.prepFileOverlay(overlay);
 		}
 

@@ -67,9 +67,10 @@ export interface ProgressTracker {
 	 * Create an object to track a unit of work to be done.
 	 * Previously the tracker was created with a built in number of work items to expect
 	 * and this number could be decremented.
-	 * Now it is expected that sources are created and then later ignored.
+	 * Now it is expected that sources are ignored if there is no work to be done.
 	 */
-	createSource(): ProgressSource;
+	getMusicSource(): ProgressSource;
+	getOverlaySource(): ProgressSource;
 	/**
 	 * State that all work associated is done.
 	 * No more work is expected to be tracked. No method calls are valid afterwards.
@@ -376,13 +377,17 @@ interface ProgressTrackerEvents {
 
 class ProgressTrackerImpl extends (EventEmitter as TypedEmitter<ProgressTrackerEvents>) implements ProgressTracker {
 	private progressSources: ProgressSource[];
+	private musicSource: ProgressSource;
+	private overlaySource: ProgressSource;
 
 	/**
 	 * @param maximumExpectedSources The number of progress sources that are expected to be added.
 	 */
 	constructor() {
 		super();
-		this.progressSources = [];
+		this.musicSource = this.createSource();
+		this.overlaySource = this.createSource();
+		this.progressSources = [this.musicSource, this.overlaySource];
 	}
 
 	cancel(): boolean {
@@ -395,9 +400,8 @@ class ProgressTrackerImpl extends (EventEmitter as TypedEmitter<ProgressTrackerE
 		return false;
 	}
 
-	createSource(): ProgressSource {
+	private createSource(): ProgressSource {
 		const source = new ProgressSourceImpl();
-		this.progressSources.push(source);
 
 		// if any source is cancellable, the whole thing is
 		source.on("cancellable", (cancellable) => {
@@ -418,6 +422,14 @@ class ProgressTrackerImpl extends (EventEmitter as TypedEmitter<ProgressTrackerE
 	finishedWithError(error: Error) {
 		this.cancel(); // clean up all sources
 		this.emit("finished", error);
+	}
+
+	getMusicSource() {
+		return this.musicSource;
+	}
+
+	getOverlaySource() {
+		return this.overlaySource;
 	}
 
 	getPercentComplete() {

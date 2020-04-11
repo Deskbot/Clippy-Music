@@ -40,16 +40,11 @@ export function parseForm(req: http.IncomingMessage, progressTracker: ProgressTr
         defer.reject(fileError);
     });
 
-    const musicProgressSource = progressTracker.createSource();
-    const overlayProgressSource = progressTracker.createSource();
+    const musicProgressSource = progressTracker.getMusicSource();
+    const overlayProgressSource = progressTracker.getOverlaySource();
 
     let musicPercentComplete = 0;
     let overlayPercentComplete = 0;
-
-    form.once("end", () => {
-        musicProgressSource.ignoreIfNoPercentGetter();
-        overlayProgressSource.ignoreIfNoPercentGetter();
-    });
 
     form.on("fileBegin", (fieldName, file) => {
         lastFileField = fieldName;
