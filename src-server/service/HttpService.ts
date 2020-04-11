@@ -19,7 +19,7 @@ import { WebSocketServiceGetter } from "./WebSocketService";
 import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingError, AuthError, FormParseError } from "../lib/errors";
 import { UploadDataWithId } from "../types/UploadData";
 import { verifyPassword } from "../lib/PasswordContainer";
-import { handleFileUpload, parseUploadForm } from "./request-utils/formUtils";
+import { parseForm, extractFormData } from "./request-utils/formUtils";
 import { endWithSuccessText, endWithFailureText, redirectSuccessfulPost, downloadFile } from "./response-utils/end";
 import { URL, UrlWithParsedQuery } from "url";
 import { ServerResponse } from "http";
@@ -174,10 +174,10 @@ quelaag.addEndpoint({
 		try {
 			await handlePotentialBan(userId);
 
-			const [form, fields, files] = await handleFileUpload(req, progressTracker);
+			const [form, fields, files] = await parseForm(req, progressTracker);
 
 			const uplData: UploadDataWithId = {
-				...await parseUploadForm(form, fields, files),
+				...await extractFormData(form, fields, files),
 				id: contentId,
 				userId: userId,
 			};

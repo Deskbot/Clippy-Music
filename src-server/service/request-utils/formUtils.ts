@@ -10,7 +10,7 @@ import { FileUploadError } from "../../lib/errors";
 import { UploadData, UrlOverlay, NoOverlay, FileOverlay, FileMusic, UrlMusic, OverlayMedium } from "../../types/UploadData";
 import { ProgressTracker } from "../../lib/ProgressQueue";
 
-export function handleFileUpload(req: http.IncomingMessage, progressTracker: ProgressTracker)
+export function parseForm(req: http.IncomingMessage, progressTracker: ProgressTracker)
     : q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]>
 {
     const defer = q.defer<[formidable.IncomingForm, formidable.Fields, formidable.Files]>();
@@ -100,7 +100,7 @@ function makeMusicTooBigError(files: formidable.File[]) {
     return new FileUploadError(`The music file you gave was too large. The maximum size is ${consts.fileSizeLimStr}.`, files);
 }
 
-export function parseUploadForm(
+export function extractFormData(
     form: formidable.IncomingForm,
     fields: formidable.Fields,
     files: formidable.Files
