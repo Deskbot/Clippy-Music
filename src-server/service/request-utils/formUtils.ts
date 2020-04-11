@@ -55,21 +55,17 @@ export function parseForm(req: http.IncomingMessage, progressTracker: ProgressTr
         lastFileField = fieldName;
 
         if (fieldName === "music-file" && file && file.name) {
-            form.once("progress", () => {
-                progressTracker.setTitle(file.name, false);
-                musicProgressSource.setPercentGetter(() => musicPercentComplete);
-            });
+            progressTracker.setTitle(file.name, false);
+            musicProgressSource.setPercentGetter(() => musicPercentComplete);
 
-            form.on("progress", (sofar: number, total: number) => {
-                musicPercentComplete = sofar / total;
+            form.on("progress", (soFar: number, total: number) => {
+                musicPercentComplete = soFar / total;
             });
         } else if (fieldName === "overlay-file" && file) {
-            form.once("progress", () => {
-                overlayProgressSource.setPercentGetter(() => overlayPercentComplete);
-            });
+            overlayProgressSource.setPercentGetter(() => overlayPercentComplete);
 
-            form.on("progress", (sofar: number, total: number) => {
-                overlayPercentComplete = sofar / total;
+            form.on("progress", (soFar: number, total: number) => {
+                overlayPercentComplete = soFar / total;
             });
         }
     });
