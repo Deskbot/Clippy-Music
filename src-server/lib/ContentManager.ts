@@ -99,6 +99,11 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 	async add(uplData: UploadDataWithId, progressTracker: ProgressTracker): Promise<UploadDataWithIdTitleDuration> {
 		// awaits everything that needs to happen before http response
 		const dataToQueue = await this.getDataToQueue(uplData);
+
+		if (dataToQueue.music.isUrl) {
+			progressTracker.setTitle(dataToQueue.music.title, false);
+		}
+
 		// don't wait for the actual queueing to finish
 		this.tryQueue(dataToQueue, progressTracker).catch(utils.reportError);
 		return dataToQueue;

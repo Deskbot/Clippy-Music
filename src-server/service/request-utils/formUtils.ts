@@ -8,7 +8,7 @@ import * as utils from "../../lib/utils/utils";
 
 import { FileUploadError } from "../../lib/errors";
 import { UploadData, UrlOverlay, NoOverlay, FileOverlay, FileMusic, UrlMusic, OverlayMedium } from "../../types/UploadData";
-import { ProgressTracker, ProgressSource } from "../../lib/ProgressQueue";
+import { ProgressTracker } from "../../lib/ProgressQueue";
 
 export function handleFileUpload(req: http.IncomingMessage, progressTracker: ProgressTracker)
     : q.Promise<[formidable.IncomingForm, formidable.Fields, formidable.Files]>
@@ -21,10 +21,6 @@ export function handleFileUpload(req: http.IncomingMessage, progressTracker: Pro
 
     let lastFileField: string | undefined;
     let files: formidable.File[] = [];
-
-    form.on("fileBegin", (fieldName) => {
-        lastFileField = fieldName;
-    });
 
     form.on("file", (fieldName: string, file: formidable.File) => {
         files.push(file);
@@ -44,13 +40,6 @@ export function handleFileUpload(req: http.IncomingMessage, progressTracker: Pro
         defer.reject(fileError);
     });
 
-    form.parse(req, (err, fields, files) => {
-        if (err) {
-            defer.reject(err);
-        }
-        defer.resolve([form, fields, files]);
-    });
-
     const musicProgressSource = progressTracker.createSource();
     const overlayProgressSource = progressTracker.createSource();
 
@@ -63,6 +52,8 @@ export function handleFileUpload(req: http.IncomingMessage, progressTracker: Pro
     });
 
     form.on("fileBegin", (fieldName, file) => {
+        lastFileField = fieldName;
+
         if (fieldName === "music-file" && file && file.name) {
             form.once("progress", () => {
                 progressTracker.setTitle(file.name, false);
@@ -89,6 +80,13 @@ export function handleFileUpload(req: http.IncomingMessage, progressTracker: Pro
             // a progress source is added later when the url is downloaded
             progressTracker.setTitle(value, true);
         }
+    });
+
+    form.parse(req, (err, fields, files) => {
+        if (err) {
+            defer.reject(err);
+        }
+        defer.resolve([form, fields, files]);
     });
 
     return defer.promise;

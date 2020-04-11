@@ -199,7 +199,7 @@ quelaag.addEndpoint({
 			}
 
 			try {
-				var itemData = await ContentServiceGetter.get().add(uplData, progressTracker);
+				await ContentServiceGetter.get().add(uplData, progressTracker);
 			} catch (err) {
 				if (err instanceof DurationFindingError) {
 					console.error("Error discerning the duration of a music file.", err, uplData.music);
@@ -210,10 +210,6 @@ quelaag.addEndpoint({
 				} else {
 					throw err;
 				}
-			}
-
-			if (itemData.music.isUrl) {
-				progressTracker.setTitle(itemData.music.title, false);
 			}
 
 			debug.log("successfully queued: ", uplData);
