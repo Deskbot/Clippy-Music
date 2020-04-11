@@ -214,7 +214,7 @@ quelaag.addEndpoint({
 				}
 
 				if (itemData.music.isUrl) {
-					progressTracker.setTitle(itemData.music.title);
+					progressTracker.setTitle(itemData.music.title, false);
 				}
 
 				debug.log("successfully queued: ", uplData);

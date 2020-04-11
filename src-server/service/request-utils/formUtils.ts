@@ -65,7 +65,7 @@ export function handleFileUpload(req: http.IncomingMessage, progressTracker: Pro
     form.on("fileBegin", (fieldName, file) => {
         if (fieldName === "music-file" && file && file.name) {
             form.once("progress", () => {
-                progressTracker.setTitle(file.name);
+                progressTracker.setTitle(file.name, false);
                 musicProgressSource.setPercentGetter(() => musicPercentComplete);
             });
 
