@@ -147,4 +147,4 @@ You must not try or succeed in using any of this software to make any person or 
 Quirks
 ------
 
-* Media that has already been played within the configured time period can not be queued. Media is not checked for uniqueness against members in the queue that have not yet played because that would allow a user to prevent something from being played by queuing it and de-queueing it. Content containing duplicate music will be silently skipped when it comes to be played. Content containing a duplicate overlay will not be skipped, however.
+* Media that has already been played within the configured time period can not be queued. Media is not checked for uniqueness against members in the queue that have not yet played because that would allow a user to prevent something from being played by queuing it and de-queueing it. Content containing duplicate music will be silently skipped when it comes to be played. Content containing a duplicate overlay will not be skipped, however, and the overlay is still displayed. This is because an overlay can be used to cover a video that has content that may induce epilepsy.
