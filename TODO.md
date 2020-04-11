@@ -20,6 +20,13 @@ Music Server Features
 * allow downloading of things that have previously played
 * within a single bucket, user content should be round robin
 * Admins can ban specific songs (even if uniqueness cooloff is disabled) hash checking needs to be applied
+* admins can specified a whitelist of domains for url downloads
+	* sensible matching of hostnames with regards to matching subdomains
+	* have sensible default
+	* can config anything goes
+* vote skip
+* can disable file uploads
+* let non-unique content be queued but just not played. By the time your thing is played, the time period may be up.
 * allow admins to kill clippy at the end of the next song
 * add checkbox to enable instant upload on form input change (for quick pasting and file selecting)
 * can cancel raw url downloads
@@ -29,14 +36,24 @@ Music Server Features
 * Can reorder my uploads (hard, might be easier to have a button to send to back of queue, which just removes everything and re-adds in the new order)
 * Admins can toggle a user's ban state from a list of all users
 * Can stream content to the browser for users to watch
+	* streaming files with caching to multiple destinations may already exist in npm
+	* can't stream from any website except youtube, which means streaming would probably have to be removed
+	* node has some multi processing that would reduce delay on the main process
+	* accessible by separate url
+	* controls on hover for pause/play/volume/download
+	* music has to start part way through when a user enters
 * subtitles
+* deb/snap install
 
 User Interface
 --------------
 
 * Uploading a video as music should say my videos
+* Put a max height on the queue and give it a scrollbar when it overflows
 * Sometimes unmoved windows move by a small amount when a window above is closed
 * Windows 2000 cursors (http://telcontar.net/Misc/screeniecursors/)
+* black dotted line on the inside of buttons should be in the correct place in all browsers
+	* firefox has it but it's slightly in the wrong place
 * dragging and dropping a file/url into anywhere in the upload window should stage the upload
 * Dragging a window when another window resizes, causes the one you're dragging to shift.
 	* maybe consider changing the way the layout is done. how often do people resize the browser window anyway? I don't think i need to be account for all that
@@ -47,6 +64,7 @@ User Interface
 	* not x-able
 * Grey bar at the top of unfocused windows
 	* probably looks bad even though it's authentic
+* put field names on the same line as the inputs https://forum.winworldpc.com/uploads/editor/td/kwk99aehv1xl.png
 * Make Clippy installable as a Progressive Web App
 	* desktop icon is clippy with headphones on
 	* Clippy should state when the user is not connected to the internet at all
@@ -57,6 +75,7 @@ User Experience
 ---------------
 
 * Improve the way clippy reconnects the websocket, maybe do it as soon as the tab regains focus and update the queue data at the same time.
+* Can't clear a file field in Firefox
 * Choosing a file with a long name should make it show ellipsis (a literal ... not the unicode …)
 * Make it so Clippy can't be dropped in a place that covers the scroll bar partially
 * Tell the user how long until something is no longer blocked due to the uniqueness constraint
