@@ -202,7 +202,6 @@ export function startWebSocketService() {
 		WebSocketService.sendMessage(socs, "dl-delete", contentId);
 	});
 
-	//extraInfo is an optional argument
 	ProgressQueueService.on("error", (userId, contentId, error) => {
 		const data = {
 			contentId,

@@ -168,11 +168,11 @@ export class ProgressQueue extends (EventEmitter as TypedEmitter<ProgressQueueEv
 			newItem.cancellable = isCancellable;
 		});
 
-		tracker.on("error", (error) => {
-			this.emit("error", userId, contentId, error);
-		});
+		tracker.once("finished", (error) => {
+			if (error) {
+				this.emit("error", userId, contentId, error);
+			}
 
-		tracker.once("finished", () => {
 			this.deleteQueueItem(newItem);
 			this.emit("delete", userId, contentId);
 		});
@@ -224,8 +224,9 @@ export class ProgressQueue extends (EventEmitter as TypedEmitter<ProgressQueueEv
 		return undefined;
 	}
 
-	/* emits a "prepared" event when the item has all the data needed
-	 * for Clippy to talk to the user about the item by name
+	/**
+	 * Emit a "prepared" event if the item has all the data needed
+	 * for Clippy to talk to the user about the item by name.
 	 */
 	private maybeItemIsPrepared(item: PublicProgressItem) {
 		if (item.title && !item.titleIsTemp) {
@@ -342,7 +343,7 @@ class ProgressSourceImpl extends (EventEmitter as TypedEmitter<ProgressSourceImp
 	}
 
 	ignore(): void {
-		this.isDone = true;
+		this.done();
 		this._isIgnored = true;
 	}
 
@@ -368,8 +369,7 @@ class ProgressSourceImpl extends (EventEmitter as TypedEmitter<ProgressSourceImp
 
 interface ProgressTrackerEvents {
 	cancellable: (isCancellable: boolean) => void;
-	error: (error: any) => void;
-	finished: () => void;
+	finished: (error?: Error) => void;
 	title: (title: string, isTemporary: boolean) => void;
 }
 
@@ -399,8 +399,8 @@ class ProgressTrackerImpl extends (EventEmitter as TypedEmitter<ProgressTrackerE
 		this.progressSources.push(source);
 
 		// if any source is cancellable, the whole thing is
-		source.on("cancellable", (bool) => {
-			if (bool) {
+		source.on("cancellable", (cancellable) => {
+			if (cancellable) {
 				this.emit("cancellable", true);
 			} else {
 				this.emit("cancellable", anyTrue(this.progressSources.map(source => source.cancellable)));
@@ -416,7 +416,7 @@ class ProgressTrackerImpl extends (EventEmitter as TypedEmitter<ProgressTrackerE
 
 	finishedWithError(error: any) {
 		this.cancel(); // clean up all sources
-		this.emit("error", error);
+		this.emit("finished", error);
 	}
 
 	getPercentComplete() {
