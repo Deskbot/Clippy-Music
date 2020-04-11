@@ -170,7 +170,7 @@ export function ytDlTimeStrToSec(str: string): number {
 			break;
 	}
 
-	if (time === NaN) {
+	if (Number.isNaN(time)) {
 		throw new Error(`Unable to convert yt-dl time, ${str}, to seconds.`);
 	}
 
