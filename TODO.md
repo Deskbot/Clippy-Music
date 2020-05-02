@@ -48,7 +48,6 @@ Music Server Features
 User Interface
 --------------
 
-* Uploading a video as music should say my videos
 * Put a max height on the queue and give it a scrollbar when it overflows
 * Sometimes unmoved windows move by a small amount when a window above is closed
 * Windows 2000 cursors (http://telcontar.net/Misc/screeniecursors/)
