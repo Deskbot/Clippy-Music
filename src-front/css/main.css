@@ -42,12 +42,12 @@ main {
 	overflow-y: scroll;
 }
 
-main::-webkit-scrollbar {
+::-webkit-scrollbar {
 	background-image: url("/media/Scrollbar Background.png");
 	width: 16px;
 }
 
-main::-webkit-scrollbar-button:single-button {
+::-webkit-scrollbar-button:single-button {
 	background-color: #D6D3CE;
 	border-top:	1px solid #D6D3CE;
 	border-bottom: 1px solid #424142;
@@ -60,25 +60,25 @@ main::-webkit-scrollbar-button:single-button {
 	width: 16px;
 }
 
-main::-webkit-scrollbar-button:vertical:decrement {
+::-webkit-scrollbar-button:vertical:decrement {
 	background-image: url("/media/Scrollbar Arrow Up.png");
 }
 
-main::-webkit-scrollbar-button:vertical:increment {
+::-webkit-scrollbar-button:vertical:increment {
 	background-image: url("/media/Scrollbar Arrow Down.png");
 }
 
-main::-webkit-scrollbar-button:horizontal:decrement {
+::-webkit-scrollbar-button:horizontal:decrement {
 	background-image: url("/media/Scrollbar Arrow Left.png");
 }
 
-main::-webkit-scrollbar-button:horizontal:increment {
+::-webkit-scrollbar-button:horizontal:increment {
 	background-image: url("/media/Scrollbar Arrow Right.png");
 }
 
-main::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
 	background-color: #D6D3CE;
-	border-top:	1px solid #D6D3CE;
+	border-top:	   1px solid #D6D3CE;
 	border-bottom: 1px solid #424142;
 	border-left:   1px solid #D6D3CE;
 	border-right:  1px solid #424142;
@@ -319,6 +319,15 @@ legend {
 	margin: 2px 0 8px 0;
 }
 
+#queue-section .bag {
+	overflow-y: auto;
+	max-height: 698px;
+}
+
+#queue-section .link-to-music:hover {
+	text-decoration: underline;
+}
+
 button.action {
 	margin: 2px 0;
 }
@@ -422,10 +431,6 @@ button.action {
 	color: inherit;
 	font-family: inherit;
 	text-decoration: inherit;
-}
-
-#queue-section .link-to-music:hover {
-	text-decoration: underline;
 }
 
 /* special cases */

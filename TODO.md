@@ -48,7 +48,6 @@ Music Server Features
 User Interface
 --------------
 
-* Put a max height on the queue and give it a scrollbar when it overflows
 * Sometimes unmoved windows move by a small amount when a window above is closed
 * Windows 2000 cursors (http://telcontar.net/Misc/screeniecursors/)
 * black dotted line on the inside of buttons should be in the correct place in all browsers
