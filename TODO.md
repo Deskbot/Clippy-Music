@@ -91,6 +91,7 @@ Technical Cleanliness
 * clean up overlays for cancelled uploads
 * clean up music files from httpUploads when there is an error during upload
 * Reconnect websockets when attempting to perform a websocket action
+* Move files using node's fs module instead of running an `mv` command.
 * Only attach user ids to items belonging to the user the queue is sent to
 * empty queue of duplicate files after each thing is remembered
 * during overlay download if no content length is given and the we read more bytes than the allowed amount, no more data should be downloaded and the process should reject
@@ -114,6 +115,7 @@ Technical Debt
 
 * Add JSDoc to all files and some functions
 * FileUploadError probably only needs to take file paths and not files
+* Tests should assert the expectation instead of calculating the expectation.
 * convert tests to TS
 	* need to ensure old tests don't remain in the build folder
 * add tests for / and /admin loading
