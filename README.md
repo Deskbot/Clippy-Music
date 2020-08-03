@@ -51,8 +51,6 @@ Run
 
 ```
 npm start -- [...args]
-#or
-node main.js [...args]
 ```
 
 To use a port below 1024 you will need to run as root.
