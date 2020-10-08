@@ -5,8 +5,8 @@ const { BarringerQueue } = require(baseDir + "lib/queue/BarringerQueue.js");
 const assert = require("assert").strict;
 
 function bucketOrderMatchesOutputOrder(barringerQueue) {
-	const itemsInClaimedOrder = barringerQueue.getBuckets()
-		.reduce((allItems, bucket) => allItems.concat(bucket));
+	const itemsInClaimedOrder = [...barringerQueue.getBuckets()]
+		.flat(Infinity);
 
 	const actualOrder = [];
 	while (true) {
@@ -232,8 +232,7 @@ module.exports = {
 
 		q.remove(4);
 
-		const allItems = [...q.getBuckets()]
-			.reduce((allItems, bucket) => allItems.concat(bucket));
+		const allItems = [...q.getBuckets()].flat(Infinity);
 
 		assert(!allItems.find(item => item.id === 4),
 			"The removed item is not in the queue."
