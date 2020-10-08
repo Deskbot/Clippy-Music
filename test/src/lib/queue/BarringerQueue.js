@@ -4,6 +4,26 @@ const { BarringerQueue } = require(baseDir + "lib/queue/BarringerQueue.js");
 
 const assert = require("assert").strict;
 
+function bucketOrderMatchesOutputOrder(barringerQueue) {
+	const itemsInClaimedOrder = barringerQueue.getBuckets()
+		.reduce((allItems, bucket) => allItems.concat(bucket));
+
+	const actualOrder = [];
+	while (true) {
+		const item = barringerQueue.next();
+		if (!item) {
+			break;
+		}
+		actualOrder.push(item);
+	}
+
+	assert.deepStrictEqual(
+		actualOrder,
+		itemsInClaimedOrder,
+		"The items come out in the order the queue claims."
+	);
+}
+
 module.exports = {
 	can_add_to_empty_queue: () => {
 		const q = new BarringerQueue(1000);
@@ -110,9 +130,9 @@ module.exports = {
 		assert(buckets[1].includes(item1)
 			&& buckets[1].includes(item2)
 			&& buckets[1].includes(item3),
-			"The added items are in different buckets.");
+			"The first added items that don't exceed a bucket fit in the first bucket.");
 		assert(buckets[2].includes(item4),
-			"The added items are in different buckets.");
+			"The item too big for bucket 1 goes into the next bucket.");
 	},
 
 	items_can_equal_size_of_bucket() {
@@ -121,7 +141,7 @@ module.exports = {
 		const item = {
 			id: 1,
 			userId: "1",
-			duraiton: 1000,
+			duration: 1000,
 		};
 
 		q.add(item);
@@ -218,6 +238,8 @@ module.exports = {
 		assert(!allItems.find(item => item.id === 4),
 			"The removed item is not in the queue."
 		);
+
+		bucketOrderMatchesOutputOrder(q);
 	},
 
 	removing_an_item_does_not_leave_an_empty_bucket() {
@@ -248,5 +270,7 @@ module.exports = {
 		for (const bucket of q.getBuckets()) {
 			assert(bucket.length !== 0, "Each bucket has at least one item.")
 		}
+
+		bucketOrderMatchesOutputOrder(q);
 	},
 }

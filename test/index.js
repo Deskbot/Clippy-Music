@@ -4,7 +4,7 @@ const process = require("process");
 
 const { stdout } = process;
 
-const testFileDir = __dirname + "/build";
+const testFileDir = __dirname;
 
 main();
 
