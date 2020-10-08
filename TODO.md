@@ -8,6 +8,7 @@ Music Server Features
 
 * Use a separate setting for bucket size and max run time.
 * Allow admins to remove anything before it gets played
+* make the top bucket add-to-able without giving infinite play time
 * Change the options at run time from the admin panel
 * playlist upload
 	* not sure what this means for the quality of content
@@ -18,7 +19,8 @@ Music Server Features
 * multiple file uploads at once
 * Add a unicode play/pause icon to the play/pause button on the admin panel
 * allow downloading of things that have previously played
-* within a single bucket, user content should be round robin
+* the round robin order of each bucket get preserved between restarts
+	* this might already mostly happen, by exporting the correct ordering without exporting the round robin positions of each user.
 * Admins can ban specific songs (even if uniqueness cooloff is disabled) hash checking needs to be applied
 * admins can specified a whitelist of domains for url downloads
 	* sensible matching of hostnames with regards to matching subdomains
@@ -87,6 +89,10 @@ User Experience
 Technical Cleanliness
 ---------------------
 
+* Improve speed of round robin bucket sorting. e.g.
+	* memoise
+	* in-place sorting
+	* add to bucket in the right place, as only the new item has the possibility of being out of order
 * clean up part files when cancelling a ytdl
 * clean up overlays for cancelled uploads
 * clean up music files from httpUploads when there is an error during upload
