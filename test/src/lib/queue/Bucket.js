@@ -36,6 +36,7 @@ module.exports = {
         const bucket = new Bucket();
 
         const item1 = {
+            id: 1,
             userId: "1"
         };
         bucket.push(item1);
@@ -47,16 +48,19 @@ module.exports = {
         bucket.push(item11);
 
         const item13 = {
+            id: 13,
             userId: "1"
         };
         bucket.push(item13);
 
         const item2 = {
+            id: 2,
             userId: "2"
         };
         bucket.push(item2);
 
         const item21 = {
+            id: 21,
             userId: "2"
         };
         bucket.push(item21);
@@ -72,28 +76,34 @@ module.exports = {
         const bucket = new Bucket();
 
         const item1 = {
+            id: 1,
             userId: "1"
         };
         bucket.push(item1);
 
         const item11 = {
+            id: 11,
             userId: "1"
         };
         bucket.push(item11);
 
         bucket.push({
+            id: 21,
             userId: "2"
         });
         bucket.push({
+            id: 22,
             userId: "2"
         });
 
         const item3 = {
+            id: 3,
             userId: "3"
         };
         bucket.push(item3);
 
         const item31 = {
+            id: 31,
             userId: "3"
         };
         bucket.push(item31);
@@ -109,24 +119,28 @@ module.exports = {
         const bucket = new Bucket();
 
         const item1 = {
+            id: 1,
             userId: "1"
         };
         bucket.push(item1);
         assertBucketOrder(bucket, [item1]);
 
         const item2 = {
+            id: 2,
             userId: "2"
         };
         bucket.push(item2);
         assertBucketOrder(bucket, [item1, item2]);
 
         const item11 = {
+            id: 11,
             userId: "1"
         };
         bucket.push(item11);
         assertBucketOrder(bucket, [item1, item2, item11]);
 
         const item12 = {
+            id: 12,
             userId: "2"
         };
         bucket.push(item12);
@@ -139,24 +153,28 @@ module.exports = {
         const bucket = new Bucket();
 
         const item1 = {
+            id: 1,
             userId: "1"
         };
         bucket.push(item1);
         assertBucketOrder(bucket, [item1]);
 
         const item11 = {
+            id: 11,
             userId: "1"
         };
         bucket.push(item11);
         assertBucketOrder(bucket, [item1, item11]);
 
         const item2 = {
+            id: 2,
             userId: "2"
         };
         bucket.push(item2);
         assertBucketOrder(bucket, [item1, item2, item11]);
 
         const item12 = {
+            id: 12,
             userId: "2"
         };
         bucket.push(item12);
@@ -169,21 +187,25 @@ module.exports = {
         const bucket = new Bucket();
 
         const item1 = {
+            id: 1,
             userId: "one"
         };
         bucket.push(item1);
 
         const item2 = {
+            id: 2,
             userId: "two"
         };
         bucket.push(item2);
 
         const item3 = {
+            id: 3,
             userId: "one"
         };
         bucket.push(item3);
 
         const item5 = {
+            id: 5,
             userId: "two"
         };
         bucket.push(item5);
@@ -191,6 +213,7 @@ module.exports = {
         assert(bucket.outputFrontItem(), item1, "The correct item is removed.");
 
         const item4 = {
+            id: 4,
             userId: "three"
         };
         bucket.push(item4);
@@ -204,6 +227,7 @@ module.exports = {
         const bucket = new Bucket();
 
         const item1_1 = {
+            id: 11,
             userId: "1"
         };
         bucket.push(item1_1);
@@ -215,16 +239,19 @@ module.exports = {
         bucket.push(item1_2);
 
         const item1_3 = {
+            id: 13,
             userId: "1"
         };
         bucket.push(item1_3);
 
         const item2_1 = {
+            id: 21,
             userId: "2"
         };
         bucket.push(item2_1);
 
         const item2_2 = {
+            id: 22,
             userId: "2"
         };
         bucket.push(item2_2);
@@ -254,6 +281,7 @@ module.exports = {
         const bucket = new Bucket();
 
         const item1_1 = {
+            id: 11,
             userId: "1"
         };
         bucket.push(item1_1);
@@ -265,16 +293,19 @@ module.exports = {
         bucket.push(item1_2);
 
         const item1_3 = {
+            id: 13,
             userId: "1"
         };
         bucket.push(item1_3);
 
         const item2_1 = {
+            id: 21,
             userId: "2"
         };
         bucket.push(item2_1);
 
         const item2_2 = {
+            id: 22,
             userId: "2"
         };
         bucket.push(item2_2);
@@ -306,13 +337,11 @@ module.exports = {
             id: 24,
             userId: "2",
         };
-        bucket.push(item2_3);
+        bucket.push(item2_4);
 
         assertBucketOrder(bucket, [item1_1, item2_3, item1_2, item2_4, item1_3]);
 
         // final sanity check
         bucketOrderMatchesOutputOrder(bucket);
     },
-
-    // TODO user removes an items then adds again, they don't get an advantage from having inputted earlied
 };

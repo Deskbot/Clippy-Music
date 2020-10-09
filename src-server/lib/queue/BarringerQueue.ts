@@ -116,16 +116,13 @@ export class BarringerQueue {
 		this.enforceAllBucketsAreNotEmpty();
 	}
 
-	remove(cid: number): boolean {
+	remove(cid: number) {
 		for (let bucketIndex = 0; bucketIndex < this.buckets.length; bucketIndex++) {
 			const bucket = this.buckets[bucketIndex];
 			if (this.removeFromBucket(cid, bucket)) {
 				this.enforceBucketIsNotEmpty(bucketIndex);
-				return true;
 			}
 		}
-
-		return false;
 	}
 
 	private removeAllItemsOfUserFromBucket(uid: string, bucket: Bucket) {

@@ -36,7 +36,18 @@ export class Bucket implements Iterable<ItemData> {
 
     destroyItem(contentId: number): boolean {
         this.itemsNeedReordering = true;
-        return arrayUtils.removeFirst(this.items, item => item.id === contentId);
+        const itemPos = this.items.findIndex(item => item.id === contentId);
+        const item = this.items[itemPos];
+
+        const removedItems = this.items.splice(itemPos, 1);
+        const didRemove = removedItems.length > 0;
+
+        if (didRemove) {
+            this.itemsNeedReordering = true;
+            this.removeUserIfTheyHaveNoItems(item.userId);
+        }
+
+        return didRemove;
     }
 
     private enforceOrder() {
@@ -59,7 +70,7 @@ export class Bucket implements Iterable<ItemData> {
         this.enforceOrder();
         const output = this.items.shift();
 
-        if (output) {
+        if (output !== undefined) {
             while (true) {
                 const nextUser = this.users.shift();
                 if (nextUser === output.userId) {
@@ -86,6 +97,15 @@ export class Bucket implements Iterable<ItemData> {
         this.itemsNeedReordering = true;
         this.users.push(item.userId);
         this.items.push(item);
+    }
+
+    private removeUserIfTheyHaveNoItems(userId: string) {
+        const result = this.items.find(item => item.userId === userId);
+
+        // user has no items, if true
+        if (result === undefined) {
+            this.users.remove(userId);
+        }
     }
 
     [Symbol.iterator]() {

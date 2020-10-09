@@ -1,3 +1,5 @@
+import * as arrayUtils from "../utils/arrayUtils";
+
 /**
  * This file contains a class that implements a UniqueArray.
  * This is the same as a Set but the order is retained.
@@ -32,5 +34,9 @@ export class UniqueArray<T> {
 
     shift(): T | undefined {
         return this.arr.shift();
+    }
+
+    remove(item: T) {
+        arrayUtils.removeItem(this.arr, item);
     }
 }

@@ -79,6 +79,10 @@ export function removeAll<T>(arr: T[], predicate: (elem: T) => boolean) {
     }
 }
 
+export function removeItem<T>(arr: T[], item: T) {
+    arr.splice(arr.indexOf(item), 1);
+}
+
 export function zip<T,U>(arr1: T[], arr2: U[]): [T,U][] {
     const len = Math.min(arr1.length, arr2.length);
     const result = [] as [T, U][];
