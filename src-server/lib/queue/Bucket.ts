@@ -28,6 +28,7 @@ export class Bucket implements Iterable<ItemData> {
 
     destroyItem(contentId: number): boolean {
         this.itemsNeedReordering = true;
+
         const itemPos = this.items.findIndex(item => item.id === contentId);
         const item = this.items[itemPos];
 
@@ -35,7 +36,6 @@ export class Bucket implements Iterable<ItemData> {
         const didRemove = removedItems.length > 0;
 
         if (didRemove) {
-            this.itemsNeedReordering = true;
             this.removeUserIfTheyHaveNoItems(item.userId);
         }
 
