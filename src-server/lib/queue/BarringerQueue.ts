@@ -1,5 +1,6 @@
 import * as arrayUtils from "../utils/arrayUtils";
 
+import { Bucket } from "./Bucket";
 import { ItemData } from "../../types/ItemData";
 
 export interface SuspendedBarringerQueue {
@@ -15,29 +16,29 @@ export function isSuspendedBarringerQueue(obj: any): obj is SuspendedBarringerQu
 }
 
 export class BarringerQueue {
-	private buckets: ItemData[][];
+	private buckets: Bucket[];
 	private maxTimePerBucket: number;
 
 	constructor(maxTimePerBucket: number, queueObj?: SuspendedBarringerQueue) {
-		this.buckets = queueObj && queueObj.buckets ? queueObj.buckets : [];
+		this.buckets = queueObj && queueObj.buckets
+			? queueObj.buckets.map(items => new Bucket(items))
+			: [];
 		this.maxTimePerBucket = maxTimePerBucket;
 	}
 
 	add(item: ItemData) {
-		if (item.duration > this.maxTimePerBucket) return;
+		if (item.duration > this.maxTimePerBucket) {
+			return;
+		}
 
 		for (const bucket of this.buckets.slice(1)) {
 			if (this.spaceForItemInBucket(item.duration, bucket, item.userId)) {
-				const index = arrayUtils.findLastIndex(
-					bucket,
-					itemInBucket => itemInBucket.userId === item.userId
-				);
-				arrayUtils.randInsertAfter(bucket, index + 1, item);
+				bucket.push(item);
 				return;
 			}
 		}
 
-		this.buckets.push([item]);
+		this.buckets.push(new Bucket([item]));
 	}
 
 	private enforceAllBucketsAreNotEmpty() {
@@ -66,8 +67,8 @@ export class BarringerQueue {
 		return undefined;
 	}
 
-	getBuckets(): IterableIterator<ItemData[]> {
-		return this.buckets[Symbol.iterator]();
+	getBuckets(): ReadonlyArray<ReadonlyArray<ItemData>> {
+		return this.buckets.map(bucket => bucket.content);
 	}
 
 	getUserItems(uid: string): ItemData[] {
@@ -99,7 +100,7 @@ export class BarringerQueue {
 
 		if (this.buckets.length === 0) return;
 
-		const nextItem = this.buckets[0].shift();
+		const nextItem = this.buckets[0].outputFrontItem();
 
 		this.makeTopBucketNotEmpty();
 
@@ -127,15 +128,15 @@ export class BarringerQueue {
 		return false;
 	}
 
-	private removeAllItemsOfUserFromBucket(uid: string, bucket: ItemData[]) {
-		arrayUtils.removeAll(bucket, item => item.userId === uid);
+	private removeAllItemsOfUserFromBucket(uid: string, bucket: Bucket) {
+		bucket.destroyAllFromUser(uid);
 	}
 
-	private removeFromBucket(cid: number, bucket: ItemData[]): boolean {
-		return arrayUtils.removeFirst(bucket, item => item.id === cid);
+	private removeFromBucket(cid: number, bucket: Bucket): boolean {
+		return bucket.destroyItem(cid);
 	}
 
-	private spaceForItemInBucket(time: number, bucket: ItemData[], userId: string): boolean {
+	private spaceForItemInBucket(time: number, bucket: Bucket, userId: string): boolean {
 		let totalTimeExisting = 0;
 
 		for (const item of bucket) {
