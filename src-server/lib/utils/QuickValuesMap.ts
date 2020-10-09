@@ -1,7 +1,7 @@
 /*
- * The same as a regular Map except .quickValues is a list equivalent to [...map.values]
- * .valuesQuick() updates the list if needed and returns it
- * We know it needs updating when particular methods on Map are called
+ * The same as a regular Map except .quickValues is a list equivalent to [...map.values].
+ * .valuesQuick() updates the list if needed and returns it.
+ * We know it needs updating when particular methods on Map are called.
 */
 
 export class QuickValuesMap<K,V> extends Map<K,V> {

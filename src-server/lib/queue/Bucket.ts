@@ -1,4 +1,5 @@
 import * as arrayUtils from "../utils/arrayUtils";
+import * as utils from "../utils/utils";
 
 import { ItemData } from "../../types/ItemData";
 import { UniqueArray } from "../utils/UniqueArray";
@@ -47,8 +48,10 @@ export class Bucket implements Iterable<ItemData> {
             return;
         }
 
+        const memoisedPriorities = utils.mapFrom(this.items, item => this.priority(item));
+
         this.items = [...this.items].sort((left, right) => {
-            return this.priority(left) - this.priority(right);
+            return memoisedPriorities.get(left)! - memoisedPriorities.get(right)!;
         });
 
         this.itemsNeedReordering = false;

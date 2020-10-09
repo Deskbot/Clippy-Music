@@ -60,6 +60,16 @@ export function looksLikeIpAddress(str: string): boolean {
 	return str.match(ipv6) !== null || str.match(ipv4) !== null; // there is a match
 }
 
+export function mapFrom<K,V>(keys: K[], mapper: (key: K) => V): Map<K,V> {
+	const map = new Map<K, V>();
+
+	for (const key of keys) {
+		map.set(key, mapper(key));
+	}
+
+	return map;
+}
+
 export function mkdirSafelySync(path: string, mode: number) {
 	try { fs.mkdirSync(path, mode); } catch(e) {}
 }
