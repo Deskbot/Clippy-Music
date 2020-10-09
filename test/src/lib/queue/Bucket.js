@@ -199,4 +199,120 @@ module.exports = {
 
         bucketOrderMatchesOutputOrder(bucket);
     },
+
+    user_adds_item_after_destroying_one_of_their_items() {
+        const bucket = new Bucket();
+
+        const item1_1 = {
+            userId: "1"
+        };
+        bucket.push(item1_1);
+
+        const item1_2 = {
+            id: 12,
+            userId: "1"
+        };
+        bucket.push(item1_2);
+
+        const item1_3 = {
+            userId: "1"
+        };
+        bucket.push(item1_3);
+
+        const item2_1 = {
+            userId: "2"
+        };
+        bucket.push(item2_1);
+
+        const item2_2 = {
+            userId: "2"
+        };
+        bucket.push(item2_2);
+
+        // sanity check
+        assertBucketOrder(bucket, [item1_1, item2_1, item1_2, item2_2, item1_3]);
+
+        // remove middle item from user 1
+        bucket.destroyItem(item1_2.id);
+
+        assertBucketOrder(bucket, [item1_1, item2_1, item1_3, item2_2]);
+
+        // add a new item from user 1
+        const item1_4 = {
+            id: 14,
+            userId: "1",
+        };
+        bucket.push(item1_4);
+
+        assertBucketOrder(bucket, [item1_1, item2_1, item1_3, item2_2, item1_4]);
+
+        // final sanity check
+        bucketOrderMatchesOutputOrder(bucket);
+    },
+
+    user_adds_item_after_destroying_all_of_their_items() {
+        const bucket = new Bucket();
+
+        const item1_1 = {
+            userId: "1"
+        };
+        bucket.push(item1_1);
+
+        const item1_2 = {
+            id: 12,
+            userId: "1"
+        };
+        bucket.push(item1_2);
+
+        const item1_3 = {
+            userId: "1"
+        };
+        bucket.push(item1_3);
+
+        const item2_1 = {
+            userId: "2"
+        };
+        bucket.push(item2_1);
+
+        const item2_2 = {
+            userId: "2"
+        };
+        bucket.push(item2_2);
+
+        // sanity check
+        assertBucketOrder(bucket, [item1_1, item2_1, item1_2, item2_2, item1_3]);
+
+        // remove first item from user 2
+        bucket.destroyItem(item2_1.id);
+
+        assertBucketOrder(bucket, [item1_1, item2_2, item1_2, item1_3]);
+
+        // remove second item from user 2
+        bucket.destroyItem(item2_2.id);
+
+        assertBucketOrder(bucket, [item1_1, item1_2, item1_3]);
+
+        // add a new item from user 2
+        const item2_3 = {
+            id: 23,
+            userId: "2",
+        };
+        bucket.push(item2_3);
+
+        assertBucketOrder(bucket, [item1_1, item2_3, item1_2, item1_3]);
+
+        // add a new item from user 2
+        const item2_4 = {
+            id: 24,
+            userId: "2",
+        };
+        bucket.push(item2_3);
+
+        assertBucketOrder(bucket, [item1_1, item2_3, item1_2, item2_4, item1_3]);
+
+        // final sanity check
+        bucketOrderMatchesOutputOrder(bucket);
+    },
+
+    // TODO user removes an items then adds again, they don't get an advantage from having inputted earlied
 };
