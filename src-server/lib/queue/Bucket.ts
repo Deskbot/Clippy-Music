@@ -66,6 +66,7 @@ export class Bucket implements Iterable<ItemData> {
         const output = this.items.shift();
 
         if (output !== undefined) {
+            // put user to the back of the queue
             while (true) {
                 const nextUser = this.users.shift();
                 if (nextUser === output.userId) {
