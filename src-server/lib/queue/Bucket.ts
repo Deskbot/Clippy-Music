@@ -8,20 +8,12 @@ export class Bucket implements Iterable<ItemData> {
     private itemsNeedReordering = false;
     private users: UniqueArray<string>;
 
-    constructor(initialItems?: ItemData[]) {
-        if (initialItems) {
-            this.items = initialItems;
+    constructor(initialItems: ItemData[] = []) {
+        this.items = initialItems;
 
-            const users = new UniqueArray<string>();
-            for (const item of initialItems) {
-                users.push(item.userId);
-            }
-            this.users = users;
-
-        } else {
-            this.items = [];
-            this.users = new UniqueArray<string>();
-        }
+        this.users = new UniqueArray<string>(
+            initialItems.map(item => item.userId)
+        );
     }
 
     get content(): ItemData[] {

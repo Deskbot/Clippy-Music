@@ -8,8 +8,8 @@ import * as arrayUtils from "../utils/arrayUtils";
 export class UniqueArray<T> {
     private arr: T[];
 
-    constructor(initial?: T[]) {
-        this.arr = initial ?? [];
+    constructor(initial: T[] = []) {
+        this.arr = initial;
     }
 
     getArray() {
