@@ -25,6 +25,7 @@ export class Bucket implements Iterable<ItemData> {
     destroyAllFromUser(userId: string) {
         this.itemsNeedReordering = true;
         arrayUtils.removeAll(this.items, item => item.userId === userId);
+        this.users.remove(userId);
     }
 
     destroyItem(contentId: number): boolean {
