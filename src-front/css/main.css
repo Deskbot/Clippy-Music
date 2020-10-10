@@ -328,6 +328,11 @@ legend {
 	text-decoration: underline;
 }
 
+#info-section p {
+    line-height: 1.1em;
+    margin: 4px 0;
+}
+
 button.action {
 	margin: 2px 0;
 }
