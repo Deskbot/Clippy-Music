@@ -91,6 +91,10 @@ var WebSocketHandler = (function() {
 		if (errorType === "BadUrlError") {
 			clippySays = "I could not find anything I could download at the " + contentPart + " URL given. Is the URL correct? (" + contentData.error.badUrl + ")";
 
+		} else if (errorType === "BannedError") {
+			clippySays = contentData.errorMessage;
+			clippyAnimation = "EmptyTrash";
+
 		} else if (errorType === "DownloadTooLargeError") {
 			var what;
 
@@ -134,15 +138,16 @@ var WebSocketHandler = (function() {
 				what = "your content";
 			}
 
-			clippySays = "An unknown problem occured while trying to queue " + what + ".";
+			clippySays = "An unknown problem occurred while trying to queue " + what + ".";
 			clippyAnimation = "GetArtsy";
 		}
 
-		main.clippyAgent.play("GetAttention");
 		main.clippyAgent.stop();
 		main.clippyAgent.speak(clippySays);
 		localDlData.errorMessage = clippySays;
-		if (clippyAnimation) main.clippyAgent.play(clippyAnimation);
+		if (clippyAnimation) {
+			main.clippyAgent.play(clippyAnimation);
+		}
 	};
 
 	WebSocketHandler.prototype.handleDlList = function(list) {
@@ -153,7 +158,7 @@ var WebSocketHandler = (function() {
 		for (var i = 0; i < list.length; i++) {
 			var item = list[i];
 			var cid = item.contentId.toString();
-			main.dlMap.set(cid.toString(), item);
+			main.dlMap.set(cid, item);
 		}
 
 		// render full list afresh
@@ -182,7 +187,7 @@ var WebSocketHandler = (function() {
 		if (data.banned) {
 			main.clippyAgent.stop();
 			main.clippyAgent.play("GetAttention");
-			main.clippyAgent.speak("You have been banned!");
+			main.clippyAgent.speak("You are banned!");
 			main.clippyAgent.play("EmptyTrash");
 		}
 	};

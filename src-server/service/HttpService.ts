@@ -70,14 +70,11 @@ function handleErrors(err: any, res: http.ServerResponse) {
 }
 
 function handlePotentialBan(userId: string) {
-	return new Promise((resolve, reject) => {
-		if (UserRecordGetter.get().isBanned(userId)) {
-			WebSocketServiceGetter.get().sendBanned(UserRecordGetter.get().getSockets(userId));
-			return reject(new BannedError());
-		}
+	const userRecord = UserRecordGetter.get();
 
-		resolve();
-	});
+	if (userRecord.isBanned(userId)) {
+		throw new BannedError();
+	}
 }
 
 function recordUser(ipAddress: string, res: http.ServerResponse) {
@@ -132,7 +129,7 @@ const quelaag = new Quelaag({
 	},
 
 	async noRedirect(req): Promise<boolean> {
-		return (await this.ajax(req)) || (req!.headers["user-agent"] ?? "").includes("curl");
+		return (await this.ajax(req)) || (req.headers["user-agent"] ?? "").includes("curl");
 	},
 
 	urlWithQuery(req): UrlWithParsedQuery {
@@ -172,7 +169,7 @@ quelaag.addEndpoint({
 		const progressTracker = ProgressQueueService.add(userId, contentId);
 
 		try {
-			await handlePotentialBan(userId);
+			handlePotentialBan(userId);
 
 			const [form, fields, files] = await parseForm(req, progressTracker);
 
@@ -238,6 +235,7 @@ quelaag.addEndpoint({
 
 			} else if (err instanceof BannedError) {
 				res.statusCode = 400;
+				progressTracker.finishedWithError(err);
 
 			} else if (err instanceof UniqueError) {
 				res.statusCode = 400;
