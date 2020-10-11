@@ -380,9 +380,6 @@ class ProgressTrackerImpl extends (EventEmitter as TypedEmitter<ProgressTrackerE
 	private musicSource: ProgressSource;
 	private overlaySource: ProgressSource;
 
-	/**
-	 * @param maximumExpectedSources The number of progress sources that are expected to be added.
-	 */
 	constructor() {
 		super();
 		this.musicSource = this.createSource();

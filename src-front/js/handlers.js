@@ -147,18 +147,12 @@ $uploadForm.submit(function(e) {
 		processData: false
 
 	}).fail(function(jqxhr, textStatus, err) {
-		var responseData = JSON.parse(jqxhr.responseText);
-
 		if (jqxhr.status >= 500 && jqxhr.status < 600) {
 			main.clippyAgent.stop();
 			main.clippyAgent.speak("The server encountered an error trying to queue your media. Check the console and contact the developer.");
 			main.clippyAgent.play("GetArtsy");
 			console.error(jqxhr.responseText);
 
-		} else if (responseData.errorType === "BannedError") {
-			main.clippyAgent.stop();
-			main.clippyAgent.speak(responseData.message);
-			main.clippyAgent.play("EmptyTrash");
 		}
 
 		// specific error messages are given by web socket

@@ -27,7 +27,7 @@ export class BadUrlError extends DeferredContentError {
 
 export class BannedError extends Error {
 	constructor() {
-		super("You can't upload becuase you are banned.");
+		super("You can't upload because you are banned.");
 	}
 }
 

@@ -73,8 +73,6 @@ function handlePotentialBan(userId: string) {
 	const userRecord = UserRecordGetter.get();
 
 	if (userRecord.isBanned(userId)) {
-		WebSocketServiceGetter.get()
-			.sendBanned(userRecord.getSockets(userId));
 		throw new BannedError();
 	}
 }
@@ -237,6 +235,7 @@ quelaag.addEndpoint({
 
 			} else if (err instanceof BannedError) {
 				res.statusCode = 400;
+				progressTracker.finishedWithError(err);
 
 			} else if (err instanceof UniqueError) {
 				res.statusCode = 400;
