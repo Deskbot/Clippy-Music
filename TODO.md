@@ -6,7 +6,6 @@ Each sub-list is in a rough order of priority.
 Music Server Features
 ---------------------
 
-* Use a separate setting for bucket size and max run time.
 * Allow admins to remove anything before it gets played
 * Change the options at run time from the admin panel
 * playlist upload
@@ -16,7 +15,7 @@ Music Server Features
 	* the one youtube-dl at a time per user pays off here
 	* overlays will probably not be displayable here
 * multiple file uploads at once
-* Add a unicode play/pause icon to the play/pause button on the admin panel
+* Add a play/pause button on the admin panel with a unicode play/pause icon
 * allow downloading of things that have previously played
 * within a single bucket, user content should be round robin
 * Admins can ban specific songs (even if uniqueness cooloff is disabled) hash checking needs to be applied
