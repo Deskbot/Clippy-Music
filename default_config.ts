@@ -6,7 +6,7 @@ export const config = {
 	httpPort: 8080,
 
 	// inbound and outbound
-	webSocketPort: 3000,
+	webSocketPort: 8081,
 
 	// the maximum duration of a single queue item, in seconds
 	// and also the maximum amount of time a user can play for in a single bucket
