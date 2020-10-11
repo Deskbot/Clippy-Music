@@ -168,7 +168,7 @@ function makeQueueMessage() {
 
 	return {
 		current: ContentService.getPublicCurrentlyPlaying(),
-		maxBucketTime: opt.timeout,
+		maxBucketTime: opt.bucketTime,
 		queue: ContentService.getBucketsForPublic(),
 		type: "queue",
 	};

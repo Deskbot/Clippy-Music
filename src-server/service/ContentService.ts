@@ -20,7 +20,7 @@ export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> 
 		const ytDlDownloader = new YtDlDownloader();
 
 		const cm = new ContentManager(
-			opt.timeout,
+			opt.bucketTime,
 			recoveredContentManager,
 			IdFactoryGetter.get(),
 			UserRecordGetter.get(),
@@ -41,7 +41,7 @@ function play(cm: ContentManager) {
 	}
 }
 
-// retreive suspended ContentManger
+// retrieve suspended ContentManger
 function recover(): SuspendedContentManager | null {
 	let success = true;
 
