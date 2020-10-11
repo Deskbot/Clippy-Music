@@ -3,13 +3,9 @@ import * as fs from "fs";
 import * as consts from "../consts";
 
 import { IdFactory } from "../lib/IdFactory";
-import { MakeOnce } from "../lib/utils/MakeOnce";
+import { makeOnce } from "../lib/utils/makeOnce";
 
-export const IdFactoryGetter = new (class extends MakeOnce<IdFactory> {
-	protected make(): IdFactory {
-		return new IdFactory(restore());
-	}
-})();
+export const IdFactoryGetter = makeOnce(() => new IdFactory(restore()));
 
 function restore(): number | undefined {
 	let fileContent: string;

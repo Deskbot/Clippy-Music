@@ -7,31 +7,29 @@ import { IdFactoryGetter } from "./IdFactoryService";
 import { UserRecordGetter } from "./UserRecordService";
 import { ContentManager, SuspendedContentManager, isSuspendedContentManager } from "../lib/ContentManager";
 import { YtDlDownloader } from "../lib/YtDlDownloader";
-import { MakeOnce } from "../lib/utils/MakeOnce";
+import { makeOnce } from "../lib/utils/makeOnce";
 
-export const ContentServiceGetter = new (class extends MakeOnce<ContentManager> {
-	protected make(): ContentManager {
-		const recoveredContentManager = recover();
+export const ContentServiceGetter = makeOnce(() => {
+	const recoveredContentManager = recover();
 
-		if (recoveredContentManager != null && !isSuspendedContentManager(recoveredContentManager)) {
-			throw new Error("The suspended content manager is not of a valid format. Consider restarting the program with the --clean option.");
-		}
-
-		const ytDlDownloader = new YtDlDownloader();
-
-		const cm = new ContentManager(
-			opt.bucketTime,
-			recoveredContentManager,
-			IdFactoryGetter.get(),
-			UserRecordGetter.get(),
-			ytDlDownloader,
-		);
-
-		cm.on("end", () => play(cm));
-
-		return cm;
+	if (recoveredContentManager != null && !isSuspendedContentManager(recoveredContentManager)) {
+		throw new Error("The suspended content manager is not of a valid format. Consider restarting the program with the --clean option.");
 	}
-})();
+
+	const ytDlDownloader = new YtDlDownloader();
+
+	const cm = new ContentManager(
+		opt.bucketTime,
+		recoveredContentManager,
+		IdFactoryGetter.get(),
+		UserRecordGetter.get(),
+		ytDlDownloader,
+	);
+
+	cm.on("end", () => play(cm));
+
+	return cm;
+});
 
 function play(cm: ContentManager) {
 	const isNext = cm.playNext();

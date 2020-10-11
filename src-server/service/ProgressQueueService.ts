@@ -1,13 +1,11 @@
 import { ProgressQueue } from "../lib/ProgressQueue";
-import { MakeOnce } from "../lib/utils/MakeOnce";
+import { makeOnce } from "../lib/utils/makeOnce";
 
 /**
  * A single instance of ProgressQueue for use by other services.
  */
-export const ProgressQueueServiceGetter = new (class extends MakeOnce<ProgressQueue> {
-	make(): ProgressQueue {
-		const service = new ProgressQueue();
-		service.startTransmitting();
-		return service;
-	}
-})();
+export const ProgressQueueServiceGetter = makeOnce(() => {
+	const service = new ProgressQueue();
+	service.startTransmitting();
+	return service;
+});

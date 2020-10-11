@@ -7,9 +7,9 @@ import { WebSocketHandler } from "../lib/WebSocketHandler";
 import { ContentServiceGetter } from "./ContentService";
 import { ProgressQueueServiceGetter } from "./ProgressQueueService";
 import { UserRecordGetter } from "./UserRecordService";
-import { MakeOnce } from "../lib/utils/MakeOnce";
 import { ContentManager } from "../lib/ContentManager";
 import { UserRecord } from "../lib/UserRecord";
+import { makeOnce } from "../lib/utils/makeOnce";
 
 //really a namespace where all functions are hoisted
 class WebSocketService {
@@ -157,11 +157,7 @@ class WebSocketService {
 	}
 }
 
-export const WebSocketServiceGetter = new (class extends MakeOnce<WebSocketService> {
-	make() {
-		return new WebSocketService();
-	}
-})();
+export const WebSocketServiceGetter = makeOnce(() => new WebSocketService());
 
 function makeQueueMessage() {
 	const ContentService = ContentServiceGetter.get();

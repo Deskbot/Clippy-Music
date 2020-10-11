@@ -3,13 +3,9 @@ import * as fs from "fs";
 import * as consts from "../consts";
 
 import { UserRecord } from "../lib/UserRecord";
-import { MakeOnce } from "../lib/utils/MakeOnce";
+import { makeOnce } from "../lib/utils/makeOnce";
 
-export const UserRecordGetter = new (class extends MakeOnce<UserRecord> {
-	protected make(): UserRecord {
-		return new UserRecord(recover());
-	}
-})();
+export const UserRecordGetter = makeOnce(() => new UserRecord(recover()));
 
 function recover() {
 	//retreive suspended queue
