@@ -253,6 +253,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		const noHtmlEntityTitle = new Html5Entities().decode(contentData.music.title);
 
 		//public log uses publicly facing info
+		console.log("------------------------");
 		console.log(currentTime);
 		console.log(`user   "${nickname}"`);
 		console.log(`played "${noHtmlEntityTitle}"`);
