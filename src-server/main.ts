@@ -63,6 +63,27 @@ function chooseAdminPassword(): Promise<string> {
 	});
 }
 
+function closeSafely() {
+	console.log("Closing down Clippy-Music...");
+
+	ContentService.store();
+	IdFactoryService.store();
+	UserRecordService.store();
+	PasswordService.store();
+
+	const contentManager = ContentServiceGetter.get();
+	if (contentManager.isPlaying()) {
+		console.log("Waiting for content being played to get deleted.");
+		contentManager.on("end", () => {
+			process.exit(0);
+		});
+	} else {
+		process.exit(0);
+	}
+
+	contentManager.end();
+}
+
 async function handleArguments(): Promise<void> {
 	let admin = true;
 	opt.mute.set(false);
@@ -115,28 +136,11 @@ function setUpDirs() {
 }
 
 function setUpControls() {
-	const contentManager = ContentServiceGetter.get();
 
 	//when this is about to be killed
-	process.on("exit", () => {
-		console.log("Closing down Clippy-Music...");
-
-		ContentService.store();
-		IdFactoryService.store();
-		UserRecordService.store();
-		PasswordService.store();
-
-		if (contentManager.isPlaying()) {
-			console.log("Waiting for content being played to get deleted.");
-			contentManager.on("end", () => {
-				process.exit(0);
-			});
-		} else {
-			process.exit(0);
-		}
-
-		contentManager.end();
-	});
+	process.on("exit", closeSafely);
+	process.on("SIGINT", closeSafely);
+	process.on("SIGTERM", closeSafely);
 
 	//stdin controls
 	process.stdin.resume(); //needed due to something that prompt does somewhere
@@ -148,7 +152,10 @@ function setUpControls() {
 	}
 
 	process.stdin.on("keypress", (ch, key) => {
-		if (key.name === "end") contentManager.killCurrent();
+		if (key.name === "end") {
+			const contentManager = ContentServiceGetter.get();
+			contentManager.killCurrent();
+		}
 
 		//I'm having to put these in because the settings that allow me to use "end" prevent normal interrupts key commands
 		else if (key.name === "c" && key.ctrl)  process.kill(process.pid, "SIGINT");
