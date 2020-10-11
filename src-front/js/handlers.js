@@ -288,7 +288,7 @@ $("#queue").on("click", ".bucket-container .bucket button.delete", function(e) {
 		var $queueSection = $("#queue-section");
 
 		utils.counterShiftResize($queueSection, function() {
-			main.clippyAgent.speak(utils.entitle(contentName) + " was deleted succesfully.");
+			main.clippyAgent.speak(utils.entitle(contentName) + " was deleted successfully.");
 
 			var $buttonAncestors = $this.parentsUntil(".bucket");
 			var $bucket = $buttonAncestors.first().parent();
