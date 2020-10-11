@@ -70,14 +70,13 @@ function handleErrors(err: any, res: http.ServerResponse) {
 }
 
 function handlePotentialBan(userId: string) {
-	return new Promise((resolve, reject) => {
-		if (UserRecordGetter.get().isBanned(userId)) {
-			WebSocketServiceGetter.get().sendBanned(UserRecordGetter.get().getSockets(userId));
-			return reject(new BannedError());
-		}
+	const userRecord = UserRecordGetter.get();
 
-		resolve();
-	});
+	if (userRecord.isBanned(userId)) {
+		WebSocketServiceGetter.get()
+			.sendBanned(userRecord.getSockets(userId));
+		throw new BannedError();
+	}
 }
 
 function recordUser(ipAddress: string, res: http.ServerResponse) {
@@ -172,7 +171,7 @@ quelaag.addEndpoint({
 		const progressTracker = ProgressQueueService.add(userId, contentId);
 
 		try {
-			await handlePotentialBan(userId);
+			handlePotentialBan(userId);
 
 			const [form, fields, files] = await parseForm(req, progressTracker);
 
