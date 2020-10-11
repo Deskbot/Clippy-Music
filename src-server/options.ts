@@ -16,6 +16,7 @@ class Wrapper<T> {
 	}
 }
 
+export const bucketTime: number = config.bucketTime;
 export const dlPercentUpdateFreq: number = config.dlPercentUpdateFreq;
 export const fileNameSizeLimit: number = config.fileNameSizeLimit;
 export const ffprobeCommand: string = config.ffprobeCommand;

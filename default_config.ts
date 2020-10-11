@@ -9,8 +9,10 @@ export const config = {
 	webSocketPort: 8081,
 
 	// the maximum duration of a single queue item, in seconds
-	// and also the maximum amount of time a user can play for in a single bucket
 	timeout: 597,
+
+	// the maximum amount of time a user can play for in a single bucket
+	bucketTime: 597,
 
 	// how long before the same music can be shown again, in seconds
 	// Infinity = nothing can be played twice
