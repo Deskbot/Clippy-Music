@@ -138,7 +138,6 @@ var WebSocketHandler = (function() {
 			clippyAnimation = "GetArtsy";
 		}
 
-		main.clippyAgent.play("GetAttention");
 		main.clippyAgent.stop();
 		main.clippyAgent.speak(clippySays);
 		localDlData.errorMessage = clippySays;
