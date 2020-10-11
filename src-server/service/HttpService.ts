@@ -131,7 +131,7 @@ const quelaag = new Quelaag({
 	},
 
 	async noRedirect(req): Promise<boolean> {
-		return (await this.ajax(req)) || (req!.headers["user-agent"] ?? "").includes("curl");
+		return (await this.ajax(req)) || (req.headers["user-agent"] ?? "").includes("curl");
 	},
 
 	urlWithQuery(req): UrlWithParsedQuery {
