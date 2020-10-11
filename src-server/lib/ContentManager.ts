@@ -132,8 +132,8 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 			endTime
 		);
 
-		if (durationBasedOnStartAndFinish > opt.timeout) {
-			return opt.timeout;
+		if (durationBasedOnStartAndFinish > opt.timeout.get()) {
+			return opt.timeout.get();
 		}
 
 		return durationBasedOnStartAndFinish;
@@ -332,7 +332,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		const timePlayedAt = Date.now();
 		const musicLocation = contentData.music.stream ? contentData.music.url : contentData.music.path;
 
-		this.runningMusicProc = startMusic(musicLocation, opt.timeout, contentData.startTime, contentData.endTime);
+		this.runningMusicProc = startMusic(musicLocation, opt.timeout.get(), contentData.startTime, contentData.endTime);
 
 		this.runningMusicProc.on("close", (code, signal) => { // runs before next call to playNext
 			// seconds ran for, adds a little bit to prevent infinite <1 second content
@@ -537,13 +537,13 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 
 	private showImageOverlayWhenMusicPlays(path: string, musicProc: cp.ChildProcessWithoutNullStreams) {
 		doWhenMusicStarts(musicProc, () => {
-			this.runningOverlayProc = startImageOverlay(path, opt.timeout);
+			this.runningOverlayProc = startImageOverlay(path, opt.timeout.get());
 		});
 	}
 
 	private showVideoOverlayWhenMusicPlays(path: string, musicProc: cp.ChildProcessWithoutNullStreams) {
 		doWhenMusicStarts(musicProc, () => {
-			this.runningOverlayProc = startVideoOverlay(path, opt.timeout);
+			this.runningOverlayProc = startVideoOverlay(path, opt.timeout.get());
 		});
 	}
 
