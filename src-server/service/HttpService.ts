@@ -20,7 +20,7 @@ import { BannedError, FileUploadError, UniqueError, YTError, DurationFindingErro
 import { UploadDataWithId } from "../types/UploadData";
 import { verifyPassword } from "../lib/PasswordContainer";
 import { parseForm, extractFormData } from "./request-utils/formUtils";
-import { endWithSuccessText, endWithFailureText, redirectSuccessfulPost, downloadFile } from "./response-utils/end";
+import { endWithSuccessText, endWithFailureText, redirectSuccessfulPost, downloadFile, endWithSuccessJson } from "./response-utils/end";
 import { URL, UrlWithParsedQuery } from "url";
 import { ServerResponse } from "http";
 import { ItemData } from "../types/ItemData";
@@ -413,6 +413,21 @@ quelaag.addEndpoint({
 	},
 	catch(e, req, res) {
 		handleErrors(e, res);
+	}
+});
+
+quelaag.addEndpoint({
+	when: req => req.url!.startsWith("/api/config") && req.method === "GET",
+	do(req, res) {
+		endWithSuccessJson(res, {
+			bucketTime: opt.bucketTime.get(),
+			musicUniqueCoolOff: opt.musicUniqueCoolOff.get(),
+			overlayUniqueCoolOff: opt.overlayUniqueCoolOff.get(),
+			timeout: opt.timeout.get(),
+		});
+	},
+	catch(err, req, res) {
+		handleErrors(err, res);
 	}
 });
 
