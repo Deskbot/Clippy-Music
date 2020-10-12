@@ -69,9 +69,9 @@ export class UniqueError extends DeferredContentError {
 	constructor(contentPart: ContentPart) {
 		let playedWithin;
 		if (contentPart === ContentPart.Music) {
-			playedWithin = consts.musicPlayedWithin;
+			playedWithin = consts.musicPlayedWithin();
 		} else {
-			playedWithin = consts.imagePlayedWithin;
+			playedWithin = consts.imagePlayedWithin();
 		}
 
 		super(`The ${contentPart} you gave has been played in the past ${playedWithin}.`, contentPart);

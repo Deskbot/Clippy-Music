@@ -284,7 +284,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 
 	private musicHashIsUnique(hash: number): boolean {
 		let lastPlayed = this.musicHashes[hash];
-		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
+		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff.get() * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
 	}
 
 	private musicUrlIsUnique(uniqueUrlId: string): boolean {
@@ -292,7 +292,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 
 		// never played
 		// or the current time is after the cooloff period
-		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff * 1000 < new Date().getTime();
+		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff.get() * 1000 < new Date().getTime();
 	}
 
 	private nextMusicPath(): string {
@@ -305,7 +305,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 
 	private overlayHashIsUnique(hash: number): boolean {
 		let lastPlayed = this.overlayHashes[hash];
-		return !lastPlayed || lastPlayed + opt.overlayUniqueCoolOff * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
+		return !lastPlayed || lastPlayed + opt.overlayUniqueCoolOff.get() * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
 	}
 
 	playNext(): boolean {

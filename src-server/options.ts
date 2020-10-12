@@ -24,25 +24,27 @@ class TimeoutWrapper {
 
 	constructor(
 		private timeout: number,
-		private bucketTime: number
+		private bucketTime: Wrapper<number>
 	) {}
 
 	get(): number {
-		return Math.min(this.timeout, this.bucketTime);
+		return Math.min(this.timeout, this.bucketTime.get());
+	}
+
+	set(newTimeout: number) {
+		this.timeout = Math.min(newTimeout, this.bucketTime.get());
 	}
 }
 
-export const bucketTime: number = config.bucketTime;
+// const types are given explicitly because the values in config are inferred from user input
 export const dlPercentUpdateFreq: number = config.dlPercentUpdateFreq;
 export const fileNameSizeLimit: number = config.fileNameSizeLimit;
 export const ffprobeCommand: string = config.ffprobeCommand;
 export const httpPort: number = config.httpPort;
 export const showImageArgs: string[] = config.showImageArgs;
 export const showImageCommand: string = config.showImageCommand;
-export const overlayUniqueCoolOff: number = config.overlayUniqueCoolOff;
 export const mpvCommand: string = config.mpvCommand;
 export const mpvArgs: string[] = config.mpvArgs;
-export const musicUniqueCoolOff: number = config.musicUniqueCoolOff;
 export const fileSizeLimit: number = config.fileSizeLimit;
 export const nicknameSizeLimit: number = config.nicknameSizeLimit;
 export const storageDir: string = config.storageDir;
@@ -51,6 +53,12 @@ export const tooShortToCauseCoolOff: number = config.tooShortToCauseCoolOff;
 export const webSocketPort: number = config.webSocketPort;
 export const youtubeDlCommand: string = config.youtubeDlCommand;
 
-export const mute: Wrapper<boolean> = new Wrapper(false);
-
+// changeable at runtime
+export const bucketTime: Wrapper<number> = new Wrapper(config.bucketTime);
+export const musicUniqueCoolOff: Wrapper<number> = new Wrapper(config.musicUniqueCoolOff);
+export const overlayUniqueCoolOff: Wrapper<number> = new Wrapper(config.overlayUniqueCoolOff);
 export const timeout: TimeoutWrapper = new TimeoutWrapper(config.timeout, bucketTime);
+
+// non user-config
+// changeable at runtime
+export const mute: Wrapper<boolean> = new Wrapper(false);
