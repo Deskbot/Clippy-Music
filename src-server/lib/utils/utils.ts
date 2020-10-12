@@ -121,7 +121,7 @@ export function secToTimeStr(s: number): string {
 }
 
 //based on Hristo's solution that he got from somewhere else https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable
-export function sizeToReadbleStr(s: number): string {
+export function sizeToReadableStr(s: number): string {
 	if (s > 1000000000) return "~" + Math.ceil(s / 1000000000) + "GB";
 	if (s > 1000000)	return "~" + Math.ceil(s / 1000000)	+ "MB";
 	if (s > 1000)	   return "~" + Math.ceil(s / 1000000)	+ "kB";

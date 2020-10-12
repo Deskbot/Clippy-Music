@@ -2,7 +2,7 @@ import * as opt from "./options";
 import * as path from "path";
 import * as utils from "./lib/utils/utils";
 
-export const fileSizeLimStr = utils.sizeToReadbleStr(opt.fileSizeLimit);
+export const fileSizeLimStr = utils.sizeToReadableStr(opt.fileSizeLimit);
 export function imagePlayedWithin() {
 	return opt.overlayUniqueCoolOff.get() === Infinity
 		? "already"
