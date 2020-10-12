@@ -3,17 +3,6 @@ import * as path from "path";
 import * as utils from "./lib/utils/utils";
 
 export const fileSizeLimStr = utils.sizeToReadableStr(opt.fileSizeLimit);
-export function imagePlayedWithin() {
-	return opt.overlayUniqueCoolOff.get() === Infinity
-		? "already"
-		: "in the past " + utils.secToTimeStr(opt.overlayUniqueCoolOff.get());
-}
-
-export function musicPlayedWithin() {
-	return opt.musicUniqueCoolOff.get() === Infinity
-		? "already"
-		: "in the past " + utils.secToTimeStr(opt.musicUniqueCoolOff.get());
-}
 
 export const dirs = {
 	httpUpload: opt.storageDir + "/httpUploads/",

@@ -1,7 +1,22 @@
 import * as formidable from "formidable";
 import * as consts from "../consts";
+import * as opt from "../options";
+import * as utils from "./utils/utils";
 
 import { ContentPart } from "../types/ContentPart";
+
+function imagePlayedWithin() {
+	return opt.overlayUniqueCoolOff.get() === Infinity
+		? "already"
+		: "in the past " + utils.secToTimeStr(opt.overlayUniqueCoolOff.get());
+}
+
+function musicPlayedWithin() {
+	return opt.musicUniqueCoolOff.get() === Infinity
+		? "already"
+		: "in the past " + utils.secToTimeStr(opt.musicUniqueCoolOff.get());
+}
+
 
 abstract class DeferredContentError extends Error {
 	public readonly contentPart: ContentPart;
@@ -69,9 +84,9 @@ export class UniqueError extends DeferredContentError {
 	constructor(contentPart: ContentPart) {
 		let playedWithin;
 		if (contentPart === ContentPart.Music) {
-			playedWithin = consts.musicPlayedWithin();
+			playedWithin = musicPlayedWithin();
 		} else {
-			playedWithin = consts.imagePlayedWithin();
+			playedWithin = imagePlayedWithin();
 		}
 
 		super(`The ${contentPart} you gave has been played in the past ${playedWithin}.`, contentPart);
