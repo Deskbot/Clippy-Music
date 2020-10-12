@@ -479,6 +479,8 @@ $("#ban-form").submit(function(e) {
 
 	var id = $this.find("input[name=id]").val();
 	var nickname = $this.find("input[name=nickname]").val();
+	var bannedName = id == "" ? nickname : id;
+	bannedName = "\"" + bannedName + "\"";
 
 	$.ajax({
 		url: "/api/ban/add",
@@ -495,8 +497,6 @@ $("#ban-form").submit(function(e) {
 		$this.find("input[type=text]").val(null);
 		main.clippyAgent.play("Congratulate");
 
-		var bannedName = id == "" ? nickname : id;
-		bannedName = "\"" + bannedName + "\"";
 		main.clippyAgent.speak(bannedName + " is now banned.");
 
 	}).fail(function(jqxhr, textStatus, err) {
@@ -528,6 +528,7 @@ $("#un-ban-form").submit(function(e) {
 
 	var id = $this.find("input[name=id]").val();
 	var nickname = $this.find("input[name=nickname]").val();
+	var bannedName = id == "" ? nickname : id;
 
 	$.ajax({
 		url: "/api/ban/remove",
@@ -543,8 +544,6 @@ $("#un-ban-form").submit(function(e) {
 		$this.find("input").attr("disabled", false);
 		$this.find("input[type=text]").val(null);
 		main.clippyAgent.play("Congratulate");
-
-		var bannedName = id == "" ? nickname : id;
 		main.clippyAgent.speak(bannedName + " is no longer banned.");
 
 	}).fail(function(jqxhr, textStatus, err) {
