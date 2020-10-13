@@ -132,8 +132,10 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 			endTime
 		);
 
-		if (durationBasedOnStartAndFinish > opt.timeout.get()) {
-			return opt.timeout.get();
+		const timeout = opt.timeout.get()
+
+		if (durationBasedOnStartAndFinish > timeout) {
+			return timeout;
 		}
 
 		return durationBasedOnStartAndFinish;
@@ -335,9 +337,10 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		this.currentlyPlaying = contentData;
 
 		const timePlayedAt = Date.now();
+		const timeout = opt.timeout.get();
 		const musicLocation = contentData.music.stream ? contentData.music.url : contentData.music.path;
 
-		this.runningMusicProc = startMusic(musicLocation, opt.timeout.get(), contentData.startTime, contentData.endTime);
+		this.runningMusicProc = startMusic(musicLocation, timeout, contentData.startTime, contentData.endTime);
 
 		this.runningMusicProc.on("close", (code, signal) => { // runs before next call to playNext
 			// seconds ran for, adds a little bit to prevent infinite <1 second content
@@ -357,14 +360,14 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 
 		if (contentData.overlay.exists) {
 			if (contentData.overlay.stream) {
-				this.showVideoOverlayWhenMusicPlays(contentData.overlay.url, this.runningMusicProc);
+				this.showVideoOverlayWhenMusicPlays(contentData.overlay.url, this.runningMusicProc, timeout);
 			} else {
 				const path = contentData.overlay.path;
 
 				if (contentData.overlay.medium === OverlayMedium.Image) {
-					this.showImageOverlayWhenMusicPlays(path, this.runningMusicProc);
+					this.showImageOverlayWhenMusicPlays(path, this.runningMusicProc, timeout);
 				} else if (contentData.overlay.medium === OverlayMedium.Video) {
-					this.showVideoOverlayWhenMusicPlays(path, this.runningMusicProc);
+					this.showVideoOverlayWhenMusicPlays(path, this.runningMusicProc, timeout);
 				}
 			}
 		}
@@ -539,15 +542,23 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		return false;
 	}
 
-	private showImageOverlayWhenMusicPlays(path: string, musicProc: cp.ChildProcessWithoutNullStreams) {
+	private showImageOverlayWhenMusicPlays(
+		path: string,
+		musicProc: cp.ChildProcessWithoutNullStreams,
+		timeout: number
+	) {
 		doWhenMusicStarts(musicProc, () => {
-			this.runningOverlayProc = startImageOverlay(path, opt.timeout.get());
+			this.runningOverlayProc = startImageOverlay(path, timeout);
 		});
 	}
 
-	private showVideoOverlayWhenMusicPlays(path: string, musicProc: cp.ChildProcessWithoutNullStreams) {
+	private showVideoOverlayWhenMusicPlays(
+		path: string,
+		musicProc: cp.ChildProcessWithoutNullStreams,
+		timeout: number
+	) {
 		doWhenMusicStarts(musicProc, () => {
-			this.runningOverlayProc = startVideoOverlay(path, opt.timeout.get());
+			this.runningOverlayProc = startVideoOverlay(path, timeout);
 		});
 	}
 
