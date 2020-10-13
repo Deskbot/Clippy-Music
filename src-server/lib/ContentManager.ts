@@ -305,7 +305,8 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 
 	private overlayHashIsUnique(hash: number): boolean {
 		let lastPlayed = this.overlayHashes[hash];
-		return !lastPlayed || lastPlayed + opt.overlayUniqueCoolOff.get() * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
+		return !lastPlayed || lastPlayed + opt.overlayUniqueCoolOff.get() * 1000 <= new Date().getTime();
+		// can be so quick adjacent songs are recorded and played at the same time
 	}
 
 	playNext(): boolean {
@@ -678,15 +679,15 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		}
 
 		// we may already have the image downloaded, but we always need to check the uniqueness
-		let completeOveraly: CompleteFileOverlay | CompleteUrlOverlay;
+		let completeOverlay: CompleteFileOverlay | CompleteUrlOverlay;
 		if (overlay.isUrl) {
-			completeOveraly = await this.prepUrlOverlay(overlay, userId, progressSource);
+			completeOverlay = await this.prepUrlOverlay(overlay, userId, progressSource);
 		} else {
-			completeOveraly = await this.prepFileOverlay(overlay);
+			completeOverlay = await this.prepFileOverlay(overlay);
 		}
 
-		if (!completeOveraly.hash || this.overlayHashIsUnique(completeOveraly.hash)) {
-			return completeOveraly;
+		if (!completeOverlay.hash || this.overlayHashIsUnique(completeOverlay.hash)) {
+			return completeOverlay;
 		} else {
 			throw new UniqueError(ContentPart.Overlay);
 		}
