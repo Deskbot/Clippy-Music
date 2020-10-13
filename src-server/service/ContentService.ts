@@ -1,7 +1,6 @@
 import * as fs from "fs";
 
 import * as consts from "../consts";
-import * as opt from "../options";
 
 import { IdFactoryGetter } from "./IdFactoryService";
 import { UserRecordGetter } from "./UserRecordService";
@@ -19,7 +18,6 @@ export const ContentServiceGetter = makeOnce(() => {
 	const ytDlDownloader = new YtDlDownloader();
 
 	const cm = new ContentManager(
-		opt.bucketTime.get(),
 		recoveredContentManager,
 		IdFactoryGetter.get(),
 		UserRecordGetter.get(),

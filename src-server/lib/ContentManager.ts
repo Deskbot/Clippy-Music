@@ -72,7 +72,6 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 	private stop?: boolean;
 
 	constructor(
-		maxTimePerBucket: number,
 		startState: SuspendedContentManager | null,
 		idFactory: IdFactory,
 		userRecord: UserRecord,
@@ -87,12 +86,12 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		if (startState) {
 			console.log("Using suspended content manager");
 
-			this.playQueue = new BarringerQueue(maxTimePerBucket, startState.playQueue);
+			this.playQueue = new BarringerQueue(startState.playQueue);
 			this.musicHashes = startState.hashes;
 			this.overlayHashes = startState.overlayHashes;
 			this.musicUrlRecord = startState.ytIds;
 		} else {
-			this.playQueue = new BarringerQueue(maxTimePerBucket);
+			this.playQueue = new BarringerQueue();
 		}
 	}
 
