@@ -200,7 +200,8 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 			throw new YTError(`I was unable to download (${uplData.music.title ? uplData.music.title : uplData.music.url}). Is the URL correct?`);
 		}
 
-		if (this.musicUrlIsUnique(info.uniqueUrlId)) {
+		const musicCoolOffTime = opt.musicUniqueCoolOff.get();
+		if (this.musicUrlIsUnique(info.uniqueUrlId, musicCoolOffTime)) {
 			const musicData = {
 				...uplData.music,
 				totalFileDuration: info.duration,
@@ -215,7 +216,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 			};
 
 		} else {
-			throw new UniqueError(ContentPart.Music);
+			throw new UniqueError(ContentPart.Music, musicCoolOffTime);
 		}
 	}
 
@@ -270,29 +271,32 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		});
 	}
 
-	private musicIsUnique(music: CompleteMusic): boolean {
-		if (music.hash !== undefined && !this.musicHashIsUnique(music.hash)) {
+	private musicIsUnique(music: CompleteMusic, musicCoolOffTime: number): boolean {
+		if (music.hash !== undefined && !this.musicHashIsUnique(music.hash, musicCoolOffTime)) {
 			return false;
 		}
 
-		if (music.isUrl && music.uniqueId !== undefined && !this.musicUrlIsUnique(music.uniqueId)) {
+		if (music.isUrl
+			&& music.uniqueId !== undefined
+			&& !this.musicUrlIsUnique(music.uniqueId, musicCoolOffTime)
+		) {
 			return false;
 		}
 
 		return true;
 	}
 
-	private musicHashIsUnique(hash: number): boolean {
+	private musicHashIsUnique(hash: number, musicCoolOffTime: number): boolean {
 		let lastPlayed = this.musicHashes[hash];
-		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff.get() * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
+		return !lastPlayed || lastPlayed + musicCoolOffTime * 1000 <= new Date().getTime(); // can be so quick adjacent songs are recorded and played at the same time
 	}
 
-	private musicUrlIsUnique(uniqueUrlId: string): boolean {
+	private musicUrlIsUnique(uniqueUrlId: string, musicCoolOffTime: number): boolean {
 		const lastPlayed = this.musicUrlRecord[uniqueUrlId];
 
 		// never played
 		// or the current time is after the cooloff period
-		return !lastPlayed || lastPlayed + opt.musicUniqueCoolOff.get() * 1000 < new Date().getTime();
+		return !lastPlayed || lastPlayed + musicCoolOffTime * 1000 < new Date().getTime();
 	}
 
 	private nextMusicPath(): string {
@@ -303,9 +307,9 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		return consts.dirs.overlay + this.idFactory.next();
 	}
 
-	private overlayHashIsUnique(hash: number): boolean {
+	private overlayHashIsUnique(hash: number, overlayCoolOffTime: number): boolean {
 		let lastPlayed = this.overlayHashes[hash];
-		return !lastPlayed || lastPlayed + opt.overlayUniqueCoolOff.get() * 1000 <= new Date().getTime();
+		return !lastPlayed || lastPlayed + overlayCoolOffTime * 1000 <= new Date().getTime();
 		// can be so quick adjacent songs are recorded and played at the same time
 	}
 
@@ -321,7 +325,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		}
 
 		//double check the content is still unique, only checking music as it is the main feature
-		if (!this.musicIsUnique(contentData.music)) {
+		if (!this.musicIsUnique(contentData.music, opt.musicUniqueCoolOff.get())) {
 			this.deleteContent(contentData);
 			return this.playNext();
 		}
@@ -431,7 +435,6 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 					const info = await getYtDlMusicInfo(overlay.url);
 					title = info.title;
 
-					console.log(info, opt.streamOverDuration)
 					if (info.duration > opt.streamOverDuration) {
 						return this.prepStreamOverlay(overlay, progressSource);
 					} else {
@@ -615,6 +618,8 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		progressSource: ProgressSource
 	): Promise<CompleteMusic> {
 
+		const musicCoolOffTime = opt.musicUniqueCoolOff.get();
+
 		if (music.isUrl) {
 			// Is it so big it should just be streamed?
 			if (music.totalFileDuration > opt.streamOverDuration) {
@@ -641,7 +646,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 				// this exists to prevent a YouTube video from
 				// being downloaded by user and played, then played again by url
 				// or being downloaded twice in quick succession
-				if (this.musicHashIsUnique(musicHash)) {
+				if (this.musicHashIsUnique(musicHash, musicCoolOffTime)) {
 					return {
 						...music,
 						hash: musicHash,
@@ -649,20 +654,20 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 						stream: false,
 					};
 				} else {
-					throw new UniqueError(ContentPart.Music);
+					throw new UniqueError(ContentPart.Music, musicCoolOffTime);
 				}
 			}
 		} else {
 			//validate by music hash
 			const musicHash = await utils.fileHash(music.path);
-			if (this.musicHashIsUnique(musicHash)) {
+			if (this.musicHashIsUnique(musicHash, musicCoolOffTime)) {
 				return {
 					...music,
 					hash: musicHash,
 					stream: false,
 				};
 			} else {
-				throw new UniqueError(ContentPart.Music);
+				throw new UniqueError(ContentPart.Music, musicCoolOffTime);
 			}
 		}
 	}
@@ -686,10 +691,11 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 			completeOverlay = await this.prepFileOverlay(overlay);
 		}
 
-		if (!completeOverlay.hash || this.overlayHashIsUnique(completeOverlay.hash)) {
+		const overlayCoolOffTime = opt.overlayUniqueCoolOff.get();
+		if (!completeOverlay.hash || this.overlayHashIsUnique(completeOverlay.hash, overlayCoolOffTime)) {
 			return completeOverlay;
 		} else {
-			throw new UniqueError(ContentPart.Overlay);
+			throw new UniqueError(ContentPart.Overlay, overlayCoolOffTime);
 		}
 	}
 }
