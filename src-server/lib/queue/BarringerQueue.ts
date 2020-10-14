@@ -16,21 +16,23 @@ export function isSuspendedBarringerQueue(obj: any): obj is SuspendedBarringerQu
 
 export class BarringerQueue {
 	private buckets: ItemData[][];
-	private maxBucketTime: number;
+	private getMaxBucketTime: () => number;
 
-	constructor(initialMaxBucketTime: number, queueObj?: SuspendedBarringerQueue) {
+	constructor(getMaxBucketTime: () => number, queueObj?: SuspendedBarringerQueue) {
 		this.buckets = queueObj && queueObj.buckets
 			? queueObj.buckets
 			: [];
 
-		this.maxBucketTime = initialMaxBucketTime;
+		this.getMaxBucketTime = getMaxBucketTime;
 	}
 
 	add(item: ItemData) {
-		if (item.duration > this.maxBucketTime) return;
+		const maxBucketTime = this.getMaxBucketTime();
+
+		if (item.duration > maxBucketTime) return;
 
 		for (const bucket of this.buckets.slice(1)) {
-			if (this.spaceForItemInBucket(item.duration, bucket, this.maxBucketTime, item.userId)) {
+			if (this.spaceForItemInBucket(item.duration, bucket, maxBucketTime, item.userId)) {
 				const index = arrayUtils.findLastIndex(
 					bucket,
 					itemInBucket => itemInBucket.userId === item.userId
@@ -136,10 +138,6 @@ export class BarringerQueue {
 
 	private removeFromBucket(cid: number, bucket: ItemData[]): boolean {
 		return arrayUtils.removeFirst(bucket, item => item.id === cid);
-	}
-
-	setBucketTime(maxBucketTime: number) {
-		this.maxBucketTime = maxBucketTime;
 	}
 
 	private spaceForItemInBucket(

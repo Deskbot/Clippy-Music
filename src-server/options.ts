@@ -1,6 +1,4 @@
 import { config } from "./user-config";
-import { TypedEmitter } from "./lib/utils/TypedEmitter";
-import { EventEmitter } from "events";
 
 interface ChangeableConfig<T> {
 	get(): T;
@@ -22,7 +20,6 @@ class Wrapper<T> implements ChangeableConfig<T> {
 	}
 }
 
-
 /**
  * The timeout of an individual item must not be longer than a bucket length.
  * Otherwise an item longer than a bucket can not be trimmed to fit in a bucket.
@@ -31,7 +28,7 @@ class TimeoutWrapper implements ChangeableConfig<number> {
 
 	constructor(
 		private timeout: number,
-		private bucketTime: BucketTimeWrapper
+		private bucketTime: Wrapper<number>
 	) {}
 
 	get(): number {
@@ -40,28 +37,6 @@ class TimeoutWrapper implements ChangeableConfig<number> {
 
 	set(newTimeout: number) {
 		this.timeout = Math.min(newTimeout, this.bucketTime.get());
-	}
-}
-
-interface TimeoutWrapperEvents {
-	change: (timeout: number) => void;
-}
-
-class BucketTimeWrapper extends (EventEmitter as TypedEmitter<TimeoutWrapperEvents>) implements ChangeableConfig<number> {
-
-	constructor(
-		private value: number
-	) {
-		super();
-	}
-
-	get(): number {
-		return this.value;
-	}
-
-	set(value: number) {
-		this.value = value;
-		this.emit("change", this.value);
 	}
 }
 
@@ -83,7 +58,7 @@ export const webSocketPort: number = config.webSocketPort;
 export const youtubeDlCommand: string = config.youtubeDlCommand;
 
 // changeable at runtime
-export const bucketTime: BucketTimeWrapper = new BucketTimeWrapper(config.bucketTime);
+export const bucketTime: Wrapper<number> = new Wrapper(config.bucketTime);
 export const musicUniqueCoolOff: Wrapper<number> = new Wrapper(config.musicUniqueCoolOff);
 export const overlayUniqueCoolOff: Wrapper<number> = new Wrapper(config.overlayUniqueCoolOff);
 export const timeout: TimeoutWrapper = new TimeoutWrapper(config.timeout, bucketTime);

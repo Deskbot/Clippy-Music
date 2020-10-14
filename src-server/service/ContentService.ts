@@ -19,7 +19,7 @@ export const ContentServiceGetter = makeOnce(() => {
 	const ytDlDownloader = new YtDlDownloader();
 
 	const cm = new ContentManager(
-		opt.bucketTime.get(),
+		() => opt.bucketTime.get(),
 		recoveredContentManager,
 		IdFactoryGetter.get(),
 		UserRecordGetter.get(),
@@ -27,10 +27,6 @@ export const ContentServiceGetter = makeOnce(() => {
 	);
 
 	cm.on("end", () => play(cm));
-
-	opt.bucketTime.on("change", (bucketTime) => {
-		cm.setBucketTime(bucketTime);
-	});
 
 	return cm;
 });
