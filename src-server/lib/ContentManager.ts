@@ -72,6 +72,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 	private stop?: boolean;
 
 	constructor(
+		bucketTime: number,
 		startState: SuspendedContentManager | null,
 		idFactory: IdFactory,
 		userRecord: UserRecord,
@@ -86,12 +87,12 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		if (startState) {
 			console.log("Using suspended content manager");
 
-			this.playQueue = new BarringerQueue(startState.playQueue);
+			this.playQueue = new BarringerQueue(bucketTime, startState.playQueue);
 			this.musicHashes = startState.hashes;
 			this.overlayHashes = startState.overlayHashes;
 			this.musicUrlRecord = startState.ytIds;
 		} else {
-			this.playQueue = new BarringerQueue();
+			this.playQueue = new BarringerQueue(bucketTime);
 		}
 	}
 
@@ -539,6 +540,10 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 		}
 
 		return false;
+	}
+
+	setBucketTime(bucketTime: number) {
+		this.playQueue.setBucketTime(bucketTime);
 	}
 
 	private showImageOverlayWhenMusicPlays(

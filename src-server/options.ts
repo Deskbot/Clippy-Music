@@ -1,11 +1,17 @@
 import { config } from "./user-config";
+import { TypedEmitter } from "./lib/utils/TypedEmitter";
+import { EventEmitter } from "events";
 
-class Wrapper<T> {
-	private value: T;
+interface ChangeableConfig<T> {
+	get(): T;
+	set(value: T): void;
+}
 
-	constructor(value: T) {
-		this.value = value;
-	}
+class Wrapper<T> implements ChangeableConfig<T> {
+
+	constructor(
+		private value: T
+	) {}
 
 	get(): T {
 		return this.value;
@@ -16,15 +22,16 @@ class Wrapper<T> {
 	}
 }
 
+
 /**
  * The timeout of an individual item must not be longer than a bucket length.
  * Otherwise an item longer than a bucket can not be trimmed to fit in a bucket.
  */
-class TimeoutWrapper {
+class TimeoutWrapper implements ChangeableConfig<number> {
 
 	constructor(
 		private timeout: number,
-		private bucketTime: Wrapper<number>
+		private bucketTime: BucketTimeWrapper
 	) {}
 
 	get(): number {
@@ -33,6 +40,28 @@ class TimeoutWrapper {
 
 	set(newTimeout: number) {
 		this.timeout = Math.min(newTimeout, this.bucketTime.get());
+	}
+}
+
+interface TimeoutWrapperEvents {
+	change: (timeout: number) => void;
+}
+
+class BucketTimeWrapper extends (EventEmitter as TypedEmitter<TimeoutWrapperEvents>) implements ChangeableConfig<number> {
+
+	constructor(
+		private value: number
+	) {
+		super();
+	}
+
+	get(): number {
+		return this.value;
+	}
+
+	set(value: number) {
+		this.value = value;
+		this.emit("change", this.value);
 	}
 }
 
@@ -54,7 +83,7 @@ export const webSocketPort: number = config.webSocketPort;
 export const youtubeDlCommand: string = config.youtubeDlCommand;
 
 // changeable at runtime
-export const bucketTime: Wrapper<number> = new Wrapper(config.bucketTime);
+export const bucketTime: BucketTimeWrapper = new BucketTimeWrapper(config.bucketTime);
 export const musicUniqueCoolOff: Wrapper<number> = new Wrapper(config.musicUniqueCoolOff);
 export const overlayUniqueCoolOff: Wrapper<number> = new Wrapper(config.overlayUniqueCoolOff);
 export const timeout: TimeoutWrapper = new TimeoutWrapper(config.timeout, bucketTime);
