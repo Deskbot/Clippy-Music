@@ -35,7 +35,7 @@ export class BarringerQueue {
 		return this.buckets.get(cid);
 	}
 
-	getBuckets(): IterableIterator<ItemData[]> {
+	getBuckets(): ReadonlyArray<ReadonlyArray<ItemData>> {
 		this.enforceMaxBucketSize();
 		return this.buckets.getBuckets();
 	}
@@ -81,17 +81,26 @@ export class BarringerQueue {
 
 class Buckets {
 	private buckets: ItemData[][];
+	private hasBeenUsed: boolean;
 	private maxBucketTime: number;
 
 	constructor(maxBucketTime: number) {
-		this.buckets = [] as ItemData[][];
+		this.buckets = [];
+		this.hasBeenUsed = false;
 		this.maxBucketTime = maxBucketTime;
 	}
 
 	add(item: ItemData) {
 		if (item.duration > this.maxBucketTime) return;
 
-		for (const bucket of this.buckets.slice(1)) {
+		// Don't add to the top bucket, if the bucket is in use.
+		// This prevents users getting more than the max time
+		// by adding to a bucket after their items have been removed because they have been played.
+		const buckets = this.hasBeenUsed
+			? this.buckets.slice(1)
+			: this.buckets;
+
+		for (const bucket of buckets) {
 			if (this.spaceForItemInBucket(item.duration, bucket, item.userId)) {
 				const index = arrayUtils.findLastIndex(
 					bucket,
@@ -131,8 +140,8 @@ class Buckets {
 		return undefined;
 	}
 
-	getBuckets(): IterableIterator<ItemData[]> {
-		return this.buckets[Symbol.iterator]();
+	getBuckets(): ReadonlyArray<ReadonlyArray<ItemData>> {
+		return this.buckets;
 	}
 
 	getUserItems(uid: string): ItemData[] {
@@ -167,6 +176,8 @@ class Buckets {
 		const nextItem = this.buckets[0].shift();
 
 		this.makeTopBucketNotEmpty();
+
+		this.hasBeenUsed = true;
 
 		return nextItem;
 	}
