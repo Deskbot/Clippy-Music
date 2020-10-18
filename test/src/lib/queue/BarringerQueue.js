@@ -249,4 +249,99 @@ module.exports = {
 			assert(bucket.length !== 0, "Each bucket has at least one item.")
 		}
 	},
+
+	shrink_max_size() {
+		let maxBucketSize = 1000;
+
+		const q = new BarringerQueue(() => maxBucketSize);
+
+		// top bucket
+		q.add({
+			duration: 1000,
+			id: 1,
+			userId: "1",
+		});
+
+		// second bucket
+		q.add({
+			duration: 500,
+			id: 2,
+			userId: "1",
+		});
+
+		q.add({
+			duration: 500,
+			id: 3,
+			userId: "1",
+		});
+
+		// third bucket
+		q.add({
+			duration: 250,
+			id: 4,
+			userId: "1",
+		});
+
+		q.add({
+			duration: 250,
+			id: 5,
+			userId: "1",
+		});
+
+		q.add({
+			duration: 250,
+			id: 6,
+			userId: "1",
+		});
+
+		q.add({
+			duration: 250,
+			id: 7,
+			userId: "1",
+		});
+
+		// fourth bucket
+		q.add({
+			duration: 250,
+			id: 8,
+			userId: "1",
+		});
+
+		q.add({
+			duration: 500,
+			id: 9,
+			userId: "1",
+		});
+
+		// fifth bucket
+		q.add({
+			duration: 500,
+			id: 10,
+			userId: "1",
+		});
+
+		q.add({
+			duration: 250,
+			id: 11,
+			userId: "1",
+		});
+
+		// now change max size
+
+		maxBucketSize = 500;
+
+		const expectedOrder = [
+			[2],
+			[3],
+			[4,5],
+			[6,7],
+			[8,11],
+			[9],
+			[10],
+		];
+
+		const actualOrder = [...q.getBuckets()].map(bucket => bucket.map(item => item.id));
+
+		assert.deepStrictEqual(actualOrder, expectedOrder, "Items should now be arranged in buckets differently.");
+	},
 }

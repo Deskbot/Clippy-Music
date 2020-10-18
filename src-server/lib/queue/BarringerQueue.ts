@@ -62,14 +62,19 @@ export class BarringerQueue {
 
 	private enforceMaxBucketSize() {
 		const maxBucketTime = this.getMaxBucketTime();
-		if (this.lastMaxBucketTime !== maxBucketTime) {
-			this.buckets = new Buckets(maxBucketTime);
 
+		if (this.lastMaxBucketTime !== maxBucketTime) {
+			// make a new collection of buckets with the new max time
+			const newBuckets = new Buckets(maxBucketTime);
+
+			// fill those buckets with the previously existing
 			for (const bucket of this.buckets.getBuckets()) {
 				for (const item of bucket) {
-					this.buckets.add(item);
+					newBuckets.add(item);
 				}
 			}
+
+			this.buckets = newBuckets;
 		}
 	}
 }
@@ -87,7 +92,7 @@ class Buckets {
 		if (item.duration > this.maxBucketTime) return;
 
 		for (const bucket of this.buckets.slice(1)) {
-			if (this.spaceForItemInBucket(item.duration, bucket, this.maxBucketTime, item.userId)) {
+			if (this.spaceForItemInBucket(item.duration, bucket, item.userId)) {
 				const index = arrayUtils.findLastIndex(
 					bucket,
 					itemInBucket => itemInBucket.userId === item.userId
@@ -198,7 +203,6 @@ class Buckets {
 	private spaceForItemInBucket(
 		time: number,
 		bucket: ItemData[],
-		maxTimePerBucket: number,
 		userId: string,
 	): boolean {
 		let totalTimeExisting = 0;
@@ -209,6 +213,6 @@ class Buckets {
 			}
 		}
 
-		return (totalTimeExisting + time) < maxTimePerBucket;
+		return (totalTimeExisting + time) <= this.maxBucketTime;
 	}
 }
