@@ -15,24 +15,79 @@ export function isSuspendedBarringerQueue(obj: any): obj is SuspendedBarringerQu
 }
 
 export class BarringerQueue {
-	private buckets: ItemData[][];
+	private buckets: Buckets;
 	private getMaxBucketTime: () => number;
+	private lastMaxBucketTime: number;
 
 	constructor(getMaxBucketTime: () => number, queueObj?: SuspendedBarringerQueue) {
-		this.buckets = queueObj && queueObj.buckets
-			? queueObj.buckets
-			: [];
-
+		this.lastMaxBucketTime = getMaxBucketTime();
+		this.buckets = new Buckets(this.lastMaxBucketTime);
 		this.getMaxBucketTime = getMaxBucketTime;
 	}
 
-	add(item: ItemData) {
-		const maxBucketTime = this.getMaxBucketTime();
+	add(newItem: ItemData) {
+		this.enforceMaxBucketSize();
+		return this.buckets.add(newItem);
+	}
 
-		if (item.duration > maxBucketTime) return;
+	get(cid: number): ItemData | undefined {
+		this.enforceMaxBucketSize();
+		return this.buckets.get(cid);
+	}
+
+	getBuckets(): IterableIterator<ItemData[]> {
+		this.enforceMaxBucketSize();
+		return this.buckets.getBuckets();
+	}
+
+	getUserItems(uid: string): ItemData[] {
+		this.enforceMaxBucketSize();
+		return this.buckets.getUserItems(uid);
+	}
+
+	next(): ItemData | undefined {
+		this.enforceMaxBucketSize();
+		return this.buckets.next();
+	}
+
+	purge(uid: string) {
+		this.enforceMaxBucketSize();
+		return this.buckets.purge(uid);
+	}
+
+	remove(cid: number): boolean {
+		this.enforceMaxBucketSize();
+		return this.buckets.remove(cid);
+	}
+
+	private enforceMaxBucketSize() {
+		const maxBucketTime = this.getMaxBucketTime();
+		if (this.lastMaxBucketTime !== maxBucketTime) {
+			this.buckets = new Buckets(maxBucketTime);
+
+			for (const bucket of this.buckets.getBuckets()) {
+				for (const item of bucket) {
+					this.buckets.add(item);
+				}
+			}
+		}
+	}
+}
+
+class Buckets {
+	private buckets: ItemData[][];
+	private maxBucketTime: number;
+
+	constructor(maxBucketTime: number) {
+		this.buckets = [] as ItemData[][];
+		this.maxBucketTime = maxBucketTime;
+	}
+
+	add(item: ItemData) {
+		if (item.duration > this.maxBucketTime) return;
 
 		for (const bucket of this.buckets.slice(1)) {
-			if (this.spaceForItemInBucket(item.duration, bucket, maxBucketTime, item.userId)) {
+			if (this.spaceForItemInBucket(item.duration, bucket, this.maxBucketTime, item.userId)) {
 				const index = arrayUtils.findLastIndex(
 					bucket,
 					itemInBucket => itemInBucket.userId === item.userId

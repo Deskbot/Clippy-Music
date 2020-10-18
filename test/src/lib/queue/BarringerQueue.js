@@ -6,7 +6,7 @@ const assert = require("assert").strict;
 
 module.exports = {
 	can_add_to_empty_queue: () => {
-		const q = new BarringerQueue(1000);
+		const q = new BarringerQueue(() => 1000);
 
 		const item = {
 			userId: 1,
@@ -18,7 +18,7 @@ module.exports = {
 	},
 
 	can_not_add_to_top_bucket_if_queue_is_not_empty: () => {
-		const q = new BarringerQueue(1000);
+		const q = new BarringerQueue(() => 1000);
 
 		q.add({
 			userId: "2",
@@ -35,13 +35,13 @@ module.exports = {
 	},
 
 	empty_queue_is_empty() {
-		const q = new BarringerQueue(1000);
+		const q = new BarringerQueue(() => 1000);
 
 		assert([...q.getBuckets()].length === 0);
 	},
 
 	exceeding_a_bucket_size_adds_a_new_bucket: () => {
-		const q = new BarringerQueue(1000);
+		const q = new BarringerQueue(() => 1000);
 
 		// ensure the queue does not start empty
 		q.add({
@@ -70,7 +70,7 @@ module.exports = {
 	},
 
 	exceeding_a_bucket_size_adds_a_new_bucket_2: () => {
-		const q = new BarringerQueue(1000);
+		const q = new BarringerQueue(() => 1000);
 
 		// ensure the queue does not start empty
 		q.add({
@@ -116,7 +116,7 @@ module.exports = {
 	},
 
 	items_can_equal_size_of_bucket() {
-		const q = new BarringerQueue(1000);
+		const q = new BarringerQueue(() => 1000);
 
 		const item = {
 			id: 1,
@@ -130,7 +130,7 @@ module.exports = {
 	},
 
 	purge: () => {
-		const q = new BarringerQueue(1000);
+		const q = new BarringerQueue(() => 1000);
 
 		const item1a = {
 			id: 1,
@@ -183,7 +183,7 @@ module.exports = {
 	},
 
 	remove: () => {
-		const q = new BarringerQueue(1000);
+		const q = new BarringerQueue(() => 1000);
 
 		const items = [{
 			id: 1,
@@ -221,7 +221,7 @@ module.exports = {
 	},
 
 	removing_an_item_does_not_leave_an_empty_bucket() {
-		const q = new BarringerQueue(1000);
+		const q = new BarringerQueue(() => 1000);
 
 		// top bucket
 		q.add({
