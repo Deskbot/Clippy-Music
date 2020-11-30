@@ -283,9 +283,8 @@ function validateDownload(res: ServerResponse, contentIdStr: string | string[], 
 
 	if (content) {
 		success(content);
-
 	} else {
-		endWithFailureText(res, "You did not give a valid id for what to donwload.");
+		endWithFailureText(res, "You did not give a valid id for what to download.");
 	}
 }
 

@@ -1,9 +1,10 @@
 import * as arrayUtils from "../utils/arrayUtils";
 
 import { ItemData } from "../../types/ItemData";
+import { OneToManyMap } from "../utils/OneToManyMap";
 
 export interface SuspendedBarringerQueue {
-	buckets: ItemData[][];
+
 }
 
 export function isSuspendedBarringerQueue(obj: any): obj is SuspendedBarringerQueue {
@@ -15,145 +16,72 @@ export function isSuspendedBarringerQueue(obj: any): obj is SuspendedBarringerQu
 }
 
 export class BarringerQueue {
-	private buckets: ItemData[][];
+	private userQueues: OneToManyMap<string, ItemData>;
+	private idToUser: Map<number, string>;
 	private getMaxBucketTime: () => number;
 
 	constructor(getMaxBucketTime: () => number, queueObj?: SuspendedBarringerQueue) {
-		this.buckets = queueObj && queueObj.buckets
-			? queueObj.buckets
-			: [];
+
+		// TODO
+		// queueObj && queueObj.buckets
+		// 	? queueObj.buckets
+		// 	: []
 
 		this.getMaxBucketTime = getMaxBucketTime;
+		this.idToUser = new Map();
+		this.userQueues = new OneToManyMap();
 	}
 
 	add(item: ItemData) {
-		const maxBucketTime = this.getMaxBucketTime();
-
-		if (item.duration > maxBucketTime) return;
-
-		for (const bucket of this.buckets.slice(1)) {
-			if (this.spaceForItemInBucket(item.duration, bucket, maxBucketTime, item.userId)) {
-				const index = arrayUtils.findLastIndex(
-					bucket,
-					itemInBucket => itemInBucket.userId === item.userId
-				);
-				arrayUtils.randInsertAfter(bucket, index + 1, item);
-				return;
-			}
-		}
-
-		this.buckets.push([item]);
-	}
-
-	private enforceAllBucketsAreNotEmpty() {
-		// when an item is removed, the indices to the right will change
-		// so check whether to remove items from right to left
-		for (let bucketIndex = this.buckets.length - 1; bucketIndex >= 0; bucketIndex--) {
-			this.enforceBucketIsNotEmpty(bucketIndex);
-		}
-	}
-
-	private enforceBucketIsNotEmpty(index: number) {
-		if (this.buckets[index].length === 0) {
-			this.buckets.splice(index, 1);
-		}
+		this.idToUser.set(item.id, item.userId);
+		this.userQueues.set(item.userId, item);
 	}
 
 	get(cid: number): ItemData | undefined {
-		for (const bucket of this.buckets) {
-			for (const item of bucket) {
-				if (item.id === cid) {
-					return item;
-				}
-			}
+		const userId = this.idToUser.get(cid);
+
+		if (userId === undefined) {
+			return undefined;
 		}
 
-		return undefined;
+		const queue = this.userQueues.getAll(userId)!;
+		return queue.find(item => item.id === cid);
 	}
 
-	getBuckets(): IterableIterator<ItemData[]> {
-		return this.buckets[Symbol.iterator]();
+	getBuckets(): IterableIterator<ReadonlyArray<ItemData>> {
+		return this.userQueues.values();
 	}
 
-	getUserItems(uid: string): ItemData[] {
-		const userItems = [];
-
-		for (const bucket of this.buckets) {
-			for (const item of bucket) {
-				if (item.userId === uid) {
-					userItems.push(item);
-				}
-			}
-		}
-
-		return userItems;
-	}
-
-	private makeTopBucketNotEmpty() {
-		while (this.buckets[0].length === 0) {
-			this.buckets.shift();
-			if (this.buckets.length === 0) return;
-		}
+	getUserItems(uid: string): ReadonlyArray<ItemData> {
+		return this.userQueues.getAll(uid) ?? [];
 	}
 
 	next(): ItemData | undefined {
-		if (this.buckets.length === 0) return;
-
-		// make sure the top bucket has something in it to read
-		this.makeTopBucketNotEmpty();
-
-		if (this.buckets.length === 0) return;
-
-		const nextItem = this.buckets[0].shift();
-
-		this.makeTopBucketNotEmpty();
-
-		return nextItem;
+		// TODO
+		return undefined;
 	}
 
 	purge(uid: string) {
-		for (let bucketIndex = 0; bucketIndex < this.buckets.length; bucketIndex++) {
-			const bucket = this.buckets[bucketIndex];
-			this.removeAllItemsOfUserFromBucket(uid, bucket);
+		const queue = this.userQueues.getAll(uid);
+
+		if (queue === undefined) {
+			return;
 		}
 
-		this.enforceAllBucketsAreNotEmpty();
-	}
-
-	remove(cid: number): boolean {
-		for (let bucketIndex = 0; bucketIndex < this.buckets.length; bucketIndex++) {
-			const bucket = this.buckets[bucketIndex];
-			if (this.removeFromBucket(cid, bucket)) {
-				this.enforceBucketIsNotEmpty(bucketIndex);
-				return true;
-			}
+		for (const item of queue) {
+			this.idToUser.delete(item.id);
 		}
 
-		return false;
+		this.userQueues.removeAll(uid);
 	}
 
-	private removeAllItemsOfUserFromBucket(uid: string, bucket: ItemData[]) {
-		arrayUtils.removeAll(bucket, item => item.userId === uid);
-	}
+	remove(uid: string, cid: number): boolean {
+		const success = this.userQueues.removeIf(uid, item => item.id === cid);
 
-	private removeFromBucket(cid: number, bucket: ItemData[]): boolean {
-		return arrayUtils.removeFirst(bucket, item => item.id === cid);
-	}
-
-	private spaceForItemInBucket(
-		time: number,
-		bucket: ItemData[],
-		maxTimePerBucket: number,
-		userId: string,
-	): boolean {
-		let totalTimeExisting = 0;
-
-		for (const item of bucket) {
-			if (item.userId === userId) {
-				totalTimeExisting += item.duration;
-			}
+		if (success) {
+			this.idToUser.delete(cid);
 		}
 
-		return (totalTimeExisting + time) < maxTimePerBucket;
+		return success;
 	}
 }

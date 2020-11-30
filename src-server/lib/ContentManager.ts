@@ -533,7 +533,7 @@ export class ContentManager extends (EventEmitter as TypedEmitter<ContentManager
 
 		if (itemData) {
 			this.deleteContent(itemData);
-			this.playQueue.remove(contentId);
+			this.playQueue.remove(itemData.userId, contentId);
 			this.emit("queue-update");
 
 			return true;
