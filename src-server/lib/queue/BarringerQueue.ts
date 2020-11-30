@@ -2,6 +2,7 @@ import * as arrayUtils from "../utils/arrayUtils";
 
 import { ItemData } from "../../types/ItemData";
 import { OneToManyMap } from "../utils/OneToManyMap";
+import { RoundRobin } from "../utils/RoundRobin";
 
 export interface SuspendedBarringerQueue {
 
@@ -19,6 +20,7 @@ export class BarringerQueue {
 	private userQueues: OneToManyMap<string, ItemData>;
 	private idToUser: Map<number, string>;
 	private getMaxBucketTime: () => number;
+	private roundRobin: RoundRobin<string>;
 
 	constructor(getMaxBucketTime: () => number, queueObj?: SuspendedBarringerQueue) {
 
@@ -29,12 +31,14 @@ export class BarringerQueue {
 
 		this.getMaxBucketTime = getMaxBucketTime;
 		this.idToUser = new Map();
+		this.roundRobin = new RoundRobin();
 		this.userQueues = new OneToManyMap();
 	}
 
 	add(item: ItemData) {
 		this.idToUser.set(item.id, item.userId);
 		this.userQueues.set(item.userId, item);
+		this.roundRobin
 	}
 
 	get(cid: number): ItemData | undefined {
@@ -57,8 +61,22 @@ export class BarringerQueue {
 	}
 
 	next(): ItemData | undefined {
-		// TODO
-		return undefined;
+		if (this.roundRobin.isEmpty()) {
+			return undefined;
+		}
+
+		let queue: readonly ItemData[] | undefined;
+
+		do {
+			const userId = this.roundRobin.next();
+			queue = this.userQueues.getAll(userId);
+		} while (queue === undefined || queue.length === 0);
+
+		const nextItem = queue[0];
+
+		this.remove(nextItem.userId, nextItem.id);
+
+		return nextItem;
 	}
 
 	purge(uid: string) {
