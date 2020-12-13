@@ -1,3 +1,5 @@
+import * as arrUtils from "../../lib/utils/arrayUtils";
+
 export class RoundRobin<T> {
     private list: T[] = [];
     private set: Set<T> = new Set();
@@ -25,5 +27,9 @@ export class RoundRobin<T> {
         this.list.push(head);
 
         return head;
+    }
+
+    remove(value: T): boolean {
+        return arrUtils.removeFirst(this.list, elem => elem === value);
     }
 }

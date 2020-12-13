@@ -38,7 +38,7 @@ export class BarringerQueue {
 	add(item: ItemData) {
 		this.idToUser.set(item.id, item.userId);
 		this.userQueues.set(item.userId, item);
-		this.roundRobin
+		this.roundRobin.add(item.userId);
 	}
 
 	get(cid: number): ItemData | undefined {
@@ -52,8 +52,24 @@ export class BarringerQueue {
 		return queue.find(item => item.id === cid);
 	}
 
-	getBuckets(): IterableIterator<ReadonlyArray<ItemData>> {
-		return this.userQueues.values();
+	getBuckets(): ReadonlyArray<ReadonlyArray<ItemData>> {
+		const buckets = [] as ItemData[][];
+
+		const maxBucketTime = this.getMaxBucketTime();
+
+		// add every item to the right bucket
+		for (const queue of this.userQueues.values()) {
+			const itemsToAddToBuckets = splitByDuration(queue, maxBucketTime);
+			for (let i = 0; i < itemsToAddToBuckets.length; i++) {
+				const bucketToAddTo = buckets[i];
+				const groupToAdd = itemsToAddToBuckets[i];
+				bucketToAddTo.push(...groupToAdd);
+			}
+		}
+
+		// TODO sort the items in the bucket by round robin
+
+		return buckets;
 	}
 
 	getUserItems(uid: string): ReadonlyArray<ItemData> {
@@ -96,10 +112,42 @@ export class BarringerQueue {
 	remove(uid: string, cid: number): boolean {
 		const success = this.userQueues.removeIf(uid, item => item.id === cid);
 
-		if (success) {
-			this.idToUser.delete(cid);
+		if (!success) {
+			return false;
 		}
 
-		return success;
+		this.idToUser.delete(cid);
+
+		// if the user removes everything and adds something later,
+		// they should be added in at the back
+		if (this.userQueues.getAll(uid)?.length === 0) {
+			this.roundRobin.remove(uid);
+		}
+
+		return true;
 	}
+}
+
+function splitByDuration(items: ReadonlyArray<ItemData>, bucketSize: number): ItemData[][] {
+	const allItems = [] as ItemData[][];
+	let nextBucket = [] as ItemData[];
+	let timeInNextBucket = 0;
+
+	for (const item of items) {
+		const newTimeInNextBucket = timeInNextBucket + item.duration;
+
+		if (newTimeInNextBucket > bucketSize) {
+			// this bucket is finished
+			allItems.push(nextBucket);
+
+			// reset fields
+			nextBucket = [];
+			timeInNextBucket = 0;
+		} else {
+			nextBucket.push(item);
+			timeInNextBucket = newTimeInNextBucket;
+		}
+	}
+
+	return allItems;
 }
