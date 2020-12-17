@@ -1,8 +1,17 @@
 import * as arrUtils from "../../lib/utils/arrayUtils";
 
 export class RoundRobin<T> {
-    private list: T[] = [];
-    private set: Set<T> = new Set();
+    private list: T[];
+    private set: Set<T>;
+
+    static new<T>(): RoundRobin<T> {
+        return new RoundRobin();
+    }
+
+    private constructor(list?: T[], set?: Set<T>) {
+        this.list = list ?? [];
+        this.set = set ?? new Set();
+    }
 
     add(value: T) {
         const beforeSize = this.set.size;
@@ -12,6 +21,10 @@ export class RoundRobin<T> {
         if (afterSize > beforeSize) {
             this.list.push(value);
         }
+    }
+
+    clone() {
+        return new RoundRobin(this.list.slice(), new Set(this.set));
     }
 
     isEmpty(): boolean {

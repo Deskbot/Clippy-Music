@@ -31,7 +31,7 @@ export class BarringerQueue {
 
 		this.getMaxBucketTime = getMaxBucketTime;
 		this.idToUser = new Map();
-		this.roundRobin = new RoundRobin();
+		this.roundRobin = RoundRobin.new();
 		this.userQueues = new OneToManyMap();
 	}
 
@@ -56,6 +56,8 @@ export class BarringerQueue {
 		const buckets = [] as ItemData[][];
 
 		const maxBucketTime = this.getMaxBucketTime();
+
+		const simulatedRoundRobin = this.roundRobin.clone();
 
 		// add every item to the right bucket
 		for (const queue of this.userQueues.values()) {

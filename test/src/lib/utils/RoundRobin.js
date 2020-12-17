@@ -5,7 +5,7 @@ const assert = require("assert").strict;
 
 module.exports = {
     starts_empty_and_grows() {
-        const rr = new RoundRobin();
+        const rr = RoundRobin.new();
         assert(rr.isEmpty());
 
         rr.add(1);
@@ -16,7 +16,7 @@ module.exports = {
     },
 
     one_item() {
-        const rr = new RoundRobin();
+        const rr = RoundRobin.new();
         rr.add(1);
 
         assert(rr.next() === 1);
@@ -25,7 +25,7 @@ module.exports = {
     },
 
     two_items() {
-        const rr = new RoundRobin();
+        const rr = RoundRobin.new();
         rr.add(1);
         rr.add(2);
 
@@ -38,7 +38,7 @@ module.exports = {
     },
 
     three_items() {
-        const rr = new RoundRobin();
+        const rr = RoundRobin.new();
         rr.add(1);
         rr.add(2);
         rr.add(3);
@@ -55,7 +55,7 @@ module.exports = {
     },
 
     late_entries_1() {
-        const rr = new RoundRobin();
+        const rr = RoundRobin.new();
         rr.add(1);
         rr.add(2);
 
@@ -73,7 +73,7 @@ module.exports = {
     },
 
     late_entries_2() {
-        const rr = new RoundRobin();
+        const rr = RoundRobin.new();
         rr.add(1);
         rr.add(2);
 
