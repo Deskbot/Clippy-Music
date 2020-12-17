@@ -106,22 +106,21 @@ export class BarringerQueue {
 	}
 
 	next(): ItemData | undefined {
-		if (this.roundRobin.isEmpty()) {
+		const bucket = this.getBuckets()[0];
+
+		if (bucket === undefined) {
 			return undefined;
 		}
 
-		let queue: readonly ItemData[] | undefined;
+		const item = bucket[0];
 
-		do {
-			const userId = this.roundRobin.next();
-			queue = this.userQueues.getAll(userId);
-		} while (queue === undefined || queue.length === 0);
+		if (item === undefined) {
+			return undefined;
+		}
 
-		const nextItem = queue[0];
+		this.remove(item.userId, item.id);
 
-		this.remove(nextItem.userId, nextItem.id);
-
-		return nextItem;
+		return item;
 	}
 
 	purge(uid: string) {
