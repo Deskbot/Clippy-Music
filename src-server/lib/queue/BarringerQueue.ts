@@ -3,6 +3,7 @@ import * as arrayUtils from "../utils/arrayUtils";
 import { ItemData } from "../../types/ItemData";
 import { OneToManyMap } from "../utils/OneToManyMap";
 import { RoundRobin } from "../utils/RoundRobin";
+import { Cache } from "../utils/Cache";
 
 export interface SuspendedBarringerQueue {
 
@@ -22,6 +23,8 @@ export class BarringerQueue {
 	private getMaxBucketTime: () => number;
 	private roundRobin: RoundRobin<string>;
 
+	private bucketsCache: Cache<ReadonlyArray<ReadonlyArray<ItemData>>>;
+
 	constructor(getMaxBucketTime: () => number, queueObj?: SuspendedBarringerQueue) {
 
 		// TODO
@@ -33,12 +36,15 @@ export class BarringerQueue {
 		this.idToUser = new Map();
 		this.roundRobin = RoundRobin.new();
 		this.userQueues = new OneToManyMap();
+
+		this.bucketsCache = new Cache(() => this._getBuckets());
 	}
 
 	add(item: ItemData) {
 		this.idToUser.set(item.id, item.userId);
 		this.userQueues.set(item.userId, item);
 		this.roundRobin.add(item.userId);
+		this.bucketsCache.inputsChanged();
 	}
 
 	get(cid: number): ItemData | undefined {
@@ -53,6 +59,10 @@ export class BarringerQueue {
 	}
 
 	getBuckets(): ReadonlyArray<ReadonlyArray<ItemData>> {
+		return this.bucketsCache.get();
+	}
+
+	private _getBuckets(): ReadonlyArray<ReadonlyArray<ItemData>> {
 		const buckets = [] as ItemData[][];
 
 		const maxBucketTime = this.getMaxBucketTime();
@@ -126,6 +136,8 @@ export class BarringerQueue {
 		}
 
 		this.userQueues.removeAll(uid);
+
+		this.bucketsCache.inputsChanged();
 	}
 
 	remove(uid: string, cid: number): boolean {
@@ -142,6 +154,8 @@ export class BarringerQueue {
 		if (this.userQueues.getAll(uid)?.length === 0) {
 			this.roundRobin.remove(uid);
 		}
+
+		this.bucketsCache.inputsChanged();
 
 		return true;
 	}
