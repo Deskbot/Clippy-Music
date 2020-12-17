@@ -56,20 +56,37 @@ export class BarringerQueue {
 		const buckets = [] as ItemData[][];
 
 		const maxBucketTime = this.getMaxBucketTime();
-
 		const simulatedRoundRobin = this.roundRobin.clone();
 
 		// add every item to the right bucket
 		for (const queue of this.userQueues.values()) {
+
+			// split into buckets so that no user exceeds the bucket time limit
 			const itemsToAddToBuckets = splitByDuration(queue, maxBucketTime);
+
 			for (let i = 0; i < itemsToAddToBuckets.length; i++) {
-				const bucketToAddTo = buckets[i];
+
+				// order the contents of the bucket using round-robin
 				const groupToAdd = itemsToAddToBuckets[i];
-				bucketToAddTo.push(...groupToAdd);
+				const orderedGroupToAdd = [] as ItemData[];
+
+				while (groupToAdd.length > 0) {
+					// iterate through round robin
+					const nextUser = simulatedRoundRobin.next();
+
+					// get first elem of the bucket we're adding from that this user uploaded
+					// put that into the output queue
+					// if that user has no items to queue, continue
+					const index = groupToAdd.findIndex(item => item.userId === nextUser);
+					if (index !== -1) {
+						orderedGroupToAdd.push(groupToAdd[index]);
+						groupToAdd.splice(index, 1);
+					}
+				}
+
+				buckets[i].push(...orderedGroupToAdd);
 			}
 		}
-
-		// TODO sort the items in the bucket by round robin
 
 		return buckets;
 	}
