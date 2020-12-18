@@ -6,7 +6,7 @@ const assert = require("assert").strict;
 
 module.exports = {
 	can_add_to_empty_queue: () => {
-		const q = new BarringerQueue(1000);
+		const q = new BarringerQueue(() => 1000);
 
 		const item = {
 			userId: 1,
@@ -17,31 +17,14 @@ module.exports = {
 		assert([...q.getBuckets()][0][0] === item, "The added item is in the top bucket.");
 	},
 
-	can_not_add_to_top_bucket_if_queue_is_not_empty: () => {
-		const q = new BarringerQueue(1000);
-
-		q.add({
-			userId: "2",
-			duration: 2
-		});
-
-		const item = {
-			userId: "1",
-			duration: 10,
-		};
-		q.add(item);
-
-		assert([...q.getBuckets()][1][0] === item, "The added item is in the second bucket.");
-	},
-
 	empty_queue_is_empty() {
-		const q = new BarringerQueue(1000);
+		const q = new BarringerQueue(() => 1000);
 
-		assert([...q.getBuckets()].length === 0);
+		assert(q.getBuckets().length === 0);
 	},
 
 	exceeding_a_bucket_size_adds_a_new_bucket: () => {
-		const q = new BarringerQueue(1000);
+		const q = new BarringerQueue(() => 1000);
 
 		// ensure the queue does not start empty
 		q.add({
@@ -63,14 +46,14 @@ module.exports = {
 
 		const buckets = [...q.getBuckets()];
 
-		assert(buckets[1][0] === item1,
+		assert(buckets[0][0] === item1,
 			"The added items are in different buckets.");
-		assert(buckets[2][0] === item2,
+		assert(buckets[1][0] === item2,
 			"The added items are in different buckets.");
 	},
 
 	exceeding_a_bucket_size_adds_a_new_bucket_2: () => {
-		const q = new BarringerQueue(1000);
+		const q = new BarringerQueue(() => 1000);
 
 		// ensure the queue does not start empty
 		q.add({
@@ -107,21 +90,21 @@ module.exports = {
 
 		const buckets = [...q.getBuckets()];
 
-		assert(buckets[1].includes(item1)
-			&& buckets[1].includes(item2)
-			&& buckets[1].includes(item3),
+		assert(buckets[0].includes(item1)
+			&& buckets[0].includes(item2)
+			&& buckets[0].includes(item3),
 			"The added items are in different buckets.");
-		assert(buckets[2].includes(item4),
+		assert(buckets[1].includes(item4),
 			"The added items are in different buckets.");
 	},
 
 	items_can_equal_size_of_bucket() {
-		const q = new BarringerQueue(1000);
+		const q = new BarringerQueue(() => 1000);
 
 		const item = {
 			id: 1,
 			userId: "1",
-			duraiton: 1000,
+			duration: 1000,
 		};
 
 		q.add(item);
@@ -130,7 +113,7 @@ module.exports = {
 	},
 
 	purge: () => {
-		const q = new BarringerQueue(1000);
+		const q = new BarringerQueue(() => 1000);
 
 		const item1a = {
 			id: 1,
@@ -183,7 +166,7 @@ module.exports = {
 	},
 
 	remove: () => {
-		const q = new BarringerQueue(1000);
+		const q = new BarringerQueue(() => 1000);
 
 		const items = [{
 			id: 1,
@@ -221,7 +204,7 @@ module.exports = {
 	},
 
 	removing_an_item_does_not_leave_an_empty_bucket() {
-		const q = new BarringerQueue(1000);
+		const q = new BarringerQueue(() => 1000);
 
 		// top bucket
 		q.add({
