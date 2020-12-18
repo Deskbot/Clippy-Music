@@ -56,7 +56,7 @@ export class DownloadTooLargeError extends DeferredContentError {
 export class DurationFindingError extends Error {}
 
 export class FileUploadError extends Error {
-	public files: formidable.File[];
+	public files: formidable.File[] | undefined;
 
 	constructor(message: string, files: formidable.File[]) {
 		super(message);
