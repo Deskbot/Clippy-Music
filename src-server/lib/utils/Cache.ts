@@ -5,7 +5,7 @@ export class Cache<T> {
 
     constructor(func: () => T) {
         this.func = func;
-        this.needToRecompute = false;
+        this.needToRecompute = true;
     }
 
     inputsChanged() {
