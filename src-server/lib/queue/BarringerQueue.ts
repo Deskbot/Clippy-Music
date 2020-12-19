@@ -4,6 +4,7 @@ import { ItemData } from "../../types/ItemData";
 import { OneToManyMap } from "../utils/OneToManyMap";
 import { RoundRobin } from "../utils/RoundRobin";
 import { Cache } from "../utils/Cache";
+import { all } from "q";
 
 export interface SuspendedBarringerQueue {
 
@@ -70,9 +71,12 @@ export class BarringerQueue {
 
 		// add every item to the right bucket
 		for (const queue of this.userQueues.values()) {
+			console.log("\nqueue", queue);
 
 			// split into buckets so that no user exceeds the bucket time limit
 			const itemsToAddToBuckets = splitByDuration(queue, maxBucketTime);
+
+			console.log("itemsToAddToBuckets", itemsToAddToBuckets);
 
 			for (let i = 0; i < itemsToAddToBuckets.length; i++) {
 
@@ -81,6 +85,9 @@ export class BarringerQueue {
 				const orderedGroupToAdd = [] as ItemData[];
 
 				while (groupToAdd.length > 0) {
+					console.log("groupToAdd", groupToAdd);
+					console.log("orderedGroupToAdd", groupToAdd);
+
 					// iterate through round robin
 					const nextUser = simulatedRoundRobin.next();
 
@@ -94,7 +101,14 @@ export class BarringerQueue {
 					}
 				}
 
-				buckets[i].push(...orderedGroupToAdd);
+				console.log("groupToAdd", groupToAdd);
+				console.log("orderedGroupToAdd", groupToAdd);
+
+				if (buckets[i] === undefined) {
+					buckets[i] = orderedGroupToAdd;
+				} else {
+					buckets[i].push(...orderedGroupToAdd);
+				}
 			}
 		}
 
@@ -162,21 +176,17 @@ export class BarringerQueue {
 
 function splitByDuration(items: ReadonlyArray<ItemData>, bucketSize: number): ItemData[][] {
 	const allItems = [] as ItemData[][];
-	let nextBucket = [] as ItemData[];
-	let timeInNextBucket = 0;
+	let timeInNextBucket = Infinity;
+	let newTimeInNextBucket: number;
 
 	for (const item of items) {
-		const newTimeInNextBucket = timeInNextBucket + item.duration;
+		newTimeInNextBucket = timeInNextBucket + item.duration;
 
 		if (newTimeInNextBucket > bucketSize) {
-			// this bucket is finished
-			allItems.push(nextBucket);
-
-			// reset fields
-			nextBucket = [];
+			allItems.push([item]);
 			timeInNextBucket = 0;
 		} else {
-			nextBucket.push(item);
+			allItems[allItems.length - 1].push(item);
 			timeInNextBucket = newTimeInNextBucket;
 		}
 	}

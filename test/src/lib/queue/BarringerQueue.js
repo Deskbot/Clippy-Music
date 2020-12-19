@@ -14,7 +14,9 @@ module.exports = {
 		};
 		q.add(item);
 
-		assert([...q.getBuckets()][0][0] === item, "The added item is in the top bucket.");
+		console.log(q.getBuckets());
+
+		assert(q.getBuckets()[0][0] === item, "The added item is in the top bucket.");
 	},
 
 	empty_queue_is_empty() {
