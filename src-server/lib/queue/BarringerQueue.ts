@@ -134,6 +134,8 @@ export class BarringerQueue {
 
 		this.remove(item.userId, item.id);
 
+		this.roundRobin.next();
+
 		return item;
 	}
 
