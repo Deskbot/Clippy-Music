@@ -29,26 +29,29 @@ module.exports = {
 		const q = new BarringerQueue(() => 1000);
 
 		// ensure the queue does not start empty
-		q.add({
+
+		const item0 = {
 			userId: "someone",
 			duration: 100,
-		});
-
+		};
 		const item1 = {
-			userId: "1",
+			userId: "me",
 			duration: 900
 		};
 		const item2 = {
-			userId: "1",
+			userId: "me",
 			duration: 900
 		};
 
+		q.add(item0);
 		q.add(item1);
 		q.add(item2);
 
-		const buckets = [...q.getBuckets()];
+		const buckets = q.getBuckets();
 
-		assert(buckets[0][0] === item1,
+		assert(buckets[0][0] === item0,
+			"Sanity check.");
+		assert(buckets[0][1] === item1,
 			"The added items are in different buckets.");
 		assert(buckets[1][0] === item2,
 			"The added items are in different buckets.");
