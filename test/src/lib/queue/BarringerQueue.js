@@ -188,10 +188,9 @@ module.exports = {
 			q.add(item);
 		}
 
-		q.remove(4);
+		assert(q.remove("1", 4));
 
-		const allItems = [...q.getBuckets()]
-			.reduce((allItems, bucket) => allItems.concat(bucket));
+		const allItems = q.getBuckets().flat();
 
 		assert(!allItems.find(item => item.id === 4),
 			"The removed item is not in the queue."
