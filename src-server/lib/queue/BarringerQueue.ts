@@ -71,12 +71,9 @@ export class BarringerQueue {
 
 		// add every item to the right bucket
 		for (const queue of this.userQueues.values()) {
-			console.log("\nqueue", queue);
 
 			// split into buckets so that no user exceeds the bucket time limit
 			const itemsToAddToBuckets = splitByDuration(queue, maxBucketTime);
-
-			console.log("itemsToAddToBuckets", itemsToAddToBuckets);
 
 			for (let i = 0; i < itemsToAddToBuckets.length; i++) {
 
@@ -85,9 +82,6 @@ export class BarringerQueue {
 				const orderedGroupToAdd = [] as ItemData[];
 
 				while (groupToAdd.length > 0) {
-					console.log("groupToAdd", groupToAdd);
-					console.log("orderedGroupToAdd", groupToAdd);
-
 					// iterate through round robin
 					const nextUser = simulatedRoundRobin.next();
 
@@ -100,9 +94,6 @@ export class BarringerQueue {
 						groupToAdd.splice(index, 1);
 					}
 				}
-
-				console.log("groupToAdd", groupToAdd);
-				console.log("orderedGroupToAdd", groupToAdd);
 
 				if (buckets[i] === undefined) {
 					buckets[i] = orderedGroupToAdd;
