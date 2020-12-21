@@ -88,11 +88,11 @@ module.exports = {
 
 		const buckets = q.getBuckets();
 
-		assert(buckets[0].includes(item1)
-			&& buckets[0].includes(item2)
-			&& buckets[0].includes(item3),
+		assert(buckets[0][0] === item1
+			&& buckets[0][1] === item2
+			&& buckets[0][2] === item3,
 			"The added items are in different buckets.");
-		assert(buckets[1].includes(item4),
+		assert(buckets[1][0] === item4,
 			"The added items are in different buckets.");
 	},
 
