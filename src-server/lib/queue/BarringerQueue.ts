@@ -177,8 +177,12 @@ export class BarringerQueue {
 }
 
 function splitByDuration(items: ReadonlyArray<ItemData>, bucketSize: number): ItemData[][] {
-	const allItems = [] as ItemData[][];
-	let timeInNextBucket = Infinity;
+	if (items.length === 0) {
+		return [];
+	}
+
+	const allItems = [[]] as ItemData[][];
+	let timeInNextBucket = 0;
 	let newTimeInNextBucket: number;
 
 	for (const item of items) {
@@ -188,6 +192,7 @@ function splitByDuration(items: ReadonlyArray<ItemData>, bucketSize: number): It
 			allItems.push([item]);
 			timeInNextBucket = 0;
 		} else {
+			// always valid because the array is never empty
 			allItems[allItems.length - 1].push(item);
 			timeInNextBucket = newTimeInNextBucket;
 		}

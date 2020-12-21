@@ -57,13 +57,6 @@ module.exports = {
 	exceeding_a_bucket_size_adds_a_new_bucket_2: () => {
 		const q = new BarringerQueue(() => 1000);
 
-		// ensure the queue does not start empty
-		q.add({
-			id: 1,
-			userId: "someone",
-			duration: 100,
-		});
-
 		const item1 = {
 			id: 2,
 			userId: "1",
@@ -90,7 +83,7 @@ module.exports = {
 		q.add(item3);
 		q.add(item4);
 
-		const buckets = [...q.getBuckets()];
+		const buckets = q.getBuckets();
 
 		assert(buckets[0].includes(item1)
 			&& buckets[0].includes(item2)
