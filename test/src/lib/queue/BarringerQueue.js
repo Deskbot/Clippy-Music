@@ -9,7 +9,7 @@ module.exports = {
 		const q = new BarringerQueue(() => 1000);
 
 		const item = {
-			userId: 1,
+			userId: "1",
 			duration: 10,
 		};
 		q.add(item);
@@ -18,7 +18,7 @@ module.exports = {
 		assert(q.getBuckets()[0][0] === item, "The result is the same — caching has returned the same result.");
 
 		const item2 = {
-			userId: 2,
+			userId: "2",
 			duration: 10,
 		};
 		q.add(item2);
@@ -26,7 +26,7 @@ module.exports = {
 		assert(q.getBuckets()[0][1] === item2, "The bucket was updated — the cache has been updated.");
 
 		const item3 = {
-			userId: 3,
+			userId: "3",
 			duration: 10,
 		};
 		q.add(item3);
@@ -39,7 +39,7 @@ module.exports = {
 		const q = new BarringerQueue(() => 1000);
 
 		const item = {
-			userId: 1,
+			userId: "1",
 			duration: 10,
 		};
 		q.add(item);
