@@ -5,6 +5,36 @@ const { BarringerQueue } = require(baseDir + "lib/queue/BarringerQueue.js");
 const assert = require("assert").strict;
 
 module.exports = {
+	buckets_caching() {
+		const q = new BarringerQueue(() => 1000);
+
+		const item = {
+			userId: 1,
+			duration: 10,
+		};
+		q.add(item);
+
+		assert(q.getBuckets()[0][0] === item);
+		assert(q.getBuckets()[0][0] === item, "The result is the same — caching has returned the same result.");
+
+		const item2 = {
+			userId: 2,
+			duration: 10,
+		};
+		q.add(item2);
+		assert(q.getBuckets()[0][0] === item);
+		assert(q.getBuckets()[0][1] === item2, "The bucket was updated — the cache has been updated.");
+
+		const item3 = {
+			userId: 3,
+			duration: 10,
+		};
+		q.add(item3);
+		assert(q.getBuckets()[0][0] === item);
+		assert(q.getBuckets()[0][1] === item2);
+		assert(q.getBuckets()[0][2] === item3, "The updated cache got updated again.");
+	},
+
 	can_add_to_empty_queue() {
 		const q = new BarringerQueue(() => 1000);
 
