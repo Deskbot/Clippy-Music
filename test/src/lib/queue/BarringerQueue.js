@@ -5,7 +5,7 @@ const { BarringerQueue } = require(baseDir + "lib/queue/BarringerQueue.js");
 const assert = require("assert").strict;
 
 module.exports = {
-	can_add_to_empty_queue: () => {
+	can_add_to_empty_queue() {
 		const q = new BarringerQueue(() => 1000);
 
 		const item = {
@@ -23,7 +23,7 @@ module.exports = {
 		assert(q.getBuckets().length === 0);
 	},
 
-	exceeding_a_bucket_size_adds_a_new_bucket: () => {
+	exceeding_a_bucket_size_adds_a_new_bucket() {
 		const q = new BarringerQueue(() => 1000);
 
 		// ensure the queue does not start empty
@@ -55,7 +55,7 @@ module.exports = {
 			"The added items are in different buckets.");
 	},
 
-	exceeding_a_bucket_size_adds_a_new_bucket_2: () => {
+	exceeding_a_bucket_size_adds_a_new_bucket_2() {
 		const q = new BarringerQueue(() => 1000);
 
 		const item1 = {
@@ -108,7 +108,7 @@ module.exports = {
 		assert([...q.getBuckets()][0][0] == item, "The item was successfully added.");
 	},
 
-	purge: () => {
+	purge() {
 		const q = new BarringerQueue(() => 1000);
 
 		const item1a = {
@@ -161,7 +161,7 @@ module.exports = {
 		}
 	},
 
-	remove: () => {
+	remove() {
 		const q = new BarringerQueue(() => 1000);
 
 		const items = [{
