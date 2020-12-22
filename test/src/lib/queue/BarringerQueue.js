@@ -124,6 +124,49 @@ module.exports = {
 			"The added items are in different buckets.");
 	},
 
+	get_user_items() {
+		const q = new BarringerQueue(() => 1000);
+
+		const item1 = {
+			id: 1,
+			userId: "1",
+			duration: 500,
+		};
+		const item2 = {
+			id: 2,
+			userId: "2",
+			duration: 500,
+		};
+		const item11 = {
+			id: 3,
+			userId: "1",
+			duration: 500,
+		};
+		const item22 = {
+			id: 4,
+			userId: "2",
+			duration: 1000,
+		};
+		const item111 = {
+			id: 5,
+			userId: "1",
+			duration: 1000,
+		};
+
+		q.add(item1);
+		q.add(item2);
+		q.add(item11);
+		q.add(item22);
+		q.add(item111);
+
+		const userItems = q.getUserItems("1");
+		assert(userItems.includes(item1));
+		assert(userItems.includes(item11));
+		assert(userItems.includes(item111));
+		assert(!userItems.includes(item2));
+		assert(!userItems.includes(item22));
+	},
+
 	items_can_equal_size_of_bucket() {
 		const q = new BarringerQueue(() => 1000);
 
