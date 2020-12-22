@@ -43,6 +43,11 @@ export class RoundRobin<T> {
     }
 
     remove(value: T): boolean {
-        return arrUtils.removeFirst(this.list, elem => elem === value);
+        const removed = this.set.delete(value);
+        if (removed) {
+            arrUtils.removeFirst(this.list, elem => elem === value);
+        }
+
+        return removed;
     }
 }

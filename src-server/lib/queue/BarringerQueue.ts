@@ -122,9 +122,10 @@ export class BarringerQueue {
 			return undefined;
 		}
 
-		this.remove(item.userId, item.id);
-
+		// Increment the round robin before removing a user
+		// because removing first could empty the round robin.
 		this.roundRobin.next();
+		this.remove(item.userId, item.id);
 
 		return item;
 	}
@@ -156,7 +157,8 @@ export class BarringerQueue {
 
 		// if the user removes everything and adds something later,
 		// they should be added in at the back
-		if (this.userQueues.getAll(uid)?.length === 0) {
+		const userItems = this.userQueues.getAll(uid);
+		if (userItems === undefined || userItems.length === 0) {
 			this.roundRobin.remove(uid);
 		}
 
