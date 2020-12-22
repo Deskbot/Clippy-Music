@@ -300,4 +300,81 @@ module.exports = {
 			assert(bucket.length !== 0, "Each bucket has at least one item.")
 		}
 	},
+
+	round_robin_basic() {
+		const q = new BarringerQueue(() => 1000);
+
+		const item1 = {
+			id: 1,
+			userId: "1",
+			duration: 500,
+		};
+		const item2 = {
+			id: 2,
+			userId: "2",
+			duration: 500,
+		};
+		const item3 = {
+			id: 3,
+			userId: "3",
+			duration: 500,
+		};
+
+		q.add(item1);
+		q.add(item2);
+		q.add(item3);
+
+		assert(q.next() === item1);
+		assert(q.next() === item2);
+		assert(q.next() === item3);
+	},
+
+	round_robin_order_in_a_single_bucket_is_preserved() {
+		const q = new BarringerQueue(() => 1000);
+
+		const item1 = {
+			id: 1,
+			userId: "1",
+			duration: 500,
+		};
+		const item2 = {
+			id: 2,
+			userId: "2",
+			duration: 500,
+		};
+		const item3 = {
+			id: 3,
+			userId: "3",
+			duration: 500,
+		};
+		const item33 = {
+			id: 4,
+			userId: "3",
+			duration: 500,
+		};
+		const item22 = {
+			id: 5,
+			userId: "2",
+			duration: 500,
+		};
+		const item11 = {
+			id: 6,
+			userId: "1",
+			duration: 500,
+		};
+
+		q.add(item1);
+		q.add(item2);
+		q.add(item3);
+		q.add(item33);
+		q.add(item22);
+		q.add(item11);
+
+		assert(q.next() === item1);
+		assert(q.next() === item2);
+		assert(q.next() === item3);
+		assert(q.next() === item11);
+		assert(q.next() === item22);
+		assert(q.next() === item33);
+	},
 }
