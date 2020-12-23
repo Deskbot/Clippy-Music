@@ -177,6 +177,7 @@ quelaag.addEndpoint({
 				...await extractFormData(form, fields, files),
 				id: contentId,
 				userId: userId,
+				timeUploaded: new Date().getTime(),
 			};
 
 			// ignore end time if it would make the play time less than 1 second

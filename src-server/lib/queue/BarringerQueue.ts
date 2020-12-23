@@ -18,11 +18,42 @@ export function isSuspendedBarringerQueue(obj: any): obj is SuspendedBarringerQu
 		);
 }
 
+class Bucket {
+	private roundRobin = new RoundRobin();
+	private items = [] as ItemData[];
+
+	add(item: ItemData) {
+		this.roundRobin.add(item.userId);
+		this.items.push(item);
+	}
+
+	/**
+	 * This destroys the bucket.
+	 */
+	toArray() {
+		// order everything by first uploaded first
+		this.items.sort((item1, item2) => item1.timeUploaded - item2.timeUploaded);
+
+		const result = [] as ItemData[];
+
+		while (this.items.length > 0) {
+			const nextUser = this.roundRobin.next();
+			const index = this.items.findIndex(item => item.userId === nextUser);
+
+			if (index === -1) continue;
+
+			const nextItem = this.items.splice(index, 1)[0];
+			result.push(nextItem);
+		}
+
+		return result;
+	}
+}
+
 export class BarringerQueue {
 	private userQueues: OneToManyMap<string, ItemData>;
 	private idToUser: Map<number, string>;
 	private getMaxBucketTime: () => number;
-	private roundRobin: RoundRobin<string>;
 
 	private bucketsCache: Cache<ReadonlyArray<ReadonlyArray<ItemData>>>;
 
@@ -35,7 +66,6 @@ export class BarringerQueue {
 
 		this.getMaxBucketTime = getMaxBucketTime;
 		this.idToUser = new Map();
-		this.roundRobin = RoundRobin.new();
 		this.userQueues = new OneToManyMap();
 
 		this.bucketsCache = new Cache(() => this._getBuckets());
@@ -44,7 +74,6 @@ export class BarringerQueue {
 	add(item: ItemData) {
 		this.idToUser.set(item.id, item.userId);
 		this.userQueues.set(item.userId, item);
-		this.roundRobin.add(item.userId);
 		this.bucketsCache.inputsChanged();
 	}
 
@@ -64,57 +93,37 @@ export class BarringerQueue {
 	}
 
 	private _getBuckets(): ReadonlyArray<ReadonlyArray<ItemData>> {
-		const buckets = [] as ItemData[][];
-
 		const maxBucketTime = this.getMaxBucketTime();
-		const simulatedRoundRobin = this.roundRobin.clone();
 
-		// add every item to the right bucket
-
-		// split into buckets so that no user exceeds the bucket time limit
-		const userBuckets = iterUtils.mapToObject(
+		// create:
+		// iterator for each user's list of their bucket content
+		// represented as IterableIterator<ItemData[][]>
+		const eachUsersBuckets = iterUtils.map(
 			this.userQueues.keys(),
-			userId => splitByDuration(this.userQueues.getAll(userId)!, maxBucketTime)
+			userId => splitByDuration(this.userQueues.getAll(userId)!, maxBucketTime),
 		);
 
-		// order the contents of the bucket using round-robin
+		// merge into a single list of buckets, not separated by user
+		const allBuckets = [] as Bucket[];
 
-		const eventualBucketsLength = Math.max(...Object.values(userBuckets)
-			.map(bucket => bucket.length));
+		for (const aUsersBuckets of eachUsersBuckets) {
+			// put items from this user's buckets into the shared buckets
+			for (let i = 0; i < aUsersBuckets.length; i++) {
+				// ensure there is a shared bucket to add to
+				if (allBuckets[i] === undefined) {
+					allBuckets[i] = new Bucket();
+				}
 
-		while (buckets.length < eventualBucketsLength) {
-			const bucketNum = buckets.length;
-			const nextBucket = [] as ItemData[];
+				const targetBucket = allBuckets[i];
 
-			// get the nth bucket for each user
-			// figure out how many things need to go into the new bucket
-			const eventualNewBucketLength =
-				Object.keys(userBuckets)
-					.map(userId => {
-						const bucket = userBuckets[userId][bucketNum];
-						return bucket ? bucket.length : 0;
-					})
-					.reduce((acc, next) => acc + next, 0);
-
-			// loop through round robin and append items
-			// increment when added
-			// break when reached target number of adds
-			while (nextBucket.length < eventualNewBucketLength) {
-				const nextUser = simulatedRoundRobin.next();
-				const userBucket = userBuckets[nextUser][bucketNum];
-
-				// only users with uploads are in the round robin
-				// but their items in this temporary bucket are being removed as the output buckets are built
-				if (userBucket !== undefined && userBucket.length !== 0) {
-					nextBucket.push(userBucket[0]);
-					userBucket.splice(0, 1);
+				for (const item of aUsersBuckets[i]) {
+					targetBucket.add(item);
 				}
 			}
-
-			buckets.push(nextBucket);
 		}
 
-		return buckets;
+		// all sorting of the items in each bucket is done here
+		return allBuckets.map(bucket => bucket.toArray());
 	}
 
 	getUserItems(uid: string): ReadonlyArray<ItemData> {
@@ -134,9 +143,6 @@ export class BarringerQueue {
 			return undefined;
 		}
 
-		// Increment the round robin before removing a user
-		// because removing first could empty the round robin.
-		this.roundRobin.next();
 		this.remove(item.userId, item.id);
 
 		return item;
@@ -154,7 +160,6 @@ export class BarringerQueue {
 		}
 
 		this.userQueues.removeAll(uid);
-		this.roundRobin.remove(uid);
 
 		this.bucketsCache.inputsChanged();
 	}
@@ -167,13 +172,6 @@ export class BarringerQueue {
 		}
 
 		this.idToUser.delete(cid);
-
-		// if the user removes everything and adds something later,
-		// they should be added in at the back
-		const userItems = this.userQueues.getAll(uid);
-		if (userItems === undefined || userItems.length === 0) {
-			this.roundRobin.remove(uid);
-		}
 
 		this.bucketsCache.inputsChanged();
 

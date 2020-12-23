@@ -49,6 +49,7 @@ export interface NoOverlay {
 
 export interface UploadDataWithId extends UploadData {
 	id: number;
+	timeUploaded: number;
 	userId: string;
 }
 

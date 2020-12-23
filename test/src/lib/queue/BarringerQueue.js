@@ -370,6 +370,8 @@ module.exports = {
 		q.add(item22);
 		q.add(item11);
 
+		console.log(q.getBuckets());
+
 		assert.strictEqual(q.next(), item1);
 		assert.strictEqual(q.next(), item2);
 		assert.strictEqual(q.next(), item3);

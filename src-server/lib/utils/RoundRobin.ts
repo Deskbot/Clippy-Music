@@ -4,13 +4,9 @@ export class RoundRobin<T> {
     private list: T[];
     private set: Set<T>;
 
-    static new<T>(): RoundRobin<T> {
-        return new RoundRobin();
-    }
-
-    private constructor(list?: T[], set?: Set<T>) {
-        this.list = list ?? [];
-        this.set = set ?? new Set();
+    constructor() {
+        this.list = [];
+        this.set = new Set();
     }
 
     add(value: T) {
@@ -21,10 +17,6 @@ export class RoundRobin<T> {
         if (afterSize > beforeSize) {
             this.list.push(value);
         }
-    }
-
-    clone() {
-        return new RoundRobin(this.list.slice(), new Set(this.set));
     }
 
     isEmpty(): boolean {

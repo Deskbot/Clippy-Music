@@ -9,6 +9,7 @@ export interface ItemData {
 	startTime: number | null;
 	endTime: number | null;
 	timePlayedAt?: number;
+	timeUploaded: number;
 };
 
 export type CompleteMusic = {
@@ -32,7 +33,7 @@ export type CompleteMusic = {
 	title: string,
 	uniqueId: string;
 	url: string;
-}
+};
 
 export interface StreamedUrlOverlay extends UrlOverlay {
 	hash: undefined;
