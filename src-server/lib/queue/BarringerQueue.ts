@@ -1,4 +1,5 @@
 import * as arrayUtils from "../utils/arrayUtils";
+import * as iterUtils from "../utils/iterUtils";
 
 import { ItemData } from "../../types/ItemData";
 import { OneToManyMap } from "../utils/OneToManyMap";
@@ -69,37 +70,48 @@ export class BarringerQueue {
 		const simulatedRoundRobin = this.roundRobin.clone();
 
 		// add every item to the right bucket
-		for (const queue of this.userQueues.values()) {
 
-			// split into buckets so that no user exceeds the bucket time limit
-			const itemsToAddToBuckets = splitByDuration(queue, maxBucketTime);
+		// split into buckets so that no user exceeds the bucket time limit
+		const userBuckets = iterUtils.mapToObject(
+			this.userQueues.keys(),
+			userId => splitByDuration(this.userQueues.getAll(userId)!, maxBucketTime)
+		);
 
-			for (let i = 0; i < itemsToAddToBuckets.length; i++) {
+		// order the contents of the bucket using round-robin
 
-				// order the contents of the bucket using round-robin
-				const groupToAdd = itemsToAddToBuckets[i];
-				const orderedGroupToAdd = [] as ItemData[];
+		const eventualBucketsLength = Math.max(...Object.values(userBuckets)
+			.map(bucket => bucket.length));
 
-				while (groupToAdd.length > 0) {
-					// iterate through round robin
-					const nextUser = simulatedRoundRobin.next();
+		while (buckets.length < eventualBucketsLength) {
+			const bucketNum = buckets.length;
+			const nextBucket = [] as ItemData[];
 
-					// get first elem of the bucket we're adding from that this user uploaded
-					// put that into the output queue
-					// if that user has no items to queue, continue
-					const index = groupToAdd.findIndex(item => item.userId === nextUser);
-					if (index !== -1) {
-						orderedGroupToAdd.push(groupToAdd[index]);
-						groupToAdd.splice(index, 1);
-					}
-				}
+			// get the nth bucket for each user
+			// figure out how many things need to go into the new bucket
+			const eventualNewBucketLength =
+				Object.keys(userBuckets)
+					.map(userId => {
+						const bucket = userBuckets[userId][bucketNum];
+						return bucket ? bucket.length : 0;
+					})
+					.reduce((acc, next) => acc + next, 0);
 
-				if (buckets[i] === undefined) {
-					buckets[i] = orderedGroupToAdd;
-				} else {
-					buckets[i].push(...orderedGroupToAdd);
+			// loop through round robin and append items
+			// increment when added
+			// break when reached target number of adds
+			while (nextBucket.length < eventualNewBucketLength) {
+				const nextUser = simulatedRoundRobin.next();
+				const userBucket = userBuckets[nextUser][bucketNum];
+
+				// only users with uploads are in the round robin
+				// but their items in this temporary bucket are being removed as the output buckets are built
+				if (userBucket !== undefined && userBucket.length !== 0) {
+					nextBucket.push(userBucket[0]);
+					userBucket.splice(0, 1);
 				}
 			}
+
+			buckets.push(nextBucket);
 		}
 
 		return buckets;
@@ -142,6 +154,7 @@ export class BarringerQueue {
 		}
 
 		this.userQueues.removeAll(uid);
+		this.roundRobin.remove(uid);
 
 		this.bucketsCache.inputsChanged();
 	}

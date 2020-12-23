@@ -13,6 +13,10 @@ export class OneToManyMap<K,V> {
         return this.map.get(k);
     }
 
+    keys(): IterableIterator<K> {
+        return this.map.keys();
+    }
+
     removeAll(k: K) {
         this.map.delete(k);
     }

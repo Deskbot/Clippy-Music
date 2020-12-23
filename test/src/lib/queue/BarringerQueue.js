@@ -217,7 +217,7 @@ module.exports = {
 
 		q.purge("1");
 
-		const allItems = [...q.getBuckets()]
+		const allItems = q.getBuckets()
 			.reduce((allItems, bucket) => allItems.concat(bucket));
 
 		const failMessage = "The purged user's items are not in the queue.";
@@ -329,7 +329,7 @@ module.exports = {
 		assert(q.next() === item3);
 	},
 
-	round_robin_order_in_a_single_bucket_is_preserved() {
+	round_robin_order_in_a_single_bucket() {
 		const q = new BarringerQueue(() => 1000);
 
 		const item1 = {
@@ -370,11 +370,11 @@ module.exports = {
 		q.add(item22);
 		q.add(item11);
 
-		assert(q.next() === item1);
-		assert(q.next() === item2);
-		assert(q.next() === item3);
-		assert(q.next() === item11);
-		assert(q.next() === item22);
-		assert(q.next() === item33);
+		assert.strictEqual(q.next(), item1);
+		assert.strictEqual(q.next(), item2);
+		assert.strictEqual(q.next(), item3);
+		assert.strictEqual(q.next(), item11);
+		assert.strictEqual(q.next(), item22);
+		assert.strictEqual(q.next(), item33);
 	},
 }
