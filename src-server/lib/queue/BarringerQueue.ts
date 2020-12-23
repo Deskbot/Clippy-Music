@@ -1,5 +1,4 @@
 import * as arrayUtils from "../utils/arrayUtils";
-import * as iterUtils from "../utils/iterUtils";
 
 import { ItemData } from "../../types/ItemData";
 import { OneToManyMap } from "../utils/OneToManyMap";
@@ -95,20 +94,14 @@ export class BarringerQueue {
 	private _getBuckets(): ReadonlyArray<ReadonlyArray<ItemData>> {
 		const maxBucketTime = this.getMaxBucketTime();
 
-		// create:
-		// iterator for each user's list of their bucket content
-		// represented as IterableIterator<ItemData[][]>
-		const eachUsersBuckets = iterUtils.map(
-			this.userQueues.keys(),
-			userId => splitByDuration(this.userQueues.getAll(userId)!, maxBucketTime),
-		);
-
 		// merge into a single list of buckets, not separated by user
 		const allBuckets = [] as Bucket[];
 
-		for (const aUsersBuckets of eachUsersBuckets) {
+		for (const userId of this.userQueues.keys()) {
+			const userBuckets = splitByDuration(this.userQueues.getAll(userId)!, maxBucketTime);
+
 			// put items from this user's buckets into the shared buckets
-			for (let i = 0; i < aUsersBuckets.length; i++) {
+			for (let i = 0; i < userBuckets.length; i++) {
 				// ensure there is a shared bucket to add to
 				if (allBuckets[i] === undefined) {
 					allBuckets[i] = new Bucket();
@@ -116,7 +109,7 @@ export class BarringerQueue {
 
 				const targetBucket = allBuckets[i];
 
-				for (const item of aUsersBuckets[i]) {
+				for (const item of userBuckets[i]) {
 					targetBucket.add(item);
 				}
 			}
