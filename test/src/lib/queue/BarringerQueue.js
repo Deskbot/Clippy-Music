@@ -385,4 +385,59 @@ module.exports = {
 		assert.strictEqual(q.next(), item22);
 		assert.strictEqual(q.next(), item33);
 	},
+
+	round_robin_order_is_tied_to_buckets_separately() {
+		const q = new BarringerQueue(() => 500);
+
+		const item1 = {
+			id: 1,
+			userId: "1",
+			duration: 500,
+			timeUploaded: 0,
+		};
+		const item2 = {
+			id: 2,
+			userId: "2",
+			duration: 500,
+			timeUploaded: 1,
+		};
+		const item3 = {
+			id: 3,
+			userId: "3",
+			duration: 500,
+			timeUploaded: 2,
+		};
+		const item33 = {
+			id: 4,
+			userId: "3",
+			duration: 500,
+			timeUploaded: 3,
+		};
+		const item22 = {
+			id: 5,
+			userId: "2",
+			duration: 500,
+			timeUploaded: 4,
+		};
+		const item11 = {
+			id: 6,
+			userId: "1",
+			duration: 500,
+			timeUploaded: 5,
+		};
+
+		q.add(item1);
+		q.add(item2);
+		q.add(item3);
+		q.add(item33);
+		q.add(item22);
+		q.add(item11);
+
+		assert.strictEqual(q.next(), item1);
+		assert.strictEqual(q.next(), item2);
+		assert.strictEqual(q.next(), item3);
+		assert.strictEqual(q.next(), item33);
+		assert.strictEqual(q.next(), item22);
+		assert.strictEqual(q.next(), item11);
+	},
 }
