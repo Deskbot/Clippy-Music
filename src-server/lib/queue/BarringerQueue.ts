@@ -34,6 +34,11 @@ class Bucket {
 		return this.items.length === 0;
 	}
 
+	next(): ItemData | undefined {
+		this.roundRobin.next();
+		return this.items.splice(0, 1)[0];
+	}
+
 	removeIf(predicate: (item: ItemData) => boolean): boolean {
 		const index = this.items.findIndex(predicate);
 
@@ -109,7 +114,7 @@ export class BarringerQueue {
 
 		let targetBucket: Bucket | undefined;
 		for (const bucket of this.buckets) {
-			if (bucket.userTime(item.userId) + item.duration < maxTime) {
+			if (bucket.userTime(item.userId) + item.duration <= maxTime) {
 				// the bucket won't exceed the max duration if the new item is added
 				targetBucket = bucket;
 				break;
@@ -144,16 +149,19 @@ export class BarringerQueue {
 	}
 
 	next(): ItemData | undefined {
-		const bucket = this.getBuckets()[0];
-
-		if (bucket === undefined) {
+		if (this.buckets.length === 0) {
 			return undefined;
 		}
 
-		const item = bucket[0];
+		const bucket = this.buckets[0];
+		const item = bucket.next();
 
 		if (item === undefined) {
 			return undefined;
+		}
+
+		if (bucket.isEmpty()) {
+			this.buckets.splice(0, 1);
 		}
 
 		this.remove(item.userId, item.id);
