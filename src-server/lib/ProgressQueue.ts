@@ -12,7 +12,7 @@ import { EventEmitter } from "events";
 import * as opt from "../options";
 import { QuickValuesMap } from "./utils/QuickValuesMap";
 import { anyTrue } from "./utils/arrayUtils";
-import { TypedEmitter } from "./utils/TypedEmitter";
+import { TypedEmitter } from "../types/TypedEmitter";
 
 /**
  * Represents a unit of work to be done
@@ -127,7 +127,7 @@ export class ProgressQueue extends (EventEmitter as TypedEmitter<ProgressQueueEv
 		[userId: string]: QuickValuesMap<number, PublicProgressItem> | undefined // number is contentId
 	};
 	private progressTrackers: {
-		[userId: string]: QuickValuesMap<number, ProgressTracker> | undefined // number is contentId
+		[userId: string]: Map<number, ProgressTracker> | undefined // number is contentId
 	};
 	private totalContents: number;
 	private transmitIntervalId: NodeJS.Timeout | undefined;
@@ -238,7 +238,7 @@ export class ProgressQueue extends (EventEmitter as TypedEmitter<ProgressQueueEv
 
 	private setTracker(userId: string, contentId: number, tracker: ProgressTracker) {
 		if (!this.progressTrackers[userId]) {
-			this.progressTrackers[userId] = new QuickValuesMap();
+			this.progressTrackers[userId] = new Map();
 		}
 
 		this.progressTrackers[userId]!.set(contentId, tracker);

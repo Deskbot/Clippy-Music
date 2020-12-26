@@ -1,4 +1,4 @@
-import * as arrUtils from "../../lib/utils/arrayUtils";
+import * as arrUtils from "../utils/arrayUtils";
 
 export class RoundRobin<T> {
     private list: T[];

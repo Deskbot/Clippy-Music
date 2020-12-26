@@ -22,7 +22,7 @@ import { BarringerQueue, isSuspendedBarringerQueue } from "./queue/BarringerQueu
 import { PublicItemData } from "../types/PublicItemData";
 import { canDownloadOverlayFromRawUrl, downloadOverlayFromRawUrl } from "./rawUrlDownload";
 import { startVideoOverlay, startImageOverlay, startMusic, doWhenMusicPlays as doWhenMusicStarts } from "./playMedia";
-import { TypedEmitter } from "./utils/TypedEmitter";
+import { TypedEmitter } from "../types/TypedEmitter";
 import { UrlMusicData, getYtDlMusicInfo } from "./ytDlInterface";
 
 export interface SuspendedContentManager {

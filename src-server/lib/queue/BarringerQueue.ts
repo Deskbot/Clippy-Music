@@ -2,7 +2,7 @@ import * as arrayUtils from "../utils/arrayUtils";
 
 import { ItemData } from "../../types/ItemData";
 import { OneToManyMap } from "../utils/OneToManyMap";
-import { RoundRobin } from "../utils/RoundRobin";
+import { RoundRobin } from "./RoundRobin";
 
 export interface SuspendedBarringerQueue {
 
