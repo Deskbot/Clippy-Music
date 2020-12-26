@@ -17,7 +17,7 @@ export function isSuspendedBarringerQueue(obj: any): obj is SuspendedBarringerQu
 }
 
 class Bucket {
-	private roundRobin = new RoundRobin();
+	private roundRobin = RoundRobin.new();
 	private items = [] as ItemData[];
 	private userTime = {} as Record<string, number>;
 
@@ -44,6 +44,10 @@ class Bucket {
 
 	next(): ItemData | undefined {
 		this.roundRobin.next();
+		console.log(this.roundRobin);
+
+		if (this.items.length === 0) return undefined;
+
 		return this.remove(0);
 	}
 
@@ -71,7 +75,7 @@ class Bucket {
 	}
 
 	/**
-	 * Keeps consistency of the round robin, but not item durations.
+	 * Keeps consistency of the round robin, but doesn't enforce total user time.
 	 */
 	private remove(index: number): ItemData {
 		const itemToRemove = this.items[index];
@@ -99,10 +103,11 @@ class Bucket {
 
 		if (this.roundRobin.isEmpty()) return;
 
+		const simulatedRoundRobin = this.roundRobin.clone();
 		const newItems = [] as ItemData[];
 
 		while (this.items.length > 0) {
-			const nextUser = this.roundRobin.next();
+			const nextUser = simulatedRoundRobin.next();
 			const index = this.items.findIndex(item => item.userId === nextUser);
 
 			// if the next user in the round-robin has no items, don't worry about them
@@ -184,6 +189,8 @@ export class BarringerQueue {
 
 		const bucket = this.buckets[0];
 		const item = bucket.next();
+
+		console.log(bucket)
 
 		if (item === undefined) {
 			return undefined;

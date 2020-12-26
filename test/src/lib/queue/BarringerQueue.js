@@ -364,19 +364,19 @@ module.exports = {
 			timeUploaded: 2,
 		};
 		const item33 = {
-			id: 4,
+			id: 33,
 			userId: "3",
 			duration: 500,
 			timeUploaded: 3,
 		};
 		const item22 = {
-			id: 5,
+			id: 22,
 			userId: "2",
 			duration: 500,
 			timeUploaded: 4,
 		};
 		const item11 = {
-			id: 6,
+			id: 11,
 			userId: "1",
 			duration: 500,
 			timeUploaded: 5,
@@ -390,7 +390,7 @@ module.exports = {
 		q.add(item11);
 
 		assert.strictEqual(q.next(), item1);
-		assert.strictEqual(q.next(), item2);
+		assert.strictEqual(q.next(), item2)
 		assert.strictEqual(q.next(), item3);
 		assert.strictEqual(q.next(), item11);
 		assert.strictEqual(q.next(), item22);
