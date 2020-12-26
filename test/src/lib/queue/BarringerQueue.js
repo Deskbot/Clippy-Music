@@ -217,8 +217,7 @@ module.exports = {
 
 		q.purge("1");
 
-		const allItems = q.getBuckets()
-			.reduce((allItems, bucket) => allItems.concat(bucket));
+		const allItems = q.getBuckets().flat();
 
 		const failMessage = "The purged user's items are not in the queue.";
 		assert(!allItems.includes(item1a), failMessage);
@@ -378,8 +377,6 @@ module.exports = {
 		q.add(item33);
 		q.add(item22);
 		q.add(item11);
-
-		console.log(q.getBuckets());
 
 		assert.strictEqual(q.next(), item1);
 		assert.strictEqual(q.next(), item2);

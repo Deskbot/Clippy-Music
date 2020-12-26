@@ -3,7 +3,6 @@ import * as arrayUtils from "../utils/arrayUtils";
 import { ItemData } from "../../types/ItemData";
 import { OneToManyMap } from "../utils/OneToManyMap";
 import { RoundRobin } from "../utils/RoundRobin";
-import { Cache } from "../utils/Cache";
 
 export interface SuspendedBarringerQueue {
 
@@ -24,37 +23,70 @@ class Bucket {
 	add(item: ItemData) {
 		this.roundRobin.add(item.userId);
 		this.items.push(item);
+		this.sort();
 	}
 
-	/**
-	 * This destroys the bucket.
-	 */
-	toArray() {
+	asArray(): ReadonlyArray<ItemData> {
+		return this.items;
+	}
+
+	isEmpty(): boolean {
+		return this.items.length === 0;
+	}
+
+	removeIf(predicate: (item: ItemData) => boolean): boolean {
+		const index = this.items.findIndex(predicate);
+
+		if (index === -1) return false;
+
+		this.items.splice(index, 1);
+		this.sort();
+
+		return true;
+	}
+
+	removeAllIf(predicate: (item: ItemData) => boolean) {
+		while (this.removeIf(predicate));
+	}
+
+	userTime(userId: string): number {
+		let tot = 0;
+
+		for (const item of this.items) {
+			if (item.userId === userId) {
+				tot += item.duration;
+			}
+		}
+
+		return tot;
+	}
+
+	private sort() {
 		// order everything by first uploaded first
 		this.items.sort((item1, item2) => item1.timeUploaded - item2.timeUploaded);
 
-		const result = [] as ItemData[];
+		const newItems = [] as ItemData[];
 
 		while (this.items.length > 0) {
 			const nextUser = this.roundRobin.next();
 			const index = this.items.findIndex(item => item.userId === nextUser);
 
+			// if the next user in the round-robin has no items, don't worry about them
 			if (index === -1) continue;
 
 			const nextItem = this.items.splice(index, 1)[0];
-			result.push(nextItem);
+			newItems.push(nextItem);
 		}
 
-		return result;
+		this.items = newItems;
 	}
 }
 
 export class BarringerQueue {
+	private buckets: Bucket[];
 	private userQueues: OneToManyMap<string, ItemData>;
 	private idToUser: Map<number, string>;
 	private getMaxBucketTime: () => number;
-
-	private bucketsCache: Cache<ReadonlyArray<ReadonlyArray<ItemData>>>;
 
 	constructor(getMaxBucketTime: () => number, queueObj?: SuspendedBarringerQueue) {
 
@@ -63,17 +95,33 @@ export class BarringerQueue {
 		// 	? queueObj.buckets
 		// 	: []
 
+		this.buckets = [];
 		this.getMaxBucketTime = getMaxBucketTime;
 		this.idToUser = new Map();
 		this.userQueues = new OneToManyMap();
-
-		this.bucketsCache = new Cache(() => this._getBuckets());
 	}
 
 	add(item: ItemData) {
 		this.idToUser.set(item.id, item.userId);
 		this.userQueues.set(item.userId, item);
-		this.bucketsCache.inputsChanged();
+
+		const maxTime = this.getMaxBucketTime();
+
+		let targetBucket: Bucket | undefined;
+		for (const bucket of this.buckets) {
+			if (bucket.userTime(item.userId) + item.duration < maxTime) {
+				// the bucket won't exceed the max duration if the new item is added
+				targetBucket = bucket;
+				break;
+			}
+		}
+
+		if (!targetBucket) {
+			targetBucket = new Bucket();
+			this.buckets.push(targetBucket);
+		}
+
+		targetBucket.add(item);
 	}
 
 	get(cid: number): ItemData | undefined {
@@ -88,35 +136,7 @@ export class BarringerQueue {
 	}
 
 	getBuckets(): ReadonlyArray<ReadonlyArray<ItemData>> {
-		return this.bucketsCache.get();
-	}
-
-	private _getBuckets(): ReadonlyArray<ReadonlyArray<ItemData>> {
-		const maxBucketTime = this.getMaxBucketTime();
-
-		// merge into a single list of buckets, not separated by user
-		const allBuckets = [] as Bucket[];
-
-		for (const userId of this.userQueues.keys()) {
-			const userBuckets = splitByDuration(this.userQueues.getAll(userId)!, maxBucketTime);
-
-			// put items from this user's buckets into the shared buckets
-			for (let i = 0; i < userBuckets.length; i++) {
-				// ensure there is a shared bucket to add to
-				if (allBuckets[i] === undefined) {
-					allBuckets[i] = new Bucket();
-				}
-
-				const targetBucket = allBuckets[i];
-
-				for (const item of userBuckets[i]) {
-					targetBucket.add(item);
-				}
-			}
-		}
-
-		// all sorting of the items in each bucket is done here
-		return allBuckets.map(bucket => bucket.toArray());
+		return this.buckets.map(bucket => bucket.asArray());
 	}
 
 	getUserItems(uid: string): ReadonlyArray<ItemData> {
@@ -154,7 +174,18 @@ export class BarringerQueue {
 
 		this.userQueues.removeAll(uid);
 
-		this.bucketsCache.inputsChanged();
+		let i = 0;
+		while (i < this.buckets.length) {
+			const bucket = this.buckets[i];
+			bucket.removeAllIf(item => item.userId === uid);
+
+			if (bucket.isEmpty()) {
+				this.buckets.splice(i, 1);
+				// we've just shrunk the array, so the next item is at the same index
+			} else {
+				i += 1;
+			}
+		}
 	}
 
 	remove(uid: string, cid: number): boolean {
@@ -166,33 +197,18 @@ export class BarringerQueue {
 
 		this.idToUser.delete(cid);
 
-		this.bucketsCache.inputsChanged();
+		for (let i = 0; i < this.buckets.length; i++) {
+			const bucket = this.buckets[i];
+
+			const removed = bucket.removeIf(item => item.id === cid);
+			if (removed) {
+				if (bucket.isEmpty()) {
+					this.buckets.splice(i, 1);
+				}
+				break;
+			}
+		}
 
 		return true;
 	}
-}
-
-function splitByDuration(items: ReadonlyArray<ItemData>, bucketSize: number): ItemData[][] {
-	if (items.length === 0) {
-		return [];
-	}
-
-	const allItems = [[]] as ItemData[][];
-	let timeInNextBucket = 0;
-	let newTimeInNextBucket: number;
-
-	for (const item of items) {
-		newTimeInNextBucket = timeInNextBucket + item.duration;
-
-		if (newTimeInNextBucket > bucketSize) {
-			allItems.push([item]);
-			timeInNextBucket = 0;
-		} else {
-			// always valid because the array is never empty
-			allItems[allItems.length - 1].push(item);
-			timeInNextBucket = newTimeInNextBucket;
-		}
-	}
-
-	return allItems;
 }
