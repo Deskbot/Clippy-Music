@@ -39,6 +39,10 @@ class Bucket {
 		return this.items.splice(0, 1)[0];
 	}
 
+	removeAllIf(predicate: (item: ItemData) => boolean) {
+		while (this.removeIf(predicate));
+	}
+
 	removeIf(predicate: (item: ItemData) => boolean): boolean {
 		const index = this.items.findIndex(predicate);
 
@@ -48,10 +52,6 @@ class Bucket {
 		this.sort();
 
 		return true;
-	}
-
-	removeAllIf(predicate: (item: ItemData) => boolean) {
-		while (this.removeIf(predicate));
 	}
 
 	userTime(userId: string): number {
