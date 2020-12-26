@@ -170,21 +170,23 @@ module.exports = {
 	items_can_equal_size_of_bucket() {
 		const q = new BarringerQueue(() => 1000);
 
-		q.add({
+		const item1 = {
 			id: 1,
 			userId: "1",
 			duration: 1000,
-		});
+		};
+		q.add(item1);
 
-		assert(q.getBuckets()[0][0] == item, "The item was successfully added.");
+		assert(q.getBuckets()[0][0] == item1, "The item was successfully added.");
 
-		q.add({
+		const item2 = {
 			id: 2,
 			userId: "1",
 			duration: 1000,
-		});
+		};
+		q.add(item2);
 
-		assert(q.getBuckets()[1][0] == item, "The item was successfully added.");
+		assert(q.getBuckets()[1][0] == item2, "The item was successfully added.");
 	},
 
 	purge() {
