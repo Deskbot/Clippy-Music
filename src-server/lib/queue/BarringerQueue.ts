@@ -36,7 +36,7 @@ class Bucket {
 
 	next(): ItemData | undefined {
 		this.roundRobin.next();
-		return this.items.splice(0, 1)[0];
+		return this.remove(0);
 	}
 
 	removeAllIf(predicate: (item: ItemData) => boolean) {
@@ -48,10 +48,25 @@ class Bucket {
 
 		if (index === -1) return false;
 
-		this.items.splice(index, 1);
-		this.sort();
+		this.remove(index);
 
 		return true;
+	}
+
+	private remove(index: number): ItemData {
+		const itemToRemove = this.items[index];
+
+		// remove item
+		this.items.splice(index, 1);
+
+		// remove the user from the round robin if they have no items left
+		if (!this.items.find(item => item.userId === itemToRemove.userId)) {
+			this.roundRobin.remove(itemToRemove.userId);
+		}
+
+		this.sort();
+
+		return itemToRemove;
 	}
 
 	userTime(userId: string): number {
@@ -69,6 +84,8 @@ class Bucket {
 	private sort() {
 		// order everything by first uploaded first
 		this.items.sort((item1, item2) => item1.timeUploaded - item2.timeUploaded);
+
+		if (this.roundRobin.isEmpty()) return;
 
 		const newItems = [] as ItemData[];
 
