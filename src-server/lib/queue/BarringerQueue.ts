@@ -44,7 +44,6 @@ class Bucket {
 
 	next(): ItemData | undefined {
 		this.roundRobin.next();
-		console.log(this.roundRobin);
 
 		if (this.items.length === 0) return undefined;
 
@@ -189,8 +188,6 @@ export class BarringerQueue {
 
 		const bucket = this.buckets[0];
 		const item = bucket.next();
-
-		console.log(bucket)
 
 		if (item === undefined) {
 			return undefined;

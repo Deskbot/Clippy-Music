@@ -493,4 +493,60 @@ module.exports = {
 		assert.strictEqual(q.next(), item22);
 		assert.strictEqual(q.next(), item11);
 	},
+
+	round_robin_with_remove() {
+		const q = new BarringerQueue(() => 1000);
+
+		const item1 = {
+			id: 1,
+			userId: "1",
+			duration: 300,
+			timeUploaded: 0,
+		};
+		const item11 = {
+			id: 11,
+			userId: "1",
+			duration: 300,
+			timeUploaded: 1,
+		};
+		const item2 = {
+			id: 2,
+			userId: "2",
+			duration: 300,
+			timeUploaded: 2,
+		};
+		const item22 = {
+			id: 22,
+			userId: "2",
+			duration: 300,
+			timeUploaded: 3,
+		};
+
+		q.add(item1);
+		q.add(item11);
+		q.add(item2);
+
+		const item111 = {
+			id: 111,
+			userId: "1",
+			duration: 300,
+			timeUploaded: 4,
+		};
+
+		q.remove(item1.userId, item1.id);
+		q.add(item22);
+		q.add(item111);
+
+		assert.deepEqual(q.getBuckets(), [[
+			item11,
+			item2,
+			item111,
+			item22,
+		]]);
+
+		assert.strictEqual(q.next(), item11);
+		assert.strictEqual(q.next(), item2);
+		assert.strictEqual(q.next(), item111);
+		assert.strictEqual(q.next(), item22);
+	},
 }
