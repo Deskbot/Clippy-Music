@@ -170,15 +170,21 @@ module.exports = {
 	items_can_equal_size_of_bucket() {
 		const q = new BarringerQueue(() => 1000);
 
-		const item = {
+		q.add({
 			id: 1,
 			userId: "1",
 			duration: 1000,
-		};
+		});
 
-		q.add(item);
+		assert(q.getBuckets()[0][0] == item, "The item was successfully added.");
 
-		assert([...q.getBuckets()][0][0] == item, "The item was successfully added.");
+		q.add({
+			id: 2,
+			userId: "1",
+			duration: 1000,
+		});
+
+		assert(q.getBuckets()[1][0] == item, "The item was successfully added.");
 	},
 
 	purge() {
@@ -384,6 +390,48 @@ module.exports = {
 		assert.strictEqual(q.next(), item11);
 		assert.strictEqual(q.next(), item22);
 		assert.strictEqual(q.next(), item33);
+	},
+
+	round_robin_order_interleaved_next_and_add() {
+		const q = new BarringerQueue(() => 1000);
+
+		const item1 = {
+			id: 1,
+			userId: "1",
+			duration: 500,
+			timeUploaded: 0,
+		};
+		const item2 = {
+			id: 2,
+			userId: "2",
+			duration: 500,
+			timeUploaded: 1,
+		};
+
+		q.add(item1);
+		q.add(item2);
+
+		assert.strictEqual(q.next(), item1); // sanity check and remove top item
+
+		const item3 = {
+			id: 3,
+			userId: "3",
+			duration: 500,
+			timeUploaded: 2,
+		};
+		const item11 = {
+			id: 11,
+			userId: "1",
+			duration: 500,
+			timeUploaded: 5,
+		};
+
+		q.add(item3);
+		q.add(item11);
+
+		assert.strictEqual(q.next(), item2);
+		assert.strictEqual(q.next(), item3);
+		assert.strictEqual(q.next(), item11);
 	},
 
 	round_robin_order_is_tied_to_buckets_separately() {
