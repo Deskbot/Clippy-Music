@@ -14,7 +14,6 @@ module.exports = {
 		};
 		q.add(item);
 
-		assert(q.getBuckets()[0][0] === item);
 		assert(q.getBuckets()[0][0] === item, "The result is the same — caching has returned the same result.");
 
 		const item2 = {
@@ -115,16 +114,15 @@ module.exports = {
 		q.add(item4);
 
 		const buckets = q.getBuckets();
-		console.log(q.getBuckets())
 
 		// The added items are in different buckets.
-		assert.strictEqual(buckets[0][0], item1);
-		console.log(q.getBuckets())
-		assert.strictEqual(buckets[0][1], item2);
-		console.log(q.getBuckets())
-		assert.strictEqual(buckets[0][2], item3);
-		console.log(q.getBuckets())
-		assert.strictEqual(buckets[1][0], item4);
+		assert.deepEqual(buckets, [[
+			item1,
+			item2,
+			item3,
+		], [
+			item4,
+		]]);
 	},
 
 	get_user_items() {
@@ -337,9 +335,9 @@ module.exports = {
 		q.add(item2);
 		q.add(item3);
 
-		assert(q.next() === item1);
-		assert(q.next() === item2);
-		assert(q.next() === item3);
+		assert.strictEqual(q.next(), item1);
+		assert.strictEqual(q.next(), item2);
+		assert.strictEqual(q.next(), item3);
 	},
 
 	round_robin_order_in_a_single_bucket() {
