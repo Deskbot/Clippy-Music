@@ -89,22 +89,22 @@ module.exports = {
 		const q = new BarringerQueue(() => 1000);
 
 		const item1 = {
-			id: 2,
+			id: 1,
 			userId: "1",
 			duration: 300
 		};
 		const item2 = {
-			id: 3,
+			id: 2,
 			userId: "1",
 			duration: 300
 		};
 		const item3 = {
-			id: 4,
+			id: 3,
 			userId: "1",
 			duration: 300
 		};
 		const item4 = {
-			id: 5,
+			id: 4,
 			userId: "1",
 			duration: 300
 		};
@@ -115,13 +115,16 @@ module.exports = {
 		q.add(item4);
 
 		const buckets = q.getBuckets();
+		console.log(q.getBuckets())
 
-		assert(buckets[0][0] === item1
-			&& buckets[0][1] === item2
-			&& buckets[0][2] === item3,
-			"The added items are in different buckets.");
-		assert(buckets[1][0] === item4,
-			"The added items are in different buckets.");
+		// The added items are in different buckets.
+		assert.strictEqual(buckets[0][0], item1);
+		console.log(q.getBuckets())
+		assert.strictEqual(buckets[0][1], item2);
+		console.log(q.getBuckets())
+		assert.strictEqual(buckets[0][2], item3);
+		console.log(q.getBuckets())
+		assert.strictEqual(buckets[1][0], item4);
 	},
 
 	get_user_items() {

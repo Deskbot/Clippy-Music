@@ -19,10 +19,18 @@ export function isSuspendedBarringerQueue(obj: any): obj is SuspendedBarringerQu
 class Bucket {
 	private roundRobin = new RoundRobin();
 	private items = [] as ItemData[];
+	private userTime = {} as Record<string, number>;
 
 	add(item: ItemData) {
 		this.roundRobin.add(item.userId);
 		this.items.push(item);
+
+		if (this.userTime[item.userId] === undefined) {
+			this.userTime[item.userId] = item.duration;
+		} else {
+			this.userTime[item.userId] += item.duration;
+		}
+
 		this.sort();
 	}
 
@@ -39,20 +47,32 @@ class Bucket {
 		return this.remove(0);
 	}
 
+	/**
+	 * external use only
+	 */
 	removeAllIf(predicate: (item: ItemData) => boolean) {
 		while (this.removeIf(predicate));
 	}
 
+	/**
+	 * external use only
+	 */
 	removeIf(predicate: (item: ItemData) => boolean): boolean {
 		const index = this.items.findIndex(predicate);
 
 		if (index === -1) return false;
 
-		this.remove(index);
+		const removedItem = this.remove(index);
+
+		// item no longer counts towards the user's total time
+		this.userTime[removedItem.userId] -= removedItem.duration;
 
 		return true;
 	}
 
+	/**
+	 * Keeps consistency of the round robin, but not item durations.
+	 */
 	private remove(index: number): ItemData {
 		const itemToRemove = this.items[index];
 
@@ -69,16 +89,8 @@ class Bucket {
 		return itemToRemove;
 	}
 
-	userTime(userId: string): number {
-		let tot = 0;
-
-		for (const item of this.items) {
-			if (item.userId === userId) {
-				tot += item.duration;
-			}
-		}
-
-		return tot;
+	getUserTime(userId: string): number {
+		return this.userTime[userId] ?? 0;
 	}
 
 	private sort() {
@@ -131,7 +143,7 @@ export class BarringerQueue {
 
 		let targetBucket: Bucket | undefined;
 		for (const bucket of this.buckets) {
-			if (bucket.userTime(item.userId) + item.duration <= maxTime) {
+			if (bucket.getUserTime(item.userId) + item.duration <= maxTime) {
 				// the bucket won't exceed the max duration if the new item is added
 				targetBucket = bucket;
 				break;
